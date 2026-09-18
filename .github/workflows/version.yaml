@@ -1,0 +1,139 @@
+name: Version & Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  version:
+    name: Bump Version & Tag
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get current version
+        id: current
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //' | tr -d ' ')
+          SEMVER=$(echo $VERSION | cut -d'+' -f1)
+          BUILD=$(echo $VERSION | cut -d'+' -f2)
+          echo "semver=$SEMVER" >> $GITHUB_OUTPUT
+          echo "build=$BUILD" >> $GITHUB_OUTPUT
+          echo "Current: $SEMVER+$BUILD"
+
+      - name: Determine bump type
+        id: bump
+        run: |
+          # Read commit messages since last tag
+          COMMITS=$(git log $(git describe --tags --abbrev=0 2>/dev/null || git rev-list --max-parents=0 HEAD)..HEAD --pretty=format:"%s" 2>/dev/null || git log --pretty=format:"%s")
+          echo "Commits: $COMMITS"
+
+          BUMP="patch" # default
+
+          # major: breaking change markers
+          if echo "$COMMITS" | grep -qiE "^(break|major|BREAKING CHANGE):"; then
+            BUMP="major"
+          # minor: new feature markers
+          elif echo "$COMMITS" | grep -qiE "^(feat|feature|minor):"; then
+            BUMP="minor"
+          fi
+
+          echo "bump=$BUMP" >> $GITHUB_OUTPUT
+          echo "Bump type: $BUMP"
+
+      - name: Calculate new version
+        id: new_version
+        run: |
+          SEMVER="${{ steps.current.outputs.semver }}"
+          BUILD="${{ steps.current.outputs.build }}"
+          BUMP="${{ steps.bump.outputs.bump }}"
+
+          MAJOR=$(echo $SEMVER | cut -d'.' -f1)
+          MINOR=$(echo $SEMVER | cut -d'.' -f2)
+          PATCH=$(echo $SEMVER | cut -d'.' -f3)
+          NEW_BUILD=$((BUILD + 1))
+
+          case $BUMP in
+            major)
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            minor)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            patch)
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+
+          NEW_SEMVER="$MAJOR.$MINOR.$PATCH"
+          NEW_VERSION="$NEW_SEMVER+$NEW_BUILD"
+
+          echo "semver=$NEW_SEMVER" >> $GITHUB_OUTPUT
+          echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "build=$NEW_BUILD" >> $GITHUB_OUTPUT
+          echo "New version: $NEW_VERSION"
+
+      - name: Update pubspec.yaml
+        run: |
+          NEW_VERSION="${{ steps.new_version.outputs.version }}"
+          sed -i "s/^version:.*/version: $NEW_VERSION/" pubspec.yaml
+          echo "Updated pubspec.yaml to $NEW_VERSION"
+
+      - name: Commit & push version bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pubspec.yaml
+          git commit -m "chore: bump version to ${{ steps.new_version.outputs.version }} [skip ci]"
+          git push
+
+      - name: Create Git tag
+        run: |
+          TAG="v${{ steps.new_version.outputs.semver }}"
+          git tag $TAG
+          git push origin $TAG
+          echo "Tagged: $TAG"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.new_version.outputs.semver }}
+          name: Release v${{ steps.new_version.outputs.semver }}
+          body: |
+            ## What's Changed
+            **Version:** `${{ steps.new_version.outputs.version }}`
+            **Build:** `${{ steps.new_version.outputs.build }}`
+            **Bump type:** `${{ steps.bump.outputs.bump }}`
+
+            ### Commits
+            ${{ github.event.head_commit.message }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+
+#           # Patch bump (default — bug fixes)
+# fix: chat thread reversed on load
+# fix: silent refresh not firing after delete
+# chore: cleanup unused files
+
+# # Minor bump (new features)
+# feat: new chat screen with prompt grid
+# feat: shimmer loading skeletons
+# feature: conversation pagination
+
+# # Major bump (breaking changes — v3 would be here)
+# major: migrate to new API v2
+# break: remove legacy chat endpoints
+# BREAKING CHANGE: auth flow redesign

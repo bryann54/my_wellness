@@ -1,5 +1,5 @@
-platform :ios, '15.0'
-# CocoaPods analytics sends network stats synchronously affecting flutter build latency.
+# Uncomment this line to define a global platform for your project
+platform :ios, '14.0'
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
 project 'Runner', {
@@ -21,35 +21,27 @@ def flutter_root
   raise "FLUTTER_ROOT not found in #{generated_xcode_build_settings_path}. Try deleting Generated.xcconfig, then run flutter pub get"
 end
 
-flutter_root_path = flutter_root()
+require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
 
-unless flutter_root_path.nil?
-  podhelper_script = File.join(flutter_root_path, 'packages', 'flutter_tools', 'bin', 'podhelper.rb')
-  require podhelper_script if File.exist?(podhelper_script)
-end
+flutter_ios_podfile_setup
 
 target 'Runner' do
   use_frameworks!
-  use_modular_headers!
 
-  # Add the Google Maps pods here with a compatible version
-  pod 'GoogleMaps', '8.4'
-
-  flutter_install_all_ios_pods(File.dirname(File.realpath(__FILE__)))
-
+  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
   target 'RunnerTests' do
     inherit! :search_paths
   end
 end
-
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
     target.build_configurations.each do |config|
-      config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= [
-        '$(inherited)',
-        'PERMISSION_NOTIFICATIONS=1',
-      ]
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '14.0'
     end
   end
+  
+  # Remove ALL broken xcassets from DK* pods (CoreSimulator bug on macOS Tahoe)
+  system("find '#{installer.sandbox.root}' -path '*/DKPhotoGallery/*.xcassets' -exec rm -rf {} + 2>/dev/null; true")
+  system("find '#{installer.sandbox.root}' -path '*/DKImagePickerController/*.xcassets' -exec rm -rf {} + 2>/dev/null; true")
 end

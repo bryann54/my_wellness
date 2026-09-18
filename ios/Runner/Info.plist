@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>My Wellness</string>
+	<string>my wellness</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -26,27 +26,24 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>UIApplicationSceneManifest</key>
-	<dict>
-		<key>UIApplicationSupportsMultipleScenes</key>
-		<false/>
-		<key>UISceneConfigurations</key>
-		<dict>
-			<key>UIWindowSceneSessionRoleApplication</key>
-			<array>
-				<dict>
-					<key>UISceneClassName</key>
-					<string>UIWindowScene</string>
-					<key>UISceneConfigurationName</key>
-					<string>flutter</string>
-					<key>UISceneDelegateClassName</key>
-					<string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
-					<key>UISceneStoryboardFile</key>
-					<string>Main</string>
-				</dict>
-			</array>
-		</dict>
-	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>We need camera access to let you photograph documents for upload.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>We need access to your contacts to add them as emergency contacts</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>We need Face ID to securely authenticate you</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>mywellness needs access to your location to provide safety alerts nearby.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>mywellness needs access to your location to accurately report incident coordinates.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Microphone access is required by the camera framework.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>We need permission to save photos to your library.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need photo library access to let you select documents for upload.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Used for text to speech</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

@@ -1,21 +1,19 @@
-// core/storage/storage_preference_manager.dart
+// lib/core/storage/storage_preference_manager.dart
+
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 @lazySingleton
 class SharedPreferencesManager {
-  SharedPreferencesManager(this._sharedPreferences);
-
   final SharedPreferences _sharedPreferences;
 
-  static const String keyAccessToken = 'accessToken';
   static const String firebaseToken = 'firebaseToken';
   static const String keyIsLogin = 'isLogin';
   static const String user = 'user';
   static const addresses = 'addresses';
-  static const String keyCoachMarkSeen = 'coach_mark_seen';
-  static const String keySplashOnboardingSeen = 'splash_onboarding_seen';
-  static const String keyIntroSeen = 'intro_seen';
+  static String language = 'language';
+
+  SharedPreferencesManager(this._sharedPreferences);
 
   Future<bool> putBool(String key, bool value) =>
       _sharedPreferences.setBool(key, value);

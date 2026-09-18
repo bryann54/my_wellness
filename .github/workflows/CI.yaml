@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Code Quality & Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.41.5"
+          channel: "stable"
+          cache: true
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Code Generation
+        # Critical for prod code: Generates user_model.g.dart and injection.config.dart
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      # - name: Verify Formatting
+        # Fails if code isn't formatted according to dart format
+        # run: dart format --set-exit-if-changed .
+
+      # - name: Static Analysis
+        # Catches lints, missing imports, and type errors
+        # run: flutter analyze .
+
+      # - name: Run Tests
+      #   run: flutter test
