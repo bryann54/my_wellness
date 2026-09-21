@@ -1,7 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:my_wellness/common/utils/functions.dart';
-import 'package:my_wellness/features/auth/domain/entities/signup_pending_entity.dart';
 import 'package:my_wellness/features/auth/domain/usecases/auth_usecases.dart';
 import 'package:my_wellness/features/subscriptions/presentation/bloc/subscriptions_bloc.dart';
 import 'auth_event.dart';

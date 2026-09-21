@@ -44,9 +44,9 @@ class LanguageSelector extends StatelessWidget {
               ),
             ),
             DropdownMenuItem(
-              value: const Locale('es'),
+              value: const Locale('sw'),
               child: Text(
-                AppLocalizations.getString(context, 'language.spanish'),
+                AppLocalizations.getString(context, 'language.swahili'),
                 style: const TextStyle(fontSize: 14),
               ),
             ),

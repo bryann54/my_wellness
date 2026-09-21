@@ -1,6 +1,4 @@
-
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/constants/hero.dart';
 import 'package:my_wellness/common/res/l10n.dart';
@@ -23,69 +21,61 @@ class OnboardingView extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Hero(
-                tag: hero_onboarding_logo,
-                child: SizedBox(
-                  height: 120,
-                  width: 120,
-                  child: Image(
-                    image: AssetImage('assets/images/logo.png'),
-                    fit: BoxFit.contain,
-                  ),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Hero(
+              tag: hero_onboarding_logo,
+              child: SizedBox(
+                height: 72,
+                width: 72,
+                child: Image.asset(
+                  'assets/images/logo.png',
+                  fit: BoxFit.contain,
                 ),
               ),
-            ],
+            ),
           ),
+          const SizedBox(height: 12),
+
+          // Title
           AnimatedSwitcher(
-                duration: const Duration(milliseconds: 500),
-                child: OnboardingTitle(
-                  key: ValueKey(pageData.titleKey),
-                  title: AppLocalizations.getString(context, pageData.titleKey),
-                  highlight: pageData.highlightWord,
-                ),
-              )
-              .animate(onPlay: (controller) => controller.forward())
-              .fadeIn(duration: 500.ms)
-              .slideY(
-                begin: 0.5,
-                end: 0,
-                duration: 500.ms,
-                curve: Curves.easeOut,
-              ),
-          const SizedBox(height: 48),
-          OrbitingIllustration(
-            imageAsset: pageData.imageAsset,
-            orbitAssets: pageData.orbitAssets,
-            pageIndex: pageIndex,
+            duration: const Duration(milliseconds: 400),
+            child: OnboardingTitle(
+              key: ValueKey(pageData.titleKey),
+              title: AppLocalizations.getString(context, pageData.titleKey),
+              highlight: pageData.highlightWord,
+            ),
           ),
-          const SizedBox(height: 48),
-          AnimatedSwitcher(
-                duration: const Duration(milliseconds: 500),
-                child: Text(
-                  AppLocalizations.getString(context, pageData.subtitleKey),
-                  key: ValueKey(pageData.subtitleKey),
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.inter(
-                    fontSize: 15,
-                    color: Colors.grey[600],
-                    height: 1.6,
-                  ),
-                ),
-              )
-              .animate(onPlay: (controller) => controller.forward())
-              .fadeIn(duration: 500.ms)
-              .slideY(
-                begin: 0.5,
-                end: 0,
-                duration: 500.ms,
-                curve: Curves.easeOut,
+
+          const SizedBox(height: 16),
+          Expanded(
+            child: Center(
+              child: OrbitingIllustration(
+                imageAsset: pageData.imageAsset,
+                orbitAssets: pageData.orbitAssets,
+                pageIndex: pageIndex,
               ),
-          const SizedBox(height: 200),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 400),
+            child: Text(
+              AppLocalizations.getString(context, pageData.subtitleKey),
+              key: ValueKey(pageData.subtitleKey),
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(
+                fontSize: 15,
+                color: Colors.grey[600],
+                height: 1.5,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 8),
         ],
       ),
     );

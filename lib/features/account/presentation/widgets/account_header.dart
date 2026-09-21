@@ -161,7 +161,7 @@ class AccountHeader extends StatelessWidget {
     );
   }
 
- String _getInitials(HealthProfile profile) {
+  String _getInitials(HealthProfile profile) {
     final name = profile.displayName;
     final parts = name.trim().split(RegExp(r'\s+'));
     if (parts.length >= 2 && parts[0].isNotEmpty && parts[1].isNotEmpty) {

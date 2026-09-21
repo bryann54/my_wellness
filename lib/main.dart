@@ -2,7 +2,9 @@
 
 import 'package:my_wellness/common/widgets/global_error_listener.dart';
 import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
+import 'package:my_wellness/features/assessments/presentation/bloc/assessments_bloc.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/biometrics/biometrics_bloc.dart';
+import 'package:my_wellness/features/bookings/presentation/bloc/bookings_bloc.dart';
 
 import 'package:my_wellness/features/home/presentation/bloc/home_bloc.dart';
 import 'package:my_wellness/common/helpers/app_router.dart';
@@ -45,7 +47,8 @@ void main() async {
         BlocProvider(create: (context) => getIt<AccountBloc>()),
         BlocProvider(create: (context) => getIt<BiometricsBloc>()),
         BlocProvider(create: (context) => getIt<HomeBloc>()),
-        
+         BlocProvider(create: (context) => getIt<AssessmentsBloc>()),
+          BlocProvider(create: (context) => getIt<BookingsBloc>()),
       ],
       child: MyApp(),
     ),
@@ -74,8 +77,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final systemUiOverlayStyle =
         MediaQuery.of(context).platformBrightness == Brightness.dark
-            ? SystemUiOverlayStyle.light
-            : SystemUiOverlayStyle.dark;
+        ? SystemUiOverlayStyle.light
+        : SystemUiOverlayStyle.dark;
 
     final localeProvider = Provider.of<LocaleProvider>(context);
 
@@ -98,7 +101,7 @@ class MyApp extends StatelessWidget {
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        supportedLocales: const [Locale('en'), Locale('es')],
+        supportedLocales: const [Locale('en'), Locale('sw')],
         locale: localeProvider.locale,
         theme: _buildLightTheme(),
         darkTheme: _buildDarkTheme(),

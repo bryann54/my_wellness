@@ -24,7 +24,8 @@ class InputBar extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final canSend = hasText && enabled;
 
-    final resolvedHint = hintText ??
+    final resolvedHint =
+        hintText ??
         (enabled
             ? AppLocalizations.getString(context, 'chatbot.placeholder')
             : AppLocalizations.getString(context, 'attorneys.connecting'));

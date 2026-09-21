@@ -14,8 +14,8 @@ class Language {
 
 const Languages = [
   Language(
-    code: 'es',
-    label: 'Español',
+    code: 'sw',
+    label: 'swahili',
     flagAsset: 'assets/images/flag_es.png',
   ),
   Language(

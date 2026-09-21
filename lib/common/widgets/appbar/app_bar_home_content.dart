@@ -1,9 +1,7 @@
 // lib/common/widgets/appbar/app_bar_home_content.dart
 
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:my_wellness/common/constants/us_states.dart';
 import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/appbar/app_bar_initials_avatar.dart';
@@ -40,26 +38,13 @@ class AppBarHomeContent extends StatelessWidget {
     return '${parts.first[0]}${parts.last[0]}'.toUpperCase();
   }
 
-  String? _resolveLocation(String? code) {
-    if (code == null || code.isEmpty) return null;
-    return UsStates.all
-        .firstWhere(
-          (s) => s.code == code,
-          orElse: () => UsState(code: code, name: code),
-        )
-        .name;
-  }
-
   @override
   Widget build(BuildContext context) {
-    // final locationName = _resolveLocation(location);
-    // How much of the expanded content is visible (1 = fully expanded, 0 = collapsed)
     final expandedOpacity = (1.0 - progress * 2).clamp(0.0, 1.0);
     final collapsedOpacity = ((progress - 0.7) / 0.3).clamp(0.0, 1.0);
 
     return Stack(
       children: [
-        // ── Top bar: logo + avatar (always visible) ──────────────────────
         Positioned(
           top: statusBarHeight + 12,
           left: 20,
@@ -106,7 +91,7 @@ class AppBarHomeContent extends StatelessWidget {
                 children: [
                   // ── Greeting ───────────────────────────────────────────
                   Text(
-                    AppLocalizations.getString(context, 'dashboard.hello'),
+                    AppLocalizations.getString(context, 'common.hello'),
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       color: AppColors.textOnPrimary.withValues(alpha: 0.6),

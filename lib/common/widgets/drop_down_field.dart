@@ -74,10 +74,12 @@ class DropDownWidget<T> extends StatelessWidget {
                   children: [
                     TextSpan(
                       text: label,
-                      style: labelStyle ??
+                      style:
+                          labelStyle ??
                           theme.textTheme.labelMedium?.copyWith(
                             fontWeight: FontWeight.w500,
-                            color: appColors?.textPrimary ??
+                            color:
+                                appColors?.textPrimary ??
                                 theme.colorScheme.onSurface,
                           ),
                     ),
@@ -97,17 +99,20 @@ class DropDownWidget<T> extends StatelessWidget {
             initialValue: selectedItem,
             isExpanded: true,
             isDense: isDense,
-            icon: suffixIcon ??
+            icon:
+                suffixIcon ??
                 Icon(
                   Icons.keyboard_arrow_down_rounded,
                   color: theme.colorScheme.onSurface.withValues(alpha: .6),
                   size: 24,
                 ),
             decoration: InputDecoration(
-              hintText: hintText ??
+              hintText:
+                  hintText ??
                   AppLocalizations.getString(context, 'common.select'),
               hintStyle: theme.textTheme.bodyMedium?.copyWith(
-                color: appColors?.textSecondary.withValues(alpha: 0.5) ??
+                color:
+                    appColors?.textSecondary.withValues(alpha: 0.5) ??
                     theme.colorScheme.onSurface.withValues(alpha: 0.5),
               ),
               errorText: errorText,
@@ -116,7 +121,8 @@ class DropDownWidget<T> extends StatelessWidget {
                 height: 1.2,
               ),
               filled: filled,
-              fillColor: filledColor ??
+              fillColor:
+                  filledColor ??
                   appColors?.surface ??
                   theme.colorScheme.surface,
               contentPadding: EdgeInsets.symmetric(
@@ -154,12 +160,13 @@ class DropDownWidget<T> extends StatelessWidget {
                 borderSide: BorderSide(color: theme.disabledColor, width: 1),
               ),
             ),
-            style: textStyle ??
+            style:
+                textStyle ??
                 theme.textTheme.bodyMedium?.copyWith(
                   color: isEnabled
                       ? appColors?.textPrimary ?? theme.colorScheme.onSurface
                       : (appColors?.textPrimary ?? theme.colorScheme.onSurface)
-                          .withValues(alpha: 0.5),
+                            .withValues(alpha: 0.5),
                 ),
             dropdownColor: appColors?.surface ?? theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(borderRadius ?? 12),
@@ -171,9 +178,11 @@ class DropDownWidget<T> extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Text(
                     item.value?.toString() ?? '',
-                    style: textStyle ??
+                    style:
+                        textStyle ??
                         theme.textTheme.bodyMedium?.copyWith(
-                          color: appColors?.textPrimary ??
+                          color:
+                              appColors?.textPrimary ??
                               theme.colorScheme.onSurface,
                           fontWeight: FontWeight.w500,
                         ),
@@ -213,7 +222,6 @@ class DropDownWidget<T> extends StatelessWidget {
     );
   }
 
-  // Helper method for creating dropdown items from a list of objects
   static List<DropdownMenuItem<T>> fromList<T>({
     required List<T> items,
     required String Function(T) labelBuilder,
@@ -244,7 +252,6 @@ class DropDownWidget<T> extends StatelessWidget {
     }).toList();
   }
 
-  // Helper method for creating language dropdown items
   static List<DropdownMenuItem<Locale>> languageItems(BuildContext context) {
     return [
       DropdownMenuItem<Locale>(
@@ -255,9 +262,9 @@ class DropDownWidget<T> extends StatelessWidget {
         ),
       ),
       DropdownMenuItem<Locale>(
-        value: const Locale('es'),
+        value: const Locale('sw'),
         child: Text(
-          AppLocalizations.getString(context, 'language.spanish'),
+          AppLocalizations.getString(context, 'language.swahili'),
           style: const TextStyle(fontSize: 14),
         ),
       ),

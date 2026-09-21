@@ -14,24 +14,24 @@ class AppFab extends StatelessWidget {
     required this.onPressed,
     this.icon,
     this.backgroundColor,
-  })  : _isDelete = false,
-        _confirmTitle = null,
-        _confirmMessage = null,
-        _onConfirmed = null;
+  }) : _isDelete = false,
+       _confirmTitle = null,
+       _confirmMessage = null,
+       _onConfirmed = null;
 
   const AppFab.delete({
     super.key,
     required String confirmTitle,
     required String confirmMessage,
     required VoidCallback onConfirmed,
-  })  : _isDelete = true,
-        label = null,
-        icon = null,
-        backgroundColor = null,
-        onPressed = null,
-        _confirmTitle = confirmTitle,
-        _confirmMessage = confirmMessage,
-        _onConfirmed = onConfirmed;
+  }) : _isDelete = true,
+       label = null,
+       icon = null,
+       backgroundColor = null,
+       onPressed = null,
+       _confirmTitle = confirmTitle,
+       _confirmMessage = confirmMessage,
+       _onConfirmed = onConfirmed;
 
   final bool _isDelete;
 

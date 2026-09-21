@@ -25,7 +25,7 @@ class RestoreButton extends StatelessWidget {
             onPressed: isRestoring
                 ? null
                 : () =>
-                    context.read<SubscriptionsBloc>().add(RestorePurchases()),
+                      context.read<SubscriptionsBloc>().add(RestorePurchases()),
             child: isRestoring
                 ? const SizedBox(
                     width: 14,

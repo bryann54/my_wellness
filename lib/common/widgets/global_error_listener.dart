@@ -42,9 +42,6 @@ class GlobalErrorListener extends StatelessWidget {
             _showError(context, state.errorMessage ?? 'Authentication error');
           },
         ),
-
-        
-  
       ],
       child: child,
     );

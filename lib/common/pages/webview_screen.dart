@@ -79,7 +79,8 @@ class _WebViewScreenState extends State<WebViewScreen> {
                     imagePath: 'assets/images/error.png',
                     floatingIcon: Icons.error_outline,
                     title: AppLocalizations.getString(context, 'common.error'),
-                    subtitle: _errorMessage ??
+                    subtitle:
+                        _errorMessage ??
                         AppLocalizations.getString(
                           context,
                           'webview.failedToLoad',

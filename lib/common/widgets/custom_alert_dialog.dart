@@ -54,7 +54,8 @@ class CustomAlertDialog extends StatelessWidget {
       content: message != null
           ? Text(message!, textAlign: TextAlign.center)
           : content,
-      actions: actions ??
+      actions:
+          actions ??
           [
             if (showCancelButton)
               TextButton(

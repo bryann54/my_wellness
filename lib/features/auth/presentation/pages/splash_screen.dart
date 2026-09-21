@@ -105,7 +105,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 mounted) {
               // No biometrics on device — show sheet directly on PIN
               _showFailureSheet();
-            } 
+            }
           },
         ),
       ],
@@ -134,8 +134,8 @@ class _FailureSheet extends StatelessWidget {
         if (state.isAuthenticated) {
           // Authenticated via PIN — close sheet and proceed
           Navigator.pop(context);
-          final splashState =
-              context.findAncestorStateOfType<_SplashScreenState>();
+          final splashState = context
+              .findAncestorStateOfType<_SplashScreenState>();
           await splashState?._postAuthNavigation();
         }
       },
@@ -164,28 +164,28 @@ class _FailureSheet extends StatelessWidget {
               // Greeting
               if (username != null) ...[
                 Align(
-                  alignment: Alignment.centerLeft,
-                  child: RichText(
-                    text: TextSpan(
-                      style: GoogleFonts.syne(
-                        fontSize: 22,
-                        color: cs.onSurface,
-                      ),
-                      children: [
-                        const TextSpan(
-                          text: 'Hello, ',
-                          style: TextStyle(fontWeight: FontWeight.w400),
-                        ),
-                        TextSpan(
-                          text: '$username 👋',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w800,
+                      alignment: Alignment.centerLeft,
+                      child: RichText(
+                        text: TextSpan(
+                          style: GoogleFonts.syne(
+                            fontSize: 22,
+                            color: cs.onSurface,
                           ),
+                          children: [
+                            const TextSpan(
+                              text: 'Hello, ',
+                              style: TextStyle(fontWeight: FontWeight.w400),
+                            ),
+                            TextSpan(
+                              text: '$username 👋',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                )
+                      ),
+                    )
                     .animate()
                     .fadeIn(duration: 300.ms)
                     .slideX(begin: -0.05, curve: Curves.easeOut),
@@ -219,7 +219,8 @@ class _ErrorPrompt extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final isLoading = state.status == BiometricsStatus.authenticating ||
+    final isLoading =
+        state.status == BiometricsStatus.authenticating ||
         state.status == BiometricsStatus.checking;
 
     return Column(
@@ -269,8 +270,8 @@ class _ErrorPrompt extends StatelessWidget {
           onPressed: isLoading
               ? null
               : () => context.read<BiometricsBloc>().add(
-                    AuthenticateWithBiometrics(),
-                  ),
+                  AuthenticateWithBiometrics(),
+                ),
           label: 'Try Again',
           icon: Icons.fingerprint_rounded,
           isLoading: isLoading,

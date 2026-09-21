@@ -20,11 +20,11 @@ class AccountRepositoryImpl implements AccountRepository {
   @override
   Future<Either<Failure, HealthProfile>> getProfile() async {
     try {
-      final remoteProfile = await _remote.getProfile(); // returns HealthProfile
+      final remoteProfile = await _remote.getProfile();
       await _local.cacheHealthProfile(remoteProfile);
       return Right(remoteProfile);
     } on NetworkException {
-      final localProfile = _local.getCachedProfile(); // returns HealthProfile?
+      final localProfile = _local.getCachedProfile();
       if (localProfile != null) return Right(localProfile);
       return Left(NetworkFailure());
     } on Exception catch (e) {

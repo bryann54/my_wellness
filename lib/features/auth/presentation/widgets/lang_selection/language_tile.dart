@@ -67,8 +67,9 @@ class LanguageTile extends StatelessWidget {
                     language.label,
                     style: GoogleFonts.inter(
                       fontSize: 15,
-                      fontWeight:
-                          isSelected ? FontWeight.w600 : FontWeight.w400,
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.w400,
                       color: cs.onSurface,
                     ),
                   ),

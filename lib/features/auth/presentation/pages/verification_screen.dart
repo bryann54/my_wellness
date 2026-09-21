@@ -127,8 +127,8 @@ class _VerificationScreenState extends State<VerificationScreen> {
                           ? 'auth.verifyPhoneSubtitle'
                           : 'auth.verifyEmailSubtitle',
                       // fallback: isPhone
-                          // ? 'Enter the SMS code we sent to ${pending.destination}'
-                          // : 'Enter the code we emailed to ${pending.destination}',
+                      // ? 'Enter the SMS code we sent to ${pending.destination}'
+                      // : 'Enter the code we emailed to ${pending.destination}',
                     ),
                   ),
                   const SizedBox(height: 40),

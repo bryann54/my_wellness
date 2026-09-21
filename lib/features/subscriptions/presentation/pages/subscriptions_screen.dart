@@ -73,8 +73,9 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                 return _buildLoadingState();
               }
 
-              final active =
-                  state.entitlements.values.where((e) => e.isActive).toList();
+              final active = state.entitlements.values
+                  .where((e) => e.isActive)
+                  .toList();
 
               return RefreshIndicator.adaptive(
                 onRefresh: () async {
@@ -113,8 +114,8 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                           onTap: isActive
                               ? () {}
                               : () => context.read<SubscriptionsBloc>().add(
-                                    PurchasePackage(pkg),
-                                  ),
+                                  PurchasePackage(pkg),
+                                ),
                         );
                       }),
                     ],
@@ -138,9 +139,9 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
                       ),
                       const SizedBox(height: 10),
                       ...active.asMap().entries.map(
-                            (e) => EntitlementTile(
-                                entitlement: e.value, index: e.key),
-                          ),
+                        (e) =>
+                            EntitlementTile(entitlement: e.value, index: e.key),
+                      ),
                     ],
 
                     // ── Restore ────────────────────────────────────
@@ -159,7 +160,7 @@ class _SubscriptionsScreenState extends State<SubscriptionsScreen> {
 } // ── Restore button ────────────────────────────────────────────────────────────
 
 Widget _buildLoadingState() => ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-      itemCount: 5,
-      itemBuilder: (_, index) => const SubscriptionPackageShimmer(),
-    );
+  padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+  itemCount: 5,
+  itemBuilder: (_, index) => const SubscriptionPackageShimmer(),
+);

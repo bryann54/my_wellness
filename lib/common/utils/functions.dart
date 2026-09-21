@@ -1,12 +1,12 @@
 import 'package:my_wellness/core/errors/failures.dart';
 
 String mapFailure(Failure f) => switch (f) {
-      NetworkFailure() => 'Check your internet connection',
-      ServerFailure() => 'Server error, please try again',
-      ValidationFailure(:final error) => error,
-      GeneralFailure(:final error) => error,
-      _ => 'An unexpected error occurred',
-    };
+  NetworkFailure() => 'Check your internet connection',
+  ServerFailure() => 'Server error, please try again',
+  ValidationFailure(:final error) => error,
+  GeneralFailure(:final error) => error,
+  _ => 'An unexpected error occurred',
+};
 
 String mapFailureToMessage(dynamic failure) {
   if (failure is ValidationFailure) return failure.error;
@@ -16,17 +16,5 @@ String mapFailureToMessage(dynamic failure) {
   return "An unexpected error occurred";
 }
 
-String fmtDate(DateTime d) => '${d.day} ${[
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec'
-    ][d.month - 1]} ${d.year}';
+String fmtDate(DateTime d) =>
+    '${d.day} ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.month - 1]} ${d.year}';

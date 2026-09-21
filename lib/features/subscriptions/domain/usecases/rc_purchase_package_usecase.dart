@@ -20,6 +20,5 @@ class RCPurchasePackageUseCase
   @override
   Future<Either<Failure, Map<String, RCEntitlement>>> call(
     RCPurchaseParams params,
-  ) =>
-      _repository.purchasePackage(params.package);
+  ) => _repository.purchasePackage(params.package);
 }

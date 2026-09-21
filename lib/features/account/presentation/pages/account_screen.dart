@@ -98,7 +98,7 @@ class _AccountScreenState extends State<AccountScreen> {
           context,
           AppLocalizations.getString(context, 'profile.getHelp'),
         ),
-const SupportMenuSection(),
+        const SupportMenuSection(),
         const SizedBox(height: 32),
         const Center(child: AppVersionFooter()),
         const SizedBox(height: 24),

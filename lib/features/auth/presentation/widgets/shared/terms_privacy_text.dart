@@ -31,9 +31,9 @@ class TermsPrivacyText extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final baseStyle = Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: cs.onSurface.withValues(alpha: 0.5),
-          height: 1.5,
-        );
+      color: cs.onSurface.withValues(alpha: 0.5),
+      height: 1.5,
+    );
     final linkStyle = baseStyle?.copyWith(
       color: cs.primary,
       fontWeight: FontWeight.w600,

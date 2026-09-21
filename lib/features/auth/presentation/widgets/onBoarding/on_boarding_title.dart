@@ -29,7 +29,7 @@ class OnboardingTitle extends StatelessWidget {
         children: [
           TextSpan(text: parts[0]),
           TextSpan(
-            text: highlight,
+            text: highlight?.toUpperCase(),
             style: const TextStyle(color: AppColors.primaryColor),
           ),
           if (parts.length > 1) TextSpan(text: parts[1]),

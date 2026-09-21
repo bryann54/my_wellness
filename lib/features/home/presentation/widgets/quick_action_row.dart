@@ -17,7 +17,7 @@ class QuickActionRow extends StatelessWidget {
       ),
       (
         icon: FontAwesomeIcons.solidBell,
-        label: AppLocalizations.getString(context, 'dashboard.alerts'),
+        label: AppLocalizations.getString(context, 'common.alerts'),
         route: const AccountRoute(),
       ),
       (

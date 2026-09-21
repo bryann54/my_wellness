@@ -7,21 +7,25 @@ class PageIndicators extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(
-        OnboardingData.pages.length,
-        (index) => AnimatedContainer(
+      children: List.generate(OnboardingData.pages.length, (index) {
+        final selected = index == current;
+        return AnimatedContainer(
           duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
           margin: const EdgeInsets.symmetric(horizontal: 4),
           height: 8,
-          width: index == current ? 24 : 8,
+          width: selected ? 24 : 8,
           decoration: BoxDecoration(
-            color: index == current ? Colors.black : Colors.grey[300],
+            color: selected
+                ? cs.primary
+                : cs.outlineVariant.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(4),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 }

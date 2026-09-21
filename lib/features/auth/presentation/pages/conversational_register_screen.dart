@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:my_wellness/common/constants/us_states.dart';
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/features/auth/data/models/signup_request_model.dart';
@@ -17,7 +16,6 @@ import 'package:my_wellness/features/auth/presentation/widgets/auth_state_listen
 import 'package:my_wellness/features/auth/presentation/widgets/conversation/conversation_bubble.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/conversation/conversation_input_bar.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/conversation/conversation_models.dart';
-import 'package:my_wellness/features/auth/presentation/widgets/conversation/conversation_state_picker.dart';
 
 @RoutePage()
 class ConversationalRegisterScreen extends StatefulWidget {
@@ -107,17 +105,6 @@ class _ConversationalRegisterScreenState
     _advance();
   }
 
-  void _onStatePicked(UsState state) {
-    HapticFeedback.lightImpact();
-    _answers[_steps[_stepIndex].questionKey] = state.code;
-    setState(() {
-      _messages.add(ConversationMessage(text: state.name, isAi: false));
-      _errorText = null;
-    });
-    _scrollToBottom();
-    _advance();
-  }
-
   void _advance() {
     _stepIndex++;
     if (!_isDone) {
@@ -127,7 +114,7 @@ class _ConversationalRegisterScreenState
     }
   }
 
-void _submit() {
+  void _submit() {
     String q(String key) => _answers[key] ?? '';
 
     final email = q('auth.askEmail').trim();
@@ -247,7 +234,7 @@ void _submit() {
                   onVisibilityToggle: () =>
                       setState(() => _isPasswordVisible = !_isPasswordVisible),
                   onSend: isLoading ? null : _onSend,
-                
+
                   errorText: _errorText,
                   isLoading: isLoading,
                   isDone: _isDone,

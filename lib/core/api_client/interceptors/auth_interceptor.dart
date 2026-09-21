@@ -75,8 +75,9 @@ class AuthInterceptor extends Interceptor {
       );
 
       final access = response.data['access'] as String?;
-      if (access == null)
+      if (access == null) {
         throw Exception('No access token in refresh response');
+      }
 
       // Server may or may not rotate the refresh token.
       final refresh = (response.data['refresh'] as String?) ?? refreshToken;

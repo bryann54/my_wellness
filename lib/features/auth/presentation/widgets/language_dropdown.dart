@@ -9,7 +9,7 @@ import 'package:my_wellness/common/notifiers/locale_provider.dart';
 
 enum AppLanguage {
   en('English', Locale('en')),
-  es('Español', Locale('es'));
+  es('Swahili', Locale('sw'));
 
   final String displayName;
   final Locale locale;

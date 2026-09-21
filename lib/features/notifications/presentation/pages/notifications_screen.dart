@@ -20,7 +20,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           CustomAppBar(
             title: AppLocalizations.getString(
               context,
-              'dashboard.notifications',
+              'common.notifications',
             ),
           ),
 

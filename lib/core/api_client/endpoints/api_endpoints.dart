@@ -1,4 +1,3 @@
-
 class ApiEndpoints {
   ApiEndpoints._();
 
@@ -146,5 +145,4 @@ class ApiEndpoints {
       '/api/push/partner-notifications/$notificationId/';
   static String pushPartnerNotificationLookup(String token) =>
       '/api/push/partner-notifications/lookup/$token/';
-
 }

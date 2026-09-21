@@ -29,8 +29,9 @@ class CustomAppBar extends StatelessWidget {
     return BlocBuilder<AccountBloc, AccountState>(
       buildWhen: (p, c) => p.profile != c.profile,
       builder: (context, state) {
-        final resolvedExpanded =
-            isHome ? expandedHeight + curveExtra : kToolbarHeight + curveExtra;
+        final resolvedExpanded = isHome
+            ? expandedHeight + curveExtra
+            : kToolbarHeight + curveExtra;
 
         return SliverAppBar(
           expandedHeight: resolvedExpanded,
@@ -43,12 +44,9 @@ class CustomAppBar extends StatelessWidget {
           flexibleSpace: AppBarFlexibleHeader(
             isHome: isHome,
             username: state.profile?.displayName ?? '',
-            
+
             title: title,
-            actions: [
-              if (actions != null) ...actions!,
-             
-            ],
+            actions: [if (actions != null) ...actions!],
             expandedHeight: resolvedExpanded,
             bottom: bottom,
           ),

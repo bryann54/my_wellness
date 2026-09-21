@@ -100,10 +100,10 @@ class EmptyStateView extends StatelessWidget {
           if (buttonLabel != null && onButtonPressed != null) ...[
             const SizedBox(height: 40),
             AppPrimaryButton(
-              onPressed: onButtonPressed,
-              label: buttonLabel!,
-              icon: buttonIcon,
-            )
+                  onPressed: onButtonPressed,
+                  label: buttonLabel!,
+                  icon: buttonIcon,
+                )
                 .animate(delay: 400.ms)
                 .fadeIn(duration: 600.ms)
                 // Changed 'backOut' to 'Curves.backOut'
@@ -138,10 +138,10 @@ class _AnimatedFloatingIcon extends StatelessWidget {
     final baseColor = iconColor ?? Theme.of(context).primaryColor;
 
     return Icon(
-      icon,
-      color: baseColor.withValues(alpha: 0.1 + (index % 3) * 0.1),
-      size: isSmall ? 18.0 : 28.0,
-    )
+          icon,
+          color: baseColor.withValues(alpha: 0.1 + (index % 3) * 0.1),
+          size: isSmall ? 18.0 : 28.0,
+        )
         .animate(onPlay: (controller) => controller.repeat())
         .moveY(
           begin: 0,
@@ -164,12 +164,12 @@ class _AnimatedImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Image.asset(
-      imagePath,
-      width: size,
-      height: size,
-      // Changed 'ContentType.contain' to 'BoxFit.contain'
-      fit: BoxFit.contain,
-    )
+          imagePath,
+          width: size,
+          height: size,
+          // Changed 'ContentType.contain' to 'BoxFit.contain'
+          fit: BoxFit.contain,
+        )
         .animate()
         .scale(
           begin: const Offset(0.5, 0.5),

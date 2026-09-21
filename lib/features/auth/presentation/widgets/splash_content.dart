@@ -1,7 +1,5 @@
 // lib/features/auth/presentation/widgets/splash_content.dart
 
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:my_wellness/common/constants/hero.dart';

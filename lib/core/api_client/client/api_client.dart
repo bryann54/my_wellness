@@ -15,14 +15,14 @@ class ApiClient {
   static Options get open => Options(headers: {'requiresToken': false});
 
   ApiClient(@Named('BaseUrl') String baseUrl, AuthInterceptor authInterceptor)
-      : _dio = Dio(
-          BaseOptions(
-            baseUrl: baseUrl,
-            connectTimeout: const Duration(seconds: 30),
-            receiveTimeout: const Duration(seconds: 30),
-            contentType: Headers.jsonContentType,
-          ),
-        ) {
+    : _dio = Dio(
+        BaseOptions(
+          baseUrl: baseUrl,
+          connectTimeout: const Duration(seconds: 30),
+          receiveTimeout: const Duration(seconds: 30),
+          contentType: Headers.jsonContentType,
+        ),
+      ) {
     _dio.interceptors.addAll([
       DioLogInterceptor(printBody: kDebugMode),
       authInterceptor,
@@ -33,8 +33,7 @@ class ApiClient {
     required String url,
     Map<String, dynamic>? query,
     Options? options,
-  }) =>
-      _request(() => _dio.get(url, queryParameters: query, options: options));
+  }) => _request(() => _dio.get(url, queryParameters: query, options: options));
 
   Future<T> post<T>({required String url, dynamic payload, Options? options}) =>
       _request(() => _dio.post(url, data: payload, options: options));
@@ -46,15 +45,13 @@ class ApiClient {
     required String url,
     dynamic payload,
     Options? options,
-  }) =>
-      _request(() => _dio.patch(url, data: payload, options: options));
+  }) => _request(() => _dio.patch(url, data: payload, options: options));
 
   Future<T> delete<T>({
     required String url,
     dynamic payload,
     Options? options,
-  }) =>
-      _request(() => _dio.delete(url, data: payload, options: options));
+  }) => _request(() => _dio.delete(url, data: payload, options: options));
 
   Future<T> _request<T>(Future<Response> Function() apiCall) async {
     try {
@@ -84,17 +81,16 @@ class ApiClient {
     required String url,
     required FormData formData,
     Options? options,
-  }) =>
-      _request(
-        () => _dio.post(
-          url,
-          data: formData,
-          options: (options ?? Options()).copyWith(
-            contentType: 'multipart/form-data',
-            sendTimeout: const Duration(seconds: 60),
-          ),
-        ),
-      );
+  }) => _request(
+    () => _dio.post(
+      url,
+      data: formData,
+      options: (options ?? Options()).copyWith(
+        contentType: 'multipart/form-data',
+        sendTimeout: const Duration(seconds: 60),
+      ),
+    ),
+  );
 
   Exception _handleDioError(DioException e) {
     final data = e.response?.data;

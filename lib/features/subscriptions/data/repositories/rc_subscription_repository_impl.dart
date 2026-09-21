@@ -23,8 +23,7 @@ class RCSubscriptionRepositoryImpl implements RCSubscriptionRepository {
   @override
   Future<Either<Failure, Map<String, RCEntitlement>>> purchasePackage(
     RCPackage package,
-  ) =>
-      _guard(() => _datasource.purchasePackage(package));
+  ) => _guard(() => _datasource.purchasePackage(package));
 
   @override
   Future<Either<Failure, Map<String, RCEntitlement>>> restorePurchases() =>

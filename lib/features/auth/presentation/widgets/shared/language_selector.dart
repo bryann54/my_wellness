@@ -54,8 +54,9 @@ class LanguageSelector extends StatelessWidget {
                       ),
                 isDense: true,
                 borderRadius: BorderRadius.circular(12),
-                dropdownColor:
-                    isDark ? AppColors.darkBackgroundColor : Colors.white,
+                dropdownColor: isDark
+                    ? AppColors.darkBackgroundColor
+                    : Colors.white,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
@@ -67,9 +68,8 @@ class LanguageSelector extends StatelessWidget {
                         if (locale != null &&
                             locale.languageCode != currentLocale.languageCode) {
                           context.read<AccountBloc>().add(
-                                ChangeLanguageEvent(
-                                    langCode: locale.languageCode),
-                              );
+                            ChangeLanguageEvent(langCode: locale.languageCode),
+                          );
                         }
                       },
                 items: [
@@ -81,14 +81,14 @@ class LanguageSelector extends StatelessWidget {
                   ),
                   _buildDropdownItem(
                     context,
-                    const Locale('es'),
-                    'spanish',
-                    '🇪🇸',
+                    const Locale('sw'),
+                    'swahili',
+                    '🇰🇪',
                   ),
                 ],
                 selectedItemBuilder: (context) => [
                   _buildSelectedText('EN', isDark),
-                  _buildSelectedText('ES', isDark),
+                  _buildSelectedText('SW', isDark),
                 ],
               ),
             ],

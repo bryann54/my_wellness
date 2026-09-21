@@ -15,10 +15,10 @@ class MainScreen extends StatelessWidget {
       homeIndex: 1,
       routes: const [
         HomeRoute(),
+        AssessmentsRoute(),
+        BookingsRoute(),
         AccountRoute(),
-        AccountRoute(),
-        AccountRoute(),
-        AccountRoute(),
+        
       ],
       bottomNavigationBuilder: (_, tabsRouter) {
         return CustomFlashyBottomNav(

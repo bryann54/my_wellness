@@ -65,13 +65,13 @@ class SubscriptionPackageTile extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          package.localizedTitle,
-                          style: GoogleFonts.dmSans(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: cs.onSurface,
-                          ),
-                        )
+                              package.localizedTitle,
+                              style: GoogleFonts.dmSans(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                                color: cs.onSurface,
+                              ),
+                            )
                             .animate(delay: 300.ms)
                             .fadeIn(duration: 600.ms)
                             .slideY(begin: -1.2, end: 0, curve: Curves.easeOut),
@@ -82,12 +82,12 @@ class SubscriptionPackageTile extends StatelessWidget {
                             .slideX(begin: -1.2, end: 0, curve: Curves.easeOut),
                         const SizedBox(height: 8),
                         Text(
-                          package.localizedDescription,
-                          style: GoogleFonts.dmSans(
-                            fontSize: 12,
-                            color: cs.onSurface.withValues(alpha: 0.7),
-                          ),
-                        )
+                              package.localizedDescription,
+                              style: GoogleFonts.dmSans(
+                                fontSize: 12,
+                                color: cs.onSurface.withValues(alpha: 0.7),
+                              ),
+                            )
                             .animate(delay: 300.ms)
                             .fadeIn(duration: 600.ms)
                             .slideY(begin: 2, end: 0, curve: Curves.easeOut),
@@ -100,70 +100,74 @@ class SubscriptionPackageTile extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       Text(
-                        package.localizedPriceString,
-                        style: GoogleFonts.jetBrainsMono(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: accent,
-                        ),
-                      )
+                            package.localizedPriceString,
+                            style: GoogleFonts.jetBrainsMono(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: accent,
+                            ),
+                          )
                           .animate(delay: 300.ms)
                           .fadeIn(duration: 400.ms)
                           .slideY(begin: -1.2, end: 0, curve: Curves.easeOut),
                       const SizedBox(height: 8),
                       SizedBox(
                         width: 110,
-                        child: ElevatedButton(
-                          onPressed: isActive ? null : onTap,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: isActive
-                                ? accent.withValues(alpha: 0.15)
-                                : accent,
-                            foregroundColor: isActive ? accent : Colors.white,
-                            textStyle: GoogleFonts.dmSans(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 8,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: isActive
-                              ? Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.check_circle_rounded,
-                                      size: 15,
-                                      color: accent,
+                        child:
+                            ElevatedButton(
+                                  onPressed: isActive ? null : onTap,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: isActive
+                                        ? accent.withValues(alpha: 0.15)
+                                        : accent,
+                                    foregroundColor: isActive
+                                        ? accent
+                                        : Colors.white,
+                                    textStyle: GoogleFonts.dmSans(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
                                     ),
-                                    const SizedBox(width: 5),
-                                    Text(
-                                      AppLocalizations.getString(
-                                        context,
-                                        'subscription.subscribed',
-                                      ),
-                                      style: TextStyle(color: accent),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 8,
                                     ),
-                                  ],
-                                )
-                              : Text(
-                                  AppLocalizations.getString(
-                                    context,
-                                    'subscription.subscribe',
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
                                   ),
+                                  child: isActive
+                                      ? Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.check_circle_rounded,
+                                              size: 15,
+                                              color: accent,
+                                            ),
+                                            const SizedBox(width: 5),
+                                            Text(
+                                              AppLocalizations.getString(
+                                                context,
+                                                'subscription.subscribed',
+                                              ),
+                                              style: TextStyle(color: accent),
+                                            ),
+                                          ],
+                                        )
+                                      : Text(
+                                          AppLocalizations.getString(
+                                            context,
+                                            'subscription.subscribe',
+                                          ),
+                                        ),
+                                )
+                                .animate(delay: 300.ms)
+                                .fadeIn(duration: 600.ms)
+                                .slideX(
+                                  begin: 2,
+                                  end: 0,
+                                  curve: Curves.easeOut,
                                 ),
-                        )
-                            .animate(delay: 300.ms)
-                            .fadeIn(duration: 600.ms)
-                            .slideX(
-                              begin: 2,
-                              end: 0,
-                              curve: Curves.easeOut,
-                            ),
                       ),
                     ],
                   ),
@@ -183,24 +187,24 @@ class _TypeBadge extends StatelessWidget {
   const _TypeBadge({required this.type, required this.cs});
 
   String _getLabel(BuildContext context) => switch (type) {
-        RCPackageType.monthly => AppLocalizations.getString(
-            context,
-            'subscription.monthly',
-          ),
-        RCPackageType.annual => AppLocalizations.getString(
-            context,
-            'subscription.yearly',
-          ),
-        RCPackageType.weekly => AppLocalizations.getString(
-            context,
-            'subscription.weekly',
-          ),
-        RCPackageType.lifetime => AppLocalizations.getString(
-            context,
-            'subscription.lifetime',
-          ),
-        _ => 'Custom',
-      };
+    RCPackageType.monthly => AppLocalizations.getString(
+      context,
+      'subscription.monthly',
+    ),
+    RCPackageType.annual => AppLocalizations.getString(
+      context,
+      'subscription.yearly',
+    ),
+    RCPackageType.weekly => AppLocalizations.getString(
+      context,
+      'subscription.weekly',
+    ),
+    RCPackageType.lifetime => AppLocalizations.getString(
+      context,
+      'subscription.lifetime',
+    ),
+    _ => 'Custom',
+  };
 
   @override
   Widget build(BuildContext context) {

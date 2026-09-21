@@ -160,7 +160,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                   // ── Gender ────────────────────────────────────────────────
                   DropdownButtonFormField<String>(
-                    value: _manager.gender,
+                    initialValue: _manager.gender,
                     decoration: InputDecoration(
                       labelText: AppLocalizations.getString(
                         context,

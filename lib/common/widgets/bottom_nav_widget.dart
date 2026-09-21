@@ -1,4 +1,4 @@
-// lib/common/widgets/custom_flashy_bottom_nav.dart
+
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -43,92 +43,76 @@ class CustomFlashyBottomNav extends StatelessWidget {
           showElevation: false,
           onItemSelected: onTap,
           items: [
-            // Home
+            // ── Home ────────────────────────────────────────────────
             FlashyTabBarItem(
               icon: FaIcon(
                 currentIndex == 0
-                    ? FontAwesomeIcons.houseFire
+                    ? FontAwesomeIcons.houseChimneyMedical
                     : FontAwesomeIcons.house,
                 color: currentIndex == 0 ? activeColor : inactiveColor,
               ),
               title: Text(
                 AppLocalizations.getString(context, 'common.home'),
                 style: GoogleFonts.inter(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w400,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               activeColor: activeColor,
               inactiveColor: inactiveColor,
             ),
 
+            // ── Assessments ─────────────────────────────────────────
             FlashyTabBarItem(
               icon: FaIcon(
                 currentIndex == 1
-                    ? FontAwesomeIcons.solidComments
-                    : FontAwesomeIcons.comments,
+                    ? FontAwesomeIcons.clipboardCheck
+                    : FontAwesomeIcons.clipboardList,
                 color: currentIndex == 1 ? activeColor : inactiveColor,
               ),
               title: Text(
-                AppLocalizations.getString(context, 'common.chats'),
+                AppLocalizations.getString(context, 'assessments.title'),
                 style: GoogleFonts.inter(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w400,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               activeColor: activeColor,
               inactiveColor: inactiveColor,
             ),
 
-            // Documents
+            // ── Bookings ────────────────────────────────────────────
             FlashyTabBarItem(
               icon: FaIcon(
                 currentIndex == 2
-                    ? FontAwesomeIcons.solidFileLines
-                    : FontAwesomeIcons.fileContract,
+                    ? FontAwesomeIcons.solidCalendarCheck
+                    : FontAwesomeIcons.calendarCheck,
                 color: currentIndex == 2 ? activeColor : inactiveColor,
               ),
               title: Text(
-                AppLocalizations.getString(context, 'documents.documents'),
+                AppLocalizations.getString(context, 'bookings.title'),
                 style: GoogleFonts.inter(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w400,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               activeColor: activeColor,
               inactiveColor: inactiveColor,
             ),
 
-            // resources
+            // ── Profile ─────────────────────────────────────────────
             FlashyTabBarItem(
               icon: FaIcon(
-                FontAwesomeIcons.solidNewspaper,
+                currentIndex == 3
+                    ? FontAwesomeIcons.solidCircleUser
+                    : FontAwesomeIcons.circleUser,
                 color: currentIndex == 3 ? activeColor : inactiveColor,
               ),
               title: Text(
-                AppLocalizations.getString(context, 'common.resources'),
+                AppLocalizations.getString(context, 'profile.title'),
                 style: GoogleFonts.inter(
                   fontSize: 13,
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-              activeColor: activeColor,
-              inactiveColor: inactiveColor,
-            ),
-
-            // Profile
-            FlashyTabBarItem(
-              icon: FaIcon(
-                currentIndex == 4
-                    ? FontAwesomeIcons.gears
-                    : FontAwesomeIcons.gear,
-                color: currentIndex == 4 ? activeColor : inactiveColor,
-              ),
-              title: Text(
-                AppLocalizations.getString(context, 'settings.title'),
-                style: GoogleFonts.inter(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w400,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               activeColor: activeColor,

@@ -5,7 +5,7 @@ part 'signup_pending_model.g.dart';
 
 @JsonSerializable()
 class SignupPendingModel {
-  final String? channel; 
+  final String? channel;
   final String? destination;
   final String? message;
 

@@ -47,6 +47,22 @@ import '../../features/auth/domain/usecases/auth_usecases.dart' as _i46;
 import '../../features/auth/presentation/bloc/auth_bloc.dart' as _i797;
 import '../../features/auth/presentation/bloc/biometrics/biometrics_bloc.dart'
     as _i347;
+import '../../features/geography/data/datasources/geography_remote_datasource.dart'
+    as _i474;
+import '../../features/geography/data/repositories/geography_repository_impl.dart'
+    as _i771;
+import '../../features/geography/domain/repositories/geography_repository.dart'
+    as _i480;
+import '../../features/geography/domain/usecases/get_constituencies_usecase.dart'
+    as _i275;
+import '../../features/geography/domain/usecases/get_counties_usecase.dart'
+    as _i331;
+import '../../features/geography/domain/usecases/get_sub_counties_usecase.dart'
+    as _i8;
+import '../../features/geography/domain/usecases/get_wards_usecase.dart'
+    as _i903;
+import '../../features/geography/presentation/bloc/geography_bloc.dart'
+    as _i137;
 import '../../features/subscriptions/data/datasources/rc_subscription_datasource.dart'
     as _i226;
 import '../../features/subscriptions/data/repositories/rc_subscription_repository_impl.dart'
@@ -125,6 +141,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i878.AuthInterceptor>(),
       ),
     );
+    gh.lazySingleton<_i474.GeographyRemoteDataSource>(
+      () => _i474.GeographyRemoteDataSourceImpl(gh<_i671.ApiClient>()),
+    );
     gh.lazySingleton<_i818.RCSubscriptionRepository>(
       () => _i236.RCSubscriptionRepositoryImpl(
         gh<_i226.RCSubscriptionDatasource>(),
@@ -132,6 +151,10 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i161.AuthRemoteDataSource>(
       () => _i161.AuthRemoteDataSourceImpl(gh<_i671.ApiClient>()),
+    );
+    gh.lazySingleton<_i480.GeographyRepository>(
+      () =>
+          _i771.GeographyRepositoryImpl(gh<_i474.GeographyRemoteDataSource>()),
     );
     gh.lazySingleton<_i302.AccountRemoteDataSource>(
       () => _i302.AccountRemoteDataSourceImpl(gh<_i671.ApiClient>()),
@@ -162,6 +185,18 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i163.RCRestorePurchasesUseCase>(
       () =>
           _i163.RCRestorePurchasesUseCase(gh<_i818.RCSubscriptionRepository>()),
+    );
+    gh.lazySingleton<_i275.GetConstituenciesUseCase>(
+      () => _i275.GetConstituenciesUseCase(gh<_i480.GeographyRepository>()),
+    );
+    gh.lazySingleton<_i331.GetCountiesUseCase>(
+      () => _i331.GetCountiesUseCase(gh<_i480.GeographyRepository>()),
+    );
+    gh.lazySingleton<_i8.GetSubCountiesUseCase>(
+      () => _i8.GetSubCountiesUseCase(gh<_i480.GeographyRepository>()),
+    );
+    gh.lazySingleton<_i903.GetWardsUseCase>(
+      () => _i903.GetWardsUseCase(gh<_i480.GeographyRepository>()),
     );
     gh.lazySingleton<_i46.SignInUseCase>(
       () => _i46.SignInUseCase(gh<_i787.AuthRepository>()),
@@ -213,6 +248,14 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i23.UpdateProfileUseCase>(
       () => _i23.UpdateProfileUseCase(gh<_i1067.AccountRepository>()),
+    );
+    gh.factory<_i137.GeographyBloc>(
+      () => _i137.GeographyBloc(
+        gh<_i331.GetCountiesUseCase>(),
+        gh<_i8.GetSubCountiesUseCase>(),
+        gh<_i275.GetConstituenciesUseCase>(),
+        gh<_i903.GetWardsUseCase>(),
+      ),
     );
     gh.factory<_i77.SubscriptionsBloc>(
       () => _i77.SubscriptionsBloc(

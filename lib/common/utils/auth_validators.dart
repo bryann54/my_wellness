@@ -5,11 +5,12 @@ import 'package:my_wellness/common/res/l10n.dart';
 
 class AuthValidators {
   AuthValidators._();
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // Context-free predicates (used by conversational flow and other callers
-  // that don't have a BuildContext).
-  // ─────────────────────────────────────────────────────────────────────────
+  static bool isValidPassword(String v) =>
+      v.length >= 8 &&
+      v.contains(RegExp(r'[A-Z]')) &&
+      v.contains(RegExp(r'[a-z]')) &&
+      v.contains(RegExp(r'[0-9]')) &&
+      v.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
   static bool isValidEmail(String value) {
     final t = value.trim();
     if (t.isEmpty || t.length > 254 || t.contains('..')) return false;
