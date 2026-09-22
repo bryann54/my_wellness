@@ -54,15 +54,25 @@
     "select": "Select",
     "selectOption": "Select an option",
     "postedON":"posted on",
-    "at":"at"
+    "at":"at",
+    "medication":"medication",
+    "myHealth":"My health",
+    "healthJourney":"My health journey",
+    "appointments":"Appointments",
+"vitals":"Vitals",
+    "myVitals":"Vitals & Chronic care"
   },
   "assessments": {
-    "title": "Assessments",
+    "title": "Assesments",
     "subtitle": "Your health assessments and results",
     "startAssessment": "Start Assessment",
     "viewResults": "View Results",
     "noAssessments": "No assessments available at the moment. Please check back later."
     
+  },
+  "wellness":{
+    "title":"Wellness",
+    "subtitle":"Your wellness and health resources"
   },
   "bookings": {
     "title": "Bookings",

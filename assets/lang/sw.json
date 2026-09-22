@@ -54,13 +54,23 @@
     "select": "Chagua",
     "selectOption": "Chagua chaguo",
     "postedON": "imechapishwa",
-    "at": "saa"
+    "at": "saa",
+     "medication":"Dawa",
+    "myHealth":"Afya Yangu",
+    "health journey":"Safari ya Afya Yangu",
+    "appointments":" Miadi",
+"vitals":"Vitali",
+    "myVitals":"Vitali & Huduma za Kudumu"
   },
   "assessments": {
     "title": "tathmini  ",
     "subtitle": "Tathmini ya afya yako",
     "startAssessment": "Anza Tathmini",
     "noAssessments": "Hakuna tathmini zilizopo kwa sasa. Tafadhali angalia tena baadaye."
+  },
+   "wellness":{
+    "title":"Ustawi",
+    "subtitle":" Rasilimali zako za afya na ustawi"
   },
     "bookings": {
     "title": "miadi",

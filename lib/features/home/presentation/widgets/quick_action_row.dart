@@ -11,24 +11,24 @@ class QuickActionRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final items = [
       (
-        icon: FontAwesomeIcons.folder,
-        label: AppLocalizations.getString(context, 'documents.myID'),
-        route: const AccountRoute(),
+        icon: FontAwesomeIcons.capsules,
+        label: AppLocalizations.getString(context, 'common.medication'),
+        route: const MedicationsRoute(),
       ),
       (
-        icon: FontAwesomeIcons.solidBell,
-        label: AppLocalizations.getString(context, 'common.alerts'),
-        route: const AccountRoute(),
+        icon: FontAwesomeIcons.waveSquare,
+        label: AppLocalizations.getString(context, 'common.myHealth'),
+        route: const MyHealthRoute(),
       ),
       (
-        icon: FontAwesomeIcons.fileContract,
-        label: AppLocalizations.getString(context, 'documents.title'),
-        route: const AccountRoute(),
+        icon: FontAwesomeIcons.stethoscope,
+        label: AppLocalizations.getString(context, 'common.appointments'),
+        route: const AppointmentsRoute(),
       ),
       (
-        icon: FontAwesomeIcons.userTie,
-        label: AppLocalizations.getString(context, 'attorneys.title'),
-        route: const AccountRoute(),
+        icon: FontAwesomeIcons.shieldDog,
+        label: AppLocalizations.getString(context, 'common.vitals'),
+        route: const VitalsRoute(),
       ),
     ];
 

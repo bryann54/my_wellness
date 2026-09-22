@@ -53,8 +53,8 @@ class AppBarHomeContent extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                width: 45,
-                height: 45,
+                width: 105,
+                height: 55,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -63,7 +63,7 @@ class AppBarHomeContent extends StatelessWidget {
                   'assets/images/logo.png',
                   fit: BoxFit.contain,
                   errorBuilder: (_, __, ___) => Icon(
-                    Icons.shield_rounded,
+                    Icons.error_outline_outlined,
                     size: 45,
                     color: AppColors.textOnPrimary,
                   ),
@@ -76,7 +76,7 @@ class AppBarHomeContent extends StatelessWidget {
 
         // ── Expanded content (greeting + name + location + chips) ────────
         Positioned(
-          top: statusBarHeight + 72,
+          top: statusBarHeight + 90,
           left: 20,
           right: 20,
           bottom: bottomHeight + CustomAppBar.curveExtra,
@@ -89,64 +89,35 @@ class AppBarHomeContent extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // ── Greeting ───────────────────────────────────────────
-                  Text(
-                    AppLocalizations.getString(context, 'common.hello'),
-                    style: GoogleFonts.inter(
-                      fontSize: 14,
-                      color: AppColors.textOnPrimary.withValues(alpha: 0.6),
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-
-                  // ── Name + location ────────────────────────────────────
+            
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      Text(
+                        AppLocalizations.getString(context, 'common.hello'),
+                        style: GoogleFonts.habibi(
+                          fontSize: 18,
+                          color: AppColors.textOnPrimary.withValues(alpha: 0.6),
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           username.isNotEmpty ? username : '...',
                           style: GoogleFonts.inter(
-                            fontSize: 22,
-                            fontWeight: FontWeight.w800,
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
                             color: AppColors.textOnPrimary,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      // if (locationName != null) ...[
-                      //   const SizedBox(width: 8),
-                      //   Row(
-                      //     mainAxisSize: MainAxisSize.min,
-                      //     children: [
-                      //       Icon(
-                      //         Icons.location_on_rounded,
-                      //         size: 13,
-                      //         color: AppColors.textOnPrimary.withValues(
-                      //           alpha: 0.54,
-                      //         ),
-                      //       ),
-                      //       const SizedBox(width: 3),
-                      //       Text(
-                      //         locationName,
-                      //         style: GoogleFonts.inter(
-                      //           fontSize: 12,
-                      //           color: AppColors.textOnPrimary.withValues(
-                      //             alpha: 0.54,
-                      //           ),
-                      //           fontWeight: FontWeight.w500,
-                      //         ),
-                      //       ),
-                      //     ],
-                      //   ).animate().fadeIn(delay: 150.ms).slideX(begin: 0.2),
-                      // ],
+                   
                     ],
                   ),
-                  const SizedBox(height: 20),
-
-                  // ── Quick action chips ─────────────────────────────────
+                SizedBox(height: 15),
                   const QuickActionRow(),
                 ],
               ),

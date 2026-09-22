@@ -17,6 +17,7 @@ class MainScreen extends StatelessWidget {
         HomeRoute(),
         AssessmentsRoute(),
         BookingsRoute(),
+        WellnessRoute(),
         AccountRoute(),
         
       ],
