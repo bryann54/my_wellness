@@ -89,7 +89,6 @@ class AppBarHomeContent extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-            
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -101,7 +100,7 @@ class AppBarHomeContent extends StatelessWidget {
                           fontWeight: FontWeight.w400,
                         ),
                       ),
-                       const SizedBox(width: 10),
+                      const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           username.isNotEmpty ? username : '...',
@@ -114,10 +113,9 @@ class AppBarHomeContent extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                   
                     ],
                   ),
-                SizedBox(height: 15),
+                  SizedBox(height: 15),
                   const QuickActionRow(),
                 ],
               ),

@@ -19,7 +19,6 @@ class MainScreen extends StatelessWidget {
         BookingsRoute(),
         WellnessRoute(),
         AccountRoute(),
-        
       ],
       bottomNavigationBuilder: (_, tabsRouter) {
         return CustomFlashyBottomNav(

@@ -14,25 +14,24 @@ class AppRouter extends RootStackRouter {
       page: MainRoute.page,
       children: [
         AutoRoute(page: HomeRoute.page),
-         AutoRoute(page: AssessmentsRoute.page),
+        AutoRoute(page: AssessmentsRoute.page),
         AutoRoute(page: BookingsRoute.page),
         AutoRoute(page: WellnessRoute.page),
         AutoRoute(page: AccountRoute.page),
-
       ],
     ),
     AutoRoute(page: NotificationsRoute.page),
     AutoRoute(page: SubscriptionsRoute.page),
     AutoRoute(page: MedicationsRoute.page),
-     AutoRoute(page: VitalsRoute.page),
-      AutoRoute(page: MyHealthRoute.page),
-       AutoRoute(page: AppointmentsRoute.page),
+    AutoRoute(page: VitalsRoute.page),
+    AutoRoute(page: MyHealthRoute.page),
+    AutoRoute(page: AppointmentsRoute.page),
 
     AutoRoute(page: WebViewRoute.page),
 
     AutoRoute(page: EditProfileRoute.page),
     AutoRoute(page: VerificationRoute.page),
-   
+
     AutoRoute(page: ConversationalRegisterRoute.page),
   ];
 }

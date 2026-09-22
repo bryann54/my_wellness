@@ -1,4 +1,3 @@
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:my_wellness/common/res/l10n.dart';
@@ -11,26 +10,25 @@ class AssessmentsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-  body: NestedScrollView(
-          headerSliverBuilder: (_, __) => [
-            CustomAppBar(
-              title: AppLocalizations.getString(context, 'assessments.title'),
-              isHome: false,
-            ),
-          
-          
-          ],
-          body: Column(
-            children: [
-              const SizedBox(height: 20),
-              Center(
-                child: Text(
-                  AppLocalizations.getString(context, 'assessments.title'),
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
+      body: NestedScrollView(
+        headerSliverBuilder: (_, __) => [
+          CustomAppBar(
+            title: AppLocalizations.getString(context, 'assessments.title'),
+            isHome: false,
+          ),
+        ],
+        body: Column(
+          children: [
+            const SizedBox(height: 20),
+            Center(
+              child: Text(
+                AppLocalizations.getString(context, 'assessments.title'),
+                style: Theme.of(context).textTheme.headlineSmall,
               ),
-            ],
-          ),)
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

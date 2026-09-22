@@ -48,10 +48,9 @@ void main() async {
         BlocProvider(create: (context) => getIt<AccountBloc>()),
         BlocProvider(create: (context) => getIt<BiometricsBloc>()),
         BlocProvider(create: (context) => getIt<HomeBloc>()),
-         BlocProvider(create: (context) => getIt<AssessmentsBloc>()),
-          BlocProvider(create: (context) => getIt<BookingsBloc>()),
-           BlocProvider(create: (context) => getIt<WellnessBloc>()),
-
+        BlocProvider(create: (context) => getIt<AssessmentsBloc>()),
+        BlocProvider(create: (context) => getIt<BookingsBloc>()),
+        BlocProvider(create: (context) => getIt<WellnessBloc>()),
       ],
       child: MyApp(),
     ),

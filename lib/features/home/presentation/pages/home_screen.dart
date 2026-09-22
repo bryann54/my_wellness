@@ -3,13 +3,10 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
 import 'package:my_wellness/common/widgets/section_header.dart';
 import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
-import 'package:my_wellness/features/home/presentation/widgets/menu_card.dart';
 
 @RoutePage()
 class HomeScreen extends StatefulWidget {
@@ -60,8 +57,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       'common.resources',
                     ),
                   ),
-
-
 
                   // const SizedBox(height: 12),
                   // MenuCard(
@@ -119,8 +114,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   //   cardColor: const Color(0xFFFFEBEE),
                   //   onTap: () => context.router.push(const AccountRoute()),
                   // ),
-                
-                
                 ],
               ),
             ),
