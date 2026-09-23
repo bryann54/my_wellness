@@ -19,6 +19,7 @@ class AppColors {
   static const Color riskColor = Color(0xFF124F5D);
   static const Color actionColor = Color(0xFFF56E5E);
   static const Color betterColor = Color(0xFF08B9C1);
+  static const Color buttonColor =Color.fromARGB(255, 1, 3, 58);
 
   // Semantic
   static const Color success = Color(0xFF32BF7D);

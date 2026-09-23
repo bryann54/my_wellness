@@ -44,7 +44,42 @@ class ApiEndpoints {
       '/api/otp/password-reset/request/';
   static const String otpPasswordResetConfirm =
       '/api/otp/password-reset/confirm/';
+  // ── Vitals: Appointments ────────────────────────────────────────────────────
+  static const String appointments = '/api/appointments/';
+  static String appointmentDetail(String id) => '/api/appointments/$id/';
 
+  // ── Vitals: Medications ─────────────────────────────────────────────────────
+  static const String medications = '/api/medications/';
+  static const String medicationsScan = '/api/medications/scan/';
+  static String medicationDetail(String id) => '/api/medications/$id/';
+
+  // ── Vitals: Access ──────────────────────────────────────────────────────────
+  static const String vitalsAccess = '/api/vitals/access/';
+
+  // ── Vitals: Blood pressure ──────────────────────────────────────────────────
+  static const String bloodPressure = '/api/vitals/blood-pressure/';
+  static String bloodPressureDetail(String id) =>
+      '/api/vitals/blood-pressure/$id/';
+  static const String bpMonitoringProfile =
+      '/api/vitals/bp/monitoring-profile/';
+  static const String bpSessions = '/api/vitals/bp/sessions/';
+  static String bpSessionDetail(String id) => '/api/vitals/bp/sessions/$id/';
+  static String bpSessionSecondReading(String id) =>
+      '/api/vitals/bp/sessions/$id/second-reading/';
+  static String bpSessionThirdReading(String id) =>
+      '/api/vitals/bp/sessions/$id/third-reading/';
+  static String bpSessionWellbeing(String id) =>
+      '/api/vitals/bp/sessions/$id/wellbeing/';
+
+  // ── Vitals: Blood sugar ─────────────────────────────────────────────────────
+  static const String bloodSugar = '/api/vitals/blood-sugar/';
+  static String bloodSugarDetail(String id) => '/api/vitals/blood-sugar/$id/';
+  static const String bloodSugarMonitoringProfile =
+      '/api/vitals/blood-sugar/monitoring-profile/';
+
+  // ── Vitals: shared ──────────────────────────────────────────────────────────
+  static const String vitalsClassifyPreview = '/api/vitals/classify-preview/';
+  static const String vitalsReport = '/api/vitals/report/';
   // ── Assessments ─────────────────────────────────────────────────────────────
   static const String assessments = '/api/assessments/';
   static const String dashboard = '/api/dashboard/';

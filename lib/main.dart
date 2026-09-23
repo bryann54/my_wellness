@@ -18,7 +18,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:my_wellness/features/medications/presentation/bloc/medications_bloc.dart';
 import 'package:my_wellness/features/subscriptions/presentation/bloc/subscriptions_bloc.dart';
+import 'package:my_wellness/features/vitals/presentation/bloc/vitals_bloc.dart';
 import 'package:my_wellness/features/wellness/presentation/bloc/wellness_bloc.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
@@ -51,6 +53,10 @@ void main() async {
         BlocProvider(create: (context) => getIt<AssessmentsBloc>()),
         BlocProvider(create: (context) => getIt<BookingsBloc>()),
         BlocProvider(create: (context) => getIt<WellnessBloc>()),
+        BlocProvider(
+          create: (_) => getIt<VitalsBloc>()..add(const LoadVitalsEvent()),
+        ),
+        BlocProvider(create: (context) => getIt<MedicationsBloc>()),
       ],
       child: MyApp(),
     ),

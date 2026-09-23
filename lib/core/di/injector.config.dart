@@ -79,6 +79,14 @@ import '../../features/subscriptions/domain/usecases/rc_restore_purchases_usecas
     as _i163;
 import '../../features/subscriptions/presentation/bloc/subscriptions_bloc.dart'
     as _i77;
+import '../../features/vitals/data/datasources/vitals_remote_datasource.dart'
+    as _i216;
+import '../../features/vitals/data/repositories/vitals_repository_impl.dart'
+    as _i214;
+import '../../features/vitals/domain/repositories/vitals_repository.dart'
+    as _i515;
+import '../../features/vitals/domain/usecases/vitals_usecases.dart' as _i425;
+import '../../features/vitals/presentation/bloc/vitals_bloc.dart' as _i902;
 import '../api_client/client/api_client.dart' as _i671;
 import '../api_client/interceptors/auth_interceptor.dart' as _i878;
 import '../services/biometric_service.dart' as _i374;
@@ -144,6 +152,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i474.GeographyRemoteDataSource>(
       () => _i474.GeographyRemoteDataSourceImpl(gh<_i671.ApiClient>()),
     );
+    gh.lazySingleton<_i216.VitalsRemoteDataSource>(
+      () => _i216.VitalsRemoteDataSourceImpl(gh<_i671.ApiClient>()),
+    );
     gh.lazySingleton<_i818.RCSubscriptionRepository>(
       () => _i236.RCSubscriptionRepositoryImpl(
         gh<_i226.RCSubscriptionDatasource>(),
@@ -185,6 +196,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i163.RCRestorePurchasesUseCase>(
       () =>
           _i163.RCRestorePurchasesUseCase(gh<_i818.RCSubscriptionRepository>()),
+    );
+    gh.lazySingleton<_i515.VitalsRepository>(
+      () => _i214.VitalsRepositoryImpl(gh<_i216.VitalsRemoteDataSource>()),
     );
     gh.lazySingleton<_i275.GetConstituenciesUseCase>(
       () => _i275.GetConstituenciesUseCase(gh<_i480.GeographyRepository>()),
@@ -249,12 +263,74 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i23.UpdateProfileUseCase>(
       () => _i23.UpdateProfileUseCase(gh<_i1067.AccountRepository>()),
     );
+    gh.lazySingleton<_i425.GetAppointmentsByConditionUseCase>(
+      () =>
+          _i425.GetAppointmentsByConditionUseCase(gh<_i515.VitalsRepository>()),
+    );
+    gh.lazySingleton<_i425.GetAppointmentsPagedUseCase>(
+      () => _i425.GetAppointmentsPagedUseCase(gh<_i515.VitalsRepository>()),
+    );
+    gh.lazySingleton<_i425.CreateAppointmentUseCase>(
+      () => _i425.CreateAppointmentUseCase(gh<_i515.VitalsRepository>()),
+    );
+    gh.lazySingleton<_i425.DeleteAppointmentUseCase>(
+      () => _i425.DeleteAppointmentUseCase(gh<_i515.VitalsRepository>()),
+    );
+    gh.lazySingleton<_i425.GetMedicationsByConditionUseCase>(
+      () =>
+          _i425.GetMedicationsByConditionUseCase(gh<_i515.VitalsRepository>()),
+    );
+    gh.lazySingleton<_i425.GetMedicationsPagedUseCase>(
+      () => _i425.GetMedicationsPagedUseCase(gh<_i515.VitalsRepository>()),
+    );
+    gh.lazySingleton<_i425.CreateMedicationUseCase>(
+      () => _i425.CreateMedicationUseCase(gh<_i515.VitalsRepository>()),
+    );
+    gh.lazySingleton<_i425.DeleteMedicationUseCase>(
+      () => _i425.DeleteMedicationUseCase(gh<_i515.VitalsRepository>()),
+    );
+    gh.lazySingleton<_i425.GetBloodPressureReadingsUseCase>(
+      () => _i425.GetBloodPressureReadingsUseCase(gh<_i515.VitalsRepository>()),
+    );
+    gh.lazySingleton<_i425.CreateBloodPressureReadingUseCase>(
+      () =>
+          _i425.CreateBloodPressureReadingUseCase(gh<_i515.VitalsRepository>()),
+    );
+    gh.lazySingleton<_i425.DeleteBloodPressureReadingUseCase>(
+      () =>
+          _i425.DeleteBloodPressureReadingUseCase(gh<_i515.VitalsRepository>()),
+    );
+    gh.lazySingleton<_i425.GetBloodSugarReadingsUseCase>(
+      () => _i425.GetBloodSugarReadingsUseCase(gh<_i515.VitalsRepository>()),
+    );
+    gh.lazySingleton<_i425.CreateBloodSugarReadingUseCase>(
+      () => _i425.CreateBloodSugarReadingUseCase(gh<_i515.VitalsRepository>()),
+    );
+    gh.lazySingleton<_i425.DeleteBloodSugarReadingUseCase>(
+      () => _i425.DeleteBloodSugarReadingUseCase(gh<_i515.VitalsRepository>()),
+    );
     gh.factory<_i137.GeographyBloc>(
       () => _i137.GeographyBloc(
         gh<_i331.GetCountiesUseCase>(),
         gh<_i8.GetSubCountiesUseCase>(),
         gh<_i275.GetConstituenciesUseCase>(),
         gh<_i903.GetWardsUseCase>(),
+      ),
+    );
+    gh.factory<_i902.VitalsBloc>(
+      () => _i902.VitalsBloc(
+        gh<_i425.GetAppointmentsPagedUseCase>(),
+        gh<_i425.GetMedicationsPagedUseCase>(),
+        gh<_i425.GetBloodPressureReadingsUseCase>(),
+        gh<_i425.GetBloodSugarReadingsUseCase>(),
+        gh<_i425.CreateBloodPressureReadingUseCase>(),
+        gh<_i425.CreateBloodSugarReadingUseCase>(),
+        gh<_i425.CreateMedicationUseCase>(),
+        gh<_i425.CreateAppointmentUseCase>(),
+        gh<_i425.DeleteBloodPressureReadingUseCase>(),
+        gh<_i425.DeleteBloodSugarReadingUseCase>(),
+        gh<_i425.DeleteMedicationUseCase>(),
+        gh<_i425.DeleteAppointmentUseCase>(),
       ),
     );
     gh.factory<_i77.SubscriptionsBloc>(

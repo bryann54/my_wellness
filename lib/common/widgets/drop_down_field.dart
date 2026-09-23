@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/core/theme/app_colors_extension.dart';
 
@@ -269,5 +270,63 @@ class DropDownWidget<T> extends StatelessWidget {
         ),
       ),
     ];
+  }
+}
+class SoftDropdown<T> extends StatelessWidget {
+  final T? value;
+  final String? label;
+  final List<DropdownMenuItem<T>> items;
+  final ValueChanged<T?>? onChanged;
+
+  const SoftDropdown({
+    super.key,
+    required this.value,
+    required this.items,
+    required this.onChanged,
+    this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final radius = BorderRadius.circular(14);
+
+    return DropdownButtonFormField<T>(
+      initialValue: value,
+      items: items,
+      onChanged: onChanged,
+      style: GoogleFonts.inter(
+        fontSize: 14.5,
+        fontWeight: FontWeight.w500,
+        color: cs.onSurface,
+      ),
+      decoration: InputDecoration(
+        labelText: label,
+        filled: true,
+        fillColor: cs.surfaceContainerHighest,
+        labelStyle: GoogleFonts.inter(
+          fontSize: 13.5,
+          fontWeight: FontWeight.w500,
+          color: cs.onSurface.withValues(alpha: 0.6),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        border: OutlineInputBorder(
+          borderRadius: radius,
+          borderSide: BorderSide(
+            color: cs.outlineVariant.withValues(alpha: 0.4),
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: radius,
+          borderSide: BorderSide(
+            color: cs.outlineVariant.withValues(alpha: 0.4),
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: radius,
+          borderSide: BorderSide(color: cs.primary, width: 1.4),
+        ),
+      ),
+    );
   }
 }

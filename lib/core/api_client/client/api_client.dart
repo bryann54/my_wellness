@@ -97,14 +97,23 @@ class ApiClient {
     String? message;
 
     if (data is Map) {
-      final errorContent =
-          data['non_field_errors'] ?? data['detail'] ?? data['message'] ?? data;
-      if (errorContent is List && errorContent.isNotEmpty) {
-        message = errorContent.first.toString();
-      } else if (errorContent is Map) {
-        message = errorContent.values.first.toString();
+      final topLevel =
+          data['non_field_errors'] ?? data['detail'] ?? data['message'];
+      if (topLevel is List && topLevel.isNotEmpty) {
+        message = topLevel.first.toString();
+      } else if (topLevel is String) {
+        message = topLevel;
       } else {
-        message = errorContent.toString();
+        for (final entry in data.entries) {
+          final v = entry.value;
+          if (v is List && v.isNotEmpty) {
+            message = '${entry.key}: ${v.first}';
+            break;
+          } else if (v is String && v.isNotEmpty) {
+            message = '${entry.key}: $v';
+            break;
+          }
+        }
       }
     }
 

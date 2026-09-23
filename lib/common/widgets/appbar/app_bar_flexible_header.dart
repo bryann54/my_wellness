@@ -46,7 +46,7 @@ class AppBarFlexibleHeader extends StatelessWidget {
           clipper: AppBarClipper(),
           child: Container(
             height: cur,
-            color: AppColors.dividerColorDark.withValues(alpha: 0.5),
+            color: AppColors.dividerColorDark.withValues(alpha: 0.45),
             child: isHome
                 ? AppBarHomeContent(
                     username: username,

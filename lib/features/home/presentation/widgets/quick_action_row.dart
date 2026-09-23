@@ -28,7 +28,7 @@ class QuickActionRow extends StatelessWidget {
       (
         icon: FontAwesomeIcons.shieldDog,
         label: AppLocalizations.getString(context, 'common.vitals'),
-        route: const VitalsRoute(),
+        route:  VitalsRoute(),
       ),
     ];
 

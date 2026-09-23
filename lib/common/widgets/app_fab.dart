@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/widgets/custom_alert_dialog.dart';
 
 class AppFab extends StatelessWidget {
@@ -14,7 +13,20 @@ class AppFab extends StatelessWidget {
     required this.onPressed,
     this.icon,
     this.backgroundColor,
-  }) : _isDelete = false,
+  }) : _variant = _FabVariant.extended,
+       tooltip = null,
+       _confirmTitle = null,
+       _confirmMessage = null,
+       _onConfirmed = null;
+
+  const AppFab.compact({
+    super.key,
+    required Widget this.icon,
+    required this.onPressed,
+    this.backgroundColor,
+    this.tooltip,
+  }) : _variant = _FabVariant.compact,
+       label = null,
        _confirmTitle = null,
        _confirmMessage = null,
        _onConfirmed = null;
@@ -24,62 +36,93 @@ class AppFab extends StatelessWidget {
     required String confirmTitle,
     required String confirmMessage,
     required VoidCallback onConfirmed,
-  }) : _isDelete = true,
+  }) : _variant = _FabVariant.delete,
        label = null,
        icon = null,
        backgroundColor = null,
        onPressed = null,
+       tooltip = null,
        _confirmTitle = confirmTitle,
        _confirmMessage = confirmMessage,
        _onConfirmed = onConfirmed;
 
-  final bool _isDelete;
+  final _FabVariant _variant;
 
-  // Extended
   final String? label;
   final Widget? icon;
   final Color? backgroundColor;
   final VoidCallback? onPressed;
+  final String? tooltip;
 
-  // Delete
   final String? _confirmTitle;
   final String? _confirmMessage;
   final VoidCallback? _onConfirmed;
 
   @override
   Widget build(BuildContext context) {
-    final fab = _isDelete ? _buildDelete(context) : _buildExtended(context);
+    final child = switch (_variant) {
+      _FabVariant.extended => _buildExtended(context),
+      _FabVariant.compact => _buildCompact(context),
+      _FabVariant.delete => _buildDelete(context),
+    };
 
-    return fab
-        .animate(delay: 300.ms)
-        .fadeIn(duration: 400.ms)
-        .scale(begin: const Offset(0.6, 0.6), curve: Curves.easeOutBack);
+    return child
+        .animate()
+        .fadeIn(duration: 200.ms, curve: Curves.easeOut)
+        .scale(
+          begin: const Offset(0.85, 0.85),
+          end: const Offset(1, 1),
+          duration: 260.ms,
+          curve: Curves.easeOutBack,
+        );
   }
 
   Widget _buildExtended(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return FloatingActionButton.extended(
-      heroTag: 'fab_extended_${label ?? 'default'}',
-      onPressed: () {
-        HapticFeedback.lightImpact();
-        onPressed?.call();
-      },
-      backgroundColor: backgroundColor ?? Theme.of(context).colorScheme.primary,
+      heroTag: _heroTag,
+      onPressed: _handleTap,
+      backgroundColor: backgroundColor ?? cs.primary,
+      foregroundColor: cs.onPrimary,
       icon: icon,
       label: Text(
         label ?? '',
-        style: GoogleFonts.syne(fontWeight: FontWeight.w700),
+        style: GoogleFonts.inter(
+          fontSize: 14.5,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.1,
+        ),
       ),
-      elevation: 2,
+      elevation: 3,
+      highlightElevation: 6,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    );
+  }
+
+  Widget _buildCompact(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return FloatingActionButton(
+      heroTag: _heroTag,
+      onPressed: _handleTap,
+      backgroundColor: backgroundColor ?? cs.primary,
+      foregroundColor: cs.onPrimary,
+      tooltip: tooltip,
+      elevation: 3,
+      highlightElevation: 6,
+      shape: const CircleBorder(),
+      child: icon,
     );
   }
 
   Widget _buildDelete(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return FloatingActionButton(
-      heroTag: 'fab_delete',
-      backgroundColor: AppColors.errorDark.withValues(alpha: .9),
+      heroTag: _heroTag,
+      backgroundColor: cs.error,
       foregroundColor: cs.onError,
-      elevation: 2,
+      elevation: 3,
+      highlightElevation: 6,
+      shape: const CircleBorder(),
       onPressed: () async {
         HapticFeedback.mediumImpact();
         final confirmed = await AppDialogs.ask(
@@ -93,7 +136,39 @@ class AppFab extends StatelessWidget {
           _onConfirmed?.call();
         }
       },
-      child: const FaIcon(FontAwesomeIcons.trash, size: 18),
+      child: const FaIcon(FontAwesomeIcons.trash, size: 16),
+    );
+  }
+
+  void _handleTap() {
+    HapticFeedback.lightImpact();
+    onPressed?.call();
+  }
+
+  String get _heroTag => 'fab_${_variant.name}_$hashCode';
+}
+
+enum _FabVariant { extended, compact, delete }
+
+class AppFabSlot extends StatelessWidget {
+  final bool visible;
+  final Widget child;
+
+  const AppFabSlot({super.key, required this.visible, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 220),
+      switchInCurve: Curves.easeOutBack,
+      switchOutCurve: Curves.easeIn,
+      transitionBuilder: (child, animation) => ScaleTransition(
+        scale: animation,
+        child: FadeTransition(opacity: animation, child: child),
+      ),
+      child: visible
+          ? KeyedSubtree(key: const ValueKey('fab-visible'), child: child)
+          : const SizedBox.shrink(key: ValueKey('fab-hidden')),
     );
   }
 }
