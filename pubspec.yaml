@@ -1,7 +1,7 @@
 name: my_wellness
 description: Private preventive-health companion for My Wellness members.
 publish_to: none
-version: 1.0.2+3
+version: 1.0.3+4
 
 environment:
   sdk: ^3.8.0
