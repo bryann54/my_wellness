@@ -38,8 +38,8 @@ class HealthProfileModel {
   @JsonKey(name: 'sub_county')
   final int? subCounty;
 
-  final String? constituency;
-  final String? ward;
+  final int? constituency;
+  final int? ward;
   final String occupation;
 
   @JsonKey(name: 'member_code')

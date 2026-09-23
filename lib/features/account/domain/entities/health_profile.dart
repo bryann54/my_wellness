@@ -17,8 +17,8 @@ class HealthProfile extends Equatable {
 
   final String? county;
   final int? subCounty;
-  final String? constituency;
-  final String? ward;
+  final int? constituency;
+  final int? ward;
   final String occupation;
 
   final String memberCode;
