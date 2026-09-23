@@ -1,4 +1,3 @@
-// lib/common/widgets/appbar/app_bar_home_content.dart
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -10,7 +9,6 @@ import 'package:my_wellness/features/home/presentation/widgets/quick_action_row.
 
 class AppBarHomeContent extends StatelessWidget {
   final String username;
-  // final String? location;
   final List<Widget>? actions;
   final double progress;
   final double statusBarHeight;
@@ -19,7 +17,6 @@ class AppBarHomeContent extends StatelessWidget {
   const AppBarHomeContent({
     super.key,
     required this.username,
-    // required this.location,
     required this.actions,
     required this.progress,
     required this.statusBarHeight,
@@ -74,7 +71,7 @@ class AppBarHomeContent extends StatelessWidget {
           ),
         ),
 
-        // ── Expanded content (greeting + name + location + chips) ────────
+        //greeting + name + location + chips
         Positioned(
           top: statusBarHeight + 90,
           left: 20,
@@ -123,7 +120,6 @@ class AppBarHomeContent extends StatelessWidget {
           ),
         ),
 
-        // ── Collapsed title (fades in as bar collapses) ──────────────────
         Positioned(
           top: statusBarHeight,
           left: 70,
@@ -136,7 +132,7 @@ class AppBarHomeContent extends StatelessWidget {
                 username.isNotEmpty ? username : '...',
                 style: GoogleFonts.syne(
                   fontWeight: FontWeight.w700,
-                  fontSize: 18,
+                  fontSize: 15,
                   color: AppColors.textOnPrimary,
                 ),
                 maxLines: 1,

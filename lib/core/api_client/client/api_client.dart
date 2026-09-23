@@ -1,5 +1,3 @@
-// lib/core/api_client/client/api_client.dart
-
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
@@ -12,6 +10,7 @@ class ApiClient {
   final Dio _dio;
 
   static Options get protected => Options(headers: {'requiresToken': true});
+
   static Options get open => Options(headers: {'requiresToken': false});
 
   ApiClient(@Named('BaseUrl') String baseUrl, AuthInterceptor authInterceptor)
@@ -74,6 +73,7 @@ class ApiClient {
         responseType: ResponseType.stream,
       ),
     );
+
     return response.data!.stream;
   }
 
@@ -94,17 +94,29 @@ class ApiClient {
 
   Exception _handleDioError(DioException e) {
     final data = e.response?.data;
+
     String? message;
 
     if (data is Map) {
-      final errorContent =
-          data['non_field_errors'] ?? data['detail'] ?? data['message'] ?? data;
-      if (errorContent is List && errorContent.isNotEmpty) {
-        message = errorContent.first.toString();
-      } else if (errorContent is Map) {
-        message = errorContent.values.first.toString();
+      final topLevel =
+          data['non_field_errors'] ?? data['detail'] ?? data['message'];
+
+      if (topLevel is List && topLevel.isNotEmpty) {
+        message = topLevel.first.toString();
+      } else if (topLevel is String) {
+        message = topLevel;
       } else {
-        message = errorContent.toString();
+        for (final entry in data.entries) {
+          final value = entry.value;
+
+          if (value is List && value.isNotEmpty) {
+            message = '${entry.key}: ${value.first}';
+            break;
+          } else if (value is String && value.isNotEmpty) {
+            message = '${entry.key}: $value';
+            break;
+          }
+        }
       }
     }
 

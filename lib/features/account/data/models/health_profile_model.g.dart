@@ -20,8 +20,8 @@ HealthProfileModel _$HealthProfileModelFromJson(Map<String, dynamic> json) =>
       gender: json['gender'] as String,
       county: json['county'] as String?,
       subCounty: (json['sub_county'] as num?)?.toInt(),
-      constituency: json['constituency'] as String?,
-      ward: json['ward'] as String?,
+      constituency: (json['constituency'] as num?)?.toInt(),
+      ward: (json['ward'] as num?)?.toInt(),
       occupation: json['occupation'] as String? ?? '',
       memberCode: json['member_code'] as String,
       healthProfileCompleted:

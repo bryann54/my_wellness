@@ -35,8 +35,6 @@ import 'package:my_wellness/features/auth/presentation/pages/splash_screen.dart'
     as _i17;
 import 'package:my_wellness/features/auth/presentation/pages/verification_screen.dart'
     as _i19;
-import 'package:my_wellness/features/bookings/presentation/pages/appointments_screen.dart'
-    as _i2;
 import 'package:my_wellness/features/bookings/presentation/pages/bookings_screen.dart'
     as _i5;
 import 'package:my_wellness/features/geography/presentation/pages/register_stepper_screen.dart'
@@ -45,12 +43,14 @@ import 'package:my_wellness/features/health_profile/presentation/pages/my_health
     as _i13;
 import 'package:my_wellness/features/home/presentation/pages/home_screen.dart'
     as _i9;
-import 'package:my_wellness/features/medications/presentation/pages/medications_screen.dart'
-    as _i12;
 import 'package:my_wellness/features/notifications/presentation/pages/notifications_screen.dart'
     as _i14;
 import 'package:my_wellness/features/subscriptions/presentation/pages/subscriptions_screen.dart'
     as _i18;
+import 'package:my_wellness/features/vitals/presentation/pages/appointments_screen.dart'
+    as _i2;
+import 'package:my_wellness/features/vitals/presentation/pages/medications_screen.dart'
+    as _i12;
 import 'package:my_wellness/features/vitals/presentation/pages/vitals_screen.dart'
     as _i20;
 import 'package:my_wellness/features/wellness/presentation/pages/wellness_screen.dart'
@@ -428,18 +428,51 @@ class VerificationRouteArgs {
 
 /// generated route for
 /// [_i20.VitalsScreen]
-class VitalsRoute extends _i23.PageRouteInfo<void> {
-  const VitalsRoute({List<_i23.PageRouteInfo>? children})
-    : super(VitalsRoute.name, initialChildren: children);
+class VitalsRoute extends _i23.PageRouteInfo<VitalsRouteArgs> {
+  VitalsRoute({
+    _i24.Key? key,
+    int initialTab = 0,
+    List<_i23.PageRouteInfo>? children,
+  }) : super(
+         VitalsRoute.name,
+         args: VitalsRouteArgs(key: key, initialTab: initialTab),
+         initialChildren: children,
+       );
 
   static const String name = 'VitalsRoute';
 
   static _i23.PageInfo page = _i23.PageInfo(
     name,
     builder: (data) {
-      return const _i20.VitalsScreen();
+      final args = data.argsAs<VitalsRouteArgs>(
+        orElse: () => const VitalsRouteArgs(),
+      );
+      return _i20.VitalsScreen(key: args.key, initialTab: args.initialTab);
     },
   );
+}
+
+class VitalsRouteArgs {
+  const VitalsRouteArgs({this.key, this.initialTab = 0});
+
+  final _i24.Key? key;
+
+  final int initialTab;
+
+  @override
+  String toString() {
+    return 'VitalsRouteArgs{key: $key, initialTab: $initialTab}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! VitalsRouteArgs) return false;
+    return key == other.key && initialTab == other.initialTab;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ initialTab.hashCode;
 }
 
 /// generated route for
