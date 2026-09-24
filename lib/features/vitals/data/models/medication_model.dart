@@ -2,6 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:my_wellness/features/vitals/domain/entities/medication.dart';
 
 part 'medication_model.g.dart';
+
 @JsonSerializable()
 class MedicationModel {
   final String id;

@@ -65,14 +65,37 @@
 "vitals":"Vitals",
     "myVitals":"Vitals & Chronic care"
   },
-  "assessments": {
-    "title": "Assesments",
-    "subtitle": "Your health assessments and results",
+  "assessment": {
+    "title": "Health Assessments",
+    "titlebot":"Assessments",
+  "understandingTitle": "Understanding this assessment",
+  "begin": "Begin assessment",
+  "resultTitle": "Your result",
+  "warnings": "Please note",
+  "takesFiveToTen": "Should take 5–10 min",
+  "category": {
+    "cancer": "Cancer",
+    "metabolic": "Metabolic",
+    "mentalHealth": "Mental health",
+    "sexualUrinary": "Sexual & urinary"},
+  "contributing": "What's contributing",
+  "protective": "What's protecting you",
+  "recommendations": "What to do next",
+  "terminatedTitle": "Assessment stopped",
+  "terminatedBody": "Based on your answers, this assessment has been stopped. Please follow the guidance shown.",
+  "noAccessTitle": "Assessments aren't available yet",
+  "noAccessBody": "You'll be able to take assessments once access is unlocked for your account.",
+  
+  "bmi": {
+    "title": "Let's calculate your BMI",
+    "subtitle": "Enter your weight and height. We'll compute your BMI and show what it means.",
+    "weightKg": "Weight (kg)",
+    "heightCm": "Height (cm)",
     "startAssessment": "Start Assessment",
     "viewResults": "View Results",
     "noAssessments": "No assessments available at the moment. Please check back later."
     
-  },
+  }},
   "vitals": {
   "title": "Vitals",
   "subtitle": "Your blood pressure and blood sugar",

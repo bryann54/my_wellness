@@ -24,7 +24,7 @@ class VitalsTile extends StatelessWidget {
         final reading = isBp ? state.latestBp : state.latestBs;
 
         return InkWell(
-       onTap: () =>
+          onTap: () =>
               context.router.push(VitalsRoute(initialTab: isBp ? 0 : 1)),
           borderRadius: BorderRadius.circular(16),
           child: Container(

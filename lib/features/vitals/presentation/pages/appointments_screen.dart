@@ -43,97 +43,94 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
     }
   }
 
-@override
-Widget build(BuildContext context) {
-  return VitalsToastListener(
-    child: Scaffold(
-      floatingActionButton: BlocBuilder<VitalsBloc, VitalsState>(
-        buildWhen: (p, c) =>
-            p.appointments.isEmpty != c.appointments.isEmpty,
-        builder: (context, state) {
-          return AppFabSlot(
-            visible: state.appointments.isNotEmpty,
-            child: AppFab.extended(
-              label: AppLocalizations.getString(context, 'appointments.book'),
-              icon: const Icon(Icons.add),
-              onPressed: () => AddAppointmentSheet.show(context),
-            ),
-          );
-        },
-      ),
-      body: BlocBuilder<VitalsBloc, VitalsState>(
-        buildWhen: (p, c) =>
-            p.status != c.status ||
-            p.appointments != c.appointments ||
-            p.appointmentsCursor != c.appointmentsCursor,
-        builder: (context, state) {
-          final appts = state.appointments;
-          return RefreshIndicator(
-            onRefresh: () async =>
-                context.read<VitalsBloc>().add(const LoadVitalsEvent()),
-            child: NestedScrollView(
-              headerSliverBuilder: (_, __) => [
-                CustomAppBar(
-                  title: AppLocalizations.getString(
-                    context,
-                    'common.appointments',
+  @override
+  Widget build(BuildContext context) {
+    return VitalsToastListener(
+      child: Scaffold(
+        floatingActionButton: BlocBuilder<VitalsBloc, VitalsState>(
+          buildWhen: (p, c) => p.appointments.isEmpty != c.appointments.isEmpty,
+          builder: (context, state) {
+            return AppFabSlot(
+              visible: state.appointments.isNotEmpty,
+              child: AppFab.extended(
+                label: AppLocalizations.getString(context, 'appointments.book'),
+                icon: const Icon(Icons.add),
+                onPressed: () => AddAppointmentSheet.show(context),
+              ),
+            );
+          },
+        ),
+        body: BlocBuilder<VitalsBloc, VitalsState>(
+          buildWhen: (p, c) =>
+              p.status != c.status ||
+              p.appointments != c.appointments ||
+              p.appointmentsCursor != c.appointmentsCursor,
+          builder: (context, state) {
+            final appts = state.appointments;
+            return RefreshIndicator(
+              onRefresh: () async =>
+                  context.read<VitalsBloc>().add(const LoadVitalsEvent()),
+              child: NestedScrollView(
+                headerSliverBuilder: (_, __) => [
+                  CustomAppBar(
+                    title: AppLocalizations.getString(
+                      context,
+                      'common.appointments',
+                    ),
+                    isHome: false,
                   ),
-                  isHome: false,
-                ),
-              ],
-              body: appts.isEmpty
-                  ? ListView(
-                      children: [
-                        SizedBox(
-                          height: MediaQuery.sizeOf(context).height * 0.5,
-                          child: VitalsEmptyState(
-                            icon: Icons.calendar_today_outlined,
-                            title: AppLocalizations.getString(
-                              context,
-                              'appointments.empty',
+                ],
+                body: appts.isEmpty
+                    ? ListView(
+                        children: [
+                          SizedBox(
+                            height: MediaQuery.sizeOf(context).height * 0.5,
+                            child: VitalsEmptyState(
+                              icon: Icons.calendar_today_outlined,
+                              title: AppLocalizations.getString(
+                                context,
+                                'appointments.empty',
+                              ),
+                              subtitle: AppLocalizations.getString(
+                                context,
+                                'appointments.emptySub',
+                              ),
+                              ctaLabel: AppLocalizations.getString(
+                                context,
+                                'appointments.book',
+                              ),
+                              onCta: () => AddAppointmentSheet.show(context),
                             ),
-                            subtitle: AppLocalizations.getString(
-                              context,
-                              'appointments.emptySub',
-                            ),
-                            ctaLabel: AppLocalizations.getString(
-                              context,
-                              'appointments.book',
-                            ),
-                            onCta: () =>
-                                AddAppointmentSheet.show(context),
                           ),
-                        ),
-                      ],
-                    )
-                  : ListView.builder(
-                      controller: _scroll,
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
-                      itemCount:
-                          appts.length +
-                          (state.appointmentsCursor != null ? 1 : 0),
-                      itemBuilder: (context, i) {
-                        if (i >= appts.length) {
-                          return const Padding(
-                            padding: EdgeInsets.all(24),
-                            child: Center(
-                              child: CircularProgressIndicator(),
+                        ],
+                      )
+                    : ListView.builder(
+                        controller: _scroll,
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+                        itemCount:
+                            appts.length +
+                            (state.appointmentsCursor != null ? 1 : 0),
+                        itemBuilder: (context, i) {
+                          if (i >= appts.length) {
+                            return const Padding(
+                              padding: EdgeInsets.all(24),
+                              child: Center(child: CircularProgressIndicator()),
+                            );
+                          }
+                          final a = appts[i];
+                          return AppointmentTile(
+                            appointment: a,
+                            onDelete: () => context.read<VitalsBloc>().add(
+                              DeleteAppointmentEvent(a.id),
                             ),
                           );
-                        }
-                        final a = appts[i];
-                        return AppointmentTile(
-                          appointment: a,
-                          onDelete: () => context.read<VitalsBloc>().add(
-                            DeleteAppointmentEvent(a.id),
-                          ),
-                        );
-                      },
-                    ),
-            ),
-          );
-        },
+                        },
+                      ),
+              ),
+            );
+          },
+        ),
       ),
-    ),
-  );
-}}
+    );
+  }
+}

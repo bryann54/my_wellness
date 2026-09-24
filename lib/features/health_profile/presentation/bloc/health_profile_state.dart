@@ -5,6 +5,8 @@ abstract class HealthProfileState extends Equatable {
 
   @override
   List<Object> get props => [];
+
+  get profile => null;
 }
 
 class HealthProfileInitial extends HealthProfileState {}

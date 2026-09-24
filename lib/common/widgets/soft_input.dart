@@ -14,6 +14,11 @@ class SoftInput extends StatelessWidget {
   final int maxLines;
   final int minLines;
   final Widget? prefixIcon;
+  final ValueChanged<String>? onChanged;
+  final bool readOnly;
+  final VoidCallback? onTap;
+  final TextInputAction? textInputAction;
+  final TextCapitalization textCapitalization;
 
   const SoftInput({
     super.key,
@@ -27,6 +32,11 @@ class SoftInput extends StatelessWidget {
     this.maxLines = 1,
     this.minLines = 1,
     this.prefixIcon,
+    this.onChanged,
+    this.readOnly = false,
+    this.onTap,
+    this.textInputAction,
+    this.textCapitalization = TextCapitalization.none,
   });
 
   @override
@@ -40,8 +50,13 @@ class SoftInput extends StatelessWidget {
       validator: validator,
       maxLines: maxLines,
       minLines: minLines,
+      readOnly: readOnly,
+      onTap: onTap,
+      onChanged: onChanged,
+      textInputAction: textInputAction,
+      textCapitalization: textCapitalization,
       style: GoogleFonts.inter(
-        fontSize: 14.5,
+        fontSize: 15,
         fontWeight: FontWeight.w500,
         color: cs.onSurface,
       ),
@@ -50,30 +65,47 @@ class SoftInput extends StatelessWidget {
         hintText: hint,
         suffixText: suffixText,
         prefixIcon: prefixIcon,
+
+        // ── The fix ─────────────────────────────────────────────────
+        // Always float the label so it sits on the border, never inside
+        // the fill. Makes it readable against surfaceContainerHighest
+        // and keeps the field height stable whether or not it has text.
+        floatingLabelBehavior: FloatingLabelBehavior.always,
+
         filled: true,
         fillColor: cs.surfaceContainerHighest,
+
         labelStyle: GoogleFonts.inter(
           fontSize: 13.5,
-          fontWeight: FontWeight.w500,
-          color: cs.onSurface.withValues(alpha: 0.6),
+          fontWeight: FontWeight.w600,
+          color: cs.onSurface.withValues(alpha: 0.7),
+        ),
+        floatingLabelStyle: GoogleFonts.inter(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: cs.primary,
         ),
         hintStyle: GoogleFonts.inter(
-          fontSize: 14,
-          color: cs.onSurface.withValues(alpha: 0.4),
+          fontSize: 14.5,
+          fontWeight: FontWeight.w400,
+          color: cs.onSurface.withValues(alpha: 0.35),
         ),
         suffixStyle: GoogleFonts.inter(
-          fontSize: 13,
-          color: cs.onSurface.withValues(alpha: 0.5),
+          fontSize: 13.5,
+          fontWeight: FontWeight.w500,
+          color: cs.onSurface.withValues(alpha: 0.55),
         ),
+
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
-          vertical: 14,
+          vertical: 16,
         ),
-        border: _border(cs, cs.outlineVariant.withValues(alpha: 0.4)),
-        enabledBorder: _border(cs, cs.outlineVariant.withValues(alpha: 0.4)),
-        focusedBorder: _border(cs, cs.primary, width: 1.4),
+
+        border: _border(cs, cs.outlineVariant.withValues(alpha: 0.5)),
+        enabledBorder: _border(cs, cs.outlineVariant.withValues(alpha: 0.5)),
+        focusedBorder: _border(cs, cs.primary, width: 1.6),
         errorBorder: _border(cs, cs.error),
-        focusedErrorBorder: _border(cs, cs.error, width: 1.4),
+        focusedErrorBorder: _border(cs, cs.error, width: 1.6),
       ),
     );
   }

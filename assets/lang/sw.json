@@ -66,12 +66,37 @@
 "vitals":"Vitali",
     "myVitals":"Vitali & Huduma za Kudumu"
   },
-  "assessments": {
-    "title": "tathmini  ",
-    "subtitle": "Tathmini ya afya yako",
-    "startAssessment": "Anza Tathmini",
-    "noAssessments": "Hakuna tathmini zilizopo kwa sasa. Tafadhali angalia tena baadaye."
+"assessment": {
+  "title": "Tathmini za Afya",
+   "titlebot":"Tathmini",
+  "understandingTitle": "Kuelewa tathmini hii",
+  "begin": "Anza tathmini",
+  "resultTitle": "Matokeo yako",
+  "warnings": "Tafadhali zingatia",
+  "contributing": "Kinachochangia",
+  "protective": "Kinachokulinda",
+    "takesFiveToTen": "Yafaa kuchukua dakika 5–10",
+  "category": {
+    "cancer": "Saratani",
+    "metabolic": "Kimetaboliki",
+    "mentalHealth": "Afya ya akili",
+    "sexualUrinary": "Afya ya ngono na mkojo"
   },
+  "recommendations": "Cha kufanya kinachofuata",
+  "terminatedTitle": "Tathmini imesimamishwa",
+  "terminatedBody": "Kulingana na majibu yako, tathmini hii imesimamishwa. Tafadhali fuata mwongozo ulioonyeshwa.",
+  "noAccessTitle": "Tathmini hazipatikani bado",
+  "noAccessBody": "Utaweza kufanya tathmini mara tu ufikiaji utakapofunguliwa kwa akaunti yako.",
+  "bmi": {
+    "title": "Hebu tuhesabu BMI yako",
+    "subtitle": "Weka uzito na urefu wako. Tutahesabu BMI yako na kuonyesha maana yake.",
+    "weightKg": "Uzito (kg)",
+    "heightCm": "Urefu (cm)",
+    "startAssessment": "Anza Tathmini",
+    "viewResults": "Tazama Matokeo",
+    "noAssessments": "Hakuna tathmini zinazopatikana kwa sasa. Tafadhali angalia tena baadaye."
+  }
+},
   "vitals": {
   "title": "Vipimo vya Afya",
   "subtitle": "Shinikizo la damu na sukari ya damu",

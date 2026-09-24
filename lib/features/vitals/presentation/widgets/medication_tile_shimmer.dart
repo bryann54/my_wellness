@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:my_wellness/common/widgets/shimmer.dart'; 
+import 'package:my_wellness/common/widgets/shimmer.dart';
+
 class MedicationTileShimmer extends StatelessWidget {
   const MedicationTileShimmer({super.key});
 
@@ -54,6 +55,7 @@ class MedicationTileShimmer extends StatelessWidget {
     );
   }
 }
+
 class MedicationsShimmerList extends StatelessWidget {
   final int count;
   const MedicationsShimmerList({super.key, this.count = 6});

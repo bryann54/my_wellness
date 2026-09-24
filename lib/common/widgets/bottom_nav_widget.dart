@@ -57,7 +57,7 @@ class CustomFlashyBottomNav extends StatelessWidget {
               index: 1,
               activeIcon: FontAwesomeIcons.heartPulse,
               inactiveIcon: FontAwesomeIcons.heartPulse,
-              title: AppLocalizations.getString(context, 'assessments.title'),
+              title: AppLocalizations.getString(context, 'assessment.titlebot'),
               activeColor: activeColor,
               inactiveColor: inactiveColor,
             ),
