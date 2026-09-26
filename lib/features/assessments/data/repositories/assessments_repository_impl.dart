@@ -9,6 +9,7 @@ import 'package:my_wellness/features/assessments/domain/entities/assessment_scor
 import 'package:my_wellness/features/assessments/domain/entities/assessment_session.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_summary.dart';
 import 'package:my_wellness/features/assessments/domain/entities/bmi_preview.dart';
+import 'package:my_wellness/features/assessments/domain/entities/referral.dart';
 import 'package:my_wellness/features/assessments/domain/entities/vitals_access.dart';
 import 'package:my_wellness/features/assessments/domain/repositories/assessments_repository.dart';
 
@@ -153,5 +154,16 @@ class AssessmentRepositoryImpl implements AssessmentsRepository {
     if (e is NetworkException) return const NetworkFailure();
     if (e is ServerException) return const ServerFailure();
     return GeneralFailure(error: e.toString());
+  }
+
+  @override
+  Future<Either<Failure, Referral?>> getReferralForSession(
+    String sessionId,
+  ) async {
+    try {
+      return Right(await _remote.getReferralForSession(sessionId));
+    } on Exception {
+      return const Right(null);
+    }
   }
 }

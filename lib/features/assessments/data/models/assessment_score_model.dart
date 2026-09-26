@@ -14,7 +14,7 @@ class AssessmentScoreModel {
   final String? bandBlurb;
 
   @JsonKey(name: 'raw_score')
-  final int rawScore;
+  final int? rawScore;
 
   final ScoreMetricModel? metric;
   final List<ScoreItemModel> contributing;
@@ -39,10 +39,13 @@ class AssessmentScoreModel {
   @JsonKey(name: 'needs_nutrition_consultation')
   final bool needsNutritionConsultation;
 
+  @JsonKey(name: 'result_display')
+  final ResultDisplayModel? resultDisplay;
+
   const AssessmentScoreModel({
     required this.band,
     required this.bandLabel,
-    required this.rawScore,
+    this.rawScore,
     this.bandBlurb,
     this.metric,
     this.contributing = const [],
@@ -54,10 +57,79 @@ class AssessmentScoreModel {
     this.screeningRecommendation,
     this.additionalCtaKeys = const [],
     this.needsNutritionConsultation = false,
+    this.resultDisplay,
   });
 
-  factory AssessmentScoreModel.fromJson(Map<String, dynamic> json) =>
-      _$AssessmentScoreModelFromJson(json);
+  factory AssessmentScoreModel.fromJson(Map<String, dynamic> json) {
+    // Fall back gracefully when the backend sends a `result_display`
+    // wrapper instead of the flat band/band_label/band_blurb shape.
+    final display = json['result_display'] as Map<String, dynamic>?;
+
+    return AssessmentScoreModel(
+      band:
+          (json['band'] as String?) ??
+          (display?['severity'] as String?) ??
+          'unknown',
+      bandLabel:
+          (json['band_label'] as String?) ??
+          (display?['title'] as String?) ??
+          '',
+      bandBlurb:
+          (json['band_blurb'] as String?) ?? (display?['body'] as String?),
+      rawScore: (json['raw_score'] as num?)?.toInt(),
+      metric: json['metric'] == null
+          ? null
+          : ScoreMetricModel.fromJson(json['metric'] as Map<String, dynamic>),
+      contributing:
+          (json['contributing'] as List<dynamic>?)
+              ?.map((e) => ScoreItemModel.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      protective:
+          (json['protective'] as List<dynamic>?)
+              ?.map((e) => ScoreItemModel.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      recommendations:
+          (json['recommendations'] as List<dynamic>?)
+              ?.map(
+                (e) => ScoreRecommendationModel.fromJson(
+                  e as Map<String, dynamic>,
+                ),
+              )
+              .toList() ??
+          const [],
+      hasActiveWarning: json['has_active_warning'] as bool? ?? false,
+      computedAt: json['computed_at'] as String?,
+      symptomAlerts:
+          (json['symptom_alerts'] as List<dynamic>?)
+              ?.map(
+                (e) => SymptomAlertModel.fromJson(e as Map<String, dynamic>),
+              )
+              .toList() ??
+          (display?['symptom_alerts_section']?['alerts'] as List<dynamic>?)
+              ?.map(
+                (e) => SymptomAlertModel.fromJson(e as Map<String, dynamic>),
+              )
+              .toList() ??
+          const [],
+      screeningRecommendation: json['screening_recommendation'] == null
+          ? null
+          : ScreeningRecommendationModel.fromJson(
+              json['screening_recommendation'] as Map<String, dynamic>,
+            ),
+      additionalCtaKeys:
+          (json['additional_cta_keys'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
+      needsNutritionConsultation:
+          json['needs_nutrition_consultation'] as bool? ?? false,
+      resultDisplay: display == null
+          ? null
+          : ResultDisplayModel.fromJson(display),
+    );
+  }
 
   Map<String, dynamic> toJson() => _$AssessmentScoreModelToJson(this);
 
@@ -65,7 +137,7 @@ class AssessmentScoreModel {
     band: band,
     bandLabel: bandLabel,
     bandBlurb: bandBlurb,
-    rawScore: rawScore,
+    rawScore: rawScore ?? 0,
     metric: metric?.toEntity(),
     contributing: contributing.map((c) => c.toEntity()).toList(growable: false),
     protective: protective.map((p) => p.toEntity()).toList(growable: false),
@@ -82,6 +154,44 @@ class AssessmentScoreModel {
     needsNutritionConsultation: needsNutritionConsultation,
   );
 }
+
+@JsonSerializable()
+class ResultDisplayModel {
+  final String? kind;
+  final String? severity;
+  final String? title;
+  final String? body;
+
+  @JsonKey(name: 'severity_color')
+  final Map<String, dynamic>? severityColor;
+
+  const ResultDisplayModel({
+    this.kind,
+    this.severity,
+    this.title,
+    this.body,
+    this.severityColor,
+  });
+
+  factory ResultDisplayModel.fromJson(Map<String, dynamic> json) =>
+      ResultDisplayModel(
+        kind: json['kind'] as String?,
+        severity: json['severity'] as String?,
+        title: json['title'] as String?,
+        body: json['body'] as String?,
+        severityColor: json['color'] as Map<String, dynamic>?,
+      );
+
+  Map<String, dynamic> toJson() => {
+    'kind': kind,
+    'severity': severity,
+    'title': title,
+    'body': body,
+    'color': severityColor,
+  };
+}
+
+// ── Existing inner models (unchanged) ────────────────────────────────────────
 
 @JsonSerializable()
 class ScoreItemModel {

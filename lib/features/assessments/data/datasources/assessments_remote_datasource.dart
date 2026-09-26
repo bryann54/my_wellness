@@ -1,12 +1,14 @@
 import 'package:injectable/injectable.dart';
 import 'package:my_wellness/core/api_client/client/api_client.dart';
 import 'package:my_wellness/core/api_client/endpoints/api_endpoints.dart';
+import 'package:my_wellness/core/errors/exceptions.dart';
 import 'package:my_wellness/features/assessments/data/models/assessment_answer_model.dart';
 import 'package:my_wellness/features/assessments/data/models/assessment_definition_model.dart';
 import 'package:my_wellness/features/assessments/data/models/assessment_score_model.dart';
 import 'package:my_wellness/features/assessments/data/models/assessment_session_model.dart';
 import 'package:my_wellness/features/assessments/data/models/assessment_summary_model.dart';
 import 'package:my_wellness/features/assessments/data/models/bmi_preview_model.dart';
+import 'package:my_wellness/features/assessments/data/models/referral_model.dart';
 import 'package:my_wellness/features/assessments/data/models/vitals_access_model.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_answer.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_definition.dart';
@@ -14,6 +16,7 @@ import 'package:my_wellness/features/assessments/domain/entities/assessment_scor
 import 'package:my_wellness/features/assessments/domain/entities/assessment_session.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_summary.dart';
 import 'package:my_wellness/features/assessments/domain/entities/bmi_preview.dart';
+import 'package:my_wellness/features/assessments/domain/entities/referral.dart';
 import 'package:my_wellness/features/assessments/domain/entities/vitals_access.dart';
 import 'package:my_wellness/features/assessments/domain/repositories/assessments_repository.dart';
 
@@ -24,6 +27,7 @@ abstract class AssessmentsRemoteDataSource {
   Future<AssessmentDefinition> getDefinition(String slug);
   Future<AssessmentSession> startSession(String slug);
   Future<List<AssessmentAnswer>> getAnswers(String slug, String sessionId);
+  Future<Referral?> getReferralForSession(String sessionId);
   Future<SubmitAnswerResult> submitAnswer(
     String slug,
     String sessionId, {
@@ -57,7 +61,20 @@ class AssessmentsRemoteDataSourceImpl implements AssessmentsRemoteDataSource {
     );
     return VitalsAccessModel.fromJson(res).toEntity();
   }
-
+  @override
+  Future<Referral?> getReferralForSession(String sessionId) async {
+    try {
+      final res = await _api.get<Map<String, dynamic>>(
+        url: ApiEndpoints.referralFromSession(sessionId),
+        options: ApiClient.protected,
+      );
+      return ReferralModel.fromJson(res).toEntity();
+    } on NotFoundException {
+      return null;
+    } on ValidationException {
+      return null;
+    }
+  }
   @override
   Future<List<AssessmentSummary>> listAssessments() async {
     final res = await _api.get<List<dynamic>>(

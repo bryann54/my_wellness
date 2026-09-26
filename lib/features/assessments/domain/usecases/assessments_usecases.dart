@@ -8,6 +8,7 @@ import 'package:my_wellness/features/assessments/domain/entities/assessment_scor
 import 'package:my_wellness/features/assessments/domain/entities/assessment_session.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_summary.dart';
 import 'package:my_wellness/features/assessments/domain/entities/bmi_preview.dart';
+import 'package:my_wellness/features/assessments/domain/entities/referral.dart';
 import 'package:my_wellness/features/assessments/domain/entities/vitals_access.dart';
 import 'package:my_wellness/features/assessments/domain/repositories/assessments_repository.dart';
 
@@ -58,7 +59,15 @@ class StartAssessmentSessionUseCase
   Future<Either<Failure, AssessmentSession>> call(String slug) =>
       _r.startSession(slug);
 }
+@lazySingleton
+class GetReferralForSessionUseCase implements UseCase<Referral?, String> {
+  final AssessmentsRepository _r;
+  GetReferralForSessionUseCase(this._r);
 
+  @override
+  Future<Either<Failure, Referral?>> call(String sessionId) =>
+      _r.getReferralForSession(sessionId);
+}
 @lazySingleton
 class GetAssessmentAnswersUseCase
     implements

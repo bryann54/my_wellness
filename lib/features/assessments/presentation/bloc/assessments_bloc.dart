@@ -8,6 +8,7 @@ import 'package:my_wellness/features/assessments/domain/entities/assessment_scor
 import 'package:my_wellness/features/assessments/domain/entities/assessment_session.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_summary.dart';
 import 'package:my_wellness/features/assessments/domain/entities/bmi_preview.dart';
+import 'package:my_wellness/features/assessments/domain/entities/referral.dart';
 import 'package:my_wellness/features/assessments/domain/entities/vitals_access.dart';
 
 import 'package:injectable/injectable.dart';
@@ -29,6 +30,7 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
   final GetAssessmentAnswersUseCase _getAnswers;
   final SubmitAssessmentAnswerUseCase _submitAnswer;
   final SubmitAssessmentBmiUseCase _submitBmi;
+  final GetReferralForSessionUseCase _getReferral;
   final GetAssessmentScoreUseCase _getScore;
   final PreviewBmiUseCase _previewBmi;
   final AccountBloc _accountBloc;
@@ -45,6 +47,7 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
     this._getAnswers,
     this._submitAnswer,
     this._submitBmi,
+    this._getReferral, 
     this._getScore,
     this._previewBmi,
      this._accountBloc,
@@ -94,8 +97,6 @@ Future<void> _onLoad(
       () => const VitalsAccess(hasAccess: false),
     );
     final all = listRes.getOrElse(() => const <AssessmentSummary>[]);
-
-    // Read gender from the health profile (falls back to null → show all).
     final userGender = _accountBloc.state.profile?.gender;
 
     final visible = all
@@ -122,31 +123,28 @@ Future<void> _onStart(
         terminated: false,
         terminationReference: null,
         clearBmiPreview: true,
+        completionHandled: false,
+        alreadyCompleted: false,
       ),
     );
 
     _activeSlug = event.slug;
 
-    // 1. Can-start gate
+    // 1. can-start is the source of truth for "already done".
     final canStartRes = await _canStart(event.slug);
     final canStart = canStartRes.fold(
       (_) => const CanStartResult(allowed: false),
       (r) => r,
     );
-    if (!canStart.allowed) {
-      emit(
-        state.copyWith(status: AssessmentStatus.ready, alreadyCompleted: true),
-      );
-      return;
-    }
+
+    final alreadyDone = !canStart.allowed && canStart.lastCompletedAt != null;
+
     final defRes = await _getDefinition(event.slug);
     final sessionRes = await _startSession(event.slug);
 
-    // 3. Surface the first failure
     final failure =
         defRes.fold<Failure?>((f) => f, (_) => null) ??
         sessionRes.fold<Failure?>((f) => f, (_) => null);
-
     if (failure != null) {
       emit(
         state.copyWith(
@@ -157,14 +155,54 @@ Future<void> _onStart(
       return;
     }
 
-    // 4. Unwrap
     final def = defRes.getOrElse(() => throw StateError('definition missing'));
     final session = sessionRes.getOrElse(
       () => throw StateError('session missing'),
     );
     _activeSessionId = session.id;
 
-    // 5. Load any existing answers (for resume)
+    // 2. Already completed -> land on complete; kick score + referral fetch.
+    if (alreadyDone) {
+      emit(
+        state.copyWith(
+          status: AssessmentStatus.ready,
+          definition: def,
+          session: session,
+          alreadyCompleted: true,
+        ),
+      );
+      await _loadScoreAndReferral(emit);
+      return;
+    }
+
+    // 3. Terminated -> show terminated screen.
+    if (session.status == AssessmentSessionStatus.terminated) {
+      emit(
+        state.copyWith(
+          status: AssessmentStatus.ready,
+          definition: def,
+          session: session,
+          terminated: true,
+          terminationReference: session.referenceNumber,
+        ),
+      );
+      return;
+    }
+
+    // 4. Not allowed for any other reason.
+    if (!canStart.allowed) {
+      emit(
+        state.copyWith(
+          status: AssessmentStatus.error,
+          errorMessage: 'You are not eligible to start this assessment yet.',
+          definition: def,
+          session: session,
+        ),
+      );
+      return;
+    }
+
+    // 5. Fresh session: load any saved answers and enter.
     final answersRes = await _getAnswers((
       slug: event.slug,
       sessionId: session.id,
@@ -180,6 +218,115 @@ Future<void> _onStart(
       ),
     );
   }
+
+  Future<void> _onSubmitAnswer(
+    SubmitAnswerEvent event,
+    Emitter<AssessmentsState> emit,
+  ) async {
+    final slug = _activeSlug;
+    final sessionId = _activeSessionId;
+    if (slug == null || sessionId == null) return;
+
+    emit(state.copyWith(status: AssessmentStatus.submitting, clearError: true));
+
+    final res = await _submitAnswer((
+      slug: slug,
+      sessionId: sessionId,
+      questionKey: event.questionKey,
+      questionIndex: event.questionIndex,
+      answer: event.answer,
+    ));
+
+    await res.fold(
+      (f) async => emit(
+        state.copyWith(
+          status: AssessmentStatus.error,
+          errorMessage: mapFailure(f),
+        ),
+      ),
+      (result) async {
+        if (result.terminate) {
+          emit(
+            state.copyWith(
+              status: AssessmentStatus.ready,
+              terminated: true,
+              terminationReference: result.reference,
+              session: state.session?.applyResult(result),
+            ),
+          );
+          return;
+        }
+
+        final updatedSession = state.session?.applyResult(result);
+
+        if (result.completed) {
+          emit(
+            state.copyWith(
+              status: AssessmentStatus.completed,
+              session: updatedSession,
+            ),
+          );
+          await _loadScoreAndReferral(emit);
+          return;
+        }
+
+        emit(
+          state.copyWith(
+            status: AssessmentStatus.ready,
+            session: updatedSession,
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _onFetchScore(
+    FetchScoreEvent event,
+    Emitter<AssessmentsState> emit,
+  ) async {
+    if (state.completionHandled && state.score != null) return;
+
+    emit(state.copyWith(status: AssessmentStatus.loading));
+    await _loadScoreAndReferral(emit);
+  }
+
+  /// Fetches score (required) and referral (optional) in parallel, then
+  /// emits `completed` with both in state. Sets [completionHandled] so
+  /// downstream screens know not to refetch.
+  Future<void> _loadScoreAndReferral(Emitter<AssessmentsState> emit) async {
+    final slug = _activeSlug;
+    final sessionId = _activeSessionId;
+    if (slug == null || sessionId == null) return;
+
+    final scoreFut = _getScore((slug: slug, sessionId: sessionId));
+    final referralFut = _getReferral(sessionId);
+
+    final scoreRes = await scoreFut;
+    final referralRes = await referralFut;
+
+    scoreRes.fold(
+      (f) => emit(
+        state.copyWith(
+          status: AssessmentStatus.error,
+          errorMessage: mapFailure(f),
+        ),
+      ),
+      (score) {
+        final referral = referralRes.fold((_) => null, (r) => r);
+        emit(
+          state.copyWith(
+            status: AssessmentStatus.completed,
+            score: score,
+            referral: referral,
+            completionHandled: true,
+          ),
+        );
+      },
+    );
+  }
+
+
+
 
  Future<void> _onResume(
     ResumeAssessmentsEvent event,
@@ -220,62 +367,6 @@ Future<void> _onStart(
     );
   }
 
-
-  Future<void> _onSubmitAnswer(
-    SubmitAnswerEvent event,
-    Emitter<AssessmentsState> emit,
-  ) async {
-    final slug = _activeSlug;
-    final sessionId = _activeSessionId;
-    if (slug == null || sessionId == null) return;
-
-    emit(state.copyWith(status: AssessmentStatus.submitting, clearError: true));
-
-    final res = await _submitAnswer((
-      slug: slug,
-      sessionId: sessionId,
-      questionKey: event.questionKey,
-      questionIndex: event.questionIndex,
-      answer: event.answer,
-    ));
-
-await res.fold(
-      (f) async => emit(
-        state.copyWith(
-          status: AssessmentStatus.error,
-          errorMessage: mapFailure(f),
-        ),
-      ),
-      (result) async {
-        if (result.terminate) {
-          emit(
-            state.copyWith(
-              status: AssessmentStatus.ready,
-              terminated: true,
-              terminationReference: result.reference,
-              session: state.session?.applyResult(result),
-            ),
-          );
-          return;
-        }
-        if (result.completed) {
-          emit(
-            state.copyWith(
-              status: AssessmentStatus.completed,
-              session: state.session?.applyResult(result),
-            ),
-          );
-          return;
-        }
-        emit(
-          state.copyWith(
-            status: AssessmentStatus.ready,
-            session: state.session?.applyResult(result),
-          ),
-        );
-      },
-    );
-  }
 
 
 
@@ -320,6 +411,8 @@ await res.fold(
     );
   }
 
+
+
   Future<void> _onPreviewBmi(
     PreviewBmiEvent event,
     Emitter<AssessmentsState> emit,
@@ -331,27 +424,6 @@ await res.fold(
     res.fold((_) {}, (preview) => emit(state.copyWith(bmiPreview: preview)));
   }
 
-  Future<void> _onFetchScore(
-    FetchScoreEvent event,
-    Emitter<AssessmentsState> emit,
-  ) async {
-    final slug = _activeSlug;
-    final sessionId = _activeSessionId;
-    if (slug == null || sessionId == null) return;
 
-    emit(state.copyWith(status: AssessmentStatus.loading));
 
-    final res = await _getScore((slug: slug, sessionId: sessionId));
-    res.fold(
-      (f) => emit(
-        state.copyWith(
-          status: AssessmentStatus.error,
-          errorMessage: mapFailure(f),
-        ),
-      ),
-      (score) => emit(
-        state.copyWith(status: AssessmentStatus.completed, score: score),
-      ),
-    );
-  }
 }

@@ -47,7 +47,7 @@ class _AssessmentIntroBodyState extends State<_AssessmentIntroBody> {
     final def = context.select<AssessmentsBloc, dynamic>(
       (b) => b.state.definition,
     );
-   final already = context.select<AssessmentsBloc, bool>(
+    final already = context.select<AssessmentsBloc, bool>(
       (b) => b.state.alreadyCompleted,
     );
 

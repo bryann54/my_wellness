@@ -22,9 +22,7 @@ class AssessmentSessionScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: context.read<AssessmentsBloc>(),
-      child: AssessmentToastListener(
-        child: _AssessmentSessionBody(slug: slug),
-      ),
+      child: AssessmentToastListener(child: _AssessmentSessionBody(slug: slug)),
     );
   }
 }
@@ -42,6 +40,15 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
   int _lastIndex = -1;
   bool _navigated = false;
 
+  void _scheduleCompleteRedirect() {
+    if (_navigated) return;
+    _navigated = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.router.replace(AssessmentCompleteRoute(slug: widget.slug));
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AssessmentsBloc>().state;
@@ -54,24 +61,15 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
       );
     }
 
-    if (state.status == AssessmentStatus.completed && !_navigated) {
-      _navigated = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        context.router.replace(
-          AssessmentCompleteRoute(slug: widget.slug),
-        );
-      });
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+    if (state.status == AssessmentStatus.completed) {
+      _scheduleCompleteRedirect();
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     if (session == null || def == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    // When the server advances the index, clear the local pending answer.
     if (session.currentIndex != _lastIndex) {
       _lastIndex = session.currentIndex;
       _pendingAnswer = null;
@@ -79,6 +77,13 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
 
     final q = def.questionByIndex(session.currentIndex);
     if (q == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final bloc = context.read<AssessmentsBloc>();
+        if (!bloc.state.completionHandled) {
+          bloc.add(const FetchScoreEvent());
+        }
+      });
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
@@ -102,16 +107,14 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
                 padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
                 child: q.type == AssessmentQuestionType.bmi
                     ? AssessmentBmiStep(
-                        submitting:
-                            state.status == AssessmentStatus.submitting,
+                        submitting: state.status == AssessmentStatus.submitting,
                         onContinue: _submitBmi,
                       )
                     : AssessmentQuestionView(
                         key: ValueKey(q.key),
                         question: q,
                         initialValue: _pendingAnswer,
-                        onChanged: (v) =>
-                            setState(() => _pendingAnswer = v),
+                        onChanged: (v) => setState(() => _pendingAnswer = v),
                       ),
               ),
             ),
@@ -160,14 +163,11 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
               ),
             ),
             style: OutlinedButton.styleFrom(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              side: BorderSide(
-                color: cs.outlineVariant.withValues(alpha: 0.6),
-              ),
+              side: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.6)),
               foregroundColor: cs.onSurface,
             ),
           ),
@@ -194,8 +194,7 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
             ),
             style: FilledButton.styleFrom(
               backgroundColor: cs.primary,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
@@ -215,12 +214,12 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
     if (q == null) return;
 
     context.read<AssessmentsBloc>().add(
-          SubmitAnswerEvent(
-            questionKey: q.key,
-            questionIndex: q.index,
-            answer: _pendingAnswer!,
-          ),
-        );
+      SubmitAnswerEvent(
+        questionKey: q.key,
+        questionIndex: q.index,
+        answer: _pendingAnswer!,
+      ),
+    );
   }
 
   void _submitBmi() {

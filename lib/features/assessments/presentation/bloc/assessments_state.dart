@@ -20,6 +20,8 @@ class AssessmentsState extends Equatable {
   final String? toastMessage;
   final int toastNonce;
   final bool alreadyCompleted;
+  final bool completionHandled;
+  final Referral? referral;
 
   const AssessmentsState({
     this.status = AssessmentStatus.initial,
@@ -37,6 +39,8 @@ class AssessmentsState extends Equatable {
     this.toastMessage,
     this.toastNonce = 0,
     this.alreadyCompleted = false,
+    this.completionHandled = false,
+    this.referral,
   });
 
   AssessmentsState copyWith({
@@ -59,7 +63,9 @@ class AssessmentsState extends Equatable {
     bool clearBmiPreview = false,
     bool clearSession = false,
     bool? alreadyCompleted,
-    
+    bool? completionHandled,
+    Referral? referral,
+    bool clearReferral = false,
   }) {
     return AssessmentsState(
       status: status ?? this.status,
@@ -77,6 +83,8 @@ class AssessmentsState extends Equatable {
       toastMessage: clearToast ? null : (toastMessage ?? this.toastMessage),
       toastNonce: clearToast ? 0 : (toastNonce ?? this.toastNonce),
       alreadyCompleted: alreadyCompleted ?? this.alreadyCompleted,
+      completionHandled: completionHandled ?? this.completionHandled,
+      referral: clearReferral ? null : (referral ?? this.referral),
     );
   }
 
@@ -97,5 +105,7 @@ class AssessmentsState extends Equatable {
     toastMessage,
     toastNonce,
     alreadyCompleted,
+    completionHandled,
+    referral,
   ];
 }

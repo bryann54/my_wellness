@@ -11,7 +11,7 @@ AssessmentScoreModel _$AssessmentScoreModelFromJson(
 ) => AssessmentScoreModel(
   band: json['band'] as String,
   bandLabel: json['band_label'] as String,
-  rawScore: (json['raw_score'] as num).toInt(),
+  rawScore: (json['raw_score'] as num?)?.toInt(),
   bandBlurb: json['band_blurb'] as String?,
   metric: json['metric'] == null
       ? null
@@ -52,6 +52,11 @@ AssessmentScoreModel _$AssessmentScoreModelFromJson(
       const [],
   needsNutritionConsultation:
       json['needs_nutrition_consultation'] as bool? ?? false,
+  resultDisplay: json['result_display'] == null
+      ? null
+      : ResultDisplayModel.fromJson(
+          json['result_display'] as Map<String, dynamic>,
+        ),
 );
 
 Map<String, dynamic> _$AssessmentScoreModelToJson(
@@ -71,7 +76,26 @@ Map<String, dynamic> _$AssessmentScoreModelToJson(
   'screening_recommendation': instance.screeningRecommendation?.toJson(),
   'additional_cta_keys': instance.additionalCtaKeys,
   'needs_nutrition_consultation': instance.needsNutritionConsultation,
+  'result_display': instance.resultDisplay?.toJson(),
 };
+
+ResultDisplayModel _$ResultDisplayModelFromJson(Map<String, dynamic> json) =>
+    ResultDisplayModel(
+      kind: json['kind'] as String?,
+      severity: json['severity'] as String?,
+      title: json['title'] as String?,
+      body: json['body'] as String?,
+      severityColor: json['severity_color'] as Map<String, dynamic>?,
+    );
+
+Map<String, dynamic> _$ResultDisplayModelToJson(ResultDisplayModel instance) =>
+    <String, dynamic>{
+      'kind': instance.kind,
+      'severity': instance.severity,
+      'title': instance.title,
+      'body': instance.body,
+      'severity_color': instance.severityColor,
+    };
 
 ScoreItemModel _$ScoreItemModelFromJson(Map<String, dynamic> json) =>
     ScoreItemModel(
