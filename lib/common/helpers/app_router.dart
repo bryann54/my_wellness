@@ -14,7 +14,7 @@ class AppRouter extends RootStackRouter {
       page: MainRoute.page,
       children: [
         AutoRoute(page: HomeRoute.page),
-        AutoRoute(page: AssessmentsRoute.page),
+        AutoRoute(page: AssessmentsListRoute.page),
         AutoRoute(page: BookingsRoute.page),
         AutoRoute(page: WellnessRoute.page),
         AutoRoute(page: AccountRoute.page),
@@ -28,7 +28,11 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: AppointmentsRoute.page),
 
     AutoRoute(page: WebViewRoute.page),
-
+    AutoRoute(page: AssessmentCompleteRoute.page),
+// AutoRoute(page: AssessmentsListRoute.page),
+    AutoRoute(page: AssessmentIntroRoute.page),
+    AutoRoute(page: AssessmentSessionRoute.page),
+    AutoRoute(page: AssessmentResultRoute.page),
     AutoRoute(page: EditProfileRoute.page),
     AutoRoute(page: VerificationRoute.page),
 

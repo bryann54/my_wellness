@@ -62,11 +62,11 @@ class _MedicationTileState extends State<MedicationTile> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const SizedBox(height: 14),
-                           Divider(),
+                            Divider(),
                             const SizedBox(height: 12),
                             _Details(medication: m),
                             const SizedBox(height: 12),
-                          Divider(),
+                            Divider(),
                             const SizedBox(height: 8),
                             _DeleteButton(onTap: () => _confirmDelete(context)),
                           ],
@@ -126,7 +126,6 @@ class _Card extends StatelessWidget {
   }
 }
 
-
 class _Header extends StatelessWidget {
   final Medication medication;
   final bool expanded;
@@ -140,7 +139,6 @@ class _Header extends StatelessWidget {
 
     return Row(
       children: [
-       
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,10 +168,10 @@ class _Header extends StatelessWidget {
                   ),
                 ),
               ],
-                 if (     medication.notes!= null) ...[
+              if (medication.notes != null) ...[
                 const SizedBox(height: 3),
                 Text(
-                       medication.notes.toString(),
+                  medication.notes.toString(),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.inter(
@@ -430,16 +428,15 @@ class _DeleteButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Align(
       alignment: Alignment.centerRight,
-      child:AppPrimaryButton(onPressed: onTap, 
-      borderRadius: 6,
-      height: 40,
-      width: 150,
+      child: AppPrimaryButton(
+        onPressed: onTap,
+        borderRadius: 6,
+        height: 40,
+        width: 150,
         label: AppLocalizations.getString(context, 'common.delete'),
         icon: Icons.delete_outline_rounded,
-       
       ),
     );
   }

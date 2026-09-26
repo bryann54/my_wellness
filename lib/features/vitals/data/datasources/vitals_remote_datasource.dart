@@ -119,7 +119,7 @@ class VitalsRemoteDataSourceImpl implements VitalsRemoteDataSource {
     );
   }
 
-//medication
+  //medication
   @override
   Future<List<Medication>> getMedicationsByCondition(String condition) async {
     final response = await _apiClient.get<List<dynamic>>(
@@ -229,7 +229,7 @@ class VitalsRemoteDataSourceImpl implements VitalsRemoteDataSource {
     );
   }
 
-//blood sugar
+  //blood sugar
   @override
   Future<List<BsReading>> getBloodSugarReadings() async {
     final response = await _apiClient.get<List<dynamic>>(

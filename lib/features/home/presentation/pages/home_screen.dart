@@ -28,7 +28,7 @@ class HomeScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 10),
                 Divider(),
-                
+
                 // Next sections to add:
                 //   - KnowYourRiskCard (assessments)
                 //   - BookCheckUpBanner (appointments)

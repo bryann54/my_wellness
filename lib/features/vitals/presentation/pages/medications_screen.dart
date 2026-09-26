@@ -45,99 +45,99 @@ class _MedicationsScreenState extends State<MedicationsScreen> {
     }
   }
 
-@override
-Widget build(BuildContext context) {
-  return VitalsToastListener(
-    child: Scaffold(
-      floatingActionButton: BlocBuilder<VitalsBloc, VitalsState>(
-        buildWhen: (p, c) =>
-            p.medications.isEmpty != c.medications.isEmpty,
-        builder: (context, state) {
-          return AppFabSlot(
-            visible: state.medications.isNotEmpty,
-            child: AppFab.extended(
-              label: AppLocalizations.getString(context, 'medications.add'),
-              icon: const Icon(Icons.add),
-              onPressed: () => AddMedicationSheet.show(context),
-            ),
-          );
-        },
-      ),
-      body: BlocBuilder<VitalsBloc, VitalsState>(
-        buildWhen: (p, c) =>
-            p.status != c.status ||
-            p.medications != c.medications ||
-            p.medicationsCursor != c.medicationsCursor,
-        builder: (context, state) {
-          final meds = state.medications;
+  @override
+  Widget build(BuildContext context) {
+    return VitalsToastListener(
+      child: Scaffold(
+        floatingActionButton: BlocBuilder<VitalsBloc, VitalsState>(
+          buildWhen: (p, c) => p.medications.isEmpty != c.medications.isEmpty,
+          builder: (context, state) {
+            return AppFabSlot(
+              visible: state.medications.isNotEmpty,
+              child: AppFab.extended(
+                label: AppLocalizations.getString(context, 'medications.add'),
+                icon: const Icon(Icons.add),
+                onPressed: () => AddMedicationSheet.show(context),
+              ),
+            );
+          },
+        ),
+        body: BlocBuilder<VitalsBloc, VitalsState>(
+          buildWhen: (p, c) =>
+              p.status != c.status ||
+              p.medications != c.medications ||
+              p.medicationsCursor != c.medicationsCursor,
+          builder: (context, state) {
+            final meds = state.medications;
 
-          if (state.status == VitalsStatus.loading && meds.isEmpty) {
-            return const _MedicationsSkeleton();
-          }
+            if (state.status == VitalsStatus.loading && meds.isEmpty) {
+              return const _MedicationsSkeleton();
+            }
 
-          return RefreshIndicator(
-            onRefresh: () async =>
-                context.read<VitalsBloc>().add(const LoadVitalsEvent()),
-            child: NestedScrollView(
-              headerSliverBuilder: (_, __) => [
-                CustomAppBar(
-                  title: AppLocalizations.getString(
-                    context,
-                    'medications.title',
-                  ),
-                  isHome: false,
-                ),
-              ],
-              body: meds.isEmpty
-                  ? ListView(
-                      children: [
-                        SizedBox(
-                          height: MediaQuery.sizeOf(context).height * 0.5,
-                          child: VitalsEmptyState(
-                            icon: Icons.medication_outlined,
-                            title: AppLocalizations.getString(
-                              context,
-                              'medications.empty',
-                            ),
-                            subtitle: AppLocalizations.getString(
-                              context,
-                              'medications.emptySub',
-                            ),
-                            ctaLabel: AppLocalizations.getString(
-                              context,
-                              'medications.add',
-                            ),
-                            onCta: () => AddMedicationSheet.show(context),
-                          ),
-                        ),
-                      ],
-                    )
-                  : ListView.builder(
-                      controller: _scroll,
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
-                      itemCount:
-                          meds.length +
-                          (state.medicationsCursor != null ? 1 : 0),
-                      itemBuilder: (context, i) {
-                        if (i >= meds.length) {
-                          return const MedicationTileShimmer();
-                        }
-                        final m = meds[i];
-                        return MedicationTile(
-                          medication: m,
-                          onDelete: () => context.read<VitalsBloc>().add(
-                            DeleteMedicationEvent(m.id),
-                          ),
-                        );
-                      },
+            return RefreshIndicator(
+              onRefresh: () async =>
+                  context.read<VitalsBloc>().add(const LoadVitalsEvent()),
+              child: NestedScrollView(
+                headerSliverBuilder: (_, __) => [
+                  CustomAppBar(
+                    title: AppLocalizations.getString(
+                      context,
+                      'medications.title',
                     ),
-            ),
-          );
-        },
+                    isHome: false,
+                  ),
+                ],
+                body: meds.isEmpty
+                    ? ListView(
+                        children: [
+                          SizedBox(
+                            height: MediaQuery.sizeOf(context).height * 0.5,
+                            child: VitalsEmptyState(
+                              icon: Icons.medication_outlined,
+                              title: AppLocalizations.getString(
+                                context,
+                                'medications.empty',
+                              ),
+                              subtitle: AppLocalizations.getString(
+                                context,
+                                'medications.emptySub',
+                              ),
+                              ctaLabel: AppLocalizations.getString(
+                                context,
+                                'medications.add',
+                              ),
+                              onCta: () => AddMedicationSheet.show(context),
+                            ),
+                          ),
+                        ],
+                      )
+                    : ListView.builder(
+                        controller: _scroll,
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+                        itemCount:
+                            meds.length +
+                            (state.medicationsCursor != null ? 1 : 0),
+                        itemBuilder: (context, i) {
+                          if (i >= meds.length) {
+                            return const MedicationTileShimmer();
+                          }
+                          final m = meds[i];
+                          return MedicationTile(
+                            medication: m,
+                            onDelete: () => context.read<VitalsBloc>().add(
+                              DeleteMedicationEvent(m.id),
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            );
+          },
+        ),
       ),
-    ),
-  );
-}}
+    );
+  }
+}
 
 class _MedicationsSkeleton extends StatelessWidget {
   const _MedicationsSkeleton();

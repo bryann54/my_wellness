@@ -1,3 +1,4 @@
+import 'package:dartz/dartz.dart';
 import 'package:my_wellness/core/errors/failures.dart';
 
 String mapFailure(Failure f) => switch (f) {
@@ -18,3 +19,7 @@ String mapFailureToMessage(dynamic failure) {
 
 String fmtDate(DateTime d) =>
     '${d.day} ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.month - 1]} ${d.year}';
+extension EitherX<L, R> on Either<L, R> {
+  R getOrThrow() => fold((l) => throw Exception('Left: $l'), (r) => r);
+  L getLeftOrThrow() => fold((l) => l, (r) => throw Exception('Right: $r'));
+}

@@ -1,8 +1,8 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_wellness/common/widgets/app_snackbar.dart';
 import 'package:my_wellness/features/vitals/presentation/bloc/vitals_bloc.dart';
+
 class VitalsToastListener extends StatelessWidget {
   final Widget child;
   const VitalsToastListener({super.key, required this.child});

@@ -8,6 +8,7 @@ import 'package:my_wellness/features/vitals/presentation/widgets/sheets/add_bs_s
 import 'package:my_wellness/features/vitals/presentation/widgets/latest_reading_card.dart';
 import 'package:my_wellness/features/vitals/presentation/widgets/reading_history_list.dart';
 import 'package:my_wellness/features/vitals/presentation/widgets/vitals_empty_state.dart';
+
 class BsTab extends StatelessWidget {
   const BsTab({super.key});
 

@@ -272,6 +272,7 @@ class DropDownWidget<T> extends StatelessWidget {
     ];
   }
 }
+
 class SoftDropdown<T> extends StatelessWidget {
   final T? value;
   final String? label;

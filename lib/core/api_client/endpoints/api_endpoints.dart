@@ -47,7 +47,8 @@ class ApiEndpoints {
   // ── Vitals: Appointments ────────────────────────────────────────────────────
   static const String appointments = '/api/appointments/';
   static String appointmentDetail(String id) => '/api/appointments/$id/';
-
+static String referralFromSession(String sessionId) =>
+      '/api/care-navigation/referrals/from-session/$sessionId';
   // ── Vitals: Medications ─────────────────────────────────────────────────────
   static const String medications = '/api/medications/';
   static const String medicationsScan = '/api/medications/scan/';

@@ -36,6 +36,16 @@ import '../../features/account/domain/usecases/get_profile_usecase.dart'
 import '../../features/account/domain/usecases/update_profile_usecase.dart'
     as _i23;
 import '../../features/account/presentation/bloc/account_bloc.dart' as _i708;
+import '../../features/assessments/data/datasources/assessments_remote_datasource.dart'
+    as _i470;
+import '../../features/assessments/data/repositories/assessments_repository_impl.dart'
+    as _i958;
+import '../../features/assessments/domain/repositories/assessments_repository.dart'
+    as _i544;
+import '../../features/assessments/domain/usecases/assessments_usecases.dart'
+    as _i6;
+import '../../features/assessments/presentation/bloc/assessments_bloc.dart'
+    as _i1022;
 import '../../features/auth/data/datasources/auth_local_datasource.dart'
     as _i992;
 import '../../features/auth/data/datasources/auth_remote_datasource.dart'
@@ -182,6 +192,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i29.AccountLocalDatasource>(),
       ),
     );
+    gh.lazySingleton<_i470.AssessmentsRemoteDataSource>(
+      () => _i470.AssessmentsRemoteDataSourceImpl(gh<_i671.ApiClient>()),
+    );
     gh.factory<_i1043.RCGetEntitlementsUseCase>(
       () =>
           _i1043.RCGetEntitlementsUseCase(gh<_i818.RCSubscriptionRepository>()),
@@ -309,6 +322,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i425.DeleteBloodSugarReadingUseCase>(
       () => _i425.DeleteBloodSugarReadingUseCase(gh<_i515.VitalsRepository>()),
     );
+    gh.lazySingleton<_i544.AssessmentsRepository>(
+      () => _i958.AssessmentRepositoryImpl(
+        gh<_i470.AssessmentsRemoteDataSource>(),
+      ),
+    );
     gh.factory<_i137.GeographyBloc>(
       () => _i137.GeographyBloc(
         gh<_i331.GetCountiesUseCase>(),
@@ -342,6 +360,42 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1043.RCGetEntitlementsUseCase>(),
       ),
     );
+    gh.lazySingleton<_i6.GetVitalsAccessUseCase>(
+      () => _i6.GetVitalsAccessUseCase(gh<_i544.AssessmentsRepository>()),
+    );
+    gh.lazySingleton<_i6.ListAssessmentsUseCase>(
+      () => _i6.ListAssessmentsUseCase(gh<_i544.AssessmentsRepository>()),
+    );
+    gh.lazySingleton<_i6.CanStartAssessmentUseCase>(
+      () => _i6.CanStartAssessmentUseCase(gh<_i544.AssessmentsRepository>()),
+    );
+    gh.lazySingleton<_i6.GetAssessmentDefinitionUseCase>(
+      () =>
+          _i6.GetAssessmentDefinitionUseCase(gh<_i544.AssessmentsRepository>()),
+    );
+    gh.lazySingleton<_i6.StartAssessmentSessionUseCase>(
+      () =>
+          _i6.StartAssessmentSessionUseCase(gh<_i544.AssessmentsRepository>()),
+    );
+    gh.lazySingleton<_i6.GetReferralForSessionUseCase>(
+      () => _i6.GetReferralForSessionUseCase(gh<_i544.AssessmentsRepository>()),
+    );
+    gh.lazySingleton<_i6.GetAssessmentAnswersUseCase>(
+      () => _i6.GetAssessmentAnswersUseCase(gh<_i544.AssessmentsRepository>()),
+    );
+    gh.lazySingleton<_i6.SubmitAssessmentAnswerUseCase>(
+      () =>
+          _i6.SubmitAssessmentAnswerUseCase(gh<_i544.AssessmentsRepository>()),
+    );
+    gh.lazySingleton<_i6.SubmitAssessmentBmiUseCase>(
+      () => _i6.SubmitAssessmentBmiUseCase(gh<_i544.AssessmentsRepository>()),
+    );
+    gh.lazySingleton<_i6.GetAssessmentScoreUseCase>(
+      () => _i6.GetAssessmentScoreUseCase(gh<_i544.AssessmentsRepository>()),
+    );
+    gh.lazySingleton<_i6.PreviewBmiUseCase>(
+      () => _i6.PreviewBmiUseCase(gh<_i544.AssessmentsRepository>()),
+    );
     gh.factory<_i797.AuthBloc>(
       () => _i797.AuthBloc(
         signInUseCase: gh<_i46.SignInUseCase>(),
@@ -367,6 +421,22 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i79.ExportDataUseCase>(),
         gh<_i77.SubscriptionsBloc>(),
         gh<_i797.AuthBloc>(),
+      ),
+    );
+    gh.factory<_i1022.AssessmentsBloc>(
+      () => _i1022.AssessmentsBloc(
+        gh<_i6.GetVitalsAccessUseCase>(),
+        gh<_i6.ListAssessmentsUseCase>(),
+        gh<_i6.CanStartAssessmentUseCase>(),
+        gh<_i6.GetAssessmentDefinitionUseCase>(),
+        gh<_i6.StartAssessmentSessionUseCase>(),
+        gh<_i6.GetAssessmentAnswersUseCase>(),
+        gh<_i6.SubmitAssessmentAnswerUseCase>(),
+        gh<_i6.SubmitAssessmentBmiUseCase>(),
+        gh<_i6.GetReferralForSessionUseCase>(),
+        gh<_i6.GetAssessmentScoreUseCase>(),
+        gh<_i6.PreviewBmiUseCase>(),
+        gh<_i708.AccountBloc>(),
       ),
     );
     return this;

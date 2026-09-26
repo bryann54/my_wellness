@@ -13,9 +13,9 @@ class MainScreen extends StatelessWidget {
     return AutoTabsScaffold(
       lazyLoad: false,
       homeIndex: 1,
-      routes: const [
+      routes:  [
         HomeRoute(),
-        AssessmentsRoute(),
+        AssessmentsListRoute(),
         BookingsRoute(),
         WellnessRoute(),
         AccountRoute(),

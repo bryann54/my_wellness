@@ -1,5 +1,4 @@
 // lib/common/widgets/custom_app_bar.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_wellness/common/widgets/appbar/app_bar_flexible_header.dart';
@@ -11,7 +10,7 @@ class CustomAppBar extends StatelessWidget {
   final bool isHome;
   final double expandedHeight;
   final PreferredSizeWidget? bottom;
-  final bool showCart;
+
   static const curveExtra = 28.0;
 
   const CustomAppBar({
@@ -20,7 +19,6 @@ class CustomAppBar extends StatelessWidget {
     this.actions,
     this.isHome = false,
     this.expandedHeight = 180.0,
-    this.showCart = false,
     this.bottom,
   });
 
@@ -44,7 +42,65 @@ class CustomAppBar extends StatelessWidget {
           flexibleSpace: AppBarFlexibleHeader(
             isHome: isHome,
             username: state.profile?.displayName ?? '',
+            title: title,
+            actions: [if (actions != null) ...actions!],
+            expandedHeight: resolvedExpanded,
+            bottom: bottom,
+          ),
+        );
+      },
+    );
+  }
+}
 
+class CustomAppBarWithLeading extends StatelessWidget {
+  final Widget leading;
+  final String? title;
+  final List<Widget>? actions;
+  final bool isHome;
+  final double expandedHeight;
+  final PreferredSizeWidget? bottom;
+
+  static const curveExtra = 28.0;
+
+  const CustomAppBarWithLeading({
+    super.key,
+    required this.leading,
+    this.title,
+    this.actions,
+    this.isHome = false,
+    this.expandedHeight = 180.0,
+    this.bottom,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<AccountBloc, AccountState>(
+      buildWhen: (p, c) => p.profile != c.profile,
+      builder: (context, state) {
+        final resolvedExpanded = isHome
+            ? expandedHeight + curveExtra
+            : kToolbarHeight + curveExtra;
+
+        return SliverAppBar(
+          expandedHeight: resolvedExpanded,
+          pinned: true,
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          automaticallyImplyLeading: false,
+          title: null,
+          bottom: bottom,
+          leadingWidth: 60,
+          leading: Align(
+            alignment: Alignment.centerLeft,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 12, top: 4, bottom: 4),
+              child: leading,
+            ),
+          ),
+          flexibleSpace: AppBarFlexibleHeader(
+            isHome: isHome,
+            username: state.profile?.displayName ?? '',
             title: title,
             actions: [if (actions != null) ...actions!],
             expandedHeight: resolvedExpanded,
