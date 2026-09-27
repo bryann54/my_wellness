@@ -5,6 +5,7 @@ import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart
 import 'package:my_wellness/features/assessments/presentation/bloc/assessments_bloc.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/biometrics/biometrics_bloc.dart';
 import 'package:my_wellness/features/bookings/presentation/bloc/bookings_bloc.dart';
+import 'package:my_wellness/features/geography/presentation/bloc/geography_bloc.dart';
 
 import 'package:my_wellness/features/home/presentation/bloc/home_bloc.dart';
 import 'package:my_wellness/common/helpers/app_router.dart';
@@ -53,6 +54,7 @@ void main() async {
         BlocProvider(create: (context) => getIt<AssessmentsBloc>()),
         BlocProvider(create: (context) => getIt<BookingsBloc>()),
         BlocProvider(create: (context) => getIt<WellnessBloc>()),
+         BlocProvider(create: (context) => getIt<GeographyBloc>()),
         BlocProvider(
           create: (_) => getIt<VitalsBloc>()..add(const LoadVitalsEvent()),
         ),

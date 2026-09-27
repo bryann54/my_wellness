@@ -38,6 +38,14 @@ class ConfirmSignupEmailEvent extends AuthEvent {
   List<Object?> get props => [email, code];
 }
 
+class CheckConnectivityEvent extends AuthEvent {
+  const CheckConnectivityEvent();
+}
+
+class RetryPendingAuthEvent extends AuthEvent {
+  const RetryPendingAuthEvent();
+}
+
 class ConfirmSignupPhoneEvent extends AuthEvent {
   final String phone;
   final String code;

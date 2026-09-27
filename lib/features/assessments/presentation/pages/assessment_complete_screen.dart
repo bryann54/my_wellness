@@ -50,7 +50,7 @@ class _AssessmentCompleteBodyState extends State<_AssessmentCompleteBody> {
       if (!mounted) return;
       final bloc = context.read<AssessmentsBloc>();
       // Only fetch if we somehow arrived without a score. Normal flow
-    
+
       if (bloc.state.score == null || !bloc.state.completionHandled) {
         bloc.add(const FetchScoreEvent());
       }

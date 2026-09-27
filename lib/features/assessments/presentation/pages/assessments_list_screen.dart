@@ -113,7 +113,7 @@ class _GroupedAssessmentList extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                       style.localizedLabel(context, category).toUpperCase(),
+                    style.localizedLabel(context, category).toUpperCase(),
                     style: GoogleFonts.inter(
                       fontSize: 17,
                       fontWeight: FontWeight.w700,

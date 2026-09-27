@@ -108,7 +108,7 @@ class _AssessmentBmiStepState extends State<AssessmentBmiStep> {
             ),
           ),
           const SizedBox(height: 24),
-  Row(
+          Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
@@ -154,7 +154,7 @@ class _AssessmentBmiStepState extends State<AssessmentBmiStep> {
               ),
             ],
           ),
-        
+
           const SizedBox(height: 20),
           if (preview != null)
             _BmiPreviewCard(

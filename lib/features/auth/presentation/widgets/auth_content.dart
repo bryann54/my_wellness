@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:my_wellness/common/widgets/language_selector_row.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/onBoarding/get_started_actions.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/onBoarding/on_boarding_view.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/onBoarding/page_indicators.dart';
@@ -49,6 +50,13 @@ class _AuthContentState extends State<AuthContent> {
       body: SafeArea(
         child: Column(
           children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+              child: Row(
+                children: [const Spacer(), const LanguageSelectorCompact()],
+              ),
+            ),
+
             Expanded(
               child: OnboardingView(pageData: page, pageIndex: _currentPage),
             ),

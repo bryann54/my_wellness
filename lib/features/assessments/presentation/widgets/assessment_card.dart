@@ -87,7 +87,7 @@ class AssessmentCard extends StatelessWidget {
                           vertical: 3,
                         ),
                         decoration: BoxDecoration(
-                    color: cs.outlineVariant.withValues(alpha: 0.3),
+                          color: cs.outlineVariant.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(2),
                         ),
                         child: Text(
@@ -98,7 +98,9 @@ class AssessmentCard extends StatelessWidget {
                           style: GoogleFonts.inter(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.tealExtraDark.withValues(alpha: 0.7),
+                            color: AppColors.tealExtraDark.withValues(
+                              alpha: 0.7,
+                            ),
                           ),
                         ),
                       ),
@@ -152,6 +154,7 @@ Widget textShuttleBuilder(
           as Hero;
   return hero.child;
 }
+
 class CategoryIconTile extends StatelessWidget {
   final CategoryStyle style;
 

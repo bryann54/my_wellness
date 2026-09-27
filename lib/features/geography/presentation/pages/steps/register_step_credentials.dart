@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/utils/auth_validators.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/shared/auth_button.dart';
@@ -35,7 +36,6 @@ class _RegisterStepCredentialsState extends State<RegisterStepCredentials> {
   late final TextEditingController _passwordCtrl;
   late final TextEditingController _confirmCtrl;
 
-  // final bool _emailVisible = false;
   bool _passwordVisible = false;
   bool _confirmVisible = false;
   bool _isValid = false;
@@ -64,19 +64,16 @@ class _RegisterStepCredentialsState extends State<RegisterStepCredentials> {
   }
 
   void _recheck() {
-    final hasContact =
-        _emailCtrl.text.trim().isNotEmpty || _phoneCtrl.text.trim().isNotEmpty;
-    final emailOk =
-        _emailCtrl.text.trim().isEmpty ||
-        AuthValidators.isValidEmail(_emailCtrl.text.trim());
-    final phoneOk =
-        _phoneCtrl.text.trim().isEmpty ||
-        AuthValidators.isValidPhone(_phoneCtrl.text.trim());
+    final email = _emailCtrl.text.trim();
+    final phone = _phoneCtrl.text.trim();
+
+    final emailOk = email.isNotEmpty && AuthValidators.isValidEmail(email);
+    final phoneOk = phone.isEmpty || AuthValidators.isValidPhone(phone);
     final passwordOk = AuthValidators.isValidPassword(_passwordCtrl.text);
     final matchOk =
         _confirmCtrl.text.isNotEmpty && _confirmCtrl.text == _passwordCtrl.text;
 
-    final ok = hasContact && emailOk && phoneOk && passwordOk && matchOk;
+    final ok = emailOk && phoneOk && passwordOk && matchOk;
     if (ok != _isValid) setState(() => _isValid = ok);
   }
 
@@ -91,6 +88,8 @@ class _RegisterStepCredentialsState extends State<RegisterStepCredentials> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
       child: Form(
@@ -99,13 +98,22 @@ class _RegisterStepCredentialsState extends State<RegisterStepCredentials> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Text(
+              AppLocalizations.getString(context, 'auth.stepCredentialsHint'),
+              style: GoogleFonts.inter(
+                fontSize: 13,
+                height: 1.5,
+                color: cs.onSurface.withValues(alpha: 0.6),
+              ),
+            ),
+            const SizedBox(height: 20),
             AuthTextField(
               controller: _emailCtrl,
               label: AppLocalizations.getString(context, 'auth.email'),
               icon: Icons.email_outlined,
               keyboardType: TextInputType.emailAddress,
               validator: (v) =>
-                  AuthValidators.validateEmail(context, v, isRequired: false),
+                  AuthValidators.validateEmail(context, v, isRequired: true),
             ),
             const SizedBox(height: 16),
             AuthTextField(
@@ -152,7 +160,7 @@ class _RegisterStepCredentialsState extends State<RegisterStepCredentials> {
               isEnabled: _isValid,
               isLoading: false,
               onPressed: _continue,
-              heroTag: 'stepper_continue_1',
+              heroTag: 'stepper_continue_credentials',
             ),
           ],
         ),

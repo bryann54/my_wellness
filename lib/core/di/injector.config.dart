@@ -54,6 +54,8 @@ import '../../features/auth/data/repositories/auth_repository_impl.dart'
     as _i153;
 import '../../features/auth/domain/repositories/auth_repository.dart' as _i787;
 import '../../features/auth/domain/usecases/auth_usecases.dart' as _i46;
+import '../../features/auth/domain/usecases/check_connectivity_usecase.dart'
+    as _i833;
 import '../../features/auth/presentation/bloc/auth_bloc.dart' as _i797;
 import '../../features/auth/presentation/bloc/biometrics/biometrics_bloc.dart'
     as _i347;
@@ -121,6 +123,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i374.BiometricService>(() => _i374.BiometricService());
     gh.lazySingleton<_i845.PinService>(() => _i845.PinService());
+    gh.lazySingleton<_i833.CheckConnectivityUsecase>(
+      () => _i833.CheckConnectivityUsecase(),
+    );
     gh.factory<String>(() => registerModules.baseUrl, instanceName: 'BaseUrl');
     gh.factory<String>(
       () => registerModules.rcApiKey,
@@ -408,6 +413,7 @@ extension GetItInjectableX on _i174.GetIt {
         getAuthStateUseCase: gh<_i46.GetAuthStateUseCase>(),
         requestPasswordResetUseCase: gh<_i46.RequestPasswordResetUseCase>(),
         confirmPasswordResetUseCase: gh<_i46.ConfirmPasswordResetUseCase>(),
+        checkConnectivityUsecase: gh<_i833.CheckConnectivityUsecase>(),
         subscriptionsBloc: gh<_i77.SubscriptionsBloc>(),
       ),
     );

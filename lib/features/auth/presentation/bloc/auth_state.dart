@@ -13,6 +13,13 @@ enum AuthStatus {
   passwordResetCompleted,
 }
 
+class AuthOffline extends AuthState {
+  const AuthOffline({required super.status, super.user});
+
+  @override
+  List<Object> get props => [status, ?user];
+}
+
 class AuthState extends Equatable {
   final AuthStatus status;
   final UserEntity? user;

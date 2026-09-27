@@ -41,7 +41,11 @@ class _RegisterStepLocationState extends State<RegisterStepLocation> {
   void _continue() {
     if (_county == null || _subCounty == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select county and sub-county')),
+        SnackBar(
+          content: Text(
+            AppLocalizations.getString(context, 'auth.selectCountyAndSub'),
+          ),
+        ),
       );
       return;
     }
@@ -68,7 +72,6 @@ class _RegisterStepLocationState extends State<RegisterStepLocation> {
           CountyDropdown(
             selectedCountyId: _county?.id,
             onChanged: (id) {
-              // Look the entity back up so state holds the canonical object.
               if (id == null) {
                 setState(() {
                   _county = null;
@@ -82,7 +85,7 @@ class _RegisterStepLocationState extends State<RegisterStepLocation> {
                   .countyByIdOrNull(id);
               setState(() {
                 _county = selected;
-                _subCounty = null; // invalidate child when parent changes
+                _subCounty = null;
               });
             },
           ),

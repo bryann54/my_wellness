@@ -59,6 +59,7 @@ class StartAssessmentSessionUseCase
   Future<Either<Failure, AssessmentSession>> call(String slug) =>
       _r.startSession(slug);
 }
+
 @lazySingleton
 class GetReferralForSessionUseCase implements UseCase<Referral?, String> {
   final AssessmentsRepository _r;
@@ -68,6 +69,7 @@ class GetReferralForSessionUseCase implements UseCase<Referral?, String> {
   Future<Either<Failure, Referral?>> call(String sessionId) =>
       _r.getReferralForSession(sessionId);
 }
+
 @lazySingleton
 class GetAssessmentAnswersUseCase
     implements

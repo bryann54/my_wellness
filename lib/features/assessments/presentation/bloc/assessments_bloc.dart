@@ -47,10 +47,10 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
     this._getAnswers,
     this._submitAnswer,
     this._submitBmi,
-    this._getReferral, 
+    this._getReferral,
     this._getScore,
     this._previewBmi,
-     this._accountBloc,
+    this._accountBloc,
   ) : super(const AssessmentsState()) {
     on<LoadAssessmentsEvent>(_onLoad);
     on<StartAssessmentsEvent>(_onStart);
@@ -69,8 +69,7 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
     });
   }
 
-
-Future<void> _onLoad(
+  Future<void> _onLoad(
     LoadAssessmentsEvent event,
     Emitter<AssessmentsState> emit,
   ) async {
@@ -112,7 +111,7 @@ Future<void> _onLoad(
     );
   }
 
-Future<void> _onStart(
+  Future<void> _onStart(
     StartAssessmentsEvent event,
     Emitter<AssessmentsState> emit,
   ) async {
@@ -325,10 +324,7 @@ Future<void> _onStart(
     );
   }
 
-
-
-
- Future<void> _onResume(
+  Future<void> _onResume(
     ResumeAssessmentsEvent event,
     Emitter<AssessmentsState> emit,
   ) async {
@@ -366,9 +362,6 @@ Future<void> _onStart(
       ),
     );
   }
-
-
-
 
   Future<void> _onSubmitBmi(
     SubmitBmiEvent event,
@@ -411,8 +404,6 @@ Future<void> _onStart(
     );
   }
 
-
-
   Future<void> _onPreviewBmi(
     PreviewBmiEvent event,
     Emitter<AssessmentsState> emit,
@@ -423,7 +414,4 @@ Future<void> _onStart(
     ));
     res.fold((_) {}, (preview) => emit(state.copyWith(bmiPreview: preview)));
   }
-
-
-
 }

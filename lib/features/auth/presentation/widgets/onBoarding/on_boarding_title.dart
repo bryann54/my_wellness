@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:my_wellness/common/res/colors.dart';
 
 class OnboardingTitle extends StatelessWidget {
   final String title;
@@ -10,15 +9,22 @@ class OnboardingTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final style = GoogleFonts.inter(
-      fontSize: 20,
-      fontWeight: FontWeight.bold,
-      color: Colors.black,
-      letterSpacing: -0.5,
+      fontSize: 24,
+      fontWeight: FontWeight.w700,
+      height: 1.25,
+      letterSpacing: -0.4,
+      color: cs.onSurface,
     );
 
     if (highlight == null || !title.contains(highlight!)) {
-      return Text(title, style: style, textAlign: TextAlign.center);
+      return Text(
+        title,
+        style: style,
+        textAlign: TextAlign.center,
+        maxLines: 3,
+      );
     }
 
     final parts = title.split(highlight!);
@@ -29,8 +35,8 @@ class OnboardingTitle extends StatelessWidget {
         children: [
           TextSpan(text: parts[0]),
           TextSpan(
-            text: highlight?.toUpperCase(),
-            style: const TextStyle(color: AppColors.primaryColor),
+            text: highlight,
+            style: TextStyle(color: cs.primary),
           ),
           if (parts.length > 1) TextSpan(text: parts[1]),
         ],

@@ -1,7 +1,3 @@
-// ═════════════════════════════════════════════════════════════════════════════
-// Orbit icon
-// ═════════════════════════════════════════════════════════════════════════════
-
 import 'package:flutter/material.dart';
 
 class OrbitIcon extends StatelessWidget {
@@ -10,20 +6,23 @@ class OrbitIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: Colors.white,
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: Colors.black12,
-            blurRadius: 10,
-            offset: Offset(0, 4),
+            color: cs.shadow.withValues(alpha: 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Image.asset(asset, width: 28, height: 28),
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Image.asset(asset, fit: BoxFit.contain),
+      ),
     );
   }
 }

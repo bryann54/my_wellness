@@ -61,6 +61,7 @@ class AssessmentsRemoteDataSourceImpl implements AssessmentsRemoteDataSource {
     );
     return VitalsAccessModel.fromJson(res).toEntity();
   }
+
   @override
   Future<Referral?> getReferralForSession(String sessionId) async {
     try {
@@ -75,6 +76,7 @@ class AssessmentsRemoteDataSourceImpl implements AssessmentsRemoteDataSource {
       return null;
     }
   }
+
   @override
   Future<List<AssessmentSummary>> listAssessments() async {
     final res = await _api.get<List<dynamic>>(

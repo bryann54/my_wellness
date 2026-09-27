@@ -1,4 +1,3 @@
-
 import 'package:json_annotation/json_annotation.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_session.dart';
 
