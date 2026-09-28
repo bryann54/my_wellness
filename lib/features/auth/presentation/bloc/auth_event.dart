@@ -3,16 +3,13 @@ import 'package:my_wellness/features/auth/data/models/signup_request_model.dart'
 
 abstract class AuthEvent extends Equatable {
   const AuthEvent();
+
   @override
   List<Object?> get props => [];
 }
 
-class CheckAuthStatusEvent extends AuthEvent {
-  const CheckAuthStatusEvent();
-}
-
 class SignInEvent extends AuthEvent {
-  final String identifier; // email or phone
+  final String identifier;
   final String password;
 
   const SignInEvent({required this.identifier, required this.password});
@@ -38,14 +35,6 @@ class ConfirmSignupEmailEvent extends AuthEvent {
   List<Object?> get props => [email, code];
 }
 
-class CheckConnectivityEvent extends AuthEvent {
-  const CheckConnectivityEvent();
-}
-
-class RetryPendingAuthEvent extends AuthEvent {
-  const RetryPendingAuthEvent();
-}
-
 class ConfirmSignupPhoneEvent extends AuthEvent {
   final String phone;
   final String code;
@@ -55,9 +44,23 @@ class ConfirmSignupPhoneEvent extends AuthEvent {
   List<Object?> get props => [phone, code];
 }
 
+class VerifyIdentityEvent extends AuthEvent {
+  final String idType;
+  final String idNumber;
+  const VerifyIdentityEvent({required this.idType, required this.idNumber});
+
+  @override
+  List<Object?> get props => [idType, idNumber];
+}
+
+class ResetIdentityVerificationEvent extends AuthEvent {
+  const ResetIdentityVerificationEvent();
+}
+
 class ResendSignupEmailEvent extends AuthEvent {
   final String email;
   const ResendSignupEmailEvent({required this.email});
+
   @override
   List<Object?> get props => [email];
 }
@@ -65,6 +68,7 @@ class ResendSignupEmailEvent extends AuthEvent {
 class ResendSignupPhoneEvent extends AuthEvent {
   final String phone;
   const ResendSignupPhoneEvent({required this.phone});
+
   @override
   List<Object?> get props => [phone];
 }
@@ -72,6 +76,7 @@ class ResendSignupPhoneEvent extends AuthEvent {
 class SignOutEvent extends AuthEvent {
   final bool allDevices;
   const SignOutEvent({this.allDevices = false});
+
   @override
   List<Object?> get props => [allDevices];
 }
@@ -79,6 +84,7 @@ class SignOutEvent extends AuthEvent {
 class RequestPasswordResetEvent extends AuthEvent {
   final String identifier;
   const RequestPasswordResetEvent({required this.identifier});
+
   @override
   List<Object?> get props => [identifier];
 }
@@ -92,6 +98,7 @@ class ConfirmPasswordResetEvent extends AuthEvent {
     required this.code,
     required this.newPassword,
   });
+
   @override
   List<Object?> get props => [identifier, code, newPassword];
 }

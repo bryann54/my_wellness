@@ -8,6 +8,7 @@ import 'package:my_wellness/features/auth/data/models/signup_request_model.dart'
 import 'package:my_wellness/features/auth/domain/entities/auth_session_entity.dart';
 import 'package:my_wellness/features/auth/domain/entities/signup_pending_entity.dart';
 import 'package:my_wellness/features/auth/domain/entities/user_entity.dart';
+import 'package:my_wellness/features/auth/domain/entities/verified_identity.dart';
 import 'package:my_wellness/features/auth/domain/repositories/auth_repository.dart';
 
 @LazySingleton(as: AuthRepository)
@@ -16,10 +17,6 @@ class AuthRepositoryImpl implements AuthRepository {
   final AuthLocalDataSource _local;
 
   AuthRepositoryImpl(this._remote, this._local);
-
-  @override
-  Stream<UserEntity?> get authStateChanges =>
-      _local.userStream.map((model) => model?.toEntity());
 
   @override
   Future<Either<Failure, AuthSessionEntity>> signIn({
@@ -49,6 +46,26 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(
         GeneralFailure(error: e.toString().replaceFirst('Exception: ', '')),
       );
+    }
+  }
+
+  @override
+  Future<Either<Failure, VerifiedIdentity>> verifyIdentity({
+    required String idType,
+    required String idNumber,
+  }) async {
+    try {
+      final model = await _remote.verifyIdentity(
+        idType: idType,
+        idNumber: idNumber,
+      );
+      return Right(model.toEntity());
+    } on ValidationException catch (e) {
+      return Left(ValidationFailure(error: e.message));
+    } on ServerException catch (e) {
+      return Left(GeneralFailure(error: e.message ?? 'Verification failed'));
+    } catch (e) {
+      return Left(GeneralFailure(error: e.toString()));
     }
   }
 
@@ -136,17 +153,26 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, void>> signOut({bool allDevices = false}) async {
     try {
-      // Best-effort server-side revoke; ignore failure and clear locally.
-      try {
-        if (allDevices) {
-          await _remote.logoutAll();
-        } else {
-          await _remote.logout();
-        }
-      } catch (_) {
-        /* ignore */
-      }
+      final refresh = await _local.getRefreshToken();
+
       await _local.clearAuthData();
+
+      if (refresh != null) {
+        try {
+          if (allDevices) {
+            await _remote
+                .logoutAll(refresh: refresh)
+                .timeout(const Duration(seconds: 5));
+          } else {
+            await _remote
+                .logout(refresh: refresh)
+                .timeout(const Duration(seconds: 5));
+          }
+        } catch (_) {
+          // Swallowed intentionally — user is already logged out locally.
+        }
+      }
+
       return const Right(null);
     } catch (e) {
       return const Left(CacheFailure());

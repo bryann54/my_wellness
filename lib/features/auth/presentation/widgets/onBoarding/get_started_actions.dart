@@ -4,6 +4,7 @@ import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_primary_button.dart';
+import 'package:my_wellness/features/auth/presentation/widgets/shared/auth_divider.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/shared/terms_privacy_text.dart';
 
 class GetStartedActions extends StatelessWidget {
@@ -24,7 +25,7 @@ class GetStartedActions extends StatelessWidget {
           borderRadius: 12,
           height: 52,
         ),
-        const SizedBox(height: 12),
+        AuthDivider(text: AppLocalizations.getString(context, 'common.or')),
         AppPrimaryButton(
           label: AppLocalizations.getString(context, 'auth.signInLink'),
           onPressed: () => context.router.push(const LoginRoute()),

@@ -60,9 +60,9 @@ class OnboardingView extends StatelessWidget {
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.inter(
-                fontSize: 14.5,
+                fontSize: 16,
                 height: 1.55,
-                color: cs.onSurface.withValues(alpha: 0.6),
+                color: cs.onSurface.withValues(alpha: 0.79),
               ),
             ),
           ),

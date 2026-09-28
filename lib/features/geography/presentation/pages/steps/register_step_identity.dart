@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
-import 'package:my_wellness/common/utils/auth_validators.dart';
 import 'package:my_wellness/common/widgets/app_primary_button.dart';
-import 'package:my_wellness/common/widgets/drop_down_field.dart';
 import 'package:my_wellness/features/auth/data/models/signup_request_model.dart';
+import 'package:my_wellness/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:my_wellness/features/auth/presentation/bloc/auth_event.dart';
+import 'package:my_wellness/features/auth/presentation/bloc/auth_state.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/shared/auth_text_field.dart';
 
 class IdentityDraft {
   final IdType idType;
   final String idNumber;
+  final String? verificationId;
   final String firstName;
   final String surname;
   final String? gender;
@@ -18,11 +22,37 @@ class IdentityDraft {
   const IdentityDraft({
     required this.idType,
     required this.idNumber,
-    required this.firstName,
-    required this.surname,
+    this.verificationId,
+    this.firstName = '',
+    this.surname = '',
     this.gender,
     this.dateOfBirth,
   });
+
+  bool get isVerified => verificationId != null && verificationId!.isNotEmpty;
+
+  IdentityDraft copyWith({
+    IdType? idType,
+    String? idNumber,
+    String? verificationId,
+    String? firstName,
+    String? surname,
+    String? gender,
+    DateTime? dateOfBirth,
+    bool clearVerification = false,
+  }) {
+    return IdentityDraft(
+      idType: idType ?? this.idType,
+      idNumber: idNumber ?? this.idNumber,
+      verificationId: clearVerification
+          ? null
+          : (verificationId ?? this.verificationId),
+      firstName: firstName ?? this.firstName,
+      surname: surname ?? this.surname,
+      gender: gender ?? this.gender,
+      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+    );
+  }
 }
 
 class RegisterStepIdentity extends StatefulWidget {
@@ -40,79 +70,75 @@ class RegisterStepIdentity extends StatefulWidget {
 }
 
 class _RegisterStepIdentityState extends State<RegisterStepIdentity> {
-  final _formKey = GlobalKey<FormState>();
   late final TextEditingController _idCtrl;
-  late final TextEditingController _firstCtrl;
-  late final TextEditingController _surnameCtrl;
 
   IdType _idType = IdType.nationalId;
+  String? _verificationId;
+  String _firstName = '';
+  String _surname = '';
   String? _gender;
-  DateTime? _dob;
+  DateTime? _dateOfBirth;
 
   @override
   void initState() {
     super.initState();
     final i = widget.initial;
-    _idType = i?.idType ?? IdType.nationalId;
-    _idCtrl = TextEditingController(text: i?.idNumber ?? '');
-    _firstCtrl = TextEditingController(text: i?.firstName ?? '');
-    _surnameCtrl = TextEditingController(text: i?.surname ?? '');
-    _gender = i?.gender;
-    _dob = i?.dateOfBirth;
+    if (i != null) {
+      _idType = i.idType;
+      _idCtrl = TextEditingController(text: i.idNumber);
+      _verificationId = i.verificationId;
+      _firstName = i.firstName;
+      _surname = i.surname;
+      _gender = i.gender;
+      _dateOfBirth = i.dateOfBirth;
+    } else {
+      _idCtrl = TextEditingController();
+    }
   }
 
   @override
   void dispose() {
     _idCtrl.dispose();
-    _firstCtrl.dispose();
-    _surnameCtrl.dispose();
     super.dispose();
   }
 
-  static String _isoDate(DateTime d) =>
-      '${d.year.toString().padLeft(4, '0')}-'
-      '${d.month.toString().padLeft(2, '0')}-'
-      '${d.day.toString().padLeft(2, '0')}';
+  bool get _isVerified =>
+      _verificationId != null && _verificationId!.isNotEmpty;
+  bool get _canVerify => _idCtrl.text.trim().length >= 6 && !_isVerified;
 
-  Future<void> _pickDate() async {
-    final now = DateTime.now();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _dob ?? DateTime(now.year - 25),
-      firstDate: DateTime(now.year - 120),
-      lastDate: now,
+  void _verify() {
+    if (!_canVerify) return;
+    context.read<AuthBloc>().add(
+      VerifyIdentityEvent(
+        idType: _idType == IdType.nationalId ? 'national_id' : 'maisha_card',
+        idNumber: _idCtrl.text.trim(),
+      ),
     );
-    if (picked != null) setState(() => _dob = picked);
+  }
+
+  void _useDifferentId() {
+    context.read<AuthBloc>().add(const ResetIdentityVerificationEvent());
+    setState(() {
+      _verificationId = null;
+      _firstName = '';
+      _surname = '';
+      _gender = null;
+      _dateOfBirth = null;
+      _idCtrl.clear();
+    });
   }
 
   void _continue() {
-    if (_formKey.currentState?.validate() != true) return;
-    if (_gender == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AppLocalizations.getString(context, 'auth.selectGender'),
-          ),
-        ),
-      );
-      return;
-    }
-    if (_dob == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.getString(context, 'auth.selectDob')),
-        ),
-      );
-      return;
-    }
+    if (!_isVerified) return;
     widget.onContinue(
       IdentityDraft(
         idType: _idType,
         idNumber: _idCtrl.text.trim(),
-        firstName: _firstCtrl.text.trim(),
-        surname: _surnameCtrl.text.trim(),
+        verificationId: _verificationId,
+        firstName: _firstName,
+        surname: _surname,
         gender: _gender,
-        dateOfBirth: _dob,
+        dateOfBirth: _dateOfBirth,
       ),
     );
   }
@@ -121,137 +147,208 @@ class _RegisterStepIdentityState extends State<RegisterStepIdentity> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              AppLocalizations.getString(context, 'auth.idType'),
-              style: GoogleFonts.inter(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: cs.onSurface.withValues(alpha: 0.75),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: _IdTypeOption(
-                    label: AppLocalizations.getString(
-                      context,
-                      'auth.idTypeNational',
+    return BlocConsumer<AuthBloc, AuthState>(
+      listenWhen: (prev, curr) =>
+          prev.kycStatus != curr.kycStatus || prev.kycError != curr.kycError,
+      listener: (context, state) {
+        if (state.kycStatus == KycStatus.verified &&
+            state.verifiedIdentity != null) {
+          final v = state.verifiedIdentity!;
+          setState(() {
+            _verificationId = v.verificationId;
+            _firstName = v.firstName;
+            _surname = v.lastName;
+            _gender = v.gender;
+            _dateOfBirth = v.dateOfBirth == null
+                ? null
+                : DateTime.tryParse(v.dateOfBirth!);
+          });
+        }
+        if (state.kycStatus == KycStatus.error && state.kycError != null) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.kycError!)));
+        }
+      },
+      builder: (context, state) {
+        final verifying = state.kycStatus == KycStatus.verifying;
+        final verified = _isVerified;
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // ── Success banner ─────────────────────────────────────
+              if (verified) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF10B981).withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFF10B981).withValues(alpha: 0.4),
                     ),
-                    selected: _idType == IdType.nationalId,
-                    onTap: () => setState(() => _idType = IdType.nationalId),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.check_circle_outline,
+                        color: Color(0xFF10B981),
+                        size: 20,
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        AppLocalizations.getString(context, 'auth.idVerified'),
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF10B981),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _IdTypeOption(
-                    label: AppLocalizations.getString(
-                      context,
-                      'auth.idTypeMaisha',
-                    ),
-                    selected: _idType == IdType.maisha,
-                    onTap: () => setState(() => _idType = IdType.maisha),
+                const SizedBox(height: 20),
+              ],
+
+              // ── ID type + number (hidden when verified) ────────────
+              if (!verified) ...[
+                Text(
+                  AppLocalizations.getString(context, 'auth.idType'),
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurface.withValues(alpha: 0.75),
                   ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _IdTypeOption(
+                        label: AppLocalizations.getString(
+                          context,
+                          'auth.idTypeNational',
+                        ),
+                        selected: _idType == IdType.nationalId,
+                        onTap: () =>
+                            setState(() => _idType = IdType.nationalId),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _IdTypeOption(
+                        label: AppLocalizations.getString(
+                          context,
+                          'auth.idTypeMaisha',
+                        ),
+                        selected: _idType == IdType.maisha,
+                        onTap: () => setState(() => _idType = IdType.maisha),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                AuthTextField(
+                  controller: _idCtrl,
+                  keyboardType: TextInputType.number,
+                  label: AppLocalizations.getString(context, 'auth.idNumber'),
+                  icon: Icons.perm_identity,
+                  onChanged: (_) => setState(() {}),
+                ),
+                const SizedBox(height: 20),
+                AppPrimaryButton(
+                  onPressed: (_canVerify && !verifying) ? _verify : null,
+                  label: AppLocalizations.getString(context, 'auth.verifyId'),
+                  isLoading: verifying,
+                  borderRadius: 12,
+                  height: 52,
+                   color: AppColors.primaryColor,
                 ),
               ],
-            ),
-            const SizedBox(height: 20),
-            AuthTextField(
-              controller: _idCtrl,
-              label: AppLocalizations.getString(context, 'auth.idNumber'),
-              icon: Icons.credit_card_outlined,
-              keyboardType: TextInputType.number,
-              validator: (v) {
-                if (v == null || v.trim().length < 6) {
-                  return AppLocalizations.getString(
-                    context,
-                    'auth.invalidIdNumber',
-                  );
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 24),
-            Text(
-              AppLocalizations.getString(context, 'auth.yourDetails'),
-              style: GoogleFonts.inter(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: cs.onSurface.withValues(alpha: 0.75),
-              ),
-            ),
-            const SizedBox(height: 12),
-            AuthTextField(
-              controller: _firstCtrl,
-              label: AppLocalizations.getString(context, 'auth.firstName'),
-              icon: Icons.person_outline,
-              validator: (v) => AuthValidators.validateName(context, v),
-            ),
-            const SizedBox(height: 16),
-            AuthTextField(
-              controller: _surnameCtrl,
-              label: AppLocalizations.getString(context, 'auth.surname'),
-              icon: Icons.person_outline,
-              validator: (v) => AuthValidators.validateName(context, v),
-            ),
-            const SizedBox(height: 16),
-            DropDownWidget<String>(
-              label: AppLocalizations.getString(context, 'auth.gender'),
-              selectedItem: _gender,
-              isRequired: true,
-              items: [
-                DropdownMenuItem(
-                  value: 'male',
-                  child: Text(
-                    AppLocalizations.getString(context, 'auth.genderMale'),
-                  ),
+
+              // ── Prefilled identity (read-only when verified) ───────
+              if (verified) ...[
+                _ReadOnlyField(
+                  label: AppLocalizations.getString(context, 'auth.firstName'),
+                  value: _firstName,
                 ),
-                DropdownMenuItem(
-                  value: 'female',
-                  child: Text(
-                    AppLocalizations.getString(context, 'auth.genderFemale'),
-                  ),
+                const SizedBox(height: 16),
+                _ReadOnlyField(
+                  label: AppLocalizations.getString(context, 'auth.surname'),
+                  value: _surname,
                 ),
-              ],
-              onChanged: (v) => setState(() => _gender = v),
-            ),
-            const SizedBox(height: 8),
-            InkWell(
-              onTap: _pickDate,
-              borderRadius: BorderRadius.circular(12),
-              child: InputDecorator(
-                decoration: InputDecoration(
-                  labelText: AppLocalizations.getString(
+                const SizedBox(height: 16),
+                _ReadOnlyField(
+                  label: AppLocalizations.getString(context, 'auth.gender'),
+                  value: _gender == null
+                      ? ''
+                      : (_gender == 'female'
+                            ? AppLocalizations.getString(
+                                context,
+                                'auth.genderFemale',
+                              )
+                            : AppLocalizations.getString(
+                                context,
+                                'auth.genderMale',
+                              )),
+                ),
+                const SizedBox(height: 16),
+                _ReadOnlyField(
+                  label: AppLocalizations.getString(
                     context,
                     'auth.dateOfBirth',
                   ),
-                  prefixIcon: const Icon(Icons.calendar_today_outlined),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                  value: _dateOfBirth == null
+                      ? ''
+                      : '${_dateOfBirth!.year}-'
+                            '${_dateOfBirth!.month.toString().padLeft(2, '0')}-'
+                            '${_dateOfBirth!.day.toString().padLeft(2, '0')}',
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  AppLocalizations.getString(context, 'auth.verifiedIdNotice'),
+                  style: GoogleFonts.inter(
+                    fontSize: 12.5,
+                    height: 1.5,
+                    color: cs.onSurface.withValues(alpha: 0.55),
                   ),
                 ),
-                child: Text(
-                  _dob == null
-                      ? AppLocalizations.getString(context, 'auth.selectDate')
-                      : _isoDate(_dob!),
+                const SizedBox(height: 20),
+                OutlinedButton(
+                  onPressed: _useDifferentId,
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(52),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    side: BorderSide(color: cs.outlineVariant),
+                  ),
+                  child: Text(
+                    AppLocalizations.getString(context, 'auth.useDifferentId'),
+                    style: GoogleFonts.inter(
+                      fontSize: 14.5,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 32),
-            AppPrimaryButton(
-              onPressed: _continue,
-              label: AppLocalizations.getString(context, 'common.continue'),
-            ),
-          ],
-        ),
-      ),
+                const SizedBox(height: 16),
+                AppPrimaryButton(
+                   color: AppColors.primaryColor,
+                  onPressed: _continue,
+                  label: AppLocalizations.getString(context, 'common.continue'),
+                  borderRadius: 12,
+                  height: 52,
+                ),
+              ],
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -320,6 +417,49 @@ class _IdTypeOption extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ReadOnlyField extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _ReadOnlyField({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 12.5,
+            fontWeight: FontWeight.w500,
+            color: cs.onSurface.withValues(alpha: 0.55),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          decoration: BoxDecoration(
+            color: cs.surfaceContainerHighest.withValues(alpha: 0.6),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            value,
+            style: GoogleFonts.inter(
+              fontSize: 14.5,
+              fontWeight: FontWeight.w600,
+              color: cs.onSurface,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

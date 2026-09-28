@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/utils/auth_validators.dart';
-import 'package:my_wellness/features/auth/presentation/widgets/shared/auth_button.dart';
+import 'package:my_wellness/common/widgets/app_primary_button.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/shared/auth_text_field.dart';
 
 typedef CredentialsCallback =
@@ -155,12 +156,12 @@ class _RegisterStepCredentialsState extends State<RegisterStepCredentials> {
               ),
             ),
             const SizedBox(height: 32),
-            AuthButton(
-              text: AppLocalizations.getString(context, 'common.continue'),
-              isEnabled: _isValid,
-              isLoading: false,
-              onPressed: _continue,
-              heroTag: 'stepper_continue_credentials',
+            AppPrimaryButton(
+              onPressed: _isValid ? _continue : null,
+              label: AppLocalizations.getString(context, 'common.continue'),
+              borderRadius: 12,
+              height: 52,
+              color: AppColors.primaryColor,
             ),
           ],
         ),

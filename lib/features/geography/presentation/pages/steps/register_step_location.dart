@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_primary_button.dart';
 import 'package:my_wellness/features/geography/domain/entities/county.dart';
@@ -108,6 +109,8 @@ class _RegisterStepLocationState extends State<RegisterStepLocation> {
           ),
           const SizedBox(height: 32),
           AppPrimaryButton(
+            borderRadius: 12,
+             color: AppColors.primaryColor,
             onPressed: _continue,
             label: AppLocalizations.getString(context, 'common.continue'),
           ),

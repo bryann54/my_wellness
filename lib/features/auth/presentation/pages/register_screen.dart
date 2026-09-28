@@ -100,6 +100,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           : _isoDate(identity.dateOfBirth!),
       nationalIdNumber: identity.idNumber,
       idType: identity.idType,
+      identityVerificationId: identity.verificationId,
       countyId: _county?.id,
       subCountyId: _subCounty?.id,
     );

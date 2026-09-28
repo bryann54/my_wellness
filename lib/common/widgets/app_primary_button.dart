@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:my_wellness/common/res/colors.dart';
 
 class AppPrimaryButton extends StatelessWidget {
   final VoidCallback? onPressed;
@@ -49,7 +50,7 @@ class AppPrimaryButton extends StatelessWidget {
               },
         style: FilledButton.styleFrom(
           backgroundColor: isDisabled
-              ? cs.onSurface.withValues(alpha: 0.12)
+              ? AppColors.primaryColor
               : effectiveColor,
           foregroundColor: isDisabled
               ? cs.onSurface.withValues(alpha: 0.38)

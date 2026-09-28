@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -7,7 +6,9 @@ import 'package:my_wellness/features/auth/data/models/user_model.dart';
 import 'package:my_wellness/features/auth/domain/entities/signup_pending_entity.dart';
 
 abstract class AuthLocalDataSource {
-  Stream<UserModel?> get userStream;
+  /// Synchronous login flag, hydrated from secure storage on construction.
+  /// This is the cold-start "am I logged in?" signal consumed by LaunchBloc.
+  bool get isLoggedIn;
 
   Future<void> saveTokens({required String access, required String refresh});
   Future<void> saveUser(UserModel user);
@@ -20,7 +21,6 @@ abstract class AuthLocalDataSource {
   Future<void> clearPendingSignup();
 
   Future<void> clearAuthData();
-  void dispose();
 }
 
 @LazySingleton(as: AuthLocalDataSource)
@@ -31,20 +31,24 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
   static const _refreshTokenKey = 'refreshToken';
   static const _userKey = 'cachedUser';
   static const _pendingKey = 'pendingSignup';
+  static const _isLoggedInKey = 'isLoggedIn';
 
-  final _userStreamController = StreamController<UserModel?>.broadcast();
+  bool _isLoggedIn = false;
+  @override
+  bool get isLoggedIn => _isLoggedIn;
 
   AuthLocalDataSourceImpl(this._secure) {
-    _init();
+    _hydrate();
   }
 
-  Future<void> _init() async {
-    final user = await getUser();
-    _userStreamController.add(user);
+  Future<void> _hydrate() async {
+    try {
+      final raw = await _secure.read(key: _isLoggedInKey);
+      _isLoggedIn = raw == 'true';
+    } catch (_) {
+      _isLoggedIn = false;
+    }
   }
-
-  @override
-  Stream<UserModel?> get userStream => _userStreamController.stream;
 
   @override
   Future<void> saveTokens({
@@ -54,13 +58,14 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
     await Future.wait([
       _secure.write(key: _accessTokenKey, value: access),
       _secure.write(key: _refreshTokenKey, value: refresh),
+      _secure.write(key: _isLoggedInKey, value: 'true'),
     ]);
+    _isLoggedIn = true;
   }
 
   @override
   Future<void> saveUser(UserModel user) async {
     await _secure.write(key: _userKey, value: jsonEncode(user.toJson()));
-    _userStreamController.add(user);
   }
 
   @override
@@ -116,8 +121,9 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
       _secure.delete(key: _refreshTokenKey),
       _secure.delete(key: _userKey),
       _secure.delete(key: _pendingKey),
+      _secure.delete(key: _isLoggedInKey),
     ]);
-    _userStreamController.add(null);
+    _isLoggedIn = false;
   }
 
   @override
@@ -125,10 +131,4 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
 
   @override
   Future<String?> getRefreshToken() => _secure.read(key: _refreshTokenKey);
-
-  @override
-  @disposeMethod
-  void dispose() {
-    _userStreamController.close();
-  }
 }

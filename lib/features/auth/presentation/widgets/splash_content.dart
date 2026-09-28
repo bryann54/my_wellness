@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/constants/hero.dart';
-import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 
 class SplashContent extends StatelessWidget {
@@ -12,7 +10,7 @@ class SplashContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    Theme.of(context);
 
     return SafeArea(
       child: Padding(
@@ -26,11 +24,6 @@ class SplashContent extends StatelessWidget {
                     'assets/images/logo.png',
                     width: 180,
                     fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => Icon(
-                      Icons.health_and_safety_rounded,
-                      size: 88,
-                      color: cs.primary,
-                    ),
                   ),
                 )
                 .animate()
@@ -41,27 +34,16 @@ class SplashContent extends StatelessWidget {
                   duration: 480.ms,
                   curve: Curves.easeOutCubic,
                 ),
-            const SizedBox(height: 20),
-            Text(
-              AppLocalizations.getString(context, 'appName'),
-              textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.3,
-                color: cs.onSurface,
-              ),
-            ).animate().fadeIn(delay: 120.ms, duration: 420.ms),
-            const SizedBox(height: 8),
-            Text(
-              AppLocalizations.getString(context, 'splash.tagline'),
-              textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                height: 1.5,
-                color: cs.onSurface.withValues(alpha: 0.6),
-              ),
-            ).animate().fadeIn(delay: 220.ms, duration: 420.ms),
+            const SizedBox(height: 22),
+            const _Tagline()
+                .animate()
+                .fadeIn(delay: 220.ms, duration: 420.ms)
+                .slideY(
+                  begin: 0.15,
+                  end: 0,
+                  duration: 480.ms,
+                  curve: Curves.easeOutCubic,
+                ),
             const Spacer(flex: 2),
             _ProgressRail(
               label: statusLabel,
@@ -74,13 +56,73 @@ class SplashContent extends StatelessWidget {
   }
 }
 
+class _Tagline extends StatelessWidget {
+  const _Tagline();
+  static const _baseSize = 22.0;
+  static const _lineHeight = 1.5;
+  static const _letterSpacing = 1.75;
+
+  static const _lightWeight = FontWeight.w800;
+  static const _heavyWeight = FontWeight.w700;
+
+  static const _lightColor = Color.fromARGB(230, 8, 8, 8);
+  static const _heavyColor = Color.fromARGB(255, 236, 128, 13);
+
+  TextStyle _light(BuildContext context) =>
+      Theme.of(context).textTheme.titleMedium!.copyWith(
+        fontSize: _baseSize,
+        height: _lineHeight,
+        letterSpacing: _letterSpacing,
+        fontWeight: _lightWeight,
+        color: _lightColor,
+      );
+
+  TextStyle _heavy(BuildContext context) =>
+      Theme.of(context).textTheme.titleMedium!.copyWith(
+        fontSize: _baseSize,
+        height: _lineHeight,
+        letterSpacing: _letterSpacing,
+        fontWeight: _heavyWeight,
+        color: _heavyColor,
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _line(context, light: 'Know Your ', heavy: 'Risk.'),
+        _line(context, light: 'Take Action ', heavy: 'Early.'),
+        _line(context, light: 'Live ', heavy: 'Better.'),
+      ],
+    );
+  }
+
+  Widget _line(
+    BuildContext context, {
+    required String light,
+    required String heavy,
+  }) {
+    return Text.rich(
+      TextSpan(
+        style: _light(context),
+        children: [
+          TextSpan(text: light),
+          TextSpan(text: heavy, style: _heavy(context)),
+        ],
+      ),
+      textAlign: TextAlign.center,
+    );
+  }
+}
+
 class _ProgressRail extends StatelessWidget {
   final String? label;
   const _ProgressRail({this.label});
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -92,7 +134,7 @@ class _ProgressRail extends StatelessWidget {
             child: const LinearProgressIndicator(
               minHeight: 3,
               backgroundColor: Colors.transparent,
-              valueColor: AlwaysStoppedAnimation(AppColors.primaryColor),
+              valueColor: AlwaysStoppedAnimation(Colors.white),
             ),
           ),
         ),
@@ -103,10 +145,10 @@ class _ProgressRail extends StatelessWidget {
             label ?? AppLocalizations.getString(context, 'splash.preparing'),
             key: ValueKey(label),
             textAlign: TextAlign.center,
-            style: GoogleFonts.inter(
+            style: theme.textTheme.bodySmall?.copyWith(
               fontSize: 12.5,
               letterSpacing: 0.2,
-              color: cs.onSurface.withValues(alpha: 0.5),
+              color: Colors.white.withValues(alpha: 0.75),
             ),
           ),
         ),

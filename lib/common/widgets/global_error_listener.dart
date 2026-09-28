@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/widgets/custom_alert_dialog.dart';
-import 'package:my_wellness/features/auth/presentation/bloc/auth_state.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:my_wellness/features/auth/presentation/bloc/auth_state.dart';
 
 class GlobalErrorListener extends StatelessWidget {
   final Widget child;
@@ -17,7 +17,7 @@ class GlobalErrorListener extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocListener(
       listeners: [
-        //just inase the interceptor doest work or the refresh token expired, we want to make sure the user is logged out and sent to the login screen
+        // Session expiry: force the user back to login.
         BlocListener<AuthBloc, AuthState>(
           listenWhen: (p, c) =>
               p.status != AuthStatus.unauthenticated &&
@@ -27,14 +27,13 @@ class GlobalErrorListener extends StatelessWidget {
               const LoginRoute(),
               predicate: (route) => false,
             );
-
             _showError(
               context,
               'Your session has expired. Please log in again.',
             );
           },
         ),
-        // Auth Errors
+        // Generic auth errors.
         BlocListener<AuthBloc, AuthState>(
           listenWhen: (p, c) =>
               p.status != c.status && c.status == AuthStatus.error,
@@ -48,6 +47,10 @@ class GlobalErrorListener extends StatelessWidget {
   }
 
   void _showError(BuildContext context, String message) {
+    if (!context.mounted) return;
+    final navigator = Navigator.maybeOf(context);
+    if (navigator == null) return;
+
     CustomAlertDialog.show(
       context: context,
       dialog: CustomAlertDialog(

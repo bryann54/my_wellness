@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_primary_button.dart';
 import 'package:my_wellness/features/geography/domain/entities/county.dart';
@@ -134,6 +135,9 @@ class RegisterStepSubmit extends StatelessWidget {
             onPressed: isLoading ? null : onSubmit,
             label: AppLocalizations.getString(context, 'auth.createAccount'),
             isLoading: isLoading,
+            borderRadius: 12,
+            color: AppColors.primaryColor,
+
           ),
         ],
       ),

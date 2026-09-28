@@ -24,7 +24,8 @@ class SignupRequestModel {
 
   @JsonKey(name: 'county')
   final int? countyId;
-
+  @JsonKey(name: 'identity_verification_id')
+  final String? identityVerificationId;
   @JsonKey(name: 'sub_county')
   final int? subCountyId;
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -41,6 +42,7 @@ class SignupRequestModel {
     this.nationalIdNumber,
     this.countyId,
     this.subCountyId,
+    this.identityVerificationId,
     this.idType,
   }) : assert(
          email != null || phone != null,

@@ -4,10 +4,9 @@ import 'package:my_wellness/features/auth/data/models/signup_request_model.dart'
 import 'package:my_wellness/features/auth/domain/entities/auth_session_entity.dart';
 import 'package:my_wellness/features/auth/domain/entities/signup_pending_entity.dart';
 import 'package:my_wellness/features/auth/domain/entities/user_entity.dart';
+import 'package:my_wellness/features/auth/domain/entities/verified_identity.dart';
 
 abstract class AuthRepository {
-  Stream<UserEntity?> get authStateChanges;
-
   Future<Either<Failure, AuthSessionEntity>> signIn({
     required String identifier,
     required String password,
@@ -19,7 +18,10 @@ abstract class AuthRepository {
     required String email,
     required String code,
   });
-
+  Future<Either<Failure, VerifiedIdentity>> verifyIdentity({
+    required String idType,
+    required String idNumber,
+  });
   Future<Either<Failure, void>> confirmSignupPhone({
     required String phone,
     required String code,

@@ -4,12 +4,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_wellness/common/notifiers/locale_provider.dart';
 import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/auth_content.dart';
-import 'package:my_wellness/features/auth/presentation/widgets/auth_state_listener.dart';
 import 'package:provider/provider.dart';
 
 @RoutePage()
 class AuthScreen extends StatelessWidget {
   const AuthScreen({super.key});
+
   void _handleAccountState(BuildContext context, AccountState state) {
     final localeProvider = Provider.of<LocaleProvider>(context, listen: false);
     if (state.currentLang != localeProvider.locale.languageCode) {
@@ -22,7 +22,10 @@ class AuthScreen extends StatelessWidget {
     return BlocListener<AccountBloc, AccountState>(
       listenWhen: (prev, curr) => prev.currentLang != curr.currentLang,
       listener: _handleAccountState,
-      child: const Scaffold(body: AuthStateListener(child: AuthContent())),
+      child: const Scaffold(
+        backgroundColor: Colors.transparent,
+        body: AuthContent(),
+      ),
     );
   }
 }

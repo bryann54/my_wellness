@@ -6,14 +6,14 @@ import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/core/services/pin_service.dart';
 import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
-import 'package:my_wellness/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:my_wellness/features/auth/presentation/bloc/auth_event.dart';
-import 'package:my_wellness/features/auth/presentation/bloc/auth_state.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/biometrics/biometrics_bloc.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/security_setup_sheet.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/splash/splash_failure_sheet.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/splash/splash_offline_banner.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/splash_content.dart';
+import 'package:my_wellness/features/launch/presentation/bloc/launch_bloc.dart';
+import 'package:my_wellness/features/launch/presentation/bloc/launch_event.dart';
+import 'package:my_wellness/features/launch/presentation/bloc/launch_state.dart';
 
 @RoutePage()
 class SplashScreen extends StatefulWidget {
@@ -25,18 +25,16 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   static const _minimumDisplay = Duration(milliseconds: 1400);
-
   final _startedAt = DateTime.now();
+
   bool _navigated = false;
   bool _biometricsDispatched = false;
   bool _sheetOpen = false;
-  bool _offlineAcknowledged = false;
 
   @override
   void initState() {
     super.initState();
-    context.read<AuthBloc>().add(const CheckAuthStatusEvent());
-    context.read<AuthBloc>().add(const CheckConnectivityEvent());
+    context.read<LaunchBloc>().add(const StartLaunchEvent());
   }
 
   Future<void> _waitForMinimum() async {
@@ -46,14 +44,20 @@ class _SplashScreenState extends State<SplashScreen> {
     }
   }
 
-  Future<void> _navigateTo(String route) async {
+  Future<void> _navigateToAuth() async {
     if (_navigated || !mounted) return;
     _navigated = true;
     await _waitForMinimum();
     if (!mounted) return;
-    context.router.replace(
-      route == 'auth' ? const AuthRoute() : const MainRoute(),
-    );
+    context.router.replace(const AuthRoute());
+  }
+
+  Future<void> _navigateToMain() async {
+    if (_navigated || !mounted) return;
+    _navigated = true;
+    await _waitForMinimum();
+    if (!mounted) return;
+    context.router.replace(const MainRoute());
   }
 
   Future<void> _dispatchBiometrics() async {
@@ -68,28 +72,14 @@ class _SplashScreenState extends State<SplashScreen> {
     } else {
       await SecuritySetupSheet.show(context);
       if (!mounted) return;
-      await _navigateTo('main');
+      await _postAuthNavigation();
     }
   }
 
   Future<void> _postAuthNavigation() async {
     if (!mounted) return;
     context.read<AccountBloc>().add(const FetchProfileEvent());
-    await _navigateTo('main');
-  }
-
-  /// Called when the user dismisses the offline banner. Only then do we
-  /// proceed to biometrics.
-Future<void> _onOfflineAcknowledged() async {
-    if (_offlineAcknowledged) return;
-    setState(() => _offlineAcknowledged = true);
-
-    final auth = context.read<AuthBloc>().state;
-    if (auth.status == AuthStatus.authenticated) {
-      await _dispatchBiometrics();
-    } else {
-      await _navigateTo('auth');
-    }
+    await _navigateToMain();
   }
 
   Future<void> _showFailureSheet() async {
@@ -119,11 +109,11 @@ Future<void> _onOfflineAcknowledged() async {
     }
   }
 
-  String _statusLabel(AuthState state) {
-    if (state.status == AuthStatus.loading) {
+  String _statusLabel(LaunchState state) {
+    if (state is LaunchLoading) {
       return AppLocalizations.getString(context, 'splash.checkingSession');
     }
-    if (state.status == AuthStatus.authenticated) {
+    if (state is LaunchAuthenticated) {
       return AppLocalizations.getString(context, 'splash.loadingProfile');
     }
     return AppLocalizations.getString(context, 'splash.ready');
@@ -135,24 +125,16 @@ Future<void> _onOfflineAcknowledged() async {
 
     return MultiBlocListener(
       listeners: [
-        BlocListener<AuthBloc, AuthState>(
-          listenWhen: (prev, curr) => prev.status != curr.status,
-          listener: (_, state) {
-            if (state.status == AuthStatus.unauthenticated ||
-                state.status == AuthStatus.error) {
-              _navigateTo('auth');
-            }
-          },
-        ),
-        BlocListener<AuthBloc, AuthState>(
-          listenWhen: (prev, curr) =>
-              (prev is AuthOffline) != (curr is AuthOffline),
+        BlocListener<LaunchBloc, LaunchState>(
+          listenWhen: (prev, curr) => prev.runtimeType != curr.runtimeType,
           listener: (context, state) {
-            // Online and authenticated: proceed to biometrics immediately.
-            if (state is! AuthOffline &&
-                state.status == AuthStatus.authenticated &&
-                !_offlineAcknowledged) {
+            if (state is LaunchOffline) return;
+            if (state is LaunchUnauthenticated) {
+              _navigateToAuth();
+            } else if (state is LaunchAuthenticated) {
               _dispatchBiometrics();
+            } else if (state is LaunchError) {
+              _navigateToAuth();
             }
           },
         ),
@@ -174,32 +156,50 @@ Future<void> _onOfflineAcknowledged() async {
         backgroundColor: isDark
             ? AppColors.darkBackgroundColor
             : AppColors.lightBackgroundColor,
-        body: SafeArea(
-          top: false,
-          child: BlocBuilder<AuthBloc, AuthState>(
-            buildWhen: (prev, curr) =>
-                prev.status != curr.status || (curr is AuthOffline),
-            builder: (context, state) {
-              final showBanner = state is AuthOffline && !_offlineAcknowledged;
+        body: DecoratedBox(
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/images/splash.jpg'),
+              fit: BoxFit.cover,
+            ),
+          ),
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: BlocBuilder<LaunchBloc, LaunchState>(
+                  buildWhen: (prev, curr) =>
+                      prev.runtimeType != curr.runtimeType,
+                  builder: (context, state) {
+                    return SplashContent(statusLabel: _statusLabel(state));
+                  },
+                ),
+              ),
 
-              return Column(
-                children: [
-                  Expanded(
-                    child: SplashContent(statusLabel: _statusLabel(state)),
-                  ),
-                  AnimatedSize(
-                    duration: const Duration(milliseconds: 220),
-                    curve: Curves.easeOutCubic,
-                    alignment: Alignment.topCenter,
-                    child: showBanner
-                        ? SplashOfflineBanner(
-                            onContinue: _onOfflineAcknowledged,
-                          )
-                        : const SizedBox(width: double.infinity),
-                  ),
-                ],
-              );
-            },
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: BlocBuilder<LaunchBloc, LaunchState>(
+                  buildWhen: (prev, curr) =>
+                      (prev is LaunchOffline) != (curr is LaunchOffline),
+                  builder: (context, state) {
+                    final showBanner = state is LaunchOffline;
+                    return AnimatedSlide(
+                      duration: const Duration(milliseconds: 220),
+                      curve: Curves.easeOutCubic,
+                      offset: showBanner ? Offset.zero : const Offset(0, 1),
+                      child: showBanner
+                          ? SplashOfflineBanner(
+                              onContinue: () => context.read<LaunchBloc>().add(
+                                const ContinueOfflineEvent(),
+                              ),
+                            )
+                          : const SizedBox(width: double.infinity),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
         ),
       ),

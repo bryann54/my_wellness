@@ -2,11 +2,8 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:my_wellness/common/helpers/base_usecase.dart';
 import 'package:my_wellness/common/utils/functions.dart';
 import 'package:my_wellness/features/auth/domain/usecases/auth_usecases.dart';
-import 'package:my_wellness/features/auth/domain/usecases/check_connectivity_usecase.dart';
-import 'package:my_wellness/features/subscriptions/presentation/bloc/subscriptions_bloc.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
@@ -19,13 +16,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final ResendSignupEmailUseCase _resendSignupEmailUseCase;
   final ResendSignupPhoneUseCase _resendSignupPhoneUseCase;
   final SignOutUseCase _signOutUseCase;
-  final GetAuthStateUseCase _getAuthStateUseCase;
   final RequestPasswordResetUseCase _requestPasswordResetUseCase;
   final ConfirmPasswordResetUseCase _confirmPasswordResetUseCase;
-  final CheckConnectivityUsecase _checkConnectivityUsecase;
-  final SubscriptionsBloc _subscriptionsBloc;
-
-  AuthEvent? _pendingEvent;
+  final VerifyIdentityUseCase _verifyIdentityUseCase;
 
   AuthBloc({
     required SignInUseCase signInUseCase,
@@ -35,11 +28,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required ResendSignupEmailUseCase resendSignupEmailUseCase,
     required ResendSignupPhoneUseCase resendSignupPhoneUseCase,
     required SignOutUseCase signOutUseCase,
-    required GetAuthStateUseCase getAuthStateUseCase,
     required RequestPasswordResetUseCase requestPasswordResetUseCase,
     required ConfirmPasswordResetUseCase confirmPasswordResetUseCase,
-    required CheckConnectivityUsecase checkConnectivityUsecase,
-    required SubscriptionsBloc subscriptionsBloc,
+    required VerifyIdentityUseCase verifyIdentityUseCase,
   }) : _signInUseCase = signInUseCase,
        _signUpUseCase = signUpUseCase,
        _confirmSignupEmailUseCase = confirmSignupEmailUseCase,
@@ -47,11 +38,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
        _resendSignupEmailUseCase = resendSignupEmailUseCase,
        _resendSignupPhoneUseCase = resendSignupPhoneUseCase,
        _signOutUseCase = signOutUseCase,
-       _getAuthStateUseCase = getAuthStateUseCase,
        _requestPasswordResetUseCase = requestPasswordResetUseCase,
        _confirmPasswordResetUseCase = confirmPasswordResetUseCase,
-       _checkConnectivityUsecase = checkConnectivityUsecase,
-       _subscriptionsBloc = subscriptionsBloc,
+       _verifyIdentityUseCase = verifyIdentityUseCase,
        super(const AuthState()) {
     on<SignInEvent>(_onSignIn);
     on<SignUpEvent>(_onSignUp);
@@ -60,14 +49,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<ResendSignupEmailEvent>(_onResendSignupEmail);
     on<ResendSignupPhoneEvent>(_onResendSignupPhone);
     on<SignOutEvent>(_onSignOut);
-    on<CheckAuthStatusEvent>(_onCheckAuthStatus);
     on<RequestPasswordResetEvent>(_onRequestPasswordReset);
     on<ConfirmPasswordResetEvent>(_onConfirmPasswordReset);
-    on<CheckConnectivityEvent>(_checkConnectivity);
-    on<RetryPendingAuthEvent>(_retryPending);
+    on<VerifyIdentityEvent>(_onVerifyIdentity);
+    on<ResetIdentityVerificationEvent>(_onResetIdentity);
   }
-
-  // Unguarded handlers (work offline)
 
   Future<void> _onSignIn(SignInEvent event, Emitter<AuthState> emit) async {
     emit(state.copyWith(status: AuthStatus.loading, clearError: true));
@@ -113,36 +99,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
   }
 
-  Future<void> _onCheckAuthStatus(
-    CheckAuthStatusEvent event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(state.copyWith(status: AuthStatus.loading));
-    await emit.forEach(
-      _getAuthStateUseCase(),
-      onData: (user) {
-        if (user != null) {
-          return state.copyWith(status: AuthStatus.authenticated, user: user);
-        }
-        return state.copyWith(
-          status: AuthStatus.unauthenticated,
-          clearUser: true,
-        );
-      },
-      onError: (error, _) => state.copyWith(
-        status: AuthStatus.error,
-        errorMessage: error.toString(),
-      ),
-    );
-  }
-
-  //Guarded handlers (require connectivity)
-
   Future<void> _onConfirmSignupEmail(
     ConfirmSignupEmailEvent event,
     Emitter<AuthState> emit,
   ) async {
-    if (!await _guardOnline(event, emit)) return;
     emit(state.copyWith(status: AuthStatus.loading, clearError: true));
     final result = await _confirmSignupEmailUseCase(
       email: event.email,
@@ -165,7 +125,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     ConfirmSignupPhoneEvent event,
     Emitter<AuthState> emit,
   ) async {
-    if (!await _guardOnline(event, emit)) return;
     emit(state.copyWith(status: AuthStatus.loading, clearError: true));
     final result = await _confirmSignupPhoneUseCase(
       phone: event.phone,
@@ -188,7 +147,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     ResendSignupEmailEvent event,
     Emitter<AuthState> emit,
   ) async {
-    if (!await _guardOnline(event, emit)) return;
     final result = await _resendSignupEmailUseCase(email: event.email);
     result.fold(
       (failure) =>
@@ -201,7 +159,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     ResendSignupPhoneEvent event,
     Emitter<AuthState> emit,
   ) async {
-    if (!await _guardOnline(event, emit)) return;
     final result = await _resendSignupPhoneUseCase(phone: event.phone);
     result.fold(
       (failure) =>
@@ -211,7 +168,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onSignOut(SignOutEvent event, Emitter<AuthState> emit) async {
-    if (!await _guardOnline(event, emit)) return;
     emit(state.copyWith(status: AuthStatus.loading));
     final result = await _signOutUseCase(allDevices: event.allDevices);
     result.fold(
@@ -221,16 +177,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           errorMessage: mapFailureToMessage(failure),
         ),
       ),
-      (_) {
-        _subscriptionsBloc.add(RCLogOut());
-        emit(
-          state.copyWith(
-            status: AuthStatus.unauthenticated,
-            clearUser: true,
-            clearPending: true,
-          ),
-        );
-      },
+      (_) => emit(
+        state.copyWith(
+          status: AuthStatus.unauthenticated,
+          clearUser: true,
+          clearPending: true,
+          clearError: true,
+        ),
+      ),
     );
   }
 
@@ -238,7 +192,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     RequestPasswordResetEvent event,
     Emitter<AuthState> emit,
   ) async {
-    if (!await _guardOnline(event, emit)) return;
     emit(state.copyWith(status: AuthStatus.loading, clearError: true));
     final result = await _requestPasswordResetUseCase(
       identifier: event.identifier,
@@ -258,7 +211,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     ConfirmPasswordResetEvent event,
     Emitter<AuthState> emit,
   ) async {
-    if (!await _guardOnline(event, emit)) return;
     emit(state.copyWith(status: AuthStatus.loading, clearError: true));
     final result = await _confirmPasswordResetUseCase(
       identifier: event.identifier,
@@ -276,30 +228,41 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
   }
 
-  //Connectivity plumbing
-
-Future<bool> _guardOnline(AuthEvent event, Emitter<AuthState> emit) async {
-    final result = await _checkConnectivityUsecase.call(NoParams());
-    return result.fold((_) {
-      _pendingEvent = event;
-      emit(AuthOffline(status: state.status, user: state.user));
-      return false;
-    }, (_) => true);
-  }
-
-  FutureOr<void> _checkConnectivity(
-    CheckConnectivityEvent event,
+  Future<void> _onVerifyIdentity(
+    VerifyIdentityEvent event,
     Emitter<AuthState> emit,
   ) async {
-    await _guardOnline(event, emit);
+    emit(state.copyWith(kycStatus: KycStatus.verifying, clearKycError: true));
+    final result = await _verifyIdentityUseCase(
+      idType: event.idType,
+      idNumber: event.idNumber,
+    );
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          kycStatus: KycStatus.error,
+          kycError: mapFailureToMessage(failure),
+        ),
+      ),
+      (identity) => emit(
+        state.copyWith(
+          kycStatus: KycStatus.verified,
+          verifiedIdentity: identity,
+        ),
+      ),
+    );
   }
 
-  FutureOr<void> _retryPending(
-    RetryPendingAuthEvent event,
+  void _onResetIdentity(
+    ResetIdentityVerificationEvent event,
     Emitter<AuthState> emit,
-  ) async {
-    final pending = _pendingEvent;
-    _pendingEvent = null;
-    if (pending != null) add(pending);
+  ) {
+    emit(
+      state.copyWith(
+        kycStatus: KycStatus.idle,
+        clearVerifiedIdentity: true,
+        clearKycError: true,
+      ),
+    );
   }
 }

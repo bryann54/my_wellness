@@ -176,9 +176,8 @@ class _AssessmentBmiStepState extends State<AssessmentBmiStep> {
                 ? const SizedBox(
                     width: 18,
                     height: 18,
-                    child: CircularProgressIndicator(
+                    child: CircularProgressIndicator.adaptive(
                       strokeWidth: 2,
-                      color: Colors.white,
                     ),
                   )
                 : Text(

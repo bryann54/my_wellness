@@ -1,5 +1,7 @@
 // lib/features/auth/presentation/pages/verification_screen.dart
 
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,11 +9,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/res/l10n.dart';
+import 'package:my_wellness/common/widgets/app_primary_button.dart';
 import 'package:my_wellness/features/auth/domain/entities/signup_pending_entity.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_event.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_state.dart';
-import 'package:my_wellness/features/auth/presentation/widgets/shared/auth_button.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/shared/auth_header.dart';
 
 @RoutePage()
@@ -78,7 +80,11 @@ class _VerificationScreenState extends State<VerificationScreen> {
         backgroundColor: cs.surface,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
+          icon: Icon(
+            Platform.isAndroid ? Icons.arrow_back : Icons.arrow_back_ios,
+            size: 22,
+            color: cs.primary,
+          ),
           onPressed: () => context.router.maybePop(),
         ),
       ),
@@ -119,16 +125,12 @@ class _VerificationScreenState extends State<VerificationScreen> {
                     title: AppLocalizations.getString(
                       context,
                       'auth.verifyTitle',
-                      // fallback: 'Verify your account',
                     ),
                     subtitle: AppLocalizations.getString(
                       context,
                       isPhone
                           ? 'auth.verifyPhoneSubtitle'
                           : 'auth.verifyEmailSubtitle',
-                      // fallback: isPhone
-                      // ? 'Enter the SMS code we sent to ${pending.destination}'
-                      // : 'Enter the code we emailed to ${pending.destination}',
                     ),
                   ),
                   const SizedBox(height: 40),
@@ -146,6 +148,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                       counterText: '',
                       hintText: '••••••',
                       errorText: _errorText,
+
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -153,16 +156,14 @@ class _VerificationScreenState extends State<VerificationScreen> {
                     onSubmitted: (_) => _submit(pending),
                   ),
                   const SizedBox(height: 24),
-                  AuthButton(
-                    text: AppLocalizations.getString(
+                  AppPrimaryButton(
+                    label: AppLocalizations.getString(
                       context,
                       'auth.verifyButton',
-                      // fallback: 'Verify',
                     ),
                     isLoading: isLoading,
-                    isEnabled: !isLoading,
+                    borderRadius: 12,
                     onPressed: () => _submit(pending),
-                    heroTag: 'verify_button',
                   ),
                   TextButton(
                     onPressed: isLoading ? null : () => _resend(pending),

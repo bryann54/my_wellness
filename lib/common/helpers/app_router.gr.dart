@@ -37,18 +37,18 @@ import 'package:my_wellness/features/auth/presentation/pages/conversational_regi
     as _i10;
 import 'package:my_wellness/features/auth/presentation/pages/login_screen.dart'
     as _i14;
-import 'package:my_wellness/features/auth/presentation/pages/splash_screen.dart'
-    as _i20;
+import 'package:my_wellness/features/auth/presentation/pages/register_screen.dart'
+    as _i19;
 import 'package:my_wellness/features/auth/presentation/pages/verification_screen.dart'
     as _i22;
 import 'package:my_wellness/features/bookings/presentation/pages/bookings_screen.dart'
     as _i9;
-import 'package:my_wellness/features/geography/presentation/pages/register_screen.dart'
-    as _i19;
 import 'package:my_wellness/features/health_profile/presentation/pages/my_health_screen.dart'
     as _i17;
 import 'package:my_wellness/features/home/presentation/pages/home_screen.dart'
     as _i13;
+import 'package:my_wellness/features/launch/presentation/pages/splash_screen.dart'
+    as _i20;
 import 'package:my_wellness/features/notifications/presentation/pages/notifications_screen.dart'
     as _i18;
 import 'package:my_wellness/features/subscriptions/presentation/pages/subscriptions_screen.dart'
