@@ -110,7 +110,7 @@ class _RegisterStepLocationState extends State<RegisterStepLocation> {
           const SizedBox(height: 32),
           AppPrimaryButton(
             borderRadius: 12,
-             color: AppColors.primaryColor,
+            color: AppColors.primaryColor,
             onPressed: _continue,
             label: AppLocalizations.getString(context, 'common.continue'),
           ),

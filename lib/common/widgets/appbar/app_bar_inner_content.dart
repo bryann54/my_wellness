@@ -39,7 +39,6 @@ class AppBarInnerContent extends StatelessWidget {
             ),
           ),
 
-        // ── Centered title ───────────────────────────────────────────────
         Positioned(
           top: statusBarHeight,
           left: 56,
@@ -49,7 +48,7 @@ class AppBarInnerContent extends StatelessWidget {
             child: Text(
               title,
               textAlign: TextAlign.center,
-              style: GoogleFonts.syne(
+              style: GoogleFonts.inter(
                 fontWeight: FontWeight.w700,
                 fontSize: 18,
                 color: AppColors.textOnPrimary,
@@ -58,7 +57,6 @@ class AppBarInnerContent extends StatelessWidget {
           ),
         ),
 
-        // ── Right actions ────────────────────────────────────────────────
         if (actions != null)
           Positioned(
             top: statusBarHeight + 4,

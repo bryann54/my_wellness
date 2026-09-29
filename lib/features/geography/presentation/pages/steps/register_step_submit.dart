@@ -137,7 +137,6 @@ class RegisterStepSubmit extends StatelessWidget {
             isLoading: isLoading,
             borderRadius: 12,
             color: AppColors.primaryColor,
-
           ),
         ],
       ),

@@ -28,6 +28,30 @@ class HomeScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 10),
                 Divider(),
+                Row(
+                  children: [
+                    Expanded(child: VitalsTile(kind: VitalsTileKind.bp)),
+                    SizedBox(width: 12),
+                    Expanded(child: VitalsTile(kind: VitalsTileKind.bs)),
+                  ],
+                ),
+                SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(child: VitalsTile(kind: VitalsTileKind.bp)),
+                    SizedBox(width: 12),
+                    Expanded(child: VitalsTile(kind: VitalsTileKind.bs)),
+                  ],
+                ),
+                SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(child: VitalsTile(kind: VitalsTileKind.bp)),
+                    SizedBox(width: 12),
+                    Expanded(child: VitalsTile(kind: VitalsTileKind.bs)),
+                  ],
+                ),
+                SizedBox(height: 10),
 
                 // Next sections to add:
                 //   - KnowYourRiskCard (assessments)

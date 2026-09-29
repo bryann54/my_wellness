@@ -24,12 +24,12 @@ class LanguageSelector extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
             color: isDark
-                ? Colors.white.withValues(alpha: 0.1)
+                ? AppColors.background.withValues(alpha: 0.1)
                 : Colors.black.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: isDark
-                  ? Colors.white.withValues(alpha: 0.2)
+                  ? AppColors.background.withValues(alpha: 0.2)
                   : Colors.black.withValues(alpha: 0.1),
             ),
           ),
@@ -39,7 +39,7 @@ class LanguageSelector extends StatelessWidget {
               Icon(
                 Icons.language,
                 size: 18,
-                color: isDark ? Colors.white70 : Colors.black54,
+                color: isDark ? AppColors.background : Colors.black54,
               ),
               const SizedBox(width: 6),
               DropdownButton<Locale>(
@@ -50,17 +50,17 @@ class LanguageSelector extends StatelessWidget {
                     : Icon(
                         Icons.keyboard_arrow_down_rounded,
                         size: 18,
-                        color: isDark ? Colors.white70 : Colors.black54,
+                        color: isDark ? AppColors.background : Colors.black54,
                       ),
                 isDense: true,
                 borderRadius: BorderRadius.circular(12),
                 dropdownColor: isDark
                     ? AppColors.darkBackgroundColor
-                    : Colors.white,
+                    : AppColors.background,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: isDark ? Colors.white : Colors.black87,
+                  color: isDark ? AppColors.background : Colors.black87,
                 ),
                 onChanged: isLoading
                     ? null
@@ -124,7 +124,7 @@ class LanguageSelector extends StatelessWidget {
         style: TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w700,
-          color: isDark ? Colors.white70 : Colors.black54,
+          color: isDark ? AppColors.background : Colors.black54,
         ),
       ),
     );
@@ -138,7 +138,7 @@ class LanguageSelector extends StatelessWidget {
       child: CircularProgressIndicator.adaptive(
         strokeWidth: 2,
         valueColor: AlwaysStoppedAnimation(
-          isDark ? Colors.white70 : AppColors.primaryColor,
+          isDark ? AppColors.background : AppColors.primaryColor,
         ),
       ),
     );

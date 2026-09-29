@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_wellness/common/res/colors.dart';
 
 class OrbitIcon extends StatelessWidget {
   final String asset;
@@ -9,7 +10,7 @@ class OrbitIcon extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.background,
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(

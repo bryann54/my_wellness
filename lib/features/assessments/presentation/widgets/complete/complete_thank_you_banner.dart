@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_card.dart';
 
@@ -38,11 +39,15 @@ class CompleteThankYouBanner extends StatelessWidget {
             width: 56,
             height: 56,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.22),
+              color: AppColors.background.withValues(alpha: 0.22),
               shape: BoxShape.circle,
             ),
             child: const Center(
-              child: Icon(Icons.check_rounded, color: Colors.white, size: 30),
+              child: Icon(
+                Icons.check_rounded,
+                color: AppColors.background,
+                size: 30,
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -52,7 +57,7 @@ class CompleteThankYouBanner extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 26,
               fontWeight: FontWeight.w700,
-              color: Colors.white,
+              color: AppColors.background,
               height: 1.2,
             ),
           ),
@@ -63,7 +68,7 @@ class CompleteThankYouBanner extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 13.5,
               height: 1.5,
-              color: Colors.white.withValues(alpha: 0.9),
+              color: AppColors.background.withValues(alpha: 0.9),
             ),
           ),
           if (reference != null && reference!.isNotEmpty) ...[
@@ -71,9 +76,11 @@ class CompleteThankYouBanner extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.18),
+                color: AppColors.background.withValues(alpha: 0.18),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.28)),
+                border: Border.all(
+                  color: AppColors.background.withValues(alpha: 0.28),
+                ),
               ),
               child: Column(
                 children: [
@@ -86,7 +93,7 @@ class CompleteThankYouBanner extends StatelessWidget {
                       fontSize: 10.5,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 1.2,
-                      color: Colors.white.withValues(alpha: 0.85),
+                      color: AppColors.background.withValues(alpha: 0.85),
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -96,7 +103,7 @@ class CompleteThankYouBanner extends StatelessWidget {
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 1.4,
-                      color: Colors.white,
+                      color: AppColors.background,
                     ),
                   ),
                 ],

@@ -179,10 +179,7 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
                 ? const SizedBox(
                     width: 16,
                     height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
+                    child: CircularProgressIndicator.adaptive(strokeWidth: 2),
                   )
                 : const Icon(Icons.chevron_right, size: 18),
             label: Text(

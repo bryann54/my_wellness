@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
+import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/features/vitals/presentation/bloc/vitals_bloc.dart';
 import 'package:auto_route/auto_route.dart';
@@ -49,7 +50,7 @@ class VitalsTile extends StatelessWidget {
                       ),
                       child: Icon(
                         isBp ? Icons.favorite : Icons.water_drop,
-                        color: Colors.white,
+                        color: AppColors.background,
                         size: 20,
                       ),
                     ),

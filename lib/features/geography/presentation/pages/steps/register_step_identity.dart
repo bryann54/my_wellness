@@ -267,7 +267,7 @@ class _RegisterStepIdentityState extends State<RegisterStepIdentity> {
                   isLoading: verifying,
                   borderRadius: 12,
                   height: 52,
-                   color: AppColors.primaryColor,
+                  color: AppColors.primaryColor,
                 ),
               ],
 
@@ -338,7 +338,7 @@ class _RegisterStepIdentityState extends State<RegisterStepIdentity> {
                 ),
                 const SizedBox(height: 16),
                 AppPrimaryButton(
-                   color: AppColors.primaryColor,
+                  color: AppColors.primaryColor,
                   onPressed: _continue,
                   label: AppLocalizations.getString(context, 'common.continue'),
                   borderRadius: 12,
@@ -399,7 +399,11 @@ class _IdTypeOption extends StatelessWidget {
               ),
               child: selected
                   ? const Center(
-                      child: Icon(Icons.circle, size: 7, color: Colors.white),
+                      child: Icon(
+                        Icons.circle,
+                        size: 7,
+                        color: AppColors.background,
+                      ),
                     )
                   : null,
             ),

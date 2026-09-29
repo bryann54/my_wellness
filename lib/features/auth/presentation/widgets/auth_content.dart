@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/widgets/language_selector_row.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/onBoarding/get_started_actions.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/onBoarding/on_boarding_view.dart';
@@ -46,7 +47,7 @@ class _AuthContentState extends State<AuthContent> {
     final page = OnboardingData.pages[_currentPage];
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           children: [

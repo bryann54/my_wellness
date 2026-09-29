@@ -7,11 +7,11 @@ class AppColors {
   static const Color secondaryColor = Color(0xFF20B2AA);
   static const Color accentColor = Color(0xFF48D1CC);
   static const Color background = Color(0xFFF0F9F9);
-  static const Color surface = Colors.white;
+  static const Color surface = AppColors.background;
   static const Color error = Color(0xFFB0272F);
   static const Color textPrimary = Color(0xFF004D4D);
   static const Color textSecondary = Color(0xFF5F7C7C);
-  static const Color cardColor = Colors.white;
+  static const Color cardColor = AppColors.background;
   static const Color dividerColor = Color(0xFFB2DFDB);
   static const Color shadowColor = Color(0x1A008080);
   static const Color cardDark = Color(0xFF2C2C2C);
@@ -47,7 +47,7 @@ class AppColors {
 
   // Split backgrounds
   static const Color visualDarkBackgroundHalf = Color(0xFF1A1A1A);
-  static const Color visualLightBackgroundHalf = Colors.white;
+  static const Color visualLightBackgroundHalf = AppColors.background;
 
   // Dark
   static const Color primaryColorDark = Color(0xFF26A69A);
@@ -82,7 +82,7 @@ class AppColors {
   static const Color darkBackgroundColor = Color(0xFF121212);
   static const Color lightBackgroundColor = Color(0xFFFAFAFA);
   static const Color darkCardColor = Color(0xFF1E1E1E);
-  static const Color lightCardColor = Colors.white;
+  static const Color lightCardColor = AppColors.background;
 
   // Spacing
   static const double horizontalPadding = 24.0;

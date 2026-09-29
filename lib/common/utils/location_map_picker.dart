@@ -525,7 +525,7 @@ class _FullscreenPickerState extends State<_FullscreenPicker> {
                       ),
                       child: Text(
                         'Confirm Location',
-                        style: GoogleFonts.syne(
+                        style: GoogleFonts.inter(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
                           color: cs.onPrimary,

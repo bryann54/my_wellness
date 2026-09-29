@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
+import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/core/services/pin_service.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_bloc.dart';
@@ -83,7 +84,11 @@ class AuthStateListener extends StatelessWidget {
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.check_circle, color: Colors.white, size: 20),
+            const Icon(
+              Icons.check_circle,
+              color: AppColors.background,
+              size: 20,
+            ),
             const SizedBox(width: 8),
             Flexible(
               child: Text(
@@ -108,7 +113,11 @@ class AuthStateListener extends StatelessWidget {
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.error_outline, color: Colors.white, size: 20),
+            const Icon(
+              Icons.error_outline,
+              color: AppColors.background,
+              size: 20,
+            ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(

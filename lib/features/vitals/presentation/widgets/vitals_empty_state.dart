@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:my_wellness/common/res/colors.dart';
 
 class VitalsEmptyState extends StatelessWidget {
   final IconData icon;
@@ -58,9 +59,9 @@ class VitalsEmptyState extends StatelessWidget {
             FilledButton(
               onPressed: onCta,
               style: FilledButton.styleFrom(
-                backgroundColor: cs.primary,
+                backgroundColor: AppColors.primaryColor,
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 54,
+                  horizontal: 64,
                   vertical: 12,
                 ),
                 shape: RoundedRectangleBorder(

@@ -97,7 +97,7 @@ class OrbitingIllustrationState extends State<OrbitingIllustration>
                     height: imageSize,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 4),
+                      border: Border.all(color: AppColors.background, width: 4),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withValues(alpha: 0.06),

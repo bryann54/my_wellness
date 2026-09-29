@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/utils/formatters.dart';
 import 'package:my_wellness/features/vitals/presentation/utils/classification_colors.dart';
 
@@ -53,7 +54,10 @@ class ReadingHistoryList extends StatelessWidget {
               alignment: Alignment.centerRight,
               padding: const EdgeInsets.symmetric(horizontal: 20),
               color: cs.error.withValues(alpha: 0.85),
-              child: const Icon(Icons.delete_outline, color: Colors.white),
+              child: const Icon(
+                Icons.delete_outline,
+                color: AppColors.background,
+              ),
             ),
             child: ListTile(
               leading: Container(

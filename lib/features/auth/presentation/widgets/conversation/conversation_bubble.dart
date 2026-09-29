@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/conversation/conversation_models.dart';
 
 class ConversationBubble extends StatelessWidget {
@@ -60,7 +61,7 @@ class ConversationBubble extends StatelessWidget {
                     message.text,
                     style: GoogleFonts.inter(
                       fontSize: 14,
-                      color: isAi ? cs.onSurface : Colors.white,
+                      color: isAi ? cs.onSurface : AppColors.background,
                       height: 1.4,
                     ),
                   ),

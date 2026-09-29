@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 
 enum SocialAuthProvider { google, apple }
@@ -46,7 +47,7 @@ class SocialAuthButton extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: const BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.background,
                     shape: BoxShape.circle,
                   ),
                   child: Center(

@@ -112,7 +112,7 @@
 //                   ],
 //                   AnimatedDefaultTextStyle(
 //                     duration: const Duration(milliseconds: 250),
-//                     style: GoogleFonts.syne(
+//                     style: GoogleFonts.inter(
 //                       fontSize: 15,
 //                       fontWeight: FontWeight.w700,
 //                       color: fg,

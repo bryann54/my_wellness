@@ -1,63 +1,12 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// ignore_for_file: unused_element
+
 part of 'assessment_score_model.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
-
-AssessmentScoreModel _$AssessmentScoreModelFromJson(
-  Map<String, dynamic> json,
-) => AssessmentScoreModel(
-  band: json['band'] as String,
-  bandLabel: json['band_label'] as String,
-  rawScore: (json['raw_score'] as num?)?.toInt(),
-  bandBlurb: json['band_blurb'] as String?,
-  metric: json['metric'] == null
-      ? null
-      : ScoreMetricModel.fromJson(json['metric'] as Map<String, dynamic>),
-  contributing:
-      (json['contributing'] as List<dynamic>?)
-          ?.map((e) => ScoreItemModel.fromJson(e as Map<String, dynamic>))
-          .toList() ??
-      const [],
-  protective:
-      (json['protective'] as List<dynamic>?)
-          ?.map((e) => ScoreItemModel.fromJson(e as Map<String, dynamic>))
-          .toList() ??
-      const [],
-  recommendations:
-      (json['recommendations'] as List<dynamic>?)
-          ?.map(
-            (e) => ScoreRecommendationModel.fromJson(e as Map<String, dynamic>),
-          )
-          .toList() ??
-      const [],
-  hasActiveWarning: json['has_active_warning'] as bool? ?? false,
-  computedAt: json['computed_at'] as String?,
-  symptomAlerts:
-      (json['symptom_alerts'] as List<dynamic>?)
-          ?.map((e) => SymptomAlertModel.fromJson(e as Map<String, dynamic>))
-          .toList() ??
-      const [],
-  screeningRecommendation: json['screening_recommendation'] == null
-      ? null
-      : ScreeningRecommendationModel.fromJson(
-          json['screening_recommendation'] as Map<String, dynamic>,
-        ),
-  additionalCtaKeys:
-      (json['additional_cta_keys'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList() ??
-      const [],
-  needsNutritionConsultation:
-      json['needs_nutrition_consultation'] as bool? ?? false,
-  resultDisplay: json['result_display'] == null
-      ? null
-      : ResultDisplayModel.fromJson(
-          json['result_display'] as Map<String, dynamic>,
-        ),
-);
 
 Map<String, dynamic> _$AssessmentScoreModelToJson(
   AssessmentScoreModel instance,

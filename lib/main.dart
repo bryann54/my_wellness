@@ -2,6 +2,7 @@
 
 import 'package:my_wellness/common/helpers/app_router.dart';
 import 'package:my_wellness/common/notifiers/locale_provider.dart';
+import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/global_bloc_observer.dart';
 import 'package:my_wellness/core/di/injector.dart';
@@ -119,7 +120,7 @@ class MyApp extends StatelessWidget {
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.background,
         selectedItemColor: Colors.blue,
         unselectedItemColor: Colors.grey,
         selectedIconTheme: IconThemeData(size: 28),

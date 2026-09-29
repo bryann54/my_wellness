@@ -8,7 +8,6 @@ import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
 class AppBarFlexibleHeader extends StatelessWidget {
   final bool isHome;
   final String username;
-  // final String? location;
   final String? title;
   final List<Widget>? actions;
   final double expandedHeight;
@@ -18,7 +17,6 @@ class AppBarFlexibleHeader extends StatelessWidget {
     super.key,
     required this.isHome,
     required this.username,
-    // required this.location,
     required this.title,
     required this.actions,
     required this.expandedHeight,
@@ -46,11 +44,10 @@ class AppBarFlexibleHeader extends StatelessWidget {
           clipper: AppBarClipper(),
           child: Container(
             height: cur,
-            color: AppColors.dividerColorDark.withValues(alpha: 0.45),
+            color: AppColors.primaryColor,
             child: isHome
                 ? AppBarHomeContent(
                     username: username,
-                    // location: location,
                     actions: actions,
                     progress: progress,
                     statusBarHeight: statusBarHeight,

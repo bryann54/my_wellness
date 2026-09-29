@@ -186,7 +186,7 @@ class CategoryIconTile extends StatelessWidget {
       child: Center(
         child: FaIcon(
           style.icon,
-          color: Colors.white,
+          color: AppColors.background,
           size: glyphSize ?? size * 0.55,
         ),
       ),

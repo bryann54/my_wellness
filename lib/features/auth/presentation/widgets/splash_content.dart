@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:my_wellness/common/constants/hero.dart';
+import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 
 class SplashContent extends StatelessWidget {
@@ -134,7 +135,7 @@ class _ProgressRail extends StatelessWidget {
             child: const LinearProgressIndicator(
               minHeight: 3,
               backgroundColor: Colors.transparent,
-              valueColor: AlwaysStoppedAnimation(Colors.white),
+              valueColor: AlwaysStoppedAnimation(AppColors.background),
             ),
           ),
         ),
@@ -148,7 +149,7 @@ class _ProgressRail extends StatelessWidget {
             style: theme.textTheme.bodySmall?.copyWith(
               fontSize: 12.5,
               letterSpacing: 0.2,
-              color: Colors.white.withValues(alpha: 0.75),
+              color: AppColors.background.withValues(alpha: 0.75),
             ),
           ),
         ),

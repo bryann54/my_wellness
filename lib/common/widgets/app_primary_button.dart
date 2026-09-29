@@ -1,5 +1,3 @@
-// lib/common/widgets/app_primary_button.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:my_wellness/common/res/colors.dart';
@@ -34,7 +32,7 @@ class AppPrimaryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final effectiveColor = color ?? cs.primary;
-    final effectiveTextColor = textColor ?? Colors.white;
+    final effectiveTextColor = textColor ?? AppColors.background;
     final effectiveRadius = borderRadius ?? 25.0;
     final isDisabled = disabled ?? (onPressed == null || isLoading);
 
@@ -49,9 +47,7 @@ class AppPrimaryButton extends StatelessWidget {
                 onPressed!();
               },
         style: FilledButton.styleFrom(
-          backgroundColor: isDisabled
-              ? AppColors.primaryColor
-              : effectiveColor,
+          backgroundColor: isDisabled ? AppColors.primaryColor : effectiveColor,
           foregroundColor: isDisabled
               ? cs.onSurface.withValues(alpha: 0.38)
               : effectiveTextColor,

@@ -139,7 +139,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                     keyboardType: TextInputType.number,
                     textAlign: TextAlign.center,
                     maxLength: 6,
-                    style: GoogleFonts.syne(
+                    style: GoogleFonts.inter(
                       fontSize: 24,
                       letterSpacing: 8,
                       fontWeight: FontWeight.w700,

@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_primary_button.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_bloc.dart';
@@ -70,6 +71,8 @@ class SplashBiometricPrompt extends StatelessWidget {
         ),
         const SizedBox(height: 28),
         AppPrimaryButton(
+          borderRadius: 12,
+          color: AppColors.primaryColor,
           onPressed: busy
               ? null
               : () => context.read<BiometricsBloc>().add(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_wellness/common/res/colors.dart';
 
 @immutable
 class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
@@ -102,11 +103,11 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
     secondary: Color(0xFF20B2AA),
     accent: Color(0xFF48D1CC),
     background: Color(0xFFF0F9F9),
-    surface: Colors.white,
+    surface: AppColors.background,
     error: Color(0xFFB0272F),
     textPrimary: Color(0xFF004D4D),
     textSecondary: Color(0xFF5F7C7C),
-    cardColor: Colors.white,
+    cardColor: AppColors.background,
     divider: Color(0xFFB2DFDB),
     success: Color(0xFF00897B),
     info: Color(0xFF26C6DA),
