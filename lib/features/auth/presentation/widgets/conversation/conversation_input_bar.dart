@@ -122,9 +122,8 @@ class ConversationInputBar extends StatelessWidget {
                     child: isLoading
                         ? const Padding(
                             padding: EdgeInsets.all(12),
-                            child: CircularProgressIndicator(
+                            child: CircularProgressIndicator.adaptive(
                               strokeWidth: 2,
-                              color: AppColors.background,
                             ),
                           )
                         : Icon(

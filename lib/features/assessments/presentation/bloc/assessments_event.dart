@@ -13,6 +13,14 @@ class LoadAssessmentsEvent extends AssessmentsEvent {
   List<Object?> get props => [userGender];
 }
 
+class SearchAssessmentsEvent extends AssessmentsEvent {
+  /// Empty string clears the filter and restores the full list.
+  final String query;
+  const SearchAssessmentsEvent(this.query);
+  @override
+  List<Object?> get props => [query];
+}
+
 class StartAssessmentsEvent extends AssessmentsEvent {
   final String slug;
   const StartAssessmentsEvent(this.slug);

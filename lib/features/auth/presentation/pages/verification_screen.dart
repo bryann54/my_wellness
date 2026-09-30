@@ -109,7 +109,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
         builder: (context, state) {
           final pending = widget.pending ?? state.pendingSignup;
           if (pending == null) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator.adaptive());
           }
 
           final isPhone = pending.channel == SignupChannel.phone;

@@ -14,7 +14,7 @@ class CompleteLoading extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CircularProgressIndicator(color: cs.primary),
+            CircularProgressIndicator.adaptive(),
             const SizedBox(height: 20),
             Text(
               AppLocalizations.getString(context, 'assessment.loadingResult'),

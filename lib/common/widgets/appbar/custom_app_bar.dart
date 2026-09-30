@@ -53,7 +53,7 @@ class CustomAppBar extends StatelessWidget {
             username: state.profile?.displayName ?? '',
             title: title,
             actions: [
-              if (!isTabRoot && context.router.canPop()) const _BackButton(),
+              if (!isTabRoot && context.router.canPop()) 
               if (actions != null) ...actions!,
             ],
             expandedHeight: resolvedExpanded,
@@ -61,23 +61,6 @@ class CustomAppBar extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-class _BackButton extends StatelessWidget {
-  const _BackButton();
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: () => context.router.maybePop(),
-      icon: const Icon(
-        Icons.arrow_back_ios_new_rounded,
-        color: Colors.white,
-        size: 20,
-      ),
-      tooltip: MaterialLocalizations.of(context).backButtonTooltip,
     );
   }
 }

@@ -176,7 +176,9 @@ class _AssessmentBmiStepState extends State<AssessmentBmiStep> {
                 ? const SizedBox(
                     width: 18,
                     height: 18,
-                    child: CircularProgressIndicator.adaptive(strokeWidth: 2),
+                    child: CircularProgressIndicator.adaptive(
+                      strokeWidth: 2,
+                    ),
                   )
                 : Text(
                     AppLocalizations.getString(context, 'common.continue'),

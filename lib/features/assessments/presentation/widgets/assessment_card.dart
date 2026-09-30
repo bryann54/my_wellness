@@ -8,61 +8,87 @@ import 'package:my_wellness/features/assessments/domain/entities/assessment_summ
 class AssessmentCard extends StatelessWidget {
   final AssessmentSummary summary;
   final VoidCallback onTap;
+  final String? statusLabel;
+  final bool isRecommended;
 
-  const AssessmentCard({super.key, required this.summary, required this.onTap});
+  const AssessmentCard({
+    super.key,
+    required this.summary,
+    required this.onTap,
+    this.statusLabel,
+    this.isRecommended = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final style = CategoryStyle.forCategory(summary.category);
 
+    final borderColor = isRecommended
+       ? cs.primary.withValues(alpha: 0.25)
+        : cs.outlineVariant.withValues(alpha: 0.6);
+    final borderWidth = isRecommended ? 1.4 : 1.0;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Material(
-        color: cs.onPrimaryContainer.withValues(alpha: 0.07),
-        borderRadius: BorderRadius.circular(12),
+        color: cs.onPrimaryContainer.withValues(alpha: .05),
+        borderRadius: BorderRadius.circular(14),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
           child: Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: cs.outlineVariant.withValues(alpha: 0.6),
-              ),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: borderColor, width: borderWidth),
             ),
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+            padding: const EdgeInsets.all(14),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Hero(
                   tag: assessmentIconTag(summary.slug),
                   flightShuttleBuilder: iconShuttleBuilder,
-                  child: CategoryIconTile(style: style, size: 44),
+                  child: CategoryIconTile(style: style, size: 40),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Hero(
-                        tag: assessmentTitleTag(summary.slug),
-                        flightShuttleBuilder: textShuttleBuilder,
-                        child: Material(
-                          color: Colors.transparent,
-                          child: Text(
-                            summary.shortTitle,
-                            style: GoogleFonts.inter(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w700,
-                              height: 1.25,
-                              color: cs.onSurface,
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Hero(
+                              tag: assessmentTitleTag(summary.slug),
+                              flightShuttleBuilder: textShuttleBuilder,
+                              child: Material(
+                                color: Colors.transparent,
+                                child: Text(
+                                  summary.shortTitle,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                    height: 1.25,
+                                    color: cs.onSurface,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+                          if (statusLabel != null) ...[
+                            const SizedBox(width: 8),
+                            _StatusPill(
+                              label: statusLabel!,
+                              color: style.color,
+                            ),
+                          ],
+                        ],
                       ),
                       const SizedBox(height: 4),
-                      // ── Tagline ─────────────────────────────────
                       Hero(
                         tag: assessmentTaglineTag(summary.slug),
                         flightShuttleBuilder: textShuttleBuilder,
@@ -70,36 +96,12 @@ class AssessmentCard extends StatelessWidget {
                           color: Colors.transparent,
                           child: Text(
                             summary.tagline,
-                            maxLines: 3,
+                            maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: GoogleFonts.inter(
-                              fontSize: 13,
-                              height: 1.45,
+                              fontSize: 12.5,
+                              height: 1.4,
                               color: cs.onSurface.withValues(alpha: 0.65),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: cs.outlineVariant.withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                        child: Text(
-                          AppLocalizations.getString(
-                            context,
-                            'assessment.takesFiveToTen',
-                          ),
-                          style: GoogleFonts.inter(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.tealExtraDark.withValues(
-                              alpha: 0.7,
                             ),
                           ),
                         ),
@@ -107,14 +109,44 @@ class AssessmentCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(width: 8),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  color: cs.onSurface.withValues(alpha: 0.35),
+                const SizedBox(width: 6),
+                Padding(
+                  padding: const EdgeInsets.only(top: 2),
+                  child: Icon(
+                    Icons.chevron_right_rounded,
+                    size: 20,
+                    color: cs.onSurface.withValues(alpha: 0.3),
+                  ),
                 ),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StatusPill extends StatelessWidget {
+  final String label;
+  final Color color;
+  const _StatusPill({required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.inter(
+          fontSize: 10.5,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.3,
+          color: color,
         ),
       ),
     );
@@ -157,7 +189,6 @@ Widget textShuttleBuilder(
 
 class CategoryIconTile extends StatelessWidget {
   final CategoryStyle style;
-
   final double size;
   final double? glyphSize;
   final double radius;
@@ -167,7 +198,7 @@ class CategoryIconTile extends StatelessWidget {
     required this.style,
     this.size = 44,
     this.glyphSize,
-    this.radius = 12,
+    this.radius = 11,
   });
 
   @override
@@ -177,7 +208,10 @@ class CategoryIconTile extends StatelessWidget {
       height: size * 1.25,
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [style.color, style.color.withValues(alpha: 0.75)],
+          colors: [
+            style.color.withValues(alpha: 0.92),
+            style.color.withValues(alpha: 0.72),
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),

@@ -38,7 +38,9 @@ class SplashBiometricPrompt extends StatelessWidget {
                   ? const SizedBox(
                       width: 28,
                       height: 28,
-                      child: CircularProgressIndicator(strokeWidth: 2.5),
+                      child: CircularProgressIndicator.adaptive(
+                        strokeWidth: 2.5,
+                      ),
                     )
                   : FaIcon(
                       FontAwesomeIcons.fingerprint,

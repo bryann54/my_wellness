@@ -203,7 +203,9 @@ class _ActionBar extends StatelessWidget {
                   ? const SizedBox(
                       width: 18,
                       height: 18,
-                      child: CircularProgressIndicator.adaptive(strokeWidth: 2),
+                      child: CircularProgressIndicator.adaptive(
+                        strokeWidth: 2,
+                      ),
                     )
                   : Text(
                       primaryLabel,

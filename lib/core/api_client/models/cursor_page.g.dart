@@ -14,3 +14,12 @@ CursorPage<T> _$CursorPageFromJson<T>(
   previous: json['previous'] as String?,
   results: (json['results'] as List<dynamic>).map(fromJsonT).toList(),
 );
+
+Map<String, dynamic> _$CursorPageToJson<T>(
+  CursorPage<T> instance,
+  Object? Function(T value) toJsonT,
+) => <String, dynamic>{
+  'next': instance.next,
+  'previous': instance.previous,
+  'results': instance.results.map(toJsonT).toList(),
+};

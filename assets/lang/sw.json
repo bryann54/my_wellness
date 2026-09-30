@@ -67,8 +67,24 @@
     "myVitals":"Vitali & Huduma za Kudumu"
   },
 "assessment": {
-  "title": "Tathmini za Afya",
-   "titlebot":"Tathmini",
+ "title": "Uchunguzi wa Afya",
+    "titlebot": "Uchunguzi",
+    "searchHint": "Tafuta uchunguzi",
+
+    "forYouSectionTitle": "Kwa ajili yako",
+    "recommendedPill": "Mpya",
+
+    "searchResultCountOne": "Matokeo 1 kwa “{query}”",
+    "searchResultCountMany": "Matokeo {count} kwa “{query}”",
+
+    "emptySearchTitle": "Hakuna uchunguzi unaolingana na “{query}”",
+    "emptySearchBody": "Jaribu neno lingine, au safisha utafutaji.",
+    "emptySearchClear": "Safisha utafutaji",
+
+    "emptyNoResultsTitle": "Hakuna uchunguzi unaopatikana",
+    "emptyNoResultsBody": "Vuta chini ili kuonyesha upya.",
+
+    "railSeeAll": "Ona zote",
    "completeTitle":"completed",
   "understandingTitle": "Kuelewa tathmini hii",
   "begin": "Anza tathmini",

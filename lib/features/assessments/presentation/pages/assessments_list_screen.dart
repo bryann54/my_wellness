@@ -1,16 +1,16 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:my_wellness/common/helpers/app_router.gr.dart';
-import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
+import 'package:my_wellness/common/utils/debouncer.dart';
 import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
 import 'package:my_wellness/core/di/injector.dart';
 import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
-import 'package:my_wellness/features/assessments/domain/entities/assessment_summary.dart';
 import 'package:my_wellness/features/assessments/presentation/bloc/assessments_bloc.dart';
-import 'package:my_wellness/features/assessments/presentation/widgets/assessment_card.dart';
+import 'package:my_wellness/features/assessments/presentation/widgets/assessment_empty_state.dart';
+import 'package:my_wellness/features/assessments/presentation/widgets/assessment_list_body.dart';
+import 'package:my_wellness/features/assessments/presentation/widgets/assessment_search_bar_bottom.dart';
+import 'package:my_wellness/features/assessments/presentation/widgets/assessment_search_result_count.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_toast_listener.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessments_access_gate.dart';
 
@@ -33,8 +33,40 @@ class AssessmentsListScreen extends StatelessWidget {
   }
 }
 
-class _AssessmentsListBody extends StatelessWidget {
+class _AssessmentsListBody extends StatefulWidget {
   const _AssessmentsListBody();
+
+  @override
+  State<_AssessmentsListBody> createState() => _AssessmentsListBodyState();
+}
+
+class _AssessmentsListBodyState extends State<_AssessmentsListBody> {
+  final _searchDebouncer = Debouncer(milliseconds: 250);
+  final _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchDebouncer.cancel();
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged(String q) {
+    _searchDebouncer.run(() {
+      if (!mounted) return;
+      context.read<AssessmentsBloc>().add(SearchAssessmentsEvent(q));
+    });
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    _searchDebouncer.cancel();
+    context.read<AssessmentsBloc>().add(const SearchAssessmentsEvent(''));
+  }
+
+  Future<void> _refresh() async {
+    context.read<AssessmentsBloc>().add(const LoadAssessmentsEvent());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,13 +77,25 @@ class _AssessmentsListBody extends StatelessWidget {
             CustomAppBar(
               title: AppLocalizations.getString(context, 'assessment.title'),
               isHome: false,
+              isTabRoot: true,
+              bottom: AssessmentSearchBarBottom(
+                controller: _searchController,
+                hintText: AppLocalizations.getString(
+                  context,
+                  'assessment.searchHint',
+                ),
+                onChanged: _onSearchChanged,
+              ),
             ),
           ],
           body: BlocBuilder<AssessmentsBloc, AssessmentsState>(
             builder: (context, state) {
               if (state.status == AssessmentStatus.loading) {
-                return const Center(child: CircularProgressIndicator());
+                return const Center(
+                  child: CircularProgressIndicator.adaptive(),
+                );
               }
+
               if (state.status == AssessmentStatus.error) {
                 return Center(
                   child: Padding(
@@ -60,80 +104,47 @@ class _AssessmentsListBody extends StatelessWidget {
                   ),
                 );
               }
+
               if (state.access != null && !state.access!.hasAccess) {
                 return const AssessmentsBlockedView();
               }
 
+              final items = state.filteredAssessments;
+              final isSearching = state.searchQuery.trim().isNotEmpty;
+
+              if (items.isEmpty) {
+                return RefreshIndicator.adaptive(
+                  onRefresh: _refresh,
+                  child: AssessmentEmptyState(
+                    query: state.searchQuery,
+                    isSearching: isSearching,
+                    onClear: _clearSearch,
+                  ),
+                );
+              }
+
               return RefreshIndicator.adaptive(
-                onRefresh: () async {
-                  context.read<AssessmentsBloc>().add(
-                    const LoadAssessmentsEvent(),
-                  );
-                },
-                child: _GroupedAssessmentList(assessments: state.assessments),
+                onRefresh: _refresh,
+                child: Column(
+                  children: [
+                    if (isSearching)
+                      AssessmentSearchResultCount(
+                        count: items.length,
+                        query: state.searchQuery,
+                      ),
+                    Expanded(
+                      child: AssessmentListBody(
+                        assessments: items,
+                        searchQuery: state.searchQuery,
+                      ),
+                    ),
+                  ],
+                ),
               );
             },
           ),
         ),
       ),
-    );
-  }
-}
-
-class _GroupedAssessmentList extends StatelessWidget {
-  final List<AssessmentSummary> assessments;
-  const _GroupedAssessmentList({required this.assessments});
-
-  @override
-  Widget build(BuildContext context) {
-    final Map<String, List<AssessmentSummary>> grouped = {};
-    for (final a in assessments) {
-      grouped.putIfAbsent(a.category, () => []).add(a);
-    }
-    final categories = grouped.keys.toList(growable: false);
-
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
-      itemCount: categories.length,
-      itemBuilder: (context, i) {
-        final category = categories[i];
-        final items = grouped[category]!;
-        final style = CategoryStyle.forCategory(category);
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: EdgeInsets.only(
-                top: i == 0 ? 4 : 24,
-                bottom: 10,
-                left: 4,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    style.localizedLabel(context, category).toUpperCase(),
-                    style: GoogleFonts.inter(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.0,
-                      color: AppColors.shadowColor.withValues(alpha: 0.9),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            for (final a in items)
-              AssessmentCard(
-                summary: a,
-                onTap: () =>
-                    context.router.push(AssessmentIntroRoute(slug: a.slug)),
-              ),
-            const SizedBox(height: 4),
-          ],
-        );
-      },
     );
   }
 }

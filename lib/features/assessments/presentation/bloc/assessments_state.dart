@@ -7,7 +7,17 @@ enum ToastType { success, error, warning, info }
 class AssessmentsState extends Equatable {
   final AssessmentStatus status;
   final VitalsAccess? access;
+
+  /// Full list as returned by the backend (already filtered by gender).
   final List<AssessmentSummary> assessments;
+
+  /// `assessments` filtered by [searchQuery]. When [searchQuery] is empty,
+  /// this mirrors [assessments] exactly.
+  final List<AssessmentSummary> filteredAssessments;
+
+  /// Trimmed raw query typed by the user. Empty string == no active search.
+  final String searchQuery;
+
   final AssessmentDefinition? definition;
   final AssessmentSession? session;
   final List<AssessmentAnswer> answers;
@@ -27,6 +37,8 @@ class AssessmentsState extends Equatable {
     this.status = AssessmentStatus.initial,
     this.access,
     this.assessments = const [],
+    this.filteredAssessments = const [],
+    this.searchQuery = '',
     this.definition,
     this.session,
     this.answers = const [],
@@ -47,6 +59,8 @@ class AssessmentsState extends Equatable {
     AssessmentStatus? status,
     VitalsAccess? access,
     List<AssessmentSummary>? assessments,
+    List<AssessmentSummary>? filteredAssessments,
+    String? searchQuery,
     AssessmentDefinition? definition,
     AssessmentSession? session,
     List<AssessmentAnswer>? answers,
@@ -71,6 +85,8 @@ class AssessmentsState extends Equatable {
       status: status ?? this.status,
       access: access ?? this.access,
       assessments: assessments ?? this.assessments,
+      filteredAssessments: filteredAssessments ?? this.filteredAssessments,
+      searchQuery: searchQuery ?? this.searchQuery,
       definition: definition ?? this.definition,
       session: clearSession ? null : (session ?? this.session),
       answers: answers ?? this.answers,
@@ -93,6 +109,8 @@ class AssessmentsState extends Equatable {
     status,
     access,
     assessments,
+    filteredAssessments,
+    searchQuery,
     definition,
     session,
     answers,

@@ -52,7 +52,9 @@ class AuthButton extends StatelessWidget {
               ? SizedBox(
                   height: 22,
                   width: 22,
-                  child: CircularProgressIndicator.adaptive(strokeWidth: 2.5),
+                  child: CircularProgressIndicator.adaptive(
+                    strokeWidth: 2.5,
+                  ),
                 )
               : Text(
                   text,

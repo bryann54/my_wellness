@@ -60,7 +60,7 @@ class _AssessmentResultBodyState extends State<_AssessmentResultBody> {
           ),
         ],
         body: score == null
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(child: CircularProgressIndicator.adaptive())
             : ListView(
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 48),
                 children: [

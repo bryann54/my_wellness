@@ -67,7 +67,23 @@
   },
   "assessment": {
     "title": "Health Assessments",
-    "titlebot":"Assessments",
+    "titlebot": "Screenings",
+    "searchHint": "Search screenings",
+
+    "forYouSectionTitle": "For you",
+    "recommendedPill": "New",
+
+    "searchResultCountOne": "1 result for “{query}”",
+    "searchResultCountMany": "{count} results for “{query}”",
+
+    "emptySearchTitle": "No screenings match “{query}”",
+    "emptySearchBody": "Try a different term, or clear the search.",
+    "emptySearchClear": "Clear search",
+
+    "emptyNoResultsTitle": "No screenings available",
+    "emptyNoResultsBody": "Pull down to refresh.",
+
+    "railSeeAll": "See all",
     "completeTitle":"completed",
   "understandingTitle": "Understanding this assessment",
   "begin": "Begin assessment",

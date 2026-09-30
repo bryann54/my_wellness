@@ -43,7 +43,7 @@ class AppBarInnerContent extends StatelessWidget {
           top: statusBarHeight,
           left: 56,
           right: 56,
-          bottom: 0,
+          bottom: bottomHeight + CustomAppBar.curveExtra,
           child: Center(
             child: Text(
               title,

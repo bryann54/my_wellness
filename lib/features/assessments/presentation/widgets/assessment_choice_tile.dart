@@ -4,7 +4,7 @@ import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_option.dart';
 
 class AssessmentChoiceTile extends StatelessWidget {
-  static const warm = Color(0xFFF59E0B);
+  static const warm =AppColors.primaryColor;
 
   final AssessmentOption option;
   final bool selected;
