@@ -92,7 +92,8 @@ class _AppSearchBarState extends State<AppSearchBar> {
         : cs.outlineVariant.withValues(alpha: 0.5);
 
     return Padding(
-      padding: widget.padding ??
+      padding:
+          widget.padding ??
           const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
@@ -155,7 +156,9 @@ class _AppSearchBarState extends State<AppSearchBar> {
                         ),
                         border: InputBorder.none,
                         isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 14,
+                        ),
                       ),
                     ),
                   ),

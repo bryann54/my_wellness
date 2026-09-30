@@ -99,10 +99,7 @@ class AssessmentListBody extends StatelessWidget {
         // Multi-item → horizontal rail.
         return Padding(
           padding: const EdgeInsets.only(bottom: 24),
-          child: AssessmentCategoryRail(
-            category: category,
-            items: items,
-          ),
+          child: AssessmentCategoryRail(category: category, items: items),
         );
       },
     );

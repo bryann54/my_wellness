@@ -6,16 +6,14 @@ class CategoryHeaderIcon extends StatelessWidget {
   final CategoryStyle style;
   final double size;
 
-  const CategoryHeaderIcon({
-    super.key,
-    required this.style,
-    this.size = 22,
-  });
+  const CategoryHeaderIcon({super.key, required this.style, this.size = 22});
 
   @override
   Widget build(BuildContext context) {
-    return FaIcon(style.icon, size: size,
-     color: style.color.withValues(alpha: 0.5)
-     );
+    return FaIcon(
+      style.icon,
+      size: size,
+      color: style.color.withValues(alpha: 0.5),
+    );
   }
 }

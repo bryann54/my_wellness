@@ -1,18 +1,12 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:my_wellness/common/widgets/shimmer.dart';
+
 class ShimmerBox extends StatelessWidget {
   final double? width;
   final double height;
   final double radius;
 
-  const ShimmerBox({
-    super.key,
-    this.width,
-    this.height = 16,
-    this.radius = 8,
-  });
+  const ShimmerBox({super.key, this.width, this.height = 16, this.radius = 8});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +15,7 @@ class ShimmerBox extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: cs.surfaceContainerHighest,
+        color: cs.surfaceContainerHighest.withValues(alpha: .5),
         borderRadius: BorderRadius.circular(radius),
       ),
     ).withShimmer();
@@ -32,7 +26,7 @@ class ShimmerLine extends StatelessWidget {
   final double? width;
   final double height;
   const ShimmerLine({super.key, this.width, this.height = 14})
-      : assert(height > 0);
+    : assert(height > 0);
 
   @override
   Widget build(BuildContext context) =>
@@ -82,11 +76,8 @@ class ShimmerCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => ShimmerBox(
-        width: width,
-        height: height,
-        radius: radius,
-      );
+  Widget build(BuildContext context) =>
+      ShimmerBox(width: width, height: height, radius: radius);
 }
 
 class ShimmerCircle extends StatelessWidget {
@@ -97,6 +88,7 @@ class ShimmerCircle extends StatelessWidget {
   Widget build(BuildContext context) =>
       ShimmerBox(width: size, height: size, radius: size / 2);
 }
+
 class ShimmerListTile extends StatelessWidget {
   const ShimmerListTile({super.key});
 

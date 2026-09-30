@@ -69,7 +69,10 @@
     "title": "Health Assessments",
     "titlebot": "Screenings",
     "searchHint": "Search screenings",
-
+ "completedLabel": "Completed",
+  "nextStep": "Next step",
+  "noActionNeeded": "No further action needed. Keep up the healthy habits.",
+  "rateThisScreening": "Rate this screening",
     "forYouSectionTitle": "For you",
     "recommendedPill": "New",
 

@@ -30,9 +30,7 @@ class RestoreButton extends StatelessWidget {
                 ? const SizedBox(
                     width: 14,
                     height: 14,
-                    child: CircularProgressIndicator.adaptive(
-                      strokeWidth: 2,
-                    ),
+                    child: CircularProgressIndicator.adaptive(strokeWidth: 2),
                   )
                 : Text(
                     'Restore Purchases',

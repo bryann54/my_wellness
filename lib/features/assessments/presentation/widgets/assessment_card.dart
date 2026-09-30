@@ -25,7 +25,7 @@ class AssessmentCard extends StatelessWidget {
     final style = CategoryStyle.forCategory(summary.category);
 
     final borderColor = isRecommended
-       ? cs.primary.withValues(alpha: 0.25)
+        ? cs.primary.withValues(alpha: 0.25)
         : cs.outlineVariant.withValues(alpha: 0.6);
     final borderWidth = isRecommended ? 1.4 : 1.0;
 

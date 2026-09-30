@@ -63,11 +63,15 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
 
     if (state.status == AssessmentStatus.completed) {
       _scheduleCompleteRedirect();
-      return const Scaffold(body: Center(child: CircularProgressIndicator.adaptive()));
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator.adaptive()),
+      );
     }
 
     if (session == null || def == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator.adaptive()));
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator.adaptive()),
+      );
     }
 
     if (session.currentIndex != _lastIndex) {
@@ -84,7 +88,9 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
           bloc.add(const FetchScoreEvent());
         }
       });
-      return const Scaffold(body: Center(child: CircularProgressIndicator.adaptive()));
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator.adaptive()),
+      );
     }
 
     return Scaffold(

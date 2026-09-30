@@ -53,8 +53,8 @@ class CustomAppBar extends StatelessWidget {
             username: state.profile?.displayName ?? '',
             title: title,
             actions: [
-              if (!isTabRoot && context.router.canPop()) 
-              if (actions != null) ...actions!,
+              if (!isTabRoot && context.router.canPop())
+                if (actions != null) ...actions!,
             ],
             expandedHeight: resolvedExpanded,
             bottom: bottom,

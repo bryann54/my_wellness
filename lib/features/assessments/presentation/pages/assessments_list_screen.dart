@@ -9,6 +9,7 @@ import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart
 import 'package:my_wellness/features/assessments/presentation/bloc/assessments_bloc.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_empty_state.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_list_body.dart';
+import 'package:my_wellness/features/assessments/presentation/widgets/assessment_list_skeleton.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_search_bar_bottom.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_search_result_count.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_toast_listener.dart';
@@ -91,9 +92,7 @@ class _AssessmentsListBodyState extends State<_AssessmentsListBody> {
           body: BlocBuilder<AssessmentsBloc, AssessmentsState>(
             builder: (context, state) {
               if (state.status == AssessmentStatus.loading) {
-                return const Center(
-                  child: CircularProgressIndicator.adaptive(),
-                );
+                return const AssessmentListSkeleton();
               }
 
               if (state.status == AssessmentStatus.error) {

@@ -70,7 +70,10 @@
  "title": "Uchunguzi wa Afya",
     "titlebot": "Uchunguzi",
     "searchHint": "Tafuta uchunguzi",
-
+ "completedLabel": "Imekamilika",
+  "nextStep": "Hatua inayofuata",
+  "noActionNeeded": "Hakuna hatua zaidi inayohitajika. Endelea na tabia za afya njema.",
+  "rateThisScreening": "Toa maoni kuhusu uchunguzi huu",
     "forYouSectionTitle": "Kwa ajili yako",
     "recommendedPill": "Mpya",
 

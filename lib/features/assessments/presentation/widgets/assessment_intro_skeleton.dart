@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:my_wellness/common/widgets/shimmer_box.dart';
 
@@ -27,7 +26,7 @@ class AssessmentIntroSkeleton extends StatelessWidget {
           ShimmerParagraph(lines: 4),
 
           SizedBox(height: 28),
-          ShimmerCard(height: 78), 
+          ShimmerCard(height: 78),
 
           SizedBox(height: 36),
           ShimmerCard(height: 50, radius: 12),
