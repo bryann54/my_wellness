@@ -1,23 +1,27 @@
-// lib/features/auth/presentation/pages/register_screen.dart
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
+import 'package:my_wellness/common/notifiers/locale_provider.dart';
 import 'package:my_wellness/common/res/l10n.dart';
-import 'package:my_wellness/common/utils/auth_controllers_manager.dart';
-import 'package:my_wellness/common/utils/auth_validators.dart';
+import 'package:my_wellness/common/widgets/step_progress.dart';
+import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
+import 'package:my_wellness/common/widgets/language_selector_row.dart';
 import 'package:my_wellness/features/auth/data/models/signup_request_model.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_event.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_state.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/auth_state_listener.dart';
-import 'package:my_wellness/features/auth/presentation/widgets/password_strength_indicator.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/shared/auth_bottom_bar.dart';
-import 'package:my_wellness/features/auth/presentation/widgets/shared/auth_button.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/shared/auth_header.dart';
-import 'package:my_wellness/features/auth/presentation/widgets/shared/auth_text_field.dart';
+import 'package:my_wellness/features/geography/domain/entities/county.dart';
+import 'package:my_wellness/features/geography/domain/entities/sub_county.dart';
+import 'package:my_wellness/features/geography/presentation/bloc/geography_bloc.dart';
+import 'package:my_wellness/features/geography/presentation/pages/steps/register_step_credentials.dart';
+import 'package:my_wellness/features/geography/presentation/pages/steps/register_step_identity.dart';
+import 'package:my_wellness/features/geography/presentation/pages/steps/register_step_location.dart';
+import 'package:my_wellness/features/geography/presentation/pages/steps/register_step_submit.dart';
+import 'package:provider/provider.dart';
 
 @RoutePage()
 class RegisterScreen extends StatefulWidget {
@@ -28,41 +32,51 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  late final RegisterControllersManager _manager;
-  bool _isPasswordVisible = false;
-  bool _isConfirmPasswordVisible = false;
+  static const _totalSteps = 4;
+
+  final _pageController = PageController();
+  int _step = 0;
+  String? _email;
+  String? _phone;
+  String? _password;
+  IdentityDraft? _identity;
+  County? _county;
+  SubCounty? _subCounty;
 
   @override
   void initState() {
     super.initState();
-    _manager = RegisterControllersManager(onFormChanged: () => setState(() {}));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<GeographyBloc>().add(const LoadAllGeographyEvent());
+    });
   }
 
   @override
   void dispose() {
-    _manager.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
-  void _handleRegister() {
-    if (!_manager.validate()) return;
-
-    final request = SignupRequestModel(
-      email: _manager.email.trim().isEmpty ? null : _manager.email.trim(),
-      phone: _manager.phone.trim().isEmpty ? null : _manager.phone.trim(),
-      password: _manager.password,
-      firstName: _manager.firstName.trim(),
-      surname: _manager.surname.trim(),
-      gender: _manager.gender, // 'male' | 'female' | 'other' | null
-      dateOfBirth: _manager.dateOfBirth == null
-          ? null
-          : _isoDate(_manager.dateOfBirth!),
-      nationalIdNumber: _manager.nationalIdNumber.trim().isEmpty
-          ? null
-          : _manager.nationalIdNumber.trim(),
+  void _goTo(int step) {
+    setState(() => _step = step);
+    _pageController.animateToPage(
+      step,
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeOut,
     );
+  }
 
-    context.read<AuthBloc>().add(SignUpEvent(request));
+  void _next() {
+    if (_step < _totalSteps - 1) _goTo(_step + 1);
+  }
+
+  void _back() {
+    if (_step > 0) {
+      _goTo(_step - 1);
+    } else {
+      context.router.maybePop();
+    }
   }
 
   static String _isoDate(DateTime d) =>
@@ -70,37 +84,77 @@ class _RegisterScreenState extends State<RegisterScreen> {
       '${d.month.toString().padLeft(2, '0')}-'
       '${d.day.toString().padLeft(2, '0')}';
 
-  Future<void> _pickDate() async {
-    final now = DateTime.now();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _manager.dateOfBirth ?? DateTime(now.year - 25),
-      firstDate: DateTime(now.year - 120),
-      lastDate: now,
+  void _submit() {
+    final identity = _identity;
+    if (identity == null) return;
+
+    final request = SignupRequestModel(
+      email: (_email ?? '').trim().isEmpty ? null : _email!.trim(),
+      phone: (_phone ?? '').trim().isEmpty ? null : _phone!.trim(),
+      password: _password ?? '',
+      firstName: identity.firstName,
+      surname: identity.surname,
+      gender: identity.gender,
+      dateOfBirth: identity.dateOfBirth == null
+          ? null
+          : _isoDate(identity.dateOfBirth!),
+      nationalIdNumber: identity.idNumber,
+      idType: identity.idType,
+      identityVerificationId: identity.verificationId,
+      countyId: _county?.id,
+      subCountyId: _subCounty?.id,
     );
-    if (picked != null) _manager.setDateOfBirth(picked);
+
+    context.read<AuthBloc>().add(SignUpEvent(request));
+  }
+
+  void _handleAccountState(BuildContext context, AccountState state) {
+    final localeProvider = Provider.of<LocaleProvider>(context, listen: false);
+    if (state.currentLang != localeProvider.locale.languageCode) {
+      localeProvider.setLocale(Locale(state.currentLang));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final strength = AuthValidators.calculatePasswordStrength(
-      _manager.password,
+    final cs = Theme.of(context).colorScheme;
+    final isLoading = context.select<AuthBloc, bool>(
+      (b) => b.state.status == AuthStatus.loading,
     );
 
     return Scaffold(
-      body: AuthStateListener(
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            child: Form(
-              key: _manager.formKey,
-              autovalidateMode: _manager.showErrors
-                  ? AutovalidateMode.onUserInteraction
-                  : AutovalidateMode.disabled,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  AuthHeader(
+      backgroundColor: cs.surface,
+      body: BlocListener<AccountBloc, AccountState>(
+        listenWhen: (prev, curr) => prev.currentLang != curr.currentLang,
+        listener: _handleAccountState,
+        child: AuthStateListener(
+          isRegistration: true,
+          child: SafeArea(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
+                  child: Row(
+                    children: [
+                      if (_step > 0)
+                        IconButton(
+                          icon: const Icon(Icons.arrow_back_rounded),
+                          onPressed: _back,
+                          tooltip: AppLocalizations.getString(
+                            context,
+                            'common.back',
+                          ),
+                        )
+                      else
+                        const SizedBox(width: 48),
+                      const Spacer(),
+                      const LanguageSelectorCompact(),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 4, 24, 0),
+                  child: AuthHeader(
                     title: AppLocalizations.getString(
                       context,
                       'auth.createAccount',
@@ -110,199 +164,80 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       'auth.setupAccount',
                     ),
                   ),
-                  const SizedBox(height: 40),
+                ),
 
-                  // ── Email ─────────────────────────────────────────────────
-                  AuthTextField(
-                    controller: _manager.emailController,
-                    label: AppLocalizations.getString(context, 'auth.email'),
-                    icon: Icons.email_outlined,
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (v) => AuthValidators.validateEmail(context, v),
-                  ).animate().fadeIn().slideX(begin: 0.1, end: 0),
-                  const SizedBox(height: 16),
-
-                  // ── Phone ─────────────────────────────────────────────────
-                  AuthTextField(
-                    controller: _manager.phoneController,
-                    label: AppLocalizations.getString(
-                      context,
-                      'auth.phoneNumber',
-                    ),
-                    icon: Icons.phone_outlined,
-                    keyboardType: TextInputType.phone,
-                    validator: (v) => AuthValidators.validatePhone(context, v),
-                  ).animate(delay: 100.ms).fadeIn().slideX(begin: 0.1, end: 0),
-                  const SizedBox(height: 16),
-
-                  // ── First name ────────────────────────────────────────────
-                  AuthTextField(
-                    controller: _manager.firstNameController,
-                    label: AppLocalizations.getString(
-                      context,
-                      'auth.firstName',
-                    ),
-                    icon: Icons.badge_outlined,
-                    validator: (v) =>
-                        (v == null || v.trim().isEmpty) ? 'Required' : null,
-                  ).animate(delay: 150.ms).fadeIn().slideX(begin: 0.1, end: 0),
-                  const SizedBox(height: 16),
-
-                  // ── Surname ───────────────────────────────────────────────
-                  AuthTextField(
-                    controller: _manager.surnameController,
-                    label: AppLocalizations.getString(context, 'auth.surname'),
-                    icon: Icons.badge_outlined,
-                    validator: (v) =>
-                        (v == null || v.trim().isEmpty) ? 'Required' : null,
-                  ).animate(delay: 200.ms).fadeIn().slideX(begin: 0.1, end: 0),
-                  const SizedBox(height: 16),
-
-                  // ── Gender ────────────────────────────────────────────────
-                  DropdownButtonFormField<String>(
-                    initialValue: _manager.gender,
-                    decoration: InputDecoration(
-                      labelText: AppLocalizations.getString(
-                        context,
-                        'auth.gender',
-                      ),
-                      prefixIcon: const Icon(Icons.wc_outlined),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    items: const [
-                      DropdownMenuItem(value: 'male', child: Text('Male')),
-                      DropdownMenuItem(value: 'female', child: Text('Female')),
-                      DropdownMenuItem(value: 'other', child: Text('Other')),
-                    ],
-                    onChanged: (v) => _manager.setGender(v),
-                  ).animate(delay: 250.ms).fadeIn().slideX(begin: 0.1, end: 0),
-                  const SizedBox(height: 16),
-
-                  // ── Date of birth ─────────────────────────────────────────
-                  InkWell(
-                    onTap: _pickDate,
-                    child: InputDecorator(
-                      decoration: InputDecoration(
-                        labelText: AppLocalizations.getString(
-                          context,
-                          'auth.dateOfBirth',
-                        ),
-                        prefixIcon: const Icon(Icons.calendar_today_outlined),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(
-                        _manager.dateOfBirth == null
-                            ? 'Select date'
-                            : _isoDate(_manager.dateOfBirth!),
-                      ),
-                    ),
-                  ).animate(delay: 300.ms).fadeIn().slideX(begin: 0.1, end: 0),
-                  const SizedBox(height: 16),
-
-                  // ── National ID ───────────────────────────────────────────
-                  AuthTextField(
-                    controller: _manager.nationalIdController,
-                    label: AppLocalizations.getString(
-                      context,
-                      'auth.nationalIdNumber',
-                    ),
-                    icon: Icons.credit_card_outlined,
-                    keyboardType: TextInputType.number,
-                    validator: (v) => null, // optional
-                  ).animate(delay: 350.ms).fadeIn().slideX(begin: 0.1, end: 0),
-                  const SizedBox(height: 16),
-
-                  // ── Password ──────────────────────────────────────────────
-                  AuthTextField(
-                    controller: _manager.passwordController,
-                    label: AppLocalizations.getString(context, 'auth.password'),
-                    icon: Icons.lock_outline,
-                    isPassword: true,
-                    isPasswordVisible: _isPasswordVisible,
-                    onVisibilityToggle: () => setState(
-                      () => _isPasswordVisible = !_isPasswordVisible,
-                    ),
-                    validator: (v) => AuthValidators.validatePassword(
-                      context,
-                      v,
-                      isStrict: true,
-                    ),
-                  ).animate(delay: 400.ms).fadeIn().slideX(begin: 0.1, end: 0),
-                  if (_manager.password.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: PasswordStrengthIndicator(strength: strength),
-                    ).animate().fadeIn(),
-                  const SizedBox(height: 16),
-
-                  // ── Confirm password ──────────────────────────────────────
-                  AuthTextField(
-                    controller: _manager.confirmPasswordController,
-                    label: AppLocalizations.getString(
-                      context,
-                      'auth.confirmPassword',
-                    ),
-                    icon: Icons.lock_outline,
-                    isPassword: true,
-                    isPasswordVisible: _isConfirmPasswordVisible,
-                    onVisibilityToggle: () => setState(
-                      () => _isConfirmPasswordVisible =
-                          !_isConfirmPasswordVisible,
-                    ),
-                    validator: (v) => AuthValidators.validateConfirmPassword(
-                      context,
-                      v,
-                      _manager.password,
-                    ),
-                  ).animate(delay: 450.ms).fadeIn().slideX(begin: 0.1, end: 0),
-
-                  const SizedBox(height: 32),
-                  BlocBuilder<AuthBloc, AuthState>(
-                    builder: (context, state) {
-                      final isReady =
-                          _manager.canAttemptRegister &&
-                          _manager.passwordsMatch &&
-                          state.status != AuthStatus.loading;
-
-                      return AuthButton(
-                        text: AppLocalizations.getString(
-                          context,
-                          'auth.createAccount',
-                        ),
-                        isEnabled: isReady,
-                        isLoading: state.status == AuthStatus.loading,
-                        onPressed: _handleRegister,
-                        heroTag: 'register_button',
-                      );
-                    },
+                const SizedBox(height: 24),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: StepProgress(
+                    currentStep: _step + 1,
+                    totalSteps: _totalSteps,
+                    label:
+                        AppLocalizations.getString(context, 'auth.stepProgress')
+                            .replaceFirst('{current}', '${_step + 1}')
+                            .replaceFirst('{total}', '$_totalSteps'),
                   ),
+                ),
 
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                const SizedBox(height: 20),
+                Expanded(
+                  child: PageView(
+                    controller: _pageController,
+                    physics: const NeverScrollableScrollPhysics(),
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.all(15.0),
-                        child: GestureDetector(
-                          onTap: () => context.router.push(
-                            ConversationalRegisterRoute(),
-                          ),
-                          child: Text(
-                            AppLocalizations.getString(
-                              context,
-                              'auth.preferAi',
-                            ),
-                            style: TextStyle(color: Colors.grey[600]),
-                          ),
+                      RegisterStepCredentials(
+                        initialEmail: _email,
+                        initialPhone: _phone,
+                        onContinue:
+                            ({
+                              required email,
+                              required phone,
+                              required password,
+                            }) {
+                              setState(() {
+                                _email = email;
+                                _phone = phone;
+                                _password = password;
+                              });
+                              _next();
+                            },
+                      ),
+                      RegisterStepIdentity(
+                        initial: _identity,
+                        onContinue: (draft) {
+                          setState(() => _identity = draft);
+                          _next();
+                        },
+                      ),
+                      RegisterStepLocation(
+                        initialCounty: _county,
+                        initialSubCounty: _subCounty,
+                        onContinue: ({required county, required subCounty}) {
+                          setState(() {
+                            _county = county;
+                            _subCounty = subCounty;
+                          });
+                          _next();
+                        },
+                      ),
+                      RegisterStepSubmit(
+                        summary: SubmitSummary(
+                          email: _email,
+                          phone: _phone,
+                          firstName: _identity?.firstName ?? '',
+                          surname: _identity?.surname ?? '',
+                          gender: _identity?.gender,
+                          dateOfBirth: _identity?.dateOfBirth,
+                          county: _county,
+                          subCounty: _subCounty,
                         ),
+                        isLoading: isLoading,
+                        onSubmit: _submit,
                       ),
                     ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
@@ -313,7 +248,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
           'auth.alreadyHaveAccount',
         ),
         actionText: AppLocalizations.getString(context, 'auth.signInLink'),
-        onActionPressed: () => context.router.push(const LoginRoute()),
+        onActionPressed: () {
+          context.router.replace(const LoginRoute());
+        },
         heroTag: 'auth_toggle_button',
       ),
     );

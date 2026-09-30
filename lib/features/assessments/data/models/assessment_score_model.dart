@@ -61,8 +61,6 @@ class AssessmentScoreModel {
   });
 
   factory AssessmentScoreModel.fromJson(Map<String, dynamic> json) {
-    // Fall back gracefully when the backend sends a `result_display`
-    // wrapper instead of the flat band/band_label/band_blurb shape.
     final display = json['result_display'] as Map<String, dynamic>?;
 
     return AssessmentScoreModel(
@@ -190,8 +188,6 @@ class ResultDisplayModel {
     'color': severityColor,
   };
 }
-
-// ── Existing inner models (unchanged) ────────────────────────────────────────
 
 @JsonSerializable()
 class ScoreItemModel {

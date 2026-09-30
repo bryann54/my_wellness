@@ -12,8 +12,21 @@ class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
+  /// Legacy lookup. Prefer [t] for new code.
   static String getString(BuildContext context, String key) {
     return AppLocalizations.of(context)?.translate(key) ?? key;
+  }
+
+  /// Preferred API. Supports `{placeholder}` interpolation:
+  ///
+  ///   AppLocalizations.t(context, 'assessment.searchResultCountMany',
+  ///       {'count': '4', 'query': 'breast'});
+  static String t(
+    BuildContext context,
+    String key, [
+    Map<String, String>? params,
+  ]) {
+    return AppLocalizations.of(context)?.translate(key, params) ?? key;
   }
 
   static const LocalizationsDelegate<AppLocalizations> delegate =
@@ -33,7 +46,7 @@ class AppLocalizations {
     }
   }
 
-  String translate(String key) {
+  String translate(String key, [Map<String, String>? params]) {
     final keys = key.split('.');
     dynamic value = _localizedStrings;
 
@@ -45,7 +58,15 @@ class AppLocalizations {
       }
     }
 
-    return value?.toString() ?? key;
+    var out = value?.toString() ?? key;
+
+    if (params != null && params.isNotEmpty) {
+      params.forEach((k, v) {
+        out = out.replaceAll('{$k}', v);
+      });
+    }
+
+    return out;
   }
 }
 

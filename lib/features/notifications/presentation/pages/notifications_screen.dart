@@ -18,7 +18,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       body: CustomScrollView(
         slivers: [
           CustomAppBar(
-            title: AppLocalizations.getString(context, 'common.notifications'),
+            title: AppLocalizations.getString(
+              context,
+              'settings.notifications',
+            ),
           ),
 
           // Your content below

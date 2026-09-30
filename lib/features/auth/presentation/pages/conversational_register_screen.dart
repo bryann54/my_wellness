@@ -165,7 +165,7 @@ class _ConversationalRegisterScreenState
         ),
         title: Text(
           AppLocalizations.getString(context, 'auth.createAccount'),
-          style: GoogleFonts.syne(
+          style: GoogleFonts.inter(
             fontSize: 16,
             fontWeight: FontWeight.w700,
             color: cs.onSurface,
@@ -189,7 +189,7 @@ class _ConversationalRegisterScreenState
                   const SizedBox(height: 8),
                   Text(
                     AppLocalizations.getString(context, 'auth.title'),
-                    style: GoogleFonts.syne(
+                    style: GoogleFonts.inter(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
                       color: cs.onSurface,

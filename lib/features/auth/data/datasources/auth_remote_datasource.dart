@@ -4,6 +4,7 @@ import 'package:my_wellness/core/api_client/endpoints/api_endpoints.dart';
 import 'package:my_wellness/features/auth/data/models/auth_session_model.dart';
 import 'package:my_wellness/features/auth/data/models/signup_pending_model.dart';
 import 'package:my_wellness/features/auth/data/models/signup_request_model.dart';
+import 'package:my_wellness/features/auth/data/models/verified_identity_model.dart';
 
 abstract class AuthRemoteDataSource {
   Future<AuthSessionModel> login({
@@ -26,9 +27,14 @@ abstract class AuthRemoteDataSource {
 
   Future<AuthSessionModel> refresh(String refreshToken);
 
-  Future<void> logout();
-  Future<void> logoutAll();
+  /// The server requires the refresh token so it can revoke the session.
+  Future<void> logout({required String refresh});
+  Future<void> logoutAll({required String refresh});
 
+  Future<VerifiedIdentityModel> verifyIdentity({
+    required String idType,
+    required String idNumber,
+  });
   Future<void> requestPasswordReset({required String identifier});
   Future<void> confirmPasswordReset({
     required String identifier,
@@ -62,6 +68,18 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       payload: req.toJson(),
     );
     return SignupPendingModel.fromJson(response);
+  }
+
+  @override
+  Future<VerifiedIdentityModel> verifyIdentity({
+    required String idType,
+    required String idNumber,
+  }) async {
+    final response = await _client.post<Map<String, dynamic>>(
+      url: ApiEndpoints.authKyc,
+      payload: {'id_type': idType, 'id_number': idNumber},
+    );
+    return VerifiedIdentityModel.fromJson(response);
   }
 
   @override
@@ -112,13 +130,19 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<void> logout() async {
-    await _client.post(url: ApiEndpoints.authLogout);
+  Future<void> logout({required String refresh}) async {
+    await _client.post(
+      url: ApiEndpoints.authLogout,
+      payload: {'refresh': refresh},
+    );
   }
 
   @override
-  Future<void> logoutAll() async {
-    await _client.post(url: ApiEndpoints.authLogoutAll);
+  Future<void> logoutAll({required String refresh}) async {
+    await _client.post(
+      url: ApiEndpoints.authLogoutAll,
+      payload: {'refresh': refresh},
+    );
   }
 
   @override

@@ -13,23 +13,26 @@ class GetStartedActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         AppPrimaryButton(
-          label: AppLocalizations.getString(context, 'auth.signInLink'),
-          onPressed: () => context.router.replace(const LoginRoute()),
+          label: AppLocalizations.getString(context, 'auth.signUpLink'),
+          onPressed: () => context.router.push(const RegisterRoute()),
           color: AppColors.primaryColor,
           borderRadius: 12,
+          height: 52,
         ),
-        const SizedBox(height: 6),
         AuthDivider(text: AppLocalizations.getString(context, 'common.or')),
         AppPrimaryButton(
-          label: AppLocalizations.getString(context, 'auth.signUpLink'),
-          onPressed: () => context.router.replace(RegisterRoute()),
-          color: AppColors.dividerColorDark.withValues(alpha: 0.07),
-          textColor: cs.tertiary.withValues(alpha: 0.7),
+          label: AppLocalizations.getString(context, 'auth.signInLink'),
+          onPressed: () => context.router.push(const LoginRoute()),
+          color: AppColors.textPrimaryDark,
+          textColor: cs.primary,
           borderRadius: 12,
+          height: 52,
         ),
         const SizedBox(height: 16),
         const TermsPrivacyText(),

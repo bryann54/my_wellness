@@ -16,7 +16,7 @@ class AppTheme {
       onPrimary: AppColors.textOnPrimary,
       onSecondary: AppColors.textOnPrimary,
       onSurface: AppColors.textPrimary,
-      onError: Colors.white,
+      onError: AppColors.background,
     ),
     scaffoldBackgroundColor: AppColors.background,
     cardColor: AppColors.cardColor,
@@ -26,10 +26,10 @@ class AppTheme {
     // AppBar Theme
     appBarTheme: const AppBarTheme(
       backgroundColor: AppColors.primaryColor,
-      foregroundColor: Colors.white,
+      foregroundColor: AppColors.background,
       elevation: 0,
       centerTitle: true,
-      iconTheme: IconThemeData(color: Colors.white),
+      iconTheme: IconThemeData(color: AppColors.background),
     ),
 
     // Text Theme
@@ -73,7 +73,7 @@ class AppTheme {
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.primaryColor,
-        foregroundColor: Colors.white,
+        foregroundColor: AppColors.background,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 2,
@@ -99,7 +99,7 @@ class AppTheme {
     // Input Decoration Theme
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: Colors.white,
+      fillColor: AppColors.background,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -144,7 +144,7 @@ class AppTheme {
       onPrimary: AppColors.textOnPrimary,
       onSecondary: AppColors.textOnPrimary,
       onSurface: AppColors.textPrimaryDark,
-      onError: Colors.white,
+      onError: AppColors.background,
     ),
     scaffoldBackgroundColor: AppColors.backgroundDark,
     cardColor: AppColors.cardColorDark,

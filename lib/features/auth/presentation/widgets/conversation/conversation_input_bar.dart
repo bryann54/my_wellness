@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/conversation/conversation_models.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/shared/auth_button.dart';
@@ -121,16 +122,15 @@ class ConversationInputBar extends StatelessWidget {
                     child: isLoading
                         ? const Padding(
                             padding: EdgeInsets.all(12),
-                            child: CircularProgressIndicator(
+                            child: CircularProgressIndicator.adaptive(
                               strokeWidth: 2,
-                              color: Colors.white,
                             ),
                           )
                         : Icon(
                             Icons.send_rounded,
                             size: 20,
                             color: onSend != null
-                                ? Colors.white
+                                ? AppColors.background
                                 : cs.onSurface.withValues(alpha: 0.3),
                           ),
                   ),

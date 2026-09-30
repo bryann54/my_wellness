@@ -1,9 +1,8 @@
-// lib/features/auth/presentation/widgets/auth_state_listener.dart
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
+import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/core/services/pin_service.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_bloc.dart';
@@ -33,6 +32,9 @@ class AuthStateListener extends StatelessWidget {
   }
 
   Future<void> _handleAuthState(BuildContext context, AuthState state) async {
+    final route = ModalRoute.of(context);
+    if (route != null && !route.isCurrent) return;
+
     switch (state.status) {
       case AuthStatus.authenticated:
         _showSuccessSnackBar(context);
@@ -40,15 +42,11 @@ class AuthStateListener extends StatelessWidget {
 
       case AuthStatus.awaitingSignupConfirmation:
         if (state.pendingSignup == null) return;
-        // Push the verification screen; it reads pendingSignup from state.
         await context.router.push(
           VerificationRoute(pending: state.pendingSignup),
         );
 
       case AuthStatus.passwordResetRequested:
-      // Caller is expected to show its own "we sent a code" UI; nothing
-      // to do globally.
-
       case AuthStatus.passwordResetCompleted:
         _showSuccessSnackBar(context);
         if (context.mounted) context.router.replace(const LoginRoute());
@@ -63,10 +61,8 @@ class AuthStateListener extends StatelessWidget {
     }
   }
 
-  /// Check if first-time security setup is needed, show the sheet, then navigate.
   Future<void> _postAuthNavigation(BuildContext context) async {
     final hasPin = await PinService().hasPin();
-
     if (!context.mounted) return;
 
     if (!hasPin) {
@@ -88,7 +84,11 @@ class AuthStateListener extends StatelessWidget {
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.check_circle, color: Colors.white, size: 20),
+            const Icon(
+              Icons.check_circle,
+              color: AppColors.background,
+              size: 20,
+            ),
             const SizedBox(width: 8),
             Flexible(
               child: Text(
@@ -113,7 +113,11 @@ class AuthStateListener extends StatelessWidget {
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.error_outline, color: Colors.white, size: 20),
+            const Icon(
+              Icons.error_outline,
+              color: AppColors.background,
+              size: 20,
+            ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(

@@ -134,8 +134,6 @@ class _AccountScreenState extends State<AccountScreen> {
       context.read<AccountBloc>().add(const ClearErrorEvent());
     }
     if (state.status == AccountStatus.deleted) {
-      // Server schedules deletion and offers a cancel window.
-      // Sign the user out so the app returns to a clean state.
       context.read<AuthBloc>().add(const SignOutEvent(allDevices: false));
       context.router.pushAndPopUntil(
         const LoginRoute(),

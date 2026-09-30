@@ -1,5 +1,3 @@
-// lib/features/auth/presentation/widgets/shared/auth_header.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,11 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 class AuthHeader extends StatelessWidget {
   final String title;
   final String subtitle;
-
-  /// Optional hero tag. When null, the logo is rendered without a Hero.
-  ///
-  /// Do NOT give two simultaneously-mounted screens the same tag —
-  /// Flutter will assert "multiple heroes share the same tag".
   final String? heroTag;
 
   const AuthHeader({
@@ -43,8 +36,6 @@ class AuthHeader extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Center(
-          // Only wrap in Hero when a tag is provided, so we never
-          // accidentally fly between two auth screens with the same tag.
           child: heroTag == null ? logo : Hero(tag: heroTag!, child: logo),
         ),
 

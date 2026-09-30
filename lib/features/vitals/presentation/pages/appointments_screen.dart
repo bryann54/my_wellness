@@ -114,7 +114,9 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                           if (i >= appts.length) {
                             return const Padding(
                               padding: EdgeInsets.all(24),
-                              child: Center(child: CircularProgressIndicator()),
+                              child: Center(
+                                child: CircularProgressIndicator.adaptive(),
+                              ),
                             );
                           }
                           final a = appts[i];

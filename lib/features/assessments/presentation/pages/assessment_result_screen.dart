@@ -60,7 +60,7 @@ class _AssessmentResultBodyState extends State<_AssessmentResultBody> {
           ),
         ],
         body: score == null
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(child: CircularProgressIndicator.adaptive())
             : ListView(
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 48),
                 children: [
@@ -95,10 +95,7 @@ class _AssessmentResultBodyState extends State<_AssessmentResultBody> {
                     ),
                     const SizedBox(height: 10),
                     for (final p in score.protective)
-                      _FactorRow(
-                        item: p,
-                        accent: const Color(0xFF10B981),
-                      ),
+                      _FactorRow(item: p, accent: const Color(0xFF10B981)),
                   ],
                   if (score.recommendations.isNotEmpty) ...[
                     const SizedBox(height: 24),

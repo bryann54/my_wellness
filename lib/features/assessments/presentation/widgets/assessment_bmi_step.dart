@@ -108,7 +108,7 @@ class _AssessmentBmiStepState extends State<AssessmentBmiStep> {
             ),
           ),
           const SizedBox(height: 24),
-  Row(
+          Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
@@ -154,7 +154,7 @@ class _AssessmentBmiStepState extends State<AssessmentBmiStep> {
               ),
             ],
           ),
-        
+
           const SizedBox(height: 20),
           if (preview != null)
             _BmiPreviewCard(
@@ -176,10 +176,7 @@ class _AssessmentBmiStepState extends State<AssessmentBmiStep> {
                 ? const SizedBox(
                     width: 18,
                     height: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
+                    child: CircularProgressIndicator.adaptive(strokeWidth: 2),
                   )
                 : Text(
                     AppLocalizations.getString(context, 'common.continue'),

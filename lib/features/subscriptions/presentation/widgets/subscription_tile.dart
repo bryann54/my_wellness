@@ -122,7 +122,7 @@ class SubscriptionPackageTile extends StatelessWidget {
                                         : accent,
                                     foregroundColor: isActive
                                         ? accent
-                                        : Colors.white,
+                                        : AppColors.background,
                                     textStyle: GoogleFonts.dmSans(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w700,

@@ -26,7 +26,7 @@ class HomeScreen extends StatelessWidget {
                     Expanded(child: VitalsTile(kind: VitalsTileKind.bs)),
                   ],
                 ),
-                SizedBox(height: 10),
+                SizedBox(height: 5),
                 Divider(),
 
                 // Next sections to add:

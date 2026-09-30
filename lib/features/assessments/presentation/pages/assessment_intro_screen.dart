@@ -7,6 +7,7 @@ import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
 import 'package:my_wellness/features/assessments/presentation/bloc/assessments_bloc.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_card.dart';
+import 'package:my_wellness/features/assessments/presentation/widgets/assessment_intro_skeleton.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_toast_listener.dart';
 
 @RoutePage()
@@ -65,7 +66,7 @@ class _AssessmentIntroBodyState extends State<_AssessmentIntroBody> {
           CustomAppBar(title: def?.shortTitle ?? '', isHome: false),
         ],
         body: def == null
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(child: AssessmentIntroSkeleton())
             : SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(24, 24, 24, 48),
                 child: Column(

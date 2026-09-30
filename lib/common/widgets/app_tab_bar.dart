@@ -1,6 +1,6 @@
-// lib/common/widgets/app_tab_bar.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:my_wellness/common/res/colors.dart';
 
 class AppTabBar extends StatelessWidget implements PreferredSizeWidget {
   final TabController controller;
@@ -15,15 +15,15 @@ class AppTabBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return TabBar(
       controller: controller,
-      indicatorColor: Colors.white,
+      indicatorColor: AppColors.background,
       indicatorWeight: 2.5,
-      labelStyle: GoogleFonts.syne(fontSize: 18, fontWeight: FontWeight.w700),
+      labelStyle: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w700),
       unselectedLabelStyle: GoogleFonts.inter(
         fontSize: 15,
         fontWeight: FontWeight.w500,
       ),
-      labelColor: Colors.white,
-      unselectedLabelColor: Colors.white60,
+      labelColor: AppColors.background,
+      unselectedLabelColor: AppColors.background,
       dividerColor: Colors.transparent,
       tabs: tabs.map((t) => Tab(text: t)).toList(),
     );

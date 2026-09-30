@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_option.dart';
 
 class AssessmentChoiceTile extends StatelessWidget {
-  static const warm = Color(0xFFF59E0B);
+  static const warm = AppColors.primaryColor;
 
   final AssessmentOption option;
   final bool selected;
@@ -50,7 +51,11 @@ class AssessmentChoiceTile extends StatelessWidget {
               ),
               child: selected
                   ? const Center(
-                      child: Icon(Icons.circle, size: 8, color: Colors.white),
+                      child: Icon(
+                        Icons.circle,
+                        size: 8,
+                        color: AppColors.background,
+                      ),
                     )
                   : null,
             ),

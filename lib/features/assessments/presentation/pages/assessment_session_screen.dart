@@ -63,11 +63,15 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
 
     if (state.status == AssessmentStatus.completed) {
       _scheduleCompleteRedirect();
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator.adaptive()),
+      );
     }
 
     if (session == null || def == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator.adaptive()),
+      );
     }
 
     if (session.currentIndex != _lastIndex) {
@@ -84,7 +88,9 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
           bloc.add(const FetchScoreEvent());
         }
       });
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator.adaptive()),
+      );
     }
 
     return Scaffold(
@@ -179,10 +185,7 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
                 ? const SizedBox(
                     width: 16,
                     height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
+                    child: CircularProgressIndicator.adaptive(strokeWidth: 2),
                   )
                 : const Icon(Icons.chevron_right, size: 18),
             label: Text(

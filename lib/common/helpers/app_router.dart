@@ -10,6 +10,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: LoginRoute.page),
     AutoRoute(page: RegisterRoute.page),
     AutoRoute(page: ForgotPasswordRoute.page),
+
     AutoRoute(
       page: MainRoute.page,
       children: [
@@ -20,6 +21,8 @@ class AppRouter extends RootStackRouter {
         AutoRoute(page: AccountRoute.page),
       ],
     ),
+
+    // Vitals / health
     AutoRoute(page: NotificationsRoute.page),
     AutoRoute(page: SubscriptionsRoute.page),
     AutoRoute(page: MedicationsRoute.page),
@@ -27,15 +30,18 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: MyHealthRoute.page),
     AutoRoute(page: AppointmentsRoute.page),
 
-    AutoRoute(page: WebViewRoute.page),
+    // Assessments
     AutoRoute(page: AssessmentCompleteRoute.page),
-// AutoRoute(page: AssessmentsListRoute.page),
     AutoRoute(page: AssessmentIntroRoute.page),
     AutoRoute(page: AssessmentSessionRoute.page),
     AutoRoute(page: AssessmentResultRoute.page),
+
+    // Account / auth-adjacent
     AutoRoute(page: EditProfileRoute.page),
     AutoRoute(page: VerificationRoute.page),
-
     AutoRoute(page: ConversationalRegisterRoute.page),
+
+    // Web view
+    AutoRoute(page: WebViewRoute.page),
   ];
 }

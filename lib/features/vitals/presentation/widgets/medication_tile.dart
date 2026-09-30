@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_primary_button.dart';
 import 'package:my_wellness/common/widgets/custom_alert_dialog.dart';
@@ -455,7 +456,10 @@ class _DismissBackground extends StatelessWidget {
         color: color,
         borderRadius: BorderRadius.circular(14),
       ),
-      child: const Icon(Icons.delete_outline_rounded, color: Colors.white),
+      child: const Icon(
+        Icons.delete_outline_rounded,
+        color: AppColors.background,
+      ),
     );
   }
 }

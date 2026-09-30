@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:my_wellness/common/res/colors.dart';
 
 class MenuCard extends StatelessWidget {
   /// Accepts either an [IconData] (Material) or an [FaIconData] (Font Awesome).
@@ -73,8 +74,8 @@ class MenuCard extends StatelessWidget {
         : cs.primary;
 
     final iconBg = isDark
-        ? Colors.white.withValues(alpha: 0.08)
-        : Colors.white.withValues(alpha: 0.6);
+        ? AppColors.background.withValues(alpha: 0.08)
+        : AppColors.background.withValues(alpha: 0.6);
 
     final iconWidget = _buildIcon(iconColor);
 

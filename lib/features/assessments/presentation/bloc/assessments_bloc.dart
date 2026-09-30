@@ -47,12 +47,14 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
     this._getAnswers,
     this._submitAnswer,
     this._submitBmi,
-    this._getReferral, 
+    this._getReferral,
     this._getScore,
     this._previewBmi,
-     this._accountBloc,
+    this._accountBloc,
   ) : super(const AssessmentsState()) {
+    // Each event registered exactly once.
     on<LoadAssessmentsEvent>(_onLoad);
+    on<SearchAssessmentsEvent>(_onSearch);
     on<StartAssessmentsEvent>(_onStart);
     on<ResumeAssessmentsEvent>(_onResume);
     on<SubmitAnswerEvent>(_onSubmitAnswer);
@@ -69,8 +71,11 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
     });
   }
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // List + search
+  // ─────────────────────────────────────────────────────────────────────────
 
-Future<void> _onLoad(
+  Future<void> _onLoad(
     LoadAssessmentsEvent event,
     Emitter<AssessmentsState> emit,
   ) async {
@@ -97,7 +102,7 @@ Future<void> _onLoad(
       () => const VitalsAccess(hasAccess: false),
     );
     final all = listRes.getOrElse(() => const <AssessmentSummary>[]);
-    final userGender = _accountBloc.state.profile?.gender;
+    final userGender = event.userGender ?? _accountBloc.state.profile?.gender;
 
     final visible = all
         .where((a) => a.isVisibleFor(userGender))
@@ -108,11 +113,39 @@ Future<void> _onLoad(
         status: AssessmentStatus.ready,
         access: access,
         assessments: visible,
+        filteredAssessments: visible,
+        searchQuery: '',
       ),
     );
   }
 
-Future<void> _onStart(
+  void _onSearch(SearchAssessmentsEvent event, Emitter<AssessmentsState> emit) {
+    final query = event.query.trim();
+    final normalized = query.toLowerCase();
+
+    final filtered = normalized.isEmpty
+        ? state.assessments
+        : state.assessments
+              .where((a) {
+                final title = a.title.toLowerCase();
+                final short = a.shortTitle.toLowerCase();
+                final tagline = a.tagline.toLowerCase();
+                final category = a.category.toLowerCase();
+                return title.contains(normalized) ||
+                    short.contains(normalized) ||
+                    tagline.contains(normalized) ||
+                    category.contains(normalized);
+              })
+              .toList(growable: false);
+
+    emit(state.copyWith(searchQuery: query, filteredAssessments: filtered));
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Session lifecycle
+  // ─────────────────────────────────────────────────────────────────────────
+
+  Future<void> _onStart(
     StartAssessmentsEvent event,
     Emitter<AssessmentsState> emit,
   ) async {
@@ -219,6 +252,49 @@ Future<void> _onStart(
     );
   }
 
+  Future<void> _onResume(
+    ResumeAssessmentsEvent event,
+    Emitter<AssessmentsState> emit,
+  ) async {
+    emit(state.copyWith(status: AssessmentStatus.loading, clearError: true));
+    _activeSlug = event.slug;
+    _activeSessionId = event.sessionId;
+
+    final defRes = await _getDefinition(event.slug);
+    final answersRes = await _getAnswers((
+      slug: event.slug,
+      sessionId: event.sessionId,
+    ));
+
+    final failure =
+        defRes.fold<Failure?>((f) => f, (_) => null) ??
+        answersRes.fold<Failure?>((f) => f, (_) => null);
+
+    if (failure != null) {
+      emit(
+        state.copyWith(
+          status: AssessmentStatus.error,
+          errorMessage: mapFailure(failure),
+        ),
+      );
+      return;
+    }
+
+    emit(
+      state.copyWith(
+        status: AssessmentStatus.ready,
+        definition: defRes.getOrElse(
+          () => throw StateError('definition missing'),
+        ),
+        answers: answersRes.getOrElse(() => const <AssessmentAnswer>[]),
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Answer / BMI submission
+  // ─────────────────────────────────────────────────────────────────────────
+
   Future<void> _onSubmitAnswer(
     SubmitAnswerEvent event,
     Emitter<AssessmentsState> emit,
@@ -280,6 +356,62 @@ Future<void> _onStart(
     );
   }
 
+  Future<void> _onSubmitBmi(
+    SubmitBmiEvent event,
+    Emitter<AssessmentsState> emit,
+  ) async {
+    final slug = _activeSlug;
+    final sessionId = _activeSessionId;
+    if (slug == null || sessionId == null) return;
+
+    emit(state.copyWith(status: AssessmentStatus.submitting));
+
+    final res = await _submitBmi((
+      slug: slug,
+      sessionId: sessionId,
+      weightKg: event.weightKg,
+      heightCm: event.heightCm,
+    ));
+
+    await res.fold(
+      (f) async => emit(
+        state.copyWith(
+          status: AssessmentStatus.error,
+          errorMessage: mapFailure(f),
+        ),
+      ),
+      (ok) async {
+        if (!ok) {
+          emit(
+            state.copyWith(
+              status: AssessmentStatus.error,
+              errorMessage: 'BMI could not be saved.',
+            ),
+          );
+          return;
+        }
+        emit(
+          state.copyWith(status: AssessmentStatus.ready, clearBmiPreview: true),
+        );
+      },
+    );
+  }
+
+  Future<void> _onPreviewBmi(
+    PreviewBmiEvent event,
+    Emitter<AssessmentsState> emit,
+  ) async {
+    final res = await _previewBmi((
+      weightKg: event.weightKg,
+      heightCm: event.heightCm,
+    ));
+    res.fold((_) {}, (preview) => emit(state.copyWith(bmiPreview: preview)));
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Score + referral
+  // ─────────────────────────────────────────────────────────────────────────
+
   Future<void> _onFetchScore(
     FetchScoreEvent event,
     Emitter<AssessmentsState> emit,
@@ -324,106 +456,4 @@ Future<void> _onStart(
       },
     );
   }
-
-
-
-
- Future<void> _onResume(
-    ResumeAssessmentsEvent event,
-    Emitter<AssessmentsState> emit,
-  ) async {
-    emit(state.copyWith(status: AssessmentStatus.loading, clearError: true));
-    _activeSlug = event.slug;
-    _activeSessionId = event.sessionId;
-
-    final defRes = await _getDefinition(event.slug);
-    final answersRes = await _getAnswers((
-      slug: event.slug,
-      sessionId: event.sessionId,
-    ));
-
-    final failure =
-        defRes.fold<Failure?>((f) => f, (_) => null) ??
-        answersRes.fold<Failure?>((f) => f, (_) => null);
-
-    if (failure != null) {
-      emit(
-        state.copyWith(
-          status: AssessmentStatus.error,
-          errorMessage: mapFailure(failure),
-        ),
-      );
-      return;
-    }
-
-    emit(
-      state.copyWith(
-        status: AssessmentStatus.ready,
-        definition: defRes.getOrElse(
-          () => throw StateError('definition missing'),
-        ),
-        answers: answersRes.getOrElse(() => const <AssessmentAnswer>[]),
-      ),
-    );
-  }
-
-
-
-
-  Future<void> _onSubmitBmi(
-    SubmitBmiEvent event,
-    Emitter<AssessmentsState> emit,
-  ) async {
-    final slug = _activeSlug;
-    final sessionId = _activeSessionId;
-    if (slug == null || sessionId == null) return;
-
-    emit(state.copyWith(status: AssessmentStatus.submitting));
-
-    final res = await _submitBmi((
-      slug: slug,
-      sessionId: sessionId,
-      weightKg: event.weightKg,
-      heightCm: event.heightCm,
-    ));
-
-    await res.fold(
-      (f) async => emit(
-        state.copyWith(
-          status: AssessmentStatus.error,
-          errorMessage: mapFailure(f),
-        ),
-      ),
-      (ok) async {
-        if (!ok) {
-          emit(
-            state.copyWith(
-              status: AssessmentStatus.error,
-              errorMessage: 'BMI could not be saved.',
-            ),
-          );
-          return;
-        }
-        emit(
-          state.copyWith(status: AssessmentStatus.ready, clearBmiPreview: true),
-        );
-      },
-    );
-  }
-
-
-
-  Future<void> _onPreviewBmi(
-    PreviewBmiEvent event,
-    Emitter<AssessmentsState> emit,
-  ) async {
-    final res = await _previewBmi((
-      weightKg: event.weightKg,
-      heightCm: event.heightCm,
-    ));
-    res.fold((_) {}, (preview) => emit(state.copyWith(bmiPreview: preview)));
-  }
-
-
-
 }

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/core/services/biometric_service.dart';
 import 'package:my_wellness/core/services/pin_service.dart';
 
@@ -314,7 +315,7 @@ class _BiometricsStep extends StatelessWidget {
         const SizedBox(height: 20),
         Text(
           enrolled ? 'Biometrics Registered!' : 'Set Up Biometrics',
-          style: GoogleFonts.syne(
+          style: GoogleFonts.inter(
             fontSize: 20,
             fontWeight: FontWeight.w700,
             color: cs.onSurface,
@@ -378,7 +379,7 @@ class _BiometricsStep extends StatelessWidget {
   }
 }
 
-// ── PIN step (reused for create + confirm) ────────────────────────────────────
+// ── PIN step (reused for create + confirm)
 
 class _PinStep extends StatelessWidget {
   final String title;
@@ -424,7 +425,7 @@ class _PinStep extends StatelessWidget {
 
         Text(
           title,
-          style: GoogleFonts.syne(
+          style: GoogleFonts.inter(
             fontSize: 20,
             fontWeight: FontWeight.w700,
             color: cs.onSurface,
@@ -481,7 +482,7 @@ class _PinStep extends StatelessWidget {
   }
 }
 
-// ── Shared primary button ─────────────────────────────────────────────────────
+// ── Shared primary button
 class _PrimaryBtn extends StatelessWidget {
   final String label;
   final Object? icon;
@@ -506,7 +507,7 @@ class _PrimaryBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final iconWidget = _buildIcon(Colors.white, size: 15);
+    final iconWidget = _buildIcon(AppColors.background, size: 15);
 
     return SizedBox(
       width: double.infinity,

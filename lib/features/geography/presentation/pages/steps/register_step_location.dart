@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_primary_button.dart';
 import 'package:my_wellness/features/geography/domain/entities/county.dart';
@@ -41,7 +42,11 @@ class _RegisterStepLocationState extends State<RegisterStepLocation> {
   void _continue() {
     if (_county == null || _subCounty == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select county and sub-county')),
+        SnackBar(
+          content: Text(
+            AppLocalizations.getString(context, 'auth.selectCountyAndSub'),
+          ),
+        ),
       );
       return;
     }
@@ -68,7 +73,6 @@ class _RegisterStepLocationState extends State<RegisterStepLocation> {
           CountyDropdown(
             selectedCountyId: _county?.id,
             onChanged: (id) {
-              // Look the entity back up so state holds the canonical object.
               if (id == null) {
                 setState(() {
                   _county = null;
@@ -82,7 +86,7 @@ class _RegisterStepLocationState extends State<RegisterStepLocation> {
                   .countyByIdOrNull(id);
               setState(() {
                 _county = selected;
-                _subCounty = null; // invalidate child when parent changes
+                _subCounty = null;
               });
             },
           ),
@@ -105,6 +109,8 @@ class _RegisterStepLocationState extends State<RegisterStepLocation> {
           ),
           const SizedBox(height: 32),
           AppPrimaryButton(
+            borderRadius: 12,
+            color: AppColors.primaryColor,
             onPressed: _continue,
             label: AppLocalizations.getString(context, 'common.continue'),
           ),

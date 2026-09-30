@@ -1,5 +1,3 @@
-// lib/features/auth/presentation/widgets/onboarding_language_selector.dart
-
 import 'package:flutter/material.dart';
 import 'package:my_wellness/common/notifiers/locale_provider.dart';
 import 'package:my_wellness/common/res/colors.dart';
@@ -18,7 +16,9 @@ class LanguageSelector extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
-        color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05),
+        color: isDark
+            ? AppColors.background
+            : Colors.black.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(5),
       ),
       child: DropdownButtonHideUnderline(
@@ -27,11 +27,11 @@ class LanguageSelector extends StatelessWidget {
           icon: Icon(
             Icons.language,
             size: 18,
-            color: isDark ? Colors.white70 : Colors.black54,
+            color: isDark ? AppColors.background : Colors.black54,
           ),
           dropdownColor: isDark ? AppColors.primaryColor : AppColors.cardColor,
           style: TextStyle(
-            color: isDark ? Colors.white : Colors.black87,
+            color: isDark ? AppColors.background : Colors.black87,
             fontWeight: FontWeight.w600,
             fontSize: 14,
           ),

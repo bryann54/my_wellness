@@ -16,6 +16,7 @@ class ApiEndpoints {
       '/api/auth/password-reset/request/';
   static const String authPasswordResetConfirm =
       '/api/auth/password-reset/confirm/';
+  static const String authKyc = '/api/auth/verify-id/';
 
   // ── Accounts (self-service) ─────────────────────────────────────────────────
   static const String analyticsOptOut = '/api/auth/analytics-opt-out/';
@@ -47,7 +48,7 @@ class ApiEndpoints {
   // ── Vitals: Appointments ────────────────────────────────────────────────────
   static const String appointments = '/api/appointments/';
   static String appointmentDetail(String id) => '/api/appointments/$id/';
-static String referralFromSession(String sessionId) =>
+  static String referralFromSession(String sessionId) =>
       '/api/care-navigation/referrals/from-session/$sessionId';
   // ── Vitals: Medications ─────────────────────────────────────────────────────
   static const String medications = '/api/medications/';

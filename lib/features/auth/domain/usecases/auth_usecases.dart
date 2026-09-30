@@ -5,6 +5,7 @@ import 'package:my_wellness/features/auth/data/models/signup_request_model.dart'
 import 'package:my_wellness/features/auth/domain/entities/auth_session_entity.dart';
 import 'package:my_wellness/features/auth/domain/entities/signup_pending_entity.dart';
 import 'package:my_wellness/features/auth/domain/entities/user_entity.dart';
+import 'package:my_wellness/features/auth/domain/entities/verified_identity.dart';
 import 'package:my_wellness/features/auth/domain/repositories/auth_repository.dart';
 
 @lazySingleton
@@ -25,6 +26,17 @@ class SignUpUseCase {
 
   Future<Either<Failure, SignupPendingEntity>> call(SignupRequestModel req) =>
       repository.signUp(req);
+}
+
+@lazySingleton
+class VerifyIdentityUseCase {
+  final AuthRepository repository;
+  VerifyIdentityUseCase(this.repository);
+
+  Future<Either<Failure, VerifiedIdentity>> call({
+    required String idType,
+    required String idNumber,
+  }) => repository.verifyIdentity(idType: idType, idNumber: idNumber);
 }
 
 @lazySingleton
@@ -74,14 +86,6 @@ class SignOutUseCase {
 
   Future<Either<Failure, void>> call({bool allDevices = false}) =>
       repository.signOut(allDevices: allDevices);
-}
-
-@lazySingleton
-class GetAuthStateUseCase {
-  final AuthRepository repository;
-  GetAuthStateUseCase(this.repository);
-
-  Stream<UserEntity?> call() => repository.authStateChanges;
 }
 
 @lazySingleton

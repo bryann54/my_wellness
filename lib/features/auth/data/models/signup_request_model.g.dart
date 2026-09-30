@@ -18,6 +18,7 @@ SignupRequestModel _$SignupRequestModelFromJson(Map<String, dynamic> json) =>
       nationalIdNumber: json['national_id_number'] as String?,
       countyId: (json['county'] as num?)?.toInt(),
       subCountyId: (json['sub_county'] as num?)?.toInt(),
+      identityVerificationId: json['identity_verification_id'] as String?,
     );
 
 Map<String, dynamic> _$SignupRequestModelToJson(SignupRequestModel instance) =>
@@ -31,5 +32,6 @@ Map<String, dynamic> _$SignupRequestModelToJson(SignupRequestModel instance) =>
       'date_of_birth': instance.dateOfBirth,
       'national_id_number': instance.nationalIdNumber,
       'county': instance.countyId,
+      'identity_verification_id': instance.identityVerificationId,
       'sub_county': instance.subCountyId,
     };

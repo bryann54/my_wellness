@@ -73,6 +73,9 @@ import '../../features/geography/domain/usecases/get_wards_usecase.dart'
     as _i903;
 import '../../features/geography/presentation/bloc/geography_bloc.dart'
     as _i137;
+import '../../features/launch/domain/usecases/check_connectivity_usecase.dart'
+    as _i656;
+import '../../features/launch/presentation/bloc/launch_bloc.dart' as _i646;
 import '../../features/subscriptions/data/datasources/rc_subscription_datasource.dart'
     as _i226;
 import '../../features/subscriptions/data/repositories/rc_subscription_repository_impl.dart'
@@ -121,6 +124,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i374.BiometricService>(() => _i374.BiometricService());
     gh.lazySingleton<_i845.PinService>(() => _i845.PinService());
+    gh.lazySingleton<_i656.CheckConnectivityUsecase>(
+      () => _i656.CheckConnectivityUsecase(),
+    );
     gh.factory<String>(() => registerModules.baseUrl, instanceName: 'BaseUrl');
     gh.factory<String>(
       () => registerModules.rcApiKey,
@@ -128,7 +134,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i992.AuthLocalDataSource>(
       () => _i992.AuthLocalDataSourceImpl(gh<_i558.FlutterSecureStorage>()),
-      dispose: (i) => i.dispose(),
     );
     gh.lazySingleton<_i934.SharedPreferencesManager>(
       () => _i934.SharedPreferencesManager(gh<_i460.SharedPreferences>()),
@@ -231,6 +236,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i46.SignUpUseCase>(
       () => _i46.SignUpUseCase(gh<_i787.AuthRepository>()),
     );
+    gh.lazySingleton<_i46.VerifyIdentityUseCase>(
+      () => _i46.VerifyIdentityUseCase(gh<_i787.AuthRepository>()),
+    );
     gh.lazySingleton<_i46.ConfirmSignupEmailUseCase>(
       () => _i46.ConfirmSignupEmailUseCase(gh<_i787.AuthRepository>()),
     );
@@ -245,9 +253,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i46.SignOutUseCase>(
       () => _i46.SignOutUseCase(gh<_i787.AuthRepository>()),
-    );
-    gh.lazySingleton<_i46.GetAuthStateUseCase>(
-      () => _i46.GetAuthStateUseCase(gh<_i787.AuthRepository>()),
     );
     gh.lazySingleton<_i46.RequestPasswordResetUseCase>(
       () => _i46.RequestPasswordResetUseCase(gh<_i787.AuthRepository>()),
@@ -351,6 +356,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i425.DeleteAppointmentUseCase>(),
       ),
     );
+    gh.factory<_i646.LaunchBloc>(
+      () => _i646.LaunchBloc(
+        gh<_i656.CheckConnectivityUsecase>(),
+        gh<_i46.GetCurrentUserUseCase>(),
+      ),
+    );
     gh.factory<_i77.SubscriptionsBloc>(
       () => _i77.SubscriptionsBloc(
         gh<_i818.RCSubscriptionRepository>(),
@@ -358,6 +369,32 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i805.RCPurchasePackageUseCase>(),
         gh<_i163.RCRestorePurchasesUseCase>(),
         gh<_i1043.RCGetEntitlementsUseCase>(),
+      ),
+    );
+    gh.factory<_i797.AuthBloc>(
+      () => _i797.AuthBloc(
+        signInUseCase: gh<_i46.SignInUseCase>(),
+        signUpUseCase: gh<_i46.SignUpUseCase>(),
+        confirmSignupEmailUseCase: gh<_i46.ConfirmSignupEmailUseCase>(),
+        confirmSignupPhoneUseCase: gh<_i46.ConfirmSignupPhoneUseCase>(),
+        resendSignupEmailUseCase: gh<_i46.ResendSignupEmailUseCase>(),
+        resendSignupPhoneUseCase: gh<_i46.ResendSignupPhoneUseCase>(),
+        signOutUseCase: gh<_i46.SignOutUseCase>(),
+        requestPasswordResetUseCase: gh<_i46.RequestPasswordResetUseCase>(),
+        confirmPasswordResetUseCase: gh<_i46.ConfirmPasswordResetUseCase>(),
+        verifyIdentityUseCase: gh<_i46.VerifyIdentityUseCase>(),
+      ),
+    );
+    gh.factory<_i708.AccountBloc>(
+      () => _i708.AccountBloc(
+        gh<_i682.GetProfileUsecase>(),
+        gh<_i23.UpdateProfileUseCase>(),
+        gh<_i993.ChangeLanguageUseCase>(),
+        gh<_i949.DeleteAccountUseCase>(),
+        gh<_i1033.CancelAccountDeletionUseCase>(),
+        gh<_i79.ExportDataUseCase>(),
+        gh<_i77.SubscriptionsBloc>(),
+        gh<_i797.AuthBloc>(),
       ),
     );
     gh.lazySingleton<_i6.GetVitalsAccessUseCase>(
@@ -395,33 +432,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i6.PreviewBmiUseCase>(
       () => _i6.PreviewBmiUseCase(gh<_i544.AssessmentsRepository>()),
-    );
-    gh.factory<_i797.AuthBloc>(
-      () => _i797.AuthBloc(
-        signInUseCase: gh<_i46.SignInUseCase>(),
-        signUpUseCase: gh<_i46.SignUpUseCase>(),
-        confirmSignupEmailUseCase: gh<_i46.ConfirmSignupEmailUseCase>(),
-        confirmSignupPhoneUseCase: gh<_i46.ConfirmSignupPhoneUseCase>(),
-        resendSignupEmailUseCase: gh<_i46.ResendSignupEmailUseCase>(),
-        resendSignupPhoneUseCase: gh<_i46.ResendSignupPhoneUseCase>(),
-        signOutUseCase: gh<_i46.SignOutUseCase>(),
-        getAuthStateUseCase: gh<_i46.GetAuthStateUseCase>(),
-        requestPasswordResetUseCase: gh<_i46.RequestPasswordResetUseCase>(),
-        confirmPasswordResetUseCase: gh<_i46.ConfirmPasswordResetUseCase>(),
-        subscriptionsBloc: gh<_i77.SubscriptionsBloc>(),
-      ),
-    );
-    gh.factory<_i708.AccountBloc>(
-      () => _i708.AccountBloc(
-        gh<_i682.GetProfileUsecase>(),
-        gh<_i23.UpdateProfileUseCase>(),
-        gh<_i993.ChangeLanguageUseCase>(),
-        gh<_i949.DeleteAccountUseCase>(),
-        gh<_i1033.CancelAccountDeletionUseCase>(),
-        gh<_i79.ExportDataUseCase>(),
-        gh<_i77.SubscriptionsBloc>(),
-        gh<_i797.AuthBloc>(),
-      ),
     );
     gh.factory<_i1022.AssessmentsBloc>(
       () => _i1022.AssessmentsBloc(

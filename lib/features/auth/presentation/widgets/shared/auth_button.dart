@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:my_wellness/common/res/colors.dart';
 
 class AuthButton extends StatelessWidget {
   final String text;
@@ -38,7 +39,7 @@ class AuthButton extends StatelessWidget {
                 }
               : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: color ?? cs.primary,
+            backgroundColor: color ?? AppColors.primaryColor,
             foregroundColor: color ?? cs.onPrimary,
             disabledBackgroundColor: cs.onSurface.withValues(alpha: 0.12),
             disabledForegroundColor: cs.onSurface.withValues(alpha: 0.38),
