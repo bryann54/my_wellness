@@ -12,6 +12,8 @@ FacilityModel _$FacilityModelFromJson(Map<String, dynamic> json) =>
       name: json['name'] as String,
       town: json['town'] as String?,
       county: json['county'] as String?,
+      kephLevel: (json['keph_level'] as num?)?.toInt(),
+      coversSha: json['covers_sha'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$FacilityModelToJson(FacilityModel instance) =>
@@ -20,4 +22,6 @@ Map<String, dynamic> _$FacilityModelToJson(FacilityModel instance) =>
       'name': instance.name,
       'town': instance.town,
       'county': instance.county,
+      'keph_level': instance.kephLevel,
+      'covers_sha': instance.coversSha,
     };

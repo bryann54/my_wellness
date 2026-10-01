@@ -33,7 +33,7 @@ class AssessmentCard extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8),
       child: Material(
         color: cs.onPrimaryContainer.withValues(alpha: .05),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,

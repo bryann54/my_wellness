@@ -25,7 +25,7 @@ class EntitlementTile extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: cs.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(color: accent.withValues(alpha: 0.25), width: 1.5),
         ),
         padding: const EdgeInsets.all(16),

@@ -10,11 +10,19 @@ class FacilityModel {
   final String? town;
   final String? county;
 
+  @JsonKey(name: 'keph_level')
+  final int? kephLevel;
+
+  @JsonKey(name: 'covers_sha')
+  final bool coversSha;
+
   const FacilityModel({
     required this.id,
     required this.name,
     this.town,
     this.county,
+    this.kephLevel,
+    this.coversSha = false,
   });
 
   factory FacilityModel.fromJson(Map<String, dynamic> json) =>
@@ -22,6 +30,12 @@ class FacilityModel {
 
   Map<String, dynamic> toJson() => _$FacilityModelToJson(this);
 
-  Facility toEntity() =>
-      Facility(id: id, name: name, town: town, county: county);
+  Facility toEntity() => Facility(
+    id: id,
+    name: name,
+    town: town,
+    county: county,
+    kephLevel: kephLevel,
+    coversSha: coversSha,
+  );
 }

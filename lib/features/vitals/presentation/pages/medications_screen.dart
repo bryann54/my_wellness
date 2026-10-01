@@ -1,11 +1,11 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_fab.dart';
 import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
 import 'package:my_wellness/features/vitals/presentation/bloc/vitals_bloc.dart';
-import 'package:my_wellness/features/vitals/presentation/widgets/add_medication_sheet.dart';
 import 'package:my_wellness/features/vitals/presentation/widgets/medication_tile.dart';
 import 'package:my_wellness/features/vitals/presentation/widgets/medication_tile_shimmer.dart';
 import 'package:my_wellness/features/vitals/presentation/widgets/vitals_empty_state.dart';
@@ -57,7 +57,7 @@ class _MedicationsScreenState extends State<MedicationsScreen> {
               child: AppFab.extended(
                 label: AppLocalizations.getString(context, 'medications.add'),
                 icon: const Icon(Icons.add),
-                onPressed: () => AddMedicationSheet.show(context),
+                onPressed: () => context.router.push(AddMedicationRoute()),
               ),
             );
           },
@@ -106,7 +106,8 @@ class _MedicationsScreenState extends State<MedicationsScreen> {
                                 context,
                                 'medications.add',
                               ),
-                              onCta: () => AddMedicationSheet.show(context),
+                              onCta: () =>
+                                  context.router.push(AddMedicationRoute()),
                             ),
                           ),
                         ],

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/widgets/custom_alert_dialog.dart';
 
 class AppFab extends StatelessWidget {
@@ -78,24 +79,23 @@ class AppFab extends StatelessWidget {
   }
 
   Widget _buildExtended(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return FloatingActionButton.extended(
       heroTag: _heroTag,
       onPressed: _handleTap,
-      backgroundColor: backgroundColor ?? cs.primary,
-      foregroundColor: cs.onPrimary,
+      backgroundColor: backgroundColor ?? AppColors.primaryColor,
+      foregroundColor: AppColors.background,
       icon: icon,
       label: Text(
         label ?? '',
         style: GoogleFonts.inter(
           fontSize: 14.5,
           fontWeight: FontWeight.w600,
-          letterSpacing: 0.1,
+          letterSpacing: 0.5,
         ),
       ),
-      elevation: 3,
-      highlightElevation: 6,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 16,
+      highlightElevation: 16,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     );
   }
 

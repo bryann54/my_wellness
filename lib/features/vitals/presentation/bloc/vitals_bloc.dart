@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
 import 'package:my_wellness/common/helpers/base_usecase.dart';
@@ -9,7 +10,7 @@ import 'package:my_wellness/features/vitals/domain/entities/bp_reading.dart';
 import 'package:my_wellness/features/vitals/domain/entities/bs_reading.dart';
 import 'package:my_wellness/features/vitals/domain/entities/medication.dart';
 import 'package:my_wellness/features/vitals/domain/usecases/vitals_usecases.dart';
-
+import 'package:my_wellness/features/vitals/domain/entities/medication_scan.dart';
 part 'vitals_event.dart';
 part 'vitals_state.dart';
 
@@ -27,6 +28,7 @@ class VitalsBloc extends Bloc<VitalsEvent, VitalsState> {
   final DeleteBloodSugarReadingUseCase _deleteBs;
   final DeleteMedicationUseCase _deleteMedication;
   final DeleteAppointmentUseCase _deleteAppointment;
+  final ScanMedicationUseCase _scanMedication;
 
   VitalsBloc(
     this._getAppointments,
@@ -41,6 +43,7 @@ class VitalsBloc extends Bloc<VitalsEvent, VitalsState> {
     this._deleteBs,
     this._deleteMedication,
     this._deleteAppointment,
+    this._scanMedication,
   ) : super(const VitalsState()) {
     on<LoadVitalsEvent>(_onLoad);
     on<LoadMoreAppointmentsEvent>(_onLoadMoreAppointments);
@@ -141,6 +144,13 @@ class VitalsBloc extends Bloc<VitalsEvent, VitalsState> {
         ),
       ),
     );
+  }
+
+  Future<Either<String, MedicationScanResult>> scanMedication({
+    required String filePath,
+  }) async {
+    final result = await _scanMedication(filePath);
+    return result.fold((f) => Left(mapFailure(f)), (scan) => Right(scan));
   }
 
   Future<void> _onLoadMoreMedications(

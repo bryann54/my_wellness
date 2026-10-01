@@ -7,6 +7,7 @@ import 'package:my_wellness/features/vitals/domain/entities/appointment.dart';
 import 'package:my_wellness/features/vitals/domain/entities/bp_reading.dart';
 import 'package:my_wellness/features/vitals/domain/entities/bs_reading.dart';
 import 'package:my_wellness/features/vitals/domain/entities/medication.dart';
+import 'package:my_wellness/features/vitals/domain/entities/medication_scan.dart';
 import 'package:my_wellness/features/vitals/domain/repositories/vitals_repository.dart';
 
 @LazySingleton(as: VitalsRepository)
@@ -14,13 +15,32 @@ class VitalsRepositoryImpl implements VitalsRepository {
   final VitalsRemoteDataSource _remote;
   VitalsRepositoryImpl(this._remote);
 
-  // ── Appointments ────────────────────────────────────────────────────────
+  @override
+  Future<Either<Failure, MedicationScanResult>> scanMedication({
+    required String filePath,
+  }) async {
+    try {
+      return Right(await _remote.scanMedication(filePath: filePath));
+    } on Exception catch (e) {
+      return Left(_map(e));
+    }
+  }
+
   @override
   Future<Either<Failure, List<Appointment>>> getAppointmentsByCondition(
     String condition,
   ) async {
     try {
       return Right(await _remote.getAppointmentsByCondition(condition));
+    } on Exception catch (e) {
+      return Left(_map(e));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Facility>>> searchFacilities(String query) async {
+    try {
+      return Right(await _remote.searchFacilities(query));
     } on Exception catch (e) {
       return Left(_map(e));
     }

@@ -290,7 +290,7 @@ class SoftDropdown<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final radius = BorderRadius.circular(14);
+    final radius = BorderRadius.circular(12);
 
     return DropdownButtonFormField<T>(
       initialValue: value,

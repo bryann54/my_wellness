@@ -85,7 +85,7 @@ class _AppSearchBarState extends State<AppSearchBar> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final radius = BorderRadius.circular(14);
+    final radius = BorderRadius.circular(12);
 
     final borderColor = _focused
         ? cs.primary.withValues(alpha: 0.7)
@@ -231,7 +231,7 @@ class _FilterButton extends StatelessWidget {
       child: Material(
         color: cs.surfaceContainerLow,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
           side: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.5)),
         ),
         clipBehavior: Clip.antiAlias,
