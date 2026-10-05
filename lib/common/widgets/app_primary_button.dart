@@ -33,7 +33,7 @@ class AppPrimaryButton extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final effectiveColor = color ?? cs.primary;
     final effectiveTextColor = textColor ?? AppColors.background;
-    final effectiveRadius = borderRadius ?? 25.0;
+    final effectiveRadius = borderRadius ?? 12.0;
     final isDisabled = disabled ?? (onPressed == null || isLoading);
 
     return SizedBox(

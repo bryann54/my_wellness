@@ -25,8 +25,6 @@ class CountyDropdown extends StatelessWidget {
         final counties = state.counties;
         final isLoading = state.countiesStatus == LoadStatus.loading;
 
-        // Match the selected item by id — DropDownWidget compares by identity,
-        // so we must pass the SAME object that's in `items`.
         County? selected;
         if (selectedCountyId != null) {
           for (final c in counties) {

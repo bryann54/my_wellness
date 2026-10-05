@@ -172,23 +172,15 @@ class DropDownWidget<T> extends StatelessWidget {
             dropdownColor: appColors?.surface ?? theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(borderRadius ?? 12),
             menuMaxHeight: 300,
-            selectedItemBuilder: (context) {
+         selectedItemBuilder: (context) {
               return items.map((item) {
                 return Container(
                   alignment: Alignment.centerLeft,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    item.value?.toString() ?? '',
-                    style:
-                        textStyle ??
-                        theme.textTheme.bodyMedium?.copyWith(
-                          color:
-                              appColors?.textPrimary ??
-                              theme.colorScheme.onSurface,
-                          fontWeight: FontWeight.w500,
-                        ),
-                    maxLines: 1,
+                  child: DefaultTextStyle.merge(
                     overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    child: item.child,
                   ),
                 );
               }).toList();

@@ -1,7 +1,7 @@
 class ApiEndpoints {
   ApiEndpoints._();
 
-  // ── Auth ────────────────────────────────────────────────────────────────────
+  //  Auth
   static const String authLogin = '/api/auth/login/';
   static const String authLogout = '/api/auth/logout/';
   static const String authLogoutAll = '/api/auth/logout-all/';
@@ -18,7 +18,7 @@ class ApiEndpoints {
       '/api/auth/password-reset/confirm/';
   static const String authKyc = '/api/auth/verify-id/';
 
-  // ── Accounts (self-service) ─────────────────────────────────────────────────
+  //  Accounts (self-service)
   static const String analyticsOptOut = '/api/auth/analytics-opt-out/';
   static const String changePassword = '/api/auth/change-password/';
   static const String deleteAccount = '/api/auth/delete-account/';
@@ -27,7 +27,7 @@ class ApiEndpoints {
   static const String exportData = '/api/auth/export-data/';
   static const String shaConsent = '/api/auth/sha-consent/';
 
-  // ── MFA ─────────────────────────────────────────────────────────────────────
+  // MFA 
   static const String mfaConfirm = '/api/auth/mfa/confirm/';
   static const String mfaDisable = '/api/auth/mfa/disable/';
   static const String mfaEnroll = '/api/auth/mfa/enroll/';
@@ -36,7 +36,7 @@ class ApiEndpoints {
   static const String mfaStatus = '/api/auth/mfa/status/';
   static const String mfaVerify = '/api/auth/mfa/verify/';
 
-  // ── OTP ─────────────────────────────────────────────────────────────────────
+  // OTP
   static const String otpRequest = '/api/otp/request/';
   static const String otpVerify = '/api/otp/verify/';
   static const String otpPhoneRequest = '/api/otp/phone/request/';
@@ -45,21 +45,21 @@ class ApiEndpoints {
       '/api/otp/password-reset/request/';
   static const String otpPasswordResetConfirm =
       '/api/otp/password-reset/confirm/';
-  // ── Vitals: Appointments ────────────────────────────────────────────────────
+  // Vitals: Appointments
   static const String appointments = '/api/appointments/';
   static String appointmentDetail(String id) => '/api/appointments/$id/';
   static String referralFromSession(String sessionId) =>
       '/api/care-navigation/referrals/from-session/$sessionId';
-  // ── Facilities ──────────────────────────────────────────────────────────────
+  // Facilities 
   static const String facilitySearch = '/api/facilities/patient-search';
-  // ── Vitals: Medications ─────────────────────────────────────────────────────
+  // Vitals: Medications 
   static const String medications = '/api/medications/';
   static const String medicationsScan = '/api/medications/scan/';
   static String medicationDetail(String id) => '/api/medications/$id/';
-  // ── Vitals: Access ──────────────────────────────────────────────────────────
+  // Vitals: Access
   static const String vitalsAccess = '/api/vitals/access/';
 
-  // ── Vitals: Blood pressure ──────────────────────────────────────────────────
+  // Vitals: Blood pressure
   static const String bloodPressure = '/api/vitals/blood-pressure/';
   static String bloodPressureDetail(String id) =>
       '/api/vitals/blood-pressure/$id/';
@@ -74,16 +74,16 @@ class ApiEndpoints {
   static String bpSessionWellbeing(String id) =>
       '/api/vitals/bp/sessions/$id/wellbeing/';
 
-  // ── Vitals: Blood sugar ─────────────────────────────────────────────────────
+  // Vitals: Blood sugar
   static const String bloodSugar = '/api/vitals/blood-sugar/';
   static String bloodSugarDetail(String id) => '/api/vitals/blood-sugar/$id/';
   static const String bloodSugarMonitoringProfile =
       '/api/vitals/blood-sugar/monitoring-profile/';
 
-  // ── Vitals: shared ──────────────────────────────────────────────────────────
+  // Vitals: shared
   static const String vitalsClassifyPreview = '/api/vitals/classify-preview/';
   static const String vitalsReport = '/api/vitals/report/';
-  // ── Assessments ─────────────────────────────────────────────────────────────
+  // Assessments
   static const String assessments = '/api/assessments/';
   static const String dashboard = '/api/dashboard/';
   static String assessmentDetail(String slug) => '/api/assessments/$slug/';
@@ -104,7 +104,7 @@ class ApiEndpoints {
   static String assessmentScore(String slug, String sessionId) =>
       '/api/assessments/$slug/session/$sessionId/score/';
 
-  // ── Bookings ────────────────────────────────────────────────────────────────
+  // Bookings
   static const String bookings = '/api/bookings/';
   static const String bookingsFacility = '/api/bookings/facility/';
   static const String bookingsMine = '/api/bookings/mine/';
@@ -125,11 +125,11 @@ class ApiEndpoints {
   static String bookingFacilityStatus(String bookingId) =>
       '/api/bookings/facility/$bookingId/status/';
 
-  // ── Doctor Invites ──────────────────────────────────────────────────────────
+  // Doctor Invites
   static String doctorInvite(String token) => '/api/doctor-invites/$token/';
   static const String doctorInviteRedeem = '/api/doctor-invites/redeem/';
 
-  // ── Invite Codes ────────────────────────────────────────────────────────────
+  // Invite Codes
   static const String inviteCodesInvoices = '/api/invite-codes/invoices/';
   static const String inviteCodesMyCompanyAdminFlag =
       '/api/invite-codes/my-company-admin-flag/';
@@ -142,7 +142,7 @@ class ApiEndpoints {
   static String inviteCodeReports(String inviteCodeId) =>
       '/api/invite-codes/$inviteCodeId/reports/';
 
-  // ── Payments ────────────────────────────────────────────────────────────────
+  // Payments
   static const String paymentsMine = '/api/payments/mine/';
   static const String paymentsModuleAccess = '/api/payments/module-access/';
   static const String paymentsPackages = '/api/payments/packages/';
@@ -151,10 +151,10 @@ class ApiEndpoints {
   static const String paymentsC2bValidation = '/api/payments/c2b/validation/';
   static const String paymentsMpesaCallback = '/api/payments/mpesa-callback/';
 
-  // ── Health Profile ──────────────────────────────────────────────────────────
+  // Health Profile
   static const String healthProfile = '/api/health-profile/';
 
-  // ── Health Exchange ─────────────────────────────────────────────────────────
+  // Health Exchange
   static const String healthExchangeClinicVisitNotifications =
       '/api/health-exchange/clinic-visit-notifications/';
   static const String healthExchangeMySummary =
@@ -162,17 +162,17 @@ class ApiEndpoints {
   static const String healthExchangeShaEligibility =
       '/api/health-exchange/sha-eligibility/';
 
-  // ── Chatbot ─────────────────────────────────────────────────────────────────
+  // Chatbot 
   static const String chatbotMessage = '/api/chatbot/message/';
 
-  // ── Geography ───────────────────────────────────────────────────────────────
+  // Geography 
   static const String geographyConstituencies =
       '/api/geography/constituencies/';
   static const String geographyCounties = '/api/geography/counties/';
   static const String geographySubCounties = '/api/geography/sub-counties/';
   static const String geographyWards = '/api/geography/wards/';
 
-  // ── Notifications (Push) ────────────────────────────────────────────────────
+  // Notifications (Push) 
   static const String pushSubscribe = '/api/push/subscribe/';
   static const String pushVapidPublicKey = '/api/push/vapid-public-key/';
   static const String pushPartnerNotifications =

@@ -335,7 +335,11 @@ class _DismissBackground extends StatelessWidget {
         color: color,
         borderRadius: BorderRadius.circular(6),
       ),
-      child: const Icon(Icons.delete_outline_rounded, color: Colors.white,size: 25,),
+      child: const Icon(
+        Icons.delete_outline_rounded,
+        color: Colors.white,
+        size: 25,
+      ),
     );
   }
 }
