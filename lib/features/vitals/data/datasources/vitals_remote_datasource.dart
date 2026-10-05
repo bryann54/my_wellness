@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:my_wellness/core/api_client/client/api_client.dart';
 import 'package:my_wellness/core/api_client/endpoints/api_endpoints.dart';
@@ -5,11 +6,14 @@ import 'package:my_wellness/core/api_client/models/cursor_page.dart';
 import 'package:my_wellness/features/vitals/data/models/appointment_model.dart';
 import 'package:my_wellness/features/vitals/data/models/bp_reading_model.dart';
 import 'package:my_wellness/features/vitals/data/models/bs_reading_model.dart';
+import 'package:my_wellness/features/vitals/data/models/facility_model.dart';
 import 'package:my_wellness/features/vitals/data/models/medication_model.dart';
+import 'package:my_wellness/features/vitals/data/models/medication_scan_model.dart';
 import 'package:my_wellness/features/vitals/domain/entities/appointment.dart';
 import 'package:my_wellness/features/vitals/domain/entities/bp_reading.dart';
 import 'package:my_wellness/features/vitals/domain/entities/bs_reading.dart';
 import 'package:my_wellness/features/vitals/domain/entities/medication.dart';
+import 'package:my_wellness/features/vitals/domain/entities/medication_scan.dart';
 
 abstract class VitalsRemoteDataSource {
   Future<List<Appointment>> getAppointmentsByCondition(String condition);
@@ -17,11 +21,11 @@ abstract class VitalsRemoteDataSource {
     String? cursor,
     String? query,
   });
-
+  Future<MedicationScanResult> scanMedication({required String filePath});
   Future<Appointment> createAppointment(Map<String, dynamic> data);
   Future<Appointment> updateAppointment(String id, Map<String, dynamic> data);
   Future<void> deleteAppointment(String id);
-
+  Future<List<Facility>> searchFacilities(String query);
   Future<List<Medication>> getMedicationsByCondition(String condition);
 
   Future<({List<Medication> items, String? nextCursor})> getMedicationsPaged({
@@ -33,12 +37,10 @@ abstract class VitalsRemoteDataSource {
   Future<Medication> updateMedication(String id, Map<String, dynamic> data);
   Future<void> deleteMedication(String id);
 
-  // Blood pressure
   Future<List<BpReading>> getBloodPressureReadings();
   Future<BpReading> createBloodPressureReading(Map<String, dynamic> data);
   Future<void> deleteBloodPressureReading(String id);
 
-  // ── Blood sugar ───────────────────────────────────────────────────────────
   Future<List<BsReading>> getBloodSugarReadings();
   Future<BsReading> createBloodSugarReading(Map<String, dynamic> data);
   Future<void> deleteBloodSugarReading(String id);
@@ -49,6 +51,29 @@ class VitalsRemoteDataSourceImpl implements VitalsRemoteDataSource {
   final ApiClient _apiClient;
 
   VitalsRemoteDataSourceImpl(this._apiClient);
+
+  // ── Medications: scan ─────────────────────────────────────────────────────
+
+  @override
+  Future<MedicationScanResult> scanMedication({
+    required String filePath,
+  }) async {
+    // Upload the file as `image` in a multipart/form-data request.
+    final formData = FormData.fromMap({
+      'image': await MultipartFile.fromFile(
+        filePath,
+        filename: filePath.split('/').last,
+      ),
+    });
+
+    final response = await _apiClient.postFormData<Map<String, dynamic>>(
+      url: ApiEndpoints.medicationsScan,
+      formData: formData,
+      options: ApiClient.protected,
+    );
+
+    return MedicationScanModel.fromJson(response).toEntity();
+  }
 
   // ── Appointments ──────────────────────────────────────────────────────────
 
@@ -63,6 +88,20 @@ class VitalsRemoteDataSourceImpl implements VitalsRemoteDataSource {
         .map(
           (e) =>
               AppointmentModel.fromJson(e as Map<String, dynamic>).toEntity(),
+        )
+        .toList(growable: false);
+  }
+
+  @override
+  Future<List<Facility>> searchFacilities(String query) async {
+    final response = await _apiClient.get<List<dynamic>>(
+      url: ApiEndpoints.facilitySearch,
+      query: {'q': query},
+      options: ApiClient.protected,
+    );
+    return response
+        .map(
+          (e) => FacilityModel.fromJson(e as Map<String, dynamic>).toEntity(),
         )
         .toList(growable: false);
   }
@@ -119,7 +158,8 @@ class VitalsRemoteDataSourceImpl implements VitalsRemoteDataSource {
     );
   }
 
-  //medication
+  // ── Medications ───────────────────────────────────────────────────────────
+
   @override
   Future<List<Medication>> getMedicationsByCondition(String condition) async {
     final response = await _apiClient.get<List<dynamic>>(
@@ -194,7 +234,7 @@ class VitalsRemoteDataSourceImpl implements VitalsRemoteDataSource {
     );
   }
 
-  //Blood pressure
+  // ── Blood pressure ────────────────────────────────────────────────────────
 
   @override
   Future<List<BpReading>> getBloodPressureReadings() async {
@@ -229,7 +269,8 @@ class VitalsRemoteDataSourceImpl implements VitalsRemoteDataSource {
     );
   }
 
-  //blood sugar
+  // ── Blood sugar ───────────────────────────────────────────────────────────
+
   @override
   Future<List<BsReading>> getBloodSugarReadings() async {
     final response = await _apiClient.get<List<dynamic>>(

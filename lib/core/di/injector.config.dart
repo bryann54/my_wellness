@@ -294,9 +294,15 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i425.DeleteAppointmentUseCase>(
       () => _i425.DeleteAppointmentUseCase(gh<_i515.VitalsRepository>()),
     );
+    gh.lazySingleton<_i425.ScanMedicationUseCase>(
+      () => _i425.ScanMedicationUseCase(gh<_i515.VitalsRepository>()),
+    );
     gh.lazySingleton<_i425.GetMedicationsByConditionUseCase>(
       () =>
           _i425.GetMedicationsByConditionUseCase(gh<_i515.VitalsRepository>()),
+    );
+    gh.lazySingleton<_i425.SearchFacilitiesUseCase>(
+      () => _i425.SearchFacilitiesUseCase(gh<_i515.VitalsRepository>()),
     );
     gh.lazySingleton<_i425.GetMedicationsPagedUseCase>(
       () => _i425.GetMedicationsPagedUseCase(gh<_i515.VitalsRepository>()),
@@ -327,19 +333,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i425.DeleteBloodSugarReadingUseCase>(
       () => _i425.DeleteBloodSugarReadingUseCase(gh<_i515.VitalsRepository>()),
     );
-    gh.lazySingleton<_i544.AssessmentsRepository>(
-      () => _i958.AssessmentRepositoryImpl(
-        gh<_i470.AssessmentsRemoteDataSource>(),
-      ),
-    );
-    gh.factory<_i137.GeographyBloc>(
-      () => _i137.GeographyBloc(
-        gh<_i331.GetCountiesUseCase>(),
-        gh<_i8.GetSubCountiesUseCase>(),
-        gh<_i275.GetConstituenciesUseCase>(),
-        gh<_i903.GetWardsUseCase>(),
-      ),
-    );
     gh.factory<_i902.VitalsBloc>(
       () => _i902.VitalsBloc(
         gh<_i425.GetAppointmentsPagedUseCase>(),
@@ -354,6 +347,20 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i425.DeleteBloodSugarReadingUseCase>(),
         gh<_i425.DeleteMedicationUseCase>(),
         gh<_i425.DeleteAppointmentUseCase>(),
+        gh<_i425.ScanMedicationUseCase>(),
+      ),
+    );
+    gh.lazySingleton<_i544.AssessmentsRepository>(
+      () => _i958.AssessmentRepositoryImpl(
+        gh<_i470.AssessmentsRemoteDataSource>(),
+      ),
+    );
+    gh.factory<_i137.GeographyBloc>(
+      () => _i137.GeographyBloc(
+        gh<_i331.GetCountiesUseCase>(),
+        gh<_i8.GetSubCountiesUseCase>(),
+        gh<_i275.GetConstituenciesUseCase>(),
+        gh<_i903.GetWardsUseCase>(),
       ),
     );
     gh.factory<_i646.LaunchBloc>(

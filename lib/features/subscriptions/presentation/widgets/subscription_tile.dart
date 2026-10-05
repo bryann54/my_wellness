@@ -47,7 +47,7 @@ class SubscriptionPackageTile extends StatelessWidget {
             duration: const Duration(milliseconds: 250),
             decoration: BoxDecoration(
               color: bg,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: isActive
                     ? accent.withValues(alpha: .5)

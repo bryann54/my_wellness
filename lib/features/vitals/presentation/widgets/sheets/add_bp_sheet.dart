@@ -198,7 +198,7 @@ class _AddBpSheetState extends State<AddBpSheet> {
             const SizedBox(height: 12),
             InkWell(
               onTap: _pickDateTime,
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(12),
               child: InputDecorator(
                 decoration: InputDecoration(
                   labelText: AppLocalizations.getString(
@@ -218,13 +218,13 @@ class _AddBpSheetState extends State<AddBpSheet> {
                     vertical: 4,
                   ),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide(
                       color: cs.outlineVariant.withValues(alpha: 0.4),
                     ),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide(
                       color: cs.outlineVariant.withValues(alpha: 0.4),
                     ),

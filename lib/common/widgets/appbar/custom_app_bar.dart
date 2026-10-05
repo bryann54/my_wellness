@@ -51,7 +51,7 @@ class CustomAppBar extends StatelessWidget {
           flexibleSpace: AppBarFlexibleHeader(
             isHome: isHome,
             username: state.profile?.displayName ?? '',
-            title: title,
+            title: title?.toUpperCase(),
             actions: [
               if (!isTabRoot && context.router.canPop())
                 if (actions != null) ...actions!,
@@ -119,7 +119,7 @@ class CustomAppBarWithLeading extends StatelessWidget {
           flexibleSpace: AppBarFlexibleHeader(
             isHome: isHome,
             username: state.profile?.displayName ?? '',
-            title: title,
+            title: title?.toUpperCase(),
             actions: [if (actions != null) ...actions!],
             expandedHeight: resolvedExpanded,
             bottom: bottom,

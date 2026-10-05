@@ -15,7 +15,7 @@ class SubscriptionPackageShimmer extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: cs.surfaceContainerLow,
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: cs.outlineVariant.withValues(alpha: 0.1),
                   ),

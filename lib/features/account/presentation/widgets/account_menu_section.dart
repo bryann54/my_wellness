@@ -1,12 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
-import 'package:my_wellness/common/widgets/language_selector_row.dart';
 import 'package:my_wellness/features/account/presentation/widgets/menu_item_tile.dart';
-import 'package:my_wellness/features/auth/presentation/bloc/auth_bloc.dart';
 
 class AccountMenuSection extends StatelessWidget {
   final AccountState state;
@@ -31,7 +28,7 @@ class AccountMenuSection extends StatelessWidget {
       ),
       child: Column(
         children: [
-          MenuItemTile(
+        MenuItemTile(
             icon: Icons.person_outline,
             title: AppLocalizations.getString(context, 'profile.editProfile'),
             subtitle: AppLocalizations.getString(
@@ -41,59 +38,8 @@ class AccountMenuSection extends StatelessWidget {
             onTap: () {
               final profile = state.profile;
               if (profile != null) {
-                context.router.push(EditProfileRoute(profile: profile));
+                context.router.push(ProfileDetailsRoute(profile: profile));
               }
-            },
-          ),
-          _buildDivider(context),
-          const LanguageSelectorRow(),
-          _buildDivider(context),
-          MenuItemTile(
-            icon: Icons.payment_outlined,
-            title: AppLocalizations.getString(context, 'settings.subscription'),
-            subtitle: AppLocalizations.getString(
-              context,
-              'subscription.manage',
-            ),
-            onTap: () {
-              context.router.push(SubscriptionsRoute());
-            },
-          ),
-          _buildDivider(context),
-          MenuItemTile(
-            icon: Icons.contact_phone_outlined,
-            title: AppLocalizations.getString(
-              context,
-              'profile.emergencyContacts',
-            ),
-            subtitle: AppLocalizations.getString(
-              context,
-              'profile.editEmergencyContact',
-            ),
-            onTap: () {
-              final userId = context.read<AuthBloc>().state.user?.id;
-              if (userId != null && userId.isNotEmpty) {
-                // TODO: push EmergencyContactsRoute(userId: userId)
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text('User profile not loaded'),
-                    backgroundColor: Theme.of(context).colorScheme.error,
-                  ),
-                );
-              }
-            },
-          ),
-          _buildDivider(context),
-          MenuItemTile(
-            icon: Icons.description_outlined,
-            title: AppLocalizations.getString(context, 'documents.myDocuments'),
-            subtitle: AppLocalizations.getString(
-              context,
-              'documents.myDocuments',
-            ),
-            onTap: () {
-              // TODO: push MyDocumentsRoute
             },
           ),
           _buildDivider(context),
@@ -102,11 +48,9 @@ class AccountMenuSection extends StatelessWidget {
             title: AppLocalizations.getString(context, 'settings.title'),
             subtitle: AppLocalizations.getString(
               context,
-              'settings.alertPreferences',
+              'settings.subtitle', 
             ),
-            onTap: () {
-              // TODO: navigate to notification settings
-            },
+            onTap: () => context.router.push(const SettingsRoute()),
           ),
         ],
       ),

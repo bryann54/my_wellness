@@ -85,7 +85,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     );
   }
 
-  Future<void> _onUpdateProfile(
+Future<void> _onUpdateProfile(
     UpdateProfileEvent event,
     Emitter<AccountState> emit,
   ) async {
@@ -98,13 +98,20 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
           errorMessage: mapFailure(f),
         ),
       ),
-      (profile) => emit(
-        state.copyWith(
-          status: AccountStatus.updated,
-          profile: profile,
-          successMessage: 'Profile updated',
-        ),
-      ),
+      (profile) {
+        emit(
+          state.copyWith(
+            status: AccountStatus.updated,
+            profile: profile,
+            successMessage: 'Profile updated',
+          ),
+        );
+        Future.microtask(() {
+          emit(
+            state.copyWith(status: AccountStatus.initial, clearSuccess: true),
+          );
+        });
+      },
     );
   }
 

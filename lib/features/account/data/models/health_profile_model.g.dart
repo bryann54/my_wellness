@@ -11,34 +11,57 @@ HealthProfileModel _$HealthProfileModelFromJson(Map<String, dynamic> json) =>
       email: json['email'] as String,
       fullName: json['full_name'] as String,
       phone: json['phone'] as String,
-      age: (json['age'] as num?)?.toInt(),
-      ageStale: json['age_stale'] as bool? ?? false,
+      age: _intFromJson(json['age']),
+      ageStale: json['age_stale'] == null
+          ? false
+          : _boolFromJson(json['age_stale']),
       dateOfBirth: json['date_of_birth'] as String?,
-      weightKg: (json['weight_kg'] as num?)?.toDouble(),
-      heightCm: (json['height_cm'] as num?)?.toDouble(),
-      bmiStale: json['bmi_stale'] as bool? ?? false,
+      weightKg: _doubleFromJson(json['weight_kg']),
+      heightCm: _doubleFromJson(json['height_cm']),
+      bmiStale: json['bmi_stale'] == null
+          ? false
+          : _boolFromJson(json['bmi_stale']),
       gender: json['gender'] as String,
       county: json['county'] as String?,
-      subCounty: (json['sub_county'] as num?)?.toInt(),
-      constituency: (json['constituency'] as num?)?.toInt(),
-      ward: (json['ward'] as num?)?.toInt(),
-      occupation: json['occupation'] as String? ?? '',
+      subCounty: _intFromJson(json['sub_county']),
+      constituency: _intFromJson(json['constituency']),
+      ward: _intFromJson(json['ward']),
+      occupation: json['occupation'] == null
+          ? ''
+          : _stringFromJson(json['occupation']),
       memberCode: json['member_code'] as String,
-      healthProfileCompleted:
-          json['health_profile_completed'] as bool? ?? false,
-      hasHypertension: json['has_hypertension'] as bool?,
-      onHtnMedication: json['on_htn_medication'] as bool?,
-      htnMedications: json['htn_medications'] as String? ?? '',
-      hasDiabetes: json['has_diabetes'] as bool?,
-      onDmMedication: json['on_dm_medication'] as bool?,
-      dmMedications: json['dm_medications'] as String? ?? '',
-      htnOnboardingSeen: json['htn_onboarding_seen'] as bool? ?? false,
-      dmOnboardingSeen: json['dm_onboarding_seen'] as bool? ?? false,
-      shaBeneficiaryId: json['sha_beneficiary_id'] as String? ?? '',
-      shaBeneficiaryIdType: json['sha_beneficiary_id_type'] as String? ?? '',
-      nationalIdNumber: json['national_id_number'] as String?,
-      analyticsOptOut: json['analytics_opt_out'] as bool? ?? false,
-      shaDataSharingConsent: json['sha_data_sharing_consent'] as bool? ?? false,
+      healthProfileCompleted: json['health_profile_completed'] == null
+          ? false
+          : _boolFromJson(json['health_profile_completed']),
+      hasHypertension: _boolOrNullFromJson(json['has_hypertension']),
+      onHtnMedication: _boolOrNullFromJson(json['on_htn_medication']),
+      htnMedications: json['htn_medications'] == null
+          ? ''
+          : _stringFromJson(json['htn_medications']),
+      hasDiabetes: _boolOrNullFromJson(json['has_diabetes']),
+      onDmMedication: _boolOrNullFromJson(json['on_dm_medication']),
+      dmMedications: json['dm_medications'] == null
+          ? ''
+          : _stringFromJson(json['dm_medications']),
+      htnOnboardingSeen: json['htn_onboarding_seen'] == null
+          ? false
+          : _boolFromJson(json['htn_onboarding_seen']),
+      dmOnboardingSeen: json['dm_onboarding_seen'] == null
+          ? false
+          : _boolFromJson(json['dm_onboarding_seen']),
+      shaBeneficiaryId: json['sha_beneficiary_id'] == null
+          ? ''
+          : _stringFromJson(json['sha_beneficiary_id']),
+      shaBeneficiaryIdType: json['sha_beneficiary_id_type'] == null
+          ? ''
+          : _stringFromJson(json['sha_beneficiary_id_type']),
+      nationalIdNumber: _stringOrNullFromJson(json['national_id_number']),
+      analyticsOptOut: json['analytics_opt_out'] == null
+          ? false
+          : _boolFromJson(json['analytics_opt_out']),
+      shaDataSharingConsent: json['sha_data_sharing_consent'] == null
+          ? false
+          : _boolFromJson(json['sha_data_sharing_consent']),
     );
 
 Map<String, dynamic> _$HealthProfileModelToJson(HealthProfileModel instance) =>

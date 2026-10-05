@@ -29,6 +29,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: VitalsRoute.page),
     AutoRoute(page: MyHealthRoute.page),
     AutoRoute(page: AppointmentsRoute.page),
+    AutoRoute(page: AddMedicationRoute.page),
 
     // Assessments
     AutoRoute(page: AssessmentCompleteRoute.page),
@@ -37,9 +38,11 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: AssessmentResultRoute.page),
 
     // Account / auth-adjacent
-    AutoRoute(page: EditProfileRoute.page),
+   
     AutoRoute(page: VerificationRoute.page),
     AutoRoute(page: ConversationalRegisterRoute.page),
+    AutoRoute(page: SettingsRoute.page),
+    AutoRoute(page: ProfileDetailsRoute.page),
 
     // Web view
     AutoRoute(page: WebViewRoute.page),

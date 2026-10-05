@@ -4,6 +4,7 @@ import 'package:my_wellness/features/vitals/domain/entities/appointment.dart';
 import 'package:my_wellness/features/vitals/domain/entities/bp_reading.dart';
 import 'package:my_wellness/features/vitals/domain/entities/bs_reading.dart';
 import 'package:my_wellness/features/vitals/domain/entities/medication.dart';
+import 'package:my_wellness/features/vitals/domain/entities/medication_scan.dart';
 
 abstract class VitalsRepository {
   Future<Either<Failure, List<Appointment>>> getAppointmentsByCondition(
@@ -18,6 +19,10 @@ abstract class VitalsRepository {
     String id,
     Map<String, dynamic> data,
   );
+  Future<Either<Failure, MedicationScanResult>> scanMedication({
+    required String filePath,
+  });
+  Future<Either<Failure, List<Facility>>> searchFacilities(String query);
   Future<Either<Failure, void>> deleteAppointment(String id);
 
   Future<Either<Failure, List<Medication>>> getMedicationsByCondition(

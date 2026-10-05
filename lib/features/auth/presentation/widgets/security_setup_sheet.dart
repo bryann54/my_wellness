@@ -464,7 +464,7 @@ class _PinStep extends StatelessWidget {
             filled: true,
             fillColor: cs.surfaceContainerLow,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
             ),
             errorText: error,
@@ -521,7 +521,7 @@ class _PrimaryBtn extends StatelessWidget {
         style: FilledButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(12),
           ),
         ),
       ),

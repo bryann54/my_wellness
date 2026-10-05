@@ -1,12 +1,13 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/utils/functions.dart';
 import 'package:my_wellness/common/widgets/shimmer_box.dart';
 import 'package:my_wellness/features/vitals/domain/entities/medication.dart';
 import 'package:my_wellness/features/vitals/domain/usecases/vitals_usecases.dart';
-import 'package:my_wellness/features/vitals/presentation/widgets/add_medication_sheet.dart';
 import 'package:my_wellness/features/vitals/presentation/widgets/medication_tile.dart';
 
 class ConditionMedicationCapture extends StatefulWidget {
@@ -89,13 +90,7 @@ class _ConditionMedicationCaptureState
         Align(
           alignment: Alignment.centerLeft,
           child: TextButton.icon(
-            onPressed: () async {
-              await AddMedicationSheet.show(
-                context,
-                condition: widget.condition,
-              );
-              await _load();
-            },
+            onPressed: () => context.router.push(AddMedicationRoute()),
             icon: const Icon(Icons.add, size: 18),
             label: Text(AppLocalizations.getString(context, 'medications.add')),
           ),

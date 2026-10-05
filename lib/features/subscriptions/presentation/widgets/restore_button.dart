@@ -16,7 +16,7 @@ class RestoreButton extends StatelessWidget {
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: cs.primaryContainer,
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: cs.outlineVariant.withValues(alpha: 0.32),
             ),

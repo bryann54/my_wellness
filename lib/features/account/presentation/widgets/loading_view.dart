@@ -1,4 +1,3 @@
-// lib/features/account/presentation/widgets/account_shimmer.dart
 
 import 'package:flutter/material.dart';
 import 'package:my_wellness/common/widgets/shimmer.dart';
@@ -13,7 +12,6 @@ class AccountShimmer extends StatelessWidget {
     return CustomScrollView(
       physics: const NeverScrollableScrollPhysics(),
       slivers: [
-        // Header area (app bar + expanded header)
         SliverAppBar(
           expandedHeight: 150,
           floating: false,
@@ -27,7 +25,6 @@ class AccountShimmer extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(20, 70, 20, 20),
                 child: Row(
                   children: [
-                    // Avatar shimmer
                     Container(
                       width: 80,
                       height: 80,
@@ -37,7 +34,6 @@ class AccountShimmer extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 20),
-                    // Name and email shimmer
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -69,7 +65,6 @@ class AccountShimmer extends StatelessWidget {
             ),
           ),
         ),
-        // Account section label
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
@@ -83,9 +78,8 @@ class AccountShimmer extends StatelessWidget {
             ).withShimmer(isLoading: true),
           ),
         ),
-        // Account menu items (4 items)
         ...List.generate(4, (index) => _buildMenuItemShimmer(context)),
-        // Help section label
+      
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
@@ -99,9 +93,8 @@ class AccountShimmer extends StatelessWidget {
             ),
           ),
         ),
-        // Help menu items (5 items)
         ...List.generate(5, (index) => _buildMenuItemShimmer(context)),
-        // Footer space
+      
         const SliverToBoxAdapter(child: SizedBox(height: 32)),
       ],
     );
@@ -122,7 +115,6 @@ class AccountShimmer extends StatelessWidget {
           ),
           child: Row(
             children: [
-              // Icon placeholder
               Container(
                 width: 40,
                 height: 40,
@@ -132,7 +124,6 @@ class AccountShimmer extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 16),
-              // Title and subtitle placeholder
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -157,7 +148,7 @@ class AccountShimmer extends StatelessWidget {
                   ],
                 ),
               ),
-              // Chevron placeholder
+          
               Container(
                 width: 20,
                 height: 20,

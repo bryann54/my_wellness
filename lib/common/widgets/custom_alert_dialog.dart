@@ -1,5 +1,3 @@
-// lib/common/widgets/custom_alert_dialog.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:my_wellness/common/res/colors.dart';
@@ -43,8 +41,7 @@ class CustomAlertDialog extends StatelessWidget {
 
     return AlertDialog.adaptive(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      // Icons are ignored by Cupertino adaptive style automatically,
-      // but stay present for Material.
+
       icon: _buildIcon(context, color),
       title: Text(
         title,
@@ -86,7 +83,6 @@ class CustomAlertDialog extends StatelessWidget {
     required CustomAlertDialog dialog,
   }) {
     _triggerHaptics(dialog.type);
-    // showAdaptiveDialog is the modern way to invoke adaptive alerts
     return showAdaptiveDialog<T>(
       context: context,
       barrierDismissible: dialog.type != DialogType.error,
@@ -114,7 +110,6 @@ class CustomAlertDialog extends StatelessWidget {
   }
 
   Widget? _buildIcon(BuildContext context, Color color) {
-    // Icons only show in Material mode for a cleaner look
     IconData iconData = switch (type) {
       DialogType.success => Icons.check_circle_outline_rounded,
       DialogType.error => Icons.error_outline_rounded,
@@ -154,6 +149,58 @@ class AppDialogs {
         message: message,
         type: DialogType.success,
         showCancelButton: false,
+      ),
+    );
+  }
+
+  static Future<void> error(
+    BuildContext context,
+    String message, {
+    VoidCallback? onRetry,
+    VoidCallback? onCancel,
+    VoidCallback? onOk,
+  }) {
+    return CustomAlertDialog.show<void>(
+      context: context,
+      dialog: CustomAlertDialog(
+        title: AppLocalizations.getString(context, 'common.error'),
+        message: message,
+        type: DialogType.error,
+        showCancelButton: onCancel != null,
+        onCancel: onCancel,
+        showConfirmButton: onOk != null || onRetry != null,
+        confirmText: onRetry != null
+            ? AppLocalizations.getString(context, 'common.retry')
+            : AppLocalizations.getString(context, 'common.ok'),
+        onConfirm: onRetry ?? onOk,
+      ),
+    );
+  }
+
+  static Future<void> custom(
+    BuildContext context, {
+    required Widget body,
+    String? title,
+    VoidCallback? onRetry,
+    VoidCallback? onCancel,
+    VoidCallback? onOk,
+    VoidCallback? onYes,
+  }) {
+    return CustomAlertDialog.show<void>(
+      context: context,
+      dialog: CustomAlertDialog(
+        title: title ?? '',
+        content: body,
+        type: DialogType.info,
+        showCancelButton: onCancel != null,
+        onCancel: onCancel,
+        showConfirmButton: onOk != null || onYes != null || onRetry != null,
+        confirmText: onRetry != null
+            ? AppLocalizations.getString(context, 'common.retry')
+            : onYes != null
+            ? AppLocalizations.getString(context, 'common.yes')
+            : AppLocalizations.getString(context, 'common.ok'),
+        onConfirm: onRetry ?? onYes ?? onOk,
       ),
     );
   }

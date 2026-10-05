@@ -6,6 +6,7 @@ import 'package:my_wellness/features/vitals/domain/entities/appointment.dart';
 import 'package:my_wellness/features/vitals/domain/entities/bp_reading.dart';
 import 'package:my_wellness/features/vitals/domain/entities/bs_reading.dart';
 import 'package:my_wellness/features/vitals/domain/entities/medication.dart';
+import 'package:my_wellness/features/vitals/domain/entities/medication_scan.dart';
 import 'package:my_wellness/features/vitals/domain/repositories/vitals_repository.dart';
 
 // ── Appointments ────────────────────────────────────────────────────────────
@@ -53,7 +54,15 @@ class DeleteAppointmentUseCase implements UseCase<void, String> {
   Future<Either<Failure, void>> call(String id) => _repo.deleteAppointment(id);
 }
 
-// ── Medications ─────────────────────────────────────────────────────────────
+@lazySingleton
+class ScanMedicationUseCase implements UseCase<MedicationScanResult, String> {
+  final VitalsRepository _repo;
+  ScanMedicationUseCase(this._repo);
+
+  @override
+  Future<Either<Failure, MedicationScanResult>> call(String filePath) =>
+      _repo.scanMedication(filePath: filePath);
+}
 
 @lazySingleton
 class GetMedicationsByConditionUseCase
@@ -63,6 +72,15 @@ class GetMedicationsByConditionUseCase
   @override
   Future<Either<Failure, List<Medication>>> call(String condition) =>
       _repo.getMedicationsByCondition(condition);
+}
+
+@lazySingleton
+class SearchFacilitiesUseCase implements UseCase<List<Facility>, String> {
+  final VitalsRepository _repo;
+  SearchFacilitiesUseCase(this._repo);
+  @override
+  Future<Either<Failure, List<Facility>>> call(String query) =>
+      _repo.searchFacilities(query);
 }
 
 @lazySingleton

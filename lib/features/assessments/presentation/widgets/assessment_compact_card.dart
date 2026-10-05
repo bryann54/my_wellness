@@ -27,13 +27,13 @@ class AssessmentCompactCard extends StatelessWidget {
       height: height,
       child: Material(
         color: cs.onPrimaryContainer.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
           child: Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: cs.outlineVariant.withValues(alpha: 0.55),
               ),

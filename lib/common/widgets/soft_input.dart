@@ -7,6 +7,7 @@ class SoftInput extends StatelessWidget {
   final TextEditingController controller;
   final String? label;
   final String? hint;
+  final FocusNode? focusNode;
   final String? suffixText;
   final TextInputType? keyboardType;
   final List<TextInputFormatter>? inputFormatters;
@@ -26,6 +27,7 @@ class SoftInput extends StatelessWidget {
     this.label,
     this.hint,
     this.suffixText,
+    this.focusNode,
     this.keyboardType,
     this.inputFormatters,
     this.validator,
@@ -48,6 +50,7 @@ class SoftInput extends StatelessWidget {
       keyboardType: keyboardType,
       inputFormatters: inputFormatters,
       validator: validator,
+      focusNode: focusNode,
       maxLines: maxLines,
       minLines: minLines,
       readOnly: readOnly,
@@ -112,7 +115,7 @@ class SoftInput extends StatelessWidget {
 
   OutlineInputBorder _border(ColorScheme cs, Color color, {double width = 1}) {
     return OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(12),
       borderSide: BorderSide(color: color, width: width),
     );
   }

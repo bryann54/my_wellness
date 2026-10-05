@@ -120,11 +120,14 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-  void _handleStateChanges(BuildContext context, AccountState state) {
+void _handleStateChanges(BuildContext context, AccountState state) {
     final localeProvider = Provider.of<LocaleProvider>(context, listen: false);
     if (state.currentLang != localeProvider.locale.languageCode) {
       localeProvider.setLocale(Locale(state.currentLang));
     }
+    const updateStatuses = {AccountStatus.updated, AccountStatus.updating};
+    if (updateStatuses.contains(state.status)) return;
+
     if (state.successMessage != null) {
       _showSuccessMessage(context, state.successMessage!);
       context.read<AccountBloc>().add(const ClearErrorEvent());

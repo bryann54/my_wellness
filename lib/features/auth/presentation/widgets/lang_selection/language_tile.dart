@@ -27,7 +27,7 @@ class LanguageTile extends StatelessWidget {
         color: isSelected
             ? cs.primary.withValues(alpha: 0.06)
             : cs.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isSelected
               ? cs.primary.withValues(alpha: 0.4)
@@ -39,7 +39,7 @@ class LanguageTile extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
             child: Row(

@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
+import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
+import 'package:my_wellness/common/widgets/app_primary_button.dart';
 import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
 import 'package:my_wellness/features/assessments/presentation/bloc/assessments_bloc.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_card.dart';
@@ -147,31 +149,18 @@ class _AssessmentIntroBodyState extends State<_AssessmentIntroBody> {
                         ),
                       ),
                     const SizedBox(height: 36),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton(
-                        onPressed: () => context.router.push(
-                          AssessmentSessionRoute(slug: widget.slug),
-                        ),
-                        style: FilledButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 15),
-                          backgroundColor: cs.primary,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        child: Text(
-                          AppLocalizations.getString(
-                            context,
-                            'assessment.begin',
-                          ),
-                          style: GoogleFonts.inter(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+              AppPrimaryButton(
+                onPressed: () => context.router.push(
+                        AssessmentSessionRoute(slug: widget.slug),
                       ),
-                    ),
+                label: AppLocalizations.getString(
+                  context,
+                  'assessment.begin',
+                ),
+                color: AppColors.primaryColor,
+                borderRadius: 12,
+              ),
+
                   ],
                 ),
               ),

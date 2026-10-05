@@ -12,7 +12,7 @@ class MedicationTileShimmer extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 10),
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: cs.outlineVariant.withValues(alpha: 0.6),
             width: 1,
@@ -24,7 +24,6 @@ class MedicationTileShimmer extends StatelessWidget {
             children: [
               _SkeletonBox(width: 40, height: 40, radius: 11),
               const SizedBox(width: 12),
-              // Two-line text column.
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

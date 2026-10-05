@@ -113,7 +113,7 @@ class _SplashPinUnlockState extends State<SplashPinUnlock> {
             filled: true,
             fillColor: cs.surfaceContainerLow,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
             ),
             errorText: error,
