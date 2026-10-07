@@ -149,18 +149,17 @@ class _AssessmentIntroBodyState extends State<_AssessmentIntroBody> {
                         ),
                       ),
                     const SizedBox(height: 36),
-              AppPrimaryButton(
-                onPressed: () => context.router.push(
+                    AppPrimaryButton(
+                      onPressed: () => context.router.push(
                         AssessmentSessionRoute(slug: widget.slug),
                       ),
-                label: AppLocalizations.getString(
-                  context,
-                  'assessment.begin',
-                ),
-                color: AppColors.primaryColor,
-                borderRadius: 12,
-              ),
-
+                      label: AppLocalizations.getString(
+                        context,
+                        'assessment.begin',
+                      ),
+                      color: AppColors.primaryColor,
+                      borderRadius: 12,
+                    ),
                   ],
                 ),
               ),

@@ -4,9 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/notifiers/locale_provider.dart';
 import 'package:my_wellness/common/res/l10n.dart';
+import 'package:my_wellness/common/widgets/language_selector_row.dart';
 import 'package:my_wellness/common/widgets/step_progress.dart';
 import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
-import 'package:my_wellness/common/widgets/language_selector_row.dart';
 import 'package:my_wellness/features/auth/data/models/signup_request_model.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_event.dart';
@@ -36,10 +36,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   final _pageController = PageController();
   int _step = 0;
+
+  // Step 1 — identity (verified first)
+  IdentityDraft? _identity;
+
+  // Step 2 — credentials
   String? _email;
   String? _phone;
   String? _password;
-  IdentityDraft? _identity;
+
+  // Step 3 — location
   County? _county;
   SubCounty? _subCounty;
 
@@ -185,6 +191,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     controller: _pageController,
                     physics: const NeverScrollableScrollPhysics(),
                     children: [
+                      // Step 1 — verify identity first.
+                      RegisterStepIdentity(
+                        initial: _identity,
+                        onContinue: (draft) {
+                          setState(() => _identity = draft);
+                          _next();
+                        },
+                      ),
+
+                      // Step 2 — credentials (email, phone, password).
                       RegisterStepCredentials(
                         initialEmail: _email,
                         initialPhone: _phone,
@@ -202,13 +218,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               _next();
                             },
                       ),
-                      RegisterStepIdentity(
-                        initial: _identity,
-                        onContinue: (draft) {
-                          setState(() => _identity = draft);
-                          _next();
-                        },
-                      ),
+
+                      // Step 3 — location.
                       RegisterStepLocation(
                         initialCounty: _county,
                         initialSubCounty: _subCounty,
@@ -220,6 +231,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           _next();
                         },
                       ),
+
+                      // Step 4 — review + submit.
                       RegisterStepSubmit(
                         summary: SubmitSummary(
                           email: _email,

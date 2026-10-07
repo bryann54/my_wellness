@@ -120,7 +120,7 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
-void _handleStateChanges(BuildContext context, AccountState state) {
+  void _handleStateChanges(BuildContext context, AccountState state) {
     final localeProvider = Provider.of<LocaleProvider>(context, listen: false);
     if (state.currentLang != localeProvider.locale.languageCode) {
       localeProvider.setLocale(Locale(state.currentLang));

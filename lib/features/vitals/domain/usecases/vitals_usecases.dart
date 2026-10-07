@@ -55,13 +55,19 @@ class DeleteAppointmentUseCase implements UseCase<void, String> {
 }
 
 @lazySingleton
-class ScanMedicationUseCase implements UseCase<MedicationScanResult, String> {
+class ScanMedicationUseCase
+    implements
+        UseCase<MedicationScanResult, ({String filePath, String condition})> {
   final VitalsRepository _repo;
   ScanMedicationUseCase(this._repo);
 
   @override
-  Future<Either<Failure, MedicationScanResult>> call(String filePath) =>
-      _repo.scanMedication(filePath: filePath);
+  Future<Either<Failure, MedicationScanResult>> call(
+    ({String filePath, String condition}) params,
+  ) => _repo.scanMedication(
+    filePath: params.filePath,
+    condition: params.condition,
+  );
 }
 
 @lazySingleton

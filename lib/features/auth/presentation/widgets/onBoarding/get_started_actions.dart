@@ -30,7 +30,7 @@ class GetStartedActions extends StatelessWidget {
           label: AppLocalizations.getString(context, 'auth.signInLink'),
           onPressed: () => context.router.push(const LoginRoute()),
           color: AppColors.textPrimaryDark,
-          textColor: cs.primary,
+          textColor: cs.primaryContainer,
           borderRadius: 12,
           height: 52,
         ),

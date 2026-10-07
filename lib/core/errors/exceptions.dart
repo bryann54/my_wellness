@@ -25,6 +25,11 @@ class NotFoundException implements Exception {
   NotFoundException(this.message);
 }
 
+class ClientException implements Exception {
+  final String message;
+  ClientException({required this.message});
+}
+
 class ValidationException implements Exception {
   final String message;
   ValidationException(this.message);

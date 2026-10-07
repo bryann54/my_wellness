@@ -6,8 +6,8 @@
 -dontwarn io.flutter.embedding.**
 
 # Keep MainActivity
--keep class com.seed4va.mywellness.** { *; }
--keep class com.seed4va.mywellness.MainActivity { *; }
+-keep class com.mywellness.apps.** { *; }
+-keep class com.mywellness.apps.MainActivity { *; }
 
 # Flutter plugins
 -keep class io.flutter.plugins.** { *; }

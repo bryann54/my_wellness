@@ -28,7 +28,7 @@ class AccountMenuSection extends StatelessWidget {
       ),
       child: Column(
         children: [
-        MenuItemTile(
+          MenuItemTile(
             icon: Icons.person_outline,
             title: AppLocalizations.getString(context, 'profile.editProfile'),
             subtitle: AppLocalizations.getString(
@@ -46,10 +46,7 @@ class AccountMenuSection extends StatelessWidget {
           MenuItemTile(
             icon: Icons.settings_outlined,
             title: AppLocalizations.getString(context, 'settings.title'),
-            subtitle: AppLocalizations.getString(
-              context,
-              'settings.subtitle', 
-            ),
+            subtitle: AppLocalizations.getString(context, 'settings.subtitle'),
             onTap: () => context.router.push(const SettingsRoute()),
           ),
         ],

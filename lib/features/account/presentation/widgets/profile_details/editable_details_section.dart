@@ -51,7 +51,7 @@ class _EditableDetailsSectionState extends State<EditableDetailsSection> {
 
   void _onChanged() => setState(() {});
 
-void _hydrate(
+  void _hydrate(
     County? county,
     SubCounty? subCounty,
     Constituency? constituency,
@@ -133,10 +133,12 @@ void _hydrate(
           occupationController: _occupationCtrl,
         ),
         const SizedBox(height: 24),
-     AppPrimaryButton(onPressed: (!_isDirty || isSaving) ? null : _submit, 
-     color: AppColors.primaryColor,
-     borderRadius: 12,
-     label: AppLocalizations.getString(context, 'profile.saveChanges'))
+        AppPrimaryButton(
+          onPressed: (!_isDirty || isSaving) ? null : _submit,
+          color: AppColors.primaryColor,
+          borderRadius: 12,
+          label: AppLocalizations.getString(context, 'profile.saveChanges'),
+        ),
       ],
     );
   }

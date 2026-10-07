@@ -76,22 +76,13 @@ import '../../features/geography/presentation/bloc/geography_bloc.dart'
 import '../../features/launch/domain/usecases/check_connectivity_usecase.dart'
     as _i656;
 import '../../features/launch/presentation/bloc/launch_bloc.dart' as _i646;
-import '../../features/subscriptions/data/datasources/rc_subscription_datasource.dart'
-    as _i226;
-import '../../features/subscriptions/data/repositories/rc_subscription_repository_impl.dart'
-    as _i236;
-import '../../features/subscriptions/domain/repositories/rc_subscription_repository.dart'
-    as _i818;
-import '../../features/subscriptions/domain/usecases/rc_get_entitlements_usecase.dart'
-    as _i1043;
-import '../../features/subscriptions/domain/usecases/rc_get_offerings_usecase.dart'
-    as _i874;
-import '../../features/subscriptions/domain/usecases/rc_purchase_package_usecase.dart'
-    as _i805;
-import '../../features/subscriptions/domain/usecases/rc_restore_purchases_usecase.dart'
-    as _i163;
-import '../../features/subscriptions/presentation/bloc/subscriptions_bloc.dart'
-    as _i77;
+import '../../features/notifications/data/notification_service.dart' as _i597;
+import '../../features/notifications/data/repositories/notifications_repository_impl.dart'
+    as _i201;
+import '../../features/notifications/domain/repositories/notifications_repository.dart'
+    as _i563;
+import '../../features/notifications/presentation/bloc/notifications_bloc.dart'
+    as _i1041;
 import '../../features/vitals/data/datasources/vitals_remote_datasource.dart'
     as _i216;
 import '../../features/vitals/data/repositories/vitals_repository_impl.dart'
@@ -122,16 +113,18 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i558.FlutterSecureStorage>(
       () => registerModules.secureStorage,
     );
+    gh.lazySingleton<_i597.NotificationService>(
+      () => registerModules.notificationService,
+    );
     gh.lazySingleton<_i374.BiometricService>(() => _i374.BiometricService());
     gh.lazySingleton<_i845.PinService>(() => _i845.PinService());
     gh.lazySingleton<_i656.CheckConnectivityUsecase>(
       () => _i656.CheckConnectivityUsecase(),
     );
-    gh.factory<String>(() => registerModules.baseUrl, instanceName: 'BaseUrl');
-    gh.factory<String>(
-      () => registerModules.rcApiKey,
-      instanceName: 'rcApiKey',
+    gh.lazySingleton<_i563.NotificationsRepository>(
+      () => _i201.NotificationsRepositoryImpl(),
     );
+    gh.factory<String>(() => registerModules.baseUrl, instanceName: 'BaseUrl');
     gh.lazySingleton<_i992.AuthLocalDataSource>(
       () => _i992.AuthLocalDataSourceImpl(gh<_i558.FlutterSecureStorage>()),
     );
@@ -144,6 +137,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i845.PinService>(),
       ),
     );
+    gh.factory<_i1041.NotificationsBloc>(
+      () => _i1041.NotificationsBloc(gh<_i597.NotificationService>()),
+    );
     gh.lazySingleton<_i29.AccountLocalDatasource>(
       () => _i29.AccountLocalDatasource(gh<_i934.SharedPreferencesManager>()),
     );
@@ -151,11 +147,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i878.AuthInterceptor(
         gh<_i992.AuthLocalDataSource>(),
         gh<String>(instanceName: 'BaseUrl'),
-      ),
-    );
-    gh.lazySingleton<_i226.RCSubscriptionDatasource>(
-      () => _i226.RCSubscriptionDatasourceImpl(
-        gh<String>(instanceName: 'rcApiKey'),
       ),
     );
     gh.lazySingleton<_i671.ApiClient>(
@@ -169,11 +160,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i216.VitalsRemoteDataSource>(
       () => _i216.VitalsRemoteDataSourceImpl(gh<_i671.ApiClient>()),
-    );
-    gh.lazySingleton<_i818.RCSubscriptionRepository>(
-      () => _i236.RCSubscriptionRepositoryImpl(
-        gh<_i226.RCSubscriptionDatasource>(),
-      ),
     );
     gh.lazySingleton<_i161.AuthRemoteDataSource>(
       () => _i161.AuthRemoteDataSourceImpl(gh<_i671.ApiClient>()),
@@ -199,21 +185,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i470.AssessmentsRemoteDataSource>(
       () => _i470.AssessmentsRemoteDataSourceImpl(gh<_i671.ApiClient>()),
-    );
-    gh.factory<_i1043.RCGetEntitlementsUseCase>(
-      () =>
-          _i1043.RCGetEntitlementsUseCase(gh<_i818.RCSubscriptionRepository>()),
-    );
-    gh.factory<_i874.RCGetOfferingsUseCase>(
-      () => _i874.RCGetOfferingsUseCase(gh<_i818.RCSubscriptionRepository>()),
-    );
-    gh.factory<_i805.RCPurchasePackageUseCase>(
-      () =>
-          _i805.RCPurchasePackageUseCase(gh<_i818.RCSubscriptionRepository>()),
-    );
-    gh.factory<_i163.RCRestorePurchasesUseCase>(
-      () =>
-          _i163.RCRestorePurchasesUseCase(gh<_i818.RCSubscriptionRepository>()),
     );
     gh.lazySingleton<_i515.VitalsRepository>(
       () => _i214.VitalsRepositoryImpl(gh<_i216.VitalsRemoteDataSource>()),
@@ -355,6 +326,16 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i470.AssessmentsRemoteDataSource>(),
       ),
     );
+    gh.factory<_i708.AccountBloc>(
+      () => _i708.AccountBloc(
+        gh<_i682.GetProfileUsecase>(),
+        gh<_i23.UpdateProfileUseCase>(),
+        gh<_i993.ChangeLanguageUseCase>(),
+        gh<_i949.DeleteAccountUseCase>(),
+        gh<_i1033.CancelAccountDeletionUseCase>(),
+        gh<_i79.ExportDataUseCase>(),
+      ),
+    );
     gh.factory<_i137.GeographyBloc>(
       () => _i137.GeographyBloc(
         gh<_i331.GetCountiesUseCase>(),
@@ -369,15 +350,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i46.GetCurrentUserUseCase>(),
       ),
     );
-    gh.factory<_i77.SubscriptionsBloc>(
-      () => _i77.SubscriptionsBloc(
-        gh<_i818.RCSubscriptionRepository>(),
-        gh<_i874.RCGetOfferingsUseCase>(),
-        gh<_i805.RCPurchasePackageUseCase>(),
-        gh<_i163.RCRestorePurchasesUseCase>(),
-        gh<_i1043.RCGetEntitlementsUseCase>(),
-      ),
-    );
     gh.factory<_i797.AuthBloc>(
       () => _i797.AuthBloc(
         signInUseCase: gh<_i46.SignInUseCase>(),
@@ -390,18 +362,6 @@ extension GetItInjectableX on _i174.GetIt {
         requestPasswordResetUseCase: gh<_i46.RequestPasswordResetUseCase>(),
         confirmPasswordResetUseCase: gh<_i46.ConfirmPasswordResetUseCase>(),
         verifyIdentityUseCase: gh<_i46.VerifyIdentityUseCase>(),
-      ),
-    );
-    gh.factory<_i708.AccountBloc>(
-      () => _i708.AccountBloc(
-        gh<_i682.GetProfileUsecase>(),
-        gh<_i23.UpdateProfileUseCase>(),
-        gh<_i993.ChangeLanguageUseCase>(),
-        gh<_i949.DeleteAccountUseCase>(),
-        gh<_i1033.CancelAccountDeletionUseCase>(),
-        gh<_i79.ExportDataUseCase>(),
-        gh<_i77.SubscriptionsBloc>(),
-        gh<_i797.AuthBloc>(),
       ),
     );
     gh.lazySingleton<_i6.GetVitalsAccessUseCase>(

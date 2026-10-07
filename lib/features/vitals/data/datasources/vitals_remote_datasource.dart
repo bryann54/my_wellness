@@ -21,7 +21,10 @@ abstract class VitalsRemoteDataSource {
     String? cursor,
     String? query,
   });
-  Future<MedicationScanResult> scanMedication({required String filePath});
+ Future<MedicationScanResult> scanMedication({
+    required String filePath,
+    required String condition,
+  });
   Future<Appointment> createAppointment(Map<String, dynamic> data);
   Future<Appointment> updateAppointment(String id, Map<String, dynamic> data);
   Future<void> deleteAppointment(String id);
@@ -53,17 +56,17 @@ class VitalsRemoteDataSourceImpl implements VitalsRemoteDataSource {
   VitalsRemoteDataSourceImpl(this._apiClient);
 
   // ── Medications: scan ─────────────────────────────────────────────────────
-
-  @override
+@override
   Future<MedicationScanResult> scanMedication({
     required String filePath,
+    required String condition,
   }) async {
-    // Upload the file as `image` in a multipart/form-data request.
     final formData = FormData.fromMap({
       'image': await MultipartFile.fromFile(
         filePath,
         filename: filePath.split('/').last,
       ),
+      'condition': condition,
     });
 
     final response = await _apiClient.postFormData<Map<String, dynamic>>(

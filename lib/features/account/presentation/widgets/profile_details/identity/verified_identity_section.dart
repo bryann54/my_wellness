@@ -13,7 +13,6 @@ class VerifiedIdentitySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return ProfileSectionCard(
       icon: Icons.verified_user_outlined,
       title: AppLocalizations.getString(context, 'profile.verifiedIdentity'),
@@ -54,12 +53,12 @@ class VerifiedIdentitySection extends StatelessWidget {
           value: profile.nationalIdNumber ?? '—',
         ),
         const SizedBox(height: 18),
-     AppPrimaryButton(
-        onPressed: () => UpdateIdentitySheet.show(context),
-        label: AppLocalizations.getString(context, 'profile.updateIdentity'),
-        borderRadius: 12,
-        color:AppColors.primaryColor,
-      ),
+        AppPrimaryButton(
+          onPressed: () => UpdateIdentitySheet.show(context),
+          label: AppLocalizations.getString(context, 'profile.updateIdentity'),
+          borderRadius: 12,
+          color: AppColors.primaryColor,
+        ),
       ],
     );
   }

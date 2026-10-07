@@ -47,7 +47,6 @@ class _AuthContentState extends State<AuthContent> {
     final page = OnboardingData.pages[_currentPage];
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           children: [

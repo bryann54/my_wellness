@@ -6,21 +6,23 @@ class VitalsEmptyState extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
-  final String ctaLabel;
-  final VoidCallback onCta;
+  final String? ctaLabel;
+  final VoidCallback? onCta;
 
   const VitalsEmptyState({
     super.key,
     required this.icon,
     required this.title,
     required this.subtitle,
-    required this.ctaLabel,
-    required this.onCta,
+    this.ctaLabel,
+    this.onCta,
   });
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final showCta = ctaLabel != null && onCta != null;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -55,21 +57,23 @@ class VitalsEmptyState extends StatelessWidget {
                 color: cs.onSurface.withValues(alpha: 0.6),
               ),
             ),
-            const SizedBox(height: 24),
-            FilledButton(
-              onPressed: onCta,
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primaryColor,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 64,
-                  vertical: 12,
+            if (showCta) ...[
+              const SizedBox(height: 24),
+              FilledButton(
+                onPressed: onCta,
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.primaryColor,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 64,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                child: Text(ctaLabel!),
               ),
-              child: Text(ctaLabel),
-            ),
+            ],
           ],
         ),
       ),

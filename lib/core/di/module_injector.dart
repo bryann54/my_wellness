@@ -1,10 +1,8 @@
-// lib/core/di/register_module.dart
-
-import 'dart:io';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:my_wellness/features/notifications/data/notification_service.dart';
 
 @module
 abstract class RegisterModules {
@@ -17,8 +15,7 @@ abstract class RegisterModules {
   @lazySingleton
   FlutterSecureStorage get secureStorage => const FlutterSecureStorage();
 
-  @Named('rcApiKey')
-  String get rcApiKey => Platform.isIOS
-      ? (dotenv.env['PUBLIC_REVENUECAT_API_KEY_IOS'] ?? '')
-      : (dotenv.env['PUBLIC_REVENUECAT_API_KEY_ANDROID'] ?? '');
+  @lazySingleton
+  NotificationService get notificationService =>
+      NotificationService(dotenv.env['ONESIGNAL_APP_ID'] ?? '');
 }

@@ -15,7 +15,7 @@ class AppTabBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return TabBar(
       controller: controller,
-      indicatorColor: AppColors.background,
+      indicatorColor: ColorScheme.of(context).background,
       indicatorWeight: 2.5,
       labelStyle: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w700),
       unselectedLabelStyle: GoogleFonts.inter(

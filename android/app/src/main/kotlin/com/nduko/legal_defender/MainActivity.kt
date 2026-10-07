@@ -1,4 +1,4 @@
-package com.seed4va.mywellness
+package com.mywellness.apps
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine

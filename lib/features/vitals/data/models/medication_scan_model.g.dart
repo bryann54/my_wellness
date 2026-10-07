@@ -70,7 +70,9 @@ MedicationCandidateOptionModel _$MedicationCandidateOptionModelFromJson(
   Map<String, dynamic> json,
 ) => MedicationCandidateOptionModel(
   id: json['id'] as String,
-  name: json['name'] as String,
+  code: json['code'] as String?,
+  display: json['display'] as String?,
+  name: json['name'] as String?,
   dosage: json['dosage'] as String?,
   frequency: json['frequency'] as String?,
 );
@@ -79,6 +81,8 @@ Map<String, dynamic> _$MedicationCandidateOptionModelToJson(
   MedicationCandidateOptionModel instance,
 ) => <String, dynamic>{
   'id': instance.id,
+  'code': instance.code,
+  'display': instance.display,
   'name': instance.name,
   'dosage': instance.dosage,
   'frequency': instance.frequency,

@@ -447,7 +447,10 @@
   "locationSection": "Location"
 
   },
-
+ "notifications": {
+    "emptyTitle": "No notifications yet",
+    "emptyBody": "We'll let you know when something needs your attention."
+  },
   "settings": {
     "title": "Settings",
     "profile": "Profile",

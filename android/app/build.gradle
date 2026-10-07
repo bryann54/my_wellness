@@ -14,11 +14,11 @@ if (envPropertiesFile.exists()) {
 }
 
 android {
-    namespace "com.seed4va.mywellness"
+    namespace "com.mywellness.apps"
     compileSdk flutter.compileSdkVersion
     
     defaultConfig {
-        applicationId "com.seed4va.mywellness"
+        applicationId "com.mywellness.apps"
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutter.versionCode

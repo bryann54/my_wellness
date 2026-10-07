@@ -439,6 +439,10 @@
     "phoneInvalidCharacters": "Namba ya simu inaweza kuwa na tarakimu na alama za uumbizaji (nafasi, kistari, mabano, +) tu",
     "phoneInvalidLength": "Tafadhali weka namba sahihi ya simu (tarakimu 10-15)"
   },
+   "notifications": {
+    "emptyTitle": "Hakuna arifa bado",
+    "emptyBody": "Tutakujulisha wakati kuna jambo linalohitaji uangalizi wako."
+  },
   "settings": {
     
     "profile": "Wasifu",

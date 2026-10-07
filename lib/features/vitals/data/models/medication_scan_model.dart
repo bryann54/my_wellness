@@ -70,13 +70,17 @@ class MedicationCandidateModel {
 @JsonSerializable()
 class MedicationCandidateOptionModel {
   final String id;
-  final String name;
+  final String? code;
+  final String? display;
+  final String? name;
   final String? dosage;
   final String? frequency;
 
   const MedicationCandidateOptionModel({
     required this.id,
-    required this.name,
+    this.code,
+    this.display,
+    this.name,
     this.dosage,
     this.frequency,
   });
@@ -88,7 +92,7 @@ class MedicationCandidateOptionModel {
 
   MedicationCandidateOption toEntity() => MedicationCandidateOption(
     id: id,
-    name: name,
+    name: display ?? name ?? code ?? '',
     dosage: dosage,
     frequency: frequency,
   );
