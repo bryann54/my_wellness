@@ -1,8 +1,8 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/features/account/presentation/widgets/menu_item_tile.dart';
-import 'package:my_wellness/features/account/presentation/widgets/password_reset_dialog.dart';
-
 class SupportMenuSection extends StatelessWidget {
   const SupportMenuSection({super.key});
 
@@ -19,11 +19,11 @@ class SupportMenuSection extends StatelessWidget {
       ),
       child: Column(
         children: [
-          MenuItemTile(
+       MenuItemTile(
             icon: Icons.lock_outline,
             title: AppLocalizations.getString(context, 'auth.forgotPassword'),
             subtitle: AppLocalizations.getString(context, 'auth.resetPassword'),
-            onTap: () => showPasswordResetDialog(context),
+            onTap: () => context.router.push(const ForgotPasswordRoute()),
           ),
           _buildDivider(context),
           MenuItemTile(

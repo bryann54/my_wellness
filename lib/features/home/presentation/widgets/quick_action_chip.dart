@@ -2,11 +2,10 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:my_wellness/common/res/colors.dart';
 
 class QuickActionChip extends StatefulWidget {
-  /// Accepts either an [IconData] (Material) or an [FaIconData] (Font Awesome).
   final Object? icon;
   final String label;
   final PageRouteInfo route;
@@ -23,6 +22,8 @@ class QuickActionChip extends StatefulWidget {
 }
 
 class _QuickActionChipState extends State<QuickActionChip> {
+  static const _pressDuration = Duration(milliseconds: 120);
+
   bool _pressed = false;
 
   Widget? _buildIcon(Color color, {double size = 20}) {
@@ -58,24 +59,21 @@ class _QuickActionChipState extends State<QuickActionChip> {
         onTap: _onTap,
         child: AnimatedScale(
           scale: _pressed ? 0.94 : 1.0,
-          duration: const Duration(milliseconds: 120),
+          duration: _pressDuration,
           curve: Curves.easeOut,
           child: SizedBox(
             width: 72,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // ── Icon tile ─────────────────────────────────────────
                 Container(
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    // Soft glass surface instead of a flat white blob.
                     color: AppColors.background.withValues(alpha: 0.14),
                     border: Border.all(
                       color: AppColors.background.withValues(alpha: 0.22),
-                      width: 1,
                     ),
                     boxShadow: [
                       BoxShadow(
@@ -88,19 +86,15 @@ class _QuickActionChipState extends State<QuickActionChip> {
                   child: Center(child: iconWidget ?? const SizedBox.shrink()),
                 ),
                 const SizedBox(height: 8),
-                // ── Label ──────────────────────────────────────────────
                 Text(
                   widget.label,
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
                     height: 1.15,
                     fontWeight: FontWeight.w500,
                     letterSpacing: 0.1,
                     color: AppColors.background.withValues(alpha: 0.92),
                   ),
                   textAlign: TextAlign.center,
-                  // Prefer "Medication" / "My Health" / "Vitals" — one line.
-                  // For longer words use a soft ellipsis instead of wrapping.
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

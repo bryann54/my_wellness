@@ -1,26 +1,25 @@
-// lib/features/auth/presentation/pages/verification_screen.dart
-
-import 'dart:io';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
+
+import 'package:my_wellness/common/constants/hero.dart';
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
+import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
-import 'package:my_wellness/common/widgets/app_primary_button.dart';
+import 'package:my_wellness/common/widgets/app_snackbar.dart';
 import 'package:my_wellness/features/auth/domain/entities/signup_pending_entity.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_event.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_state.dart';
+import 'package:my_wellness/features/auth/presentation/widgets/shared/auth_button.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/shared/auth_header.dart';
+import 'package:my_wellness/features/auth/presentation/widgets/shared/otp_input.dart';
 
 @RoutePage()
 class VerificationScreen extends StatefulWidget {
   const VerificationScreen({super.key, this.pending});
 
-  /// Optionally supplied by navigation. If null, read from AuthState.
   final SignupPendingEntity? pending;
 
   @override
@@ -28,37 +27,31 @@ class VerificationScreen extends StatefulWidget {
 }
 
 class _VerificationScreenState extends State<VerificationScreen> {
-  final _codeCtrl = TextEditingController();
+  final _otpKey = GlobalKey<OtpInputState>();
+  String _code = '';
   String? _errorText;
 
-  @override
-  void dispose() {
-    _codeCtrl.dispose();
-    super.dispose();
-  }
+  bool get _isComplete => _code.length == 6;
 
   void _submit(SignupPendingEntity pending) {
-    final code = _codeCtrl.text.trim();
-    if (code.length < 4) {
-      setState(() => _errorText = 'Enter the code we sent you');
+    if (!_isComplete) {
+      setState(() => _errorText = 'Enter all 6 digits');
       return;
     }
     setState(() => _errorText = null);
-    HapticFeedback.lightImpact();
 
     if (pending.channel == SignupChannel.phone) {
       context.read<AuthBloc>().add(
-        ConfirmSignupPhoneEvent(phone: pending.destination, code: code),
+        ConfirmSignupPhoneEvent(phone: pending.destination, code: _code),
       );
     } else {
       context.read<AuthBloc>().add(
-        ConfirmSignupEmailEvent(email: pending.destination, code: code),
+        ConfirmSignupEmailEvent(email: pending.destination, code: _code),
       );
     }
   }
 
   void _resend(SignupPendingEntity pending) {
-    HapticFeedback.lightImpact();
     if (pending.channel == SignupChannel.phone) {
       context.read<AuthBloc>().add(
         ResendSignupPhoneEvent(phone: pending.destination),
@@ -72,22 +65,10 @@ class _VerificationScreenState extends State<VerificationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: cs.surface,
-      appBar: AppBar(
-        backgroundColor: cs.surface,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Platform.isAndroid ? Icons.arrow_back : Icons.arrow_back_ios,
-            size: 22,
-            color: cs.primary,
-          ),
-          onPressed: () => context.router.maybePop(),
-        ),
-      ),
+      appBar: AppBar(),
       body: BlocConsumer<AuthBloc, AuthState>(
         listenWhen: (prev, curr) =>
             prev.status != curr.status ||
@@ -95,15 +76,14 @@ class _VerificationScreenState extends State<VerificationScreen> {
         listener: (context, state) {
           if (state.status == AuthStatus.unauthenticated &&
               state.pendingSignup == null) {
-            // Confirmation succeeded — send them to login.
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Verified — please sign in.')),
-            );
+            AppSnackbar.success(context, 'Verified — please sign in.');
             context.router.replaceAll([const LoginRoute()]);
           }
-          if (state.errorMessage != null &&
-              state.status == AuthStatus.awaitingSignupConfirmation) {
+          if (state.status == AuthStatus.awaitingSignupConfirmation &&
+              state.errorMessage != null) {
             setState(() => _errorText = state.errorMessage);
+            _otpKey.currentState?.clear();
+            AppSnackbar.error(context, state.errorMessage!);
           }
         },
         builder: (context, state) {
@@ -117,9 +97,12 @@ class _VerificationScreenState extends State<VerificationScreen> {
 
           return SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.md,
+              ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   AuthHeader(
                     title: AppLocalizations.getString(
@@ -132,46 +115,66 @@ class _VerificationScreenState extends State<VerificationScreen> {
                           ? 'auth.verifyPhoneSubtitle'
                           : 'auth.verifyEmailSubtitle',
                     ),
+                    showLogo: false,
                   ),
-                  const SizedBox(height: 40),
-                  TextField(
-                    controller: _codeCtrl,
-                    keyboardType: TextInputType.number,
-                    textAlign: TextAlign.center,
-                    maxLength: 6,
-                    style: GoogleFonts.inter(
-                      fontSize: 24,
-                      letterSpacing: 8,
-                      fontWeight: FontWeight.w700,
-                    ),
-                    decoration: InputDecoration(
-                      counterText: '',
-                      hintText: '••••••',
-                      errorText: _errorText,
+                  const SizedBox(height: AppSpacing.xl),
 
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  OtpInput(
+                    key: _otpKey,
+                    enabled: !isLoading,
+                    hasError: _errorText != null,
+                    onChanged: (v) => setState(() {
+                      _code = v;
+                      if (_errorText != null) _errorText = null;
+                    }),
+                   onCompleted: (_) {
+                      HapticFeedback.lightImpact();
+                      _submit(pending);
+                    }
+                  ),
+
+                  if (_errorText != null) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      _errorText!,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.error,
                       ),
                     ),
-                    onSubmitted: (_) => _submit(pending),
-                  ),
-                  const SizedBox(height: 24),
-                  AppPrimaryButton(
-                    label: AppLocalizations.getString(
+                  ],
+
+                  const SizedBox(height: AppSpacing.lg),
+
+                  AuthButton(
+                    text: AppLocalizations.getString(
                       context,
                       'auth.verifyButton',
                     ),
+                    heroTag: HeroTags.verificationCta,
+                    enabled: _isComplete,
                     isLoading: isLoading,
-                    borderRadius: 12,
                     onPressed: () => _submit(pending),
                   ),
-                  TextButton(
-                    onPressed: isLoading ? null : () => _resend(pending),
-                    child: Text(
-                      AppLocalizations.getString(
-                        context,
-                        'auth.resendCode',
-                        // fallback: 'Resend code',
+
+                  const SizedBox(height: AppSpacing.sm),
+
+                  Center(
+                    child: TextButton(
+                      onPressed: isLoading ? null : () => _resend(pending),
+                      child: Text(
+                        AppLocalizations.getString(context, 'auth.resendCode'),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    'Sent to ${pending.destination}',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(
+                        alpha: 0.55,
                       ),
                     ),
                   ),

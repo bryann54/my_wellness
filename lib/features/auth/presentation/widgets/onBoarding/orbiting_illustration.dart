@@ -1,20 +1,21 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+
 import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/onBoarding/orbit_coin.dart';
 
 class OrbitingIllustration extends StatefulWidget {
-  final String imageAsset;
-  final List<String> orbitAssets;
-  final int pageIndex;
-
   const OrbitingIllustration({
     required this.imageAsset,
-    required this.orbitAssets,
+    required this.orbitIcons,
     required this.pageIndex,
     super.key,
   });
+
+  final String imageAsset;
+  final List<IconData> orbitIcons;
+  final int pageIndex;
 
   @override
   State<OrbitingIllustration> createState() => OrbitingIllustrationState();
@@ -63,9 +64,10 @@ class OrbitingIllustrationState extends State<OrbitingIllustration>
     return LayoutBuilder(
       builder: (context, constraints) {
         final size = constraints.biggest.shortestSide;
-        final orbitRadius = size * 0.44;
-        final imageSize = size * 0.82;
-        final iconSize = size * 0.13;
+        final imageSize = size * 0.78;
+        final imageRadius = imageSize / 2;
+        final orbitRadius = imageRadius;
+        final iconSize = size * 0.16;
 
         return AnimatedBuilder(
           animation: _animation,
@@ -81,18 +83,6 @@ class OrbitingIllustrationState extends State<OrbitingIllustration>
                 clipBehavior: Clip.none,
                 children: [
                   Container(
-                    width: orbitRadius * 2,
-                    height: orbitRadius * 2,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: AppColors.primaryColor.withValues(alpha: 0.08),
-                        width: 1.5,
-                      ),
-                    ),
-                  ),
-
-                  Container(
                     width: imageSize,
                     height: imageSize,
                     decoration: BoxDecoration(
@@ -100,8 +90,8 @@ class OrbitingIllustrationState extends State<OrbitingIllustration>
                       border: Border.all(color: AppColors.background, width: 4),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.06),
-                          blurRadius: 24,
+                          color: Colors.black.withValues(alpha: 0.08),
+                          blurRadius: 28,
                           spreadRadius: 2,
                         ),
                       ],
@@ -113,12 +103,14 @@ class OrbitingIllustrationState extends State<OrbitingIllustration>
                           widget.imageAsset,
                           key: ValueKey(widget.imageAsset),
                           fit: BoxFit.cover,
+                          width: imageSize,
+                          height: imageSize,
                         ),
                       ),
                     ),
                   ),
 
-                  ...List.generate(widget.orbitAssets.length, (i) {
+                  ...List.generate(widget.orbitIcons.length, (i) {
                     final angle = (i * (2 * math.pi / 3)) + rotation;
                     return Transform.translate(
                       offset: Offset(
@@ -128,7 +120,7 @@ class OrbitingIllustrationState extends State<OrbitingIllustration>
                       child: SizedBox(
                         width: iconSize,
                         height: iconSize,
-                        child: OrbitIcon(asset: widget.orbitAssets[i]),
+                        child: OrbitIcon(icon: widget.orbitIcons[i]),
                       ),
                     );
                   }),

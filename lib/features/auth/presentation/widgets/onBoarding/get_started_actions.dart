@@ -9,7 +9,6 @@ import 'package:my_wellness/features/auth/presentation/widgets/shared/terms_priv
 
 class GetStartedActions extends StatelessWidget {
   const GetStartedActions({super.key});
-
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -18,19 +17,20 @@ class GetStartedActions extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+          AppPrimaryButton(
+          label: AppLocalizations.getString(context, 'auth.signInLink'),
+          onPressed: () => context.router.push(const LoginRoute()),
+          color: AppColors.textPrimaryDark,
+          textColor: cs.onPrimaryContainer,
+          borderRadius: 12,
+          height: 52,
+        ),
+      
+        AuthDivider(text: AppLocalizations.getString(context, 'common.or').toUpperCase()),
         AppPrimaryButton(
           label: AppLocalizations.getString(context, 'auth.signUpLink'),
           onPressed: () => context.router.push(const RegisterRoute()),
           color: AppColors.primaryColor,
-          borderRadius: 12,
-          height: 52,
-        ),
-        AuthDivider(text: AppLocalizations.getString(context, 'common.or')),
-        AppPrimaryButton(
-          label: AppLocalizations.getString(context, 'auth.signInLink'),
-          onPressed: () => context.router.push(const LoginRoute()),
-          color: AppColors.textPrimaryDark,
-          textColor: cs.primaryContainer,
           borderRadius: 12,
           height: 52,
         ),

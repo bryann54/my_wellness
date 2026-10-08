@@ -1,22 +1,34 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
+import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/features/vitals/presentation/bloc/vitals_bloc.dart';
-import 'package:auto_route/auto_route.dart';
 
 enum VitalsTileKind { bp, bs }
 
 class VitalsTile extends StatelessWidget {
-  final VitalsTileKind kind;
   const VitalsTile({super.key, required this.kind});
+
+  final VitalsTileKind kind;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     final isBp = kind == VitalsTileKind.bp;
+
+    final accent = isBp
+        ? (isDark ? AppColors.vitalBpDark : AppColors.vitalBp)
+        : (isDark ? AppColors.vitalBsDark : AppColors.vitalBs);
+
+    final surface = isBp
+        ? (isDark ? AppColors.vitalBpSurfaceDark : AppColors.vitalBpSurface)
+        : (isDark ? AppColors.vitalBsSurfaceDark : AppColors.vitalBsSurface);
 
     return BlocBuilder<VitalsBloc, VitalsState>(
       buildWhen: (p, c) =>
@@ -27,12 +39,12 @@ class VitalsTile extends StatelessWidget {
         return InkWell(
           onTap: () =>
               context.router.push(VitalsRoute(initialTab: isBp ? 0 : 1)),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: AppRadius.lgAll,
           child: Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
-              color: isBp ? const Color(0xFFEFF6FF) : const Color(0xFFFFF1F2),
-              borderRadius: BorderRadius.circular(16),
+              color: surface,
+              borderRadius: AppRadius.lgAll,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,10 +55,8 @@ class VitalsTile extends StatelessWidget {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: isBp
-                            ? const Color(0xFF3B82F6)
-                            : const Color(0xFFDC2626),
-                        borderRadius: BorderRadius.circular(12),
+                        color: accent,
+                        borderRadius: AppRadius.mdAll,
                       ),
                       child: Icon(
                         isBp ? Icons.favorite : Icons.water_drop,
@@ -54,7 +64,7 @@ class VitalsTile extends StatelessWidget {
                         size: 20,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: AppSpacing.sm + 4),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -66,18 +76,14 @@ class VitalsTile extends StatelessWidget {
                                   ? 'vitals.bloodPressure'
                                   : 'vitals.bloodSugar',
                             ),
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: theme.textTheme.titleSmall,
                           ),
                           Text(
                             AppLocalizations.getString(
                               context,
                               isBp ? 'vitals.bpSubtitle' : 'vitals.bsSubtitle',
                             ),
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
+                            style: theme.textTheme.bodySmall?.copyWith(
                               color: cs.onSurface.withValues(alpha: 0.6),
                             ),
                           ),
@@ -86,17 +92,15 @@ class VitalsTile extends StatelessWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.md),
+
                 if (reading == null)
                   Text(
                     AppLocalizations.getString(
                       context,
                       'vitals.logFirstReading',
                     ),
-                    style: GoogleFonts.inter(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: theme.textTheme.titleMedium,
                   )
                 else
                   Row(
@@ -107,31 +111,27 @@ class VitalsTile extends StatelessWidget {
                         isBp
                             ? '${state.latestBp!.systolic}/${state.latestBp!.diastolic}'
                             : state.latestBs!.value,
-                        style: GoogleFonts.inter(
-                          fontSize: 22,
+                        style: theme.textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: AppSpacing.xs),
                       Text(
                         isBp ? 'mmHg' : state.latestBs!.unit,
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
+                        style: theme.textTheme.labelMedium?.copyWith(
                           color: cs.onSurface.withValues(alpha: 0.6),
                         ),
                       ),
                     ],
                   ),
-                const SizedBox(height: 8),
+
+                const SizedBox(height: AppSpacing.sm),
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(AppSpacing.sm),
                   child: Text(
                     AppLocalizations.getString(context, 'vitals.startTracking'),
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      color: isBp
-                          ? const Color(0xFF3B82F6)
-                          : const Color(0xFFDC2626),
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: accent,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

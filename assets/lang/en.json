@@ -363,6 +363,7 @@
     "passwordTooShort": "Password must be at least 5 characters long",
     "passwordsDontMatch": "Passwords do not match",
     "forgotPassword": "Forgot Password?",
+    "passwordReset": "Reset Password",
     "missingFields": "Missing Information",
     "pleaseFillFields": "Please fill in the following fields:\n\n{fields}",
     "pleaseFillAllFields": "Please fill in all required fields:\n\n• Email\n• Password",

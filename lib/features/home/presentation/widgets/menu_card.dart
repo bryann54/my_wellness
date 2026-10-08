@@ -1,13 +1,12 @@
-// lib/features/home/presentation/widgets/menu_card.dart
+
 
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:google_fonts/google_fonts.dart';
+
+import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/colors.dart';
 
 class MenuCard extends StatelessWidget {
-  /// Accepts either an [IconData] (Material) or an [FaIconData] (Font Awesome).
   final Object? icon;
 
   final String title;
@@ -24,22 +23,16 @@ class MenuCard extends StatelessWidget {
     this.cardColor,
   });
 
-  /// Renders Material and Font Awesome icons uniformly.
   Widget? _buildIcon(Color color, {double size = 25}) {
     final icon = this.icon;
     if (icon == null) return null;
 
-    if (icon is FaIconData) {
-      return FaIcon(icon, size: size, color: color);
-    }
-    if (icon is IconData) {
-      return Icon(icon, size: size, color: color);
-    }
+    if (icon is FaIconData) return FaIcon(icon, size: size, color: color);
+    if (icon is IconData) return Icon(icon, size: size, color: color);
     assert(false, 'Unsupported icon type: ${icon.runtimeType}');
     return null;
   }
 
-  /// Shifts the hue-based tint to work on both light and dark backgrounds.
   Color _resolvedBg(Color base, bool isDark) {
     final hsl = HSLColor.fromColor(base);
     return isDark
@@ -62,8 +55,9 @@ class MenuCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
 
     final bgColor = cardColor != null
         ? _resolvedBg(cardColor!, isDark)
@@ -77,57 +71,48 @@ class MenuCard extends StatelessWidget {
         ? AppColors.background.withValues(alpha: 0.08)
         : AppColors.background.withValues(alpha: 0.6);
 
-    final iconWidget = _buildIcon(iconColor);
-
     return Material(
       color: bgColor,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: AppRadius.lgAll,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: AppRadius.lgAll,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.md,
+          ),
           child: Row(
             children: [
               Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: iconBg,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(child: iconWidget ?? const SizedBox.shrink()),
-                  )
-                  .animate(delay: 800.ms)
-                  .fadeIn(duration: 400.ms)
-                  .slideX(begin: -0.8, end: 0, curve: Curves.easeOut),
-              const SizedBox(width: 14),
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: iconBg,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: _buildIcon(iconColor) ?? const SizedBox.shrink(),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                          title,
-                          style: GoogleFonts.inter(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: cs.onSurface,
-                          ),
-                        )
-                        .animate(delay: 600.ms)
-                        .fadeIn(duration: 400.ms)
-                        .slideX(begin: 0.8, end: 0, curve: Curves.easeOut),
+                      title,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        color: cs.onSurface,
+                      ),
+                    ),
                     const SizedBox(height: 2),
                     Text(
-                          subtitle,
-                          style: GoogleFonts.inter(
-                            fontSize: 13,
-                            color: cs.onSurface.withValues(alpha: 0.55),
-                          ),
-                        )
-                        .animate(delay: 500.ms)
-                        .fadeIn(duration: 400.ms)
-                        .slideX(begin: 0.8, end: 0, curve: Curves.easeOut),
+                      subtitle,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: cs.onSurface.withValues(alpha: 0.55),
+                      ),
+                    ),
                   ],
                 ),
               ),

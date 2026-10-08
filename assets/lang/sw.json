@@ -385,6 +385,7 @@
     "invalidEmail": "Anwani ya barua pepe si sahihi",
     "passwordTooShort": "Nenosiri lazima liwe na angalau herufi 5",
     "passwordsDontMatch": "Manenosiri hayafanani",
+    "passwordReset": "Badilisha nenosiri",
     "forgotPassword": "Umesahau Nenosiri?",
     "missingFields": "Taarifa Inayokosekana",
     "pleaseFillFields": "Tafadhali jaza sehemu zifuatazo:\n\n{fields}",

@@ -63,7 +63,7 @@ import 'package:my_wellness/features/vitals/presentation/pages/vitals_screen.dar
     as _i24;
 import 'package:my_wellness/features/wellness/presentation/pages/wellness_screen.dart'
     as _i26;
-import 'package:my_wellness/forgot_password_screen.dart' as _i12;
+import 'package:my_wellness/features/account/presentation/pages/forgot_password_screen.dart' as _i12;
 import 'package:my_wellness/main_screen.dart' as _i15;
 
 /// generated route for

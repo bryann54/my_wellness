@@ -1,9 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
-import 'package:my_wellness/common/res/colors.dart';
-import 'package:my_wellness/common/res/l10n.dart';
+import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/core/services/pin_service.dart';
 import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/biometrics/biometrics_bloc.dart';
@@ -91,10 +91,6 @@ class _SplashScreenState extends State<SplashScreen> {
       isDismissible: false,
       enableDrag: false,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
       builder: (_) => BlocProvider.value(
         value: context.read<BiometricsBloc>(),
         child: const SplashFailureSheet(),
@@ -109,20 +105,8 @@ class _SplashScreenState extends State<SplashScreen> {
     }
   }
 
-  String _statusLabel(LaunchState state) {
-    if (state is LaunchLoading) {
-      return AppLocalizations.getString(context, 'splash.checkingSession');
-    }
-    if (state is LaunchAuthenticated) {
-      return AppLocalizations.getString(context, 'splash.loadingProfile');
-    }
-    return AppLocalizations.getString(context, 'splash.ready');
-  }
-
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return MultiBlocListener(
       listeners: [
         BlocListener<LaunchBloc, LaunchState>(
@@ -153,9 +137,6 @@ class _SplashScreenState extends State<SplashScreen> {
         ),
       ],
       child: Scaffold(
-        backgroundColor: isDark
-            ? AppColors.darkBackgroundColor
-            : AppColors.lightBackgroundColor,
         body: DecoratedBox(
           decoration: const BoxDecoration(
             image: DecorationImage(
@@ -164,16 +145,9 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
           ),
           child: Stack(
+            fit: StackFit.expand,
             children: [
-              Positioned.fill(
-                child: BlocBuilder<LaunchBloc, LaunchState>(
-                  buildWhen: (prev, curr) =>
-                      prev.runtimeType != curr.runtimeType,
-                  builder: (context, state) {
-                    return SplashContent(statusLabel: _statusLabel(state));
-                  },
-                ),
-              ),
+              const SplashContent(),
 
               Positioned(
                 left: 0,
@@ -183,12 +157,12 @@ class _SplashScreenState extends State<SplashScreen> {
                   buildWhen: (prev, curr) =>
                       (prev is LaunchOffline) != (curr is LaunchOffline),
                   builder: (context, state) {
-                    final showBanner = state is LaunchOffline;
+                    final show = state is LaunchOffline;
                     return AnimatedSlide(
-                      duration: const Duration(milliseconds: 220),
+                      duration: AppDurations.medium,
                       curve: Curves.easeOutCubic,
-                      offset: showBanner ? Offset.zero : const Offset(0, 1),
-                      child: showBanner
+                      offset: show ? Offset.zero : const Offset(0, 1),
+                      child: show
                           ? SplashOfflineBanner(
                               onContinue: () => context.read<LaunchBloc>().add(
                                 const ContinueOfflineEvent(),

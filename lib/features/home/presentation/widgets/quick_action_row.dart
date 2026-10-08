@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
+import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/features/home/presentation/widgets/quick_action_chip.dart';
 
@@ -32,17 +34,19 @@ class QuickActionRow extends StatelessWidget {
       ),
     ];
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: items
-          .map(
-            (item) => QuickActionChip(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          for (final item in items)
+            QuickActionChip(
               icon: item.icon,
               label: item.label,
               route: item.route,
             ),
-          )
-          .toList(),
+        ],
+      ),
     );
   }
 }

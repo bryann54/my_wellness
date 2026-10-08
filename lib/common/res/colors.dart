@@ -20,7 +20,15 @@ class AppColors {
   static const Color actionColor = Color(0xFFF56E5E);
   static const Color betterColor = Color(0xFF08B9C1);
   static const Color buttonColor = Color.fromARGB(255, 1, 3, 58);
+  static const Color vitalBp = Color(0xFF3B82F6); 
+  static const Color vitalBpSurface = Color(0xFFEFF6FF); 
+  static const Color vitalBs = Color(0xFFDC2626); 
+  static const Color vitalBsSurface = Color(0xFFFFF1F2);
 
+  static const Color vitalBpDark = Color(0xFF93C5FD);
+  static const Color vitalBpSurfaceDark = Color(0xFF12203A);
+  static const Color vitalBsDark = Color(0xFFFCA5A5);
+  static const Color vitalBsSurfaceDark = Color(0xFF3A1416);
   // Semantic
   static const Color success = Color(0xFF32BF7D);
   static const Color info = Color(0xFF26C6DA);
