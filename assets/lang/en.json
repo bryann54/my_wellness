@@ -496,10 +496,11 @@
 
     "about": "About",
     "aboutSub": "Version, terms, and licences",
-
-    "logOut": "Log out",
-    "logOutSub": "Sign out of this device",
-
+"themeLight": "Light",
+"themeDark": "Dark",
+"themeSystem": "System default",
+ "theme": "Theme",
+  "themeSub": "Light or dark mode",
     "deleteAccount": "Delete account",
     "deleteAccountSub": "Permanently remove your account"
   },

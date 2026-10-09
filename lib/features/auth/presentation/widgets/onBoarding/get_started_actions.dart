@@ -17,7 +17,7 @@ class GetStartedActions extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-          AppPrimaryButton(
+        AppPrimaryButton(
           label: AppLocalizations.getString(context, 'auth.signInLink'),
           onPressed: () => context.router.push(const LoginRoute()),
           color: AppColors.textPrimaryDark,
@@ -25,8 +25,10 @@ class GetStartedActions extends StatelessWidget {
           borderRadius: 12,
           height: 52,
         ),
-      
-        AuthDivider(text: AppLocalizations.getString(context, 'common.or').toUpperCase()),
+
+        AuthDivider(
+          text: AppLocalizations.getString(context, 'common.or').toUpperCase(),
+        ),
         AppPrimaryButton(
           label: AppLocalizations.getString(context, 'auth.signUpLink'),
           onPressed: () => context.router.push(const RegisterRoute()),

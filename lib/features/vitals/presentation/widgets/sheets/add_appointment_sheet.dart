@@ -138,7 +138,7 @@ class _AddAppointmentSheetState extends State<AddAppointmentSheet> {
               ),
             ),
             const SizedBox(height: 8),
-      SoftDropdown<String>(
+            SoftDropdown<String>(
               value: _condition,
               label: AppLocalizations.getString(
                 context,

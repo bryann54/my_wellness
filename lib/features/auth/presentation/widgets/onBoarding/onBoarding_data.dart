@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import 'package:my_wellness/features/auth/data/models/onboarding_page_model.dart';

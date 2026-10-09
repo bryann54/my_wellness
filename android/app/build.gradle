@@ -2,7 +2,6 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'dev.flutter.flutter-gradle-plugin'
-  
 }
 
 def envPropertiesFile = rootProject.file("../.env")
@@ -16,29 +15,29 @@ if (envPropertiesFile.exists()) {
 android {
     namespace "com.mywellness.apps"
     compileSdk flutter.compileSdkVersion
-    
+    ndkVersion = "28.2.13676358"
+
     defaultConfig {
         applicationId "com.mywellness.apps"
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutter.versionCode
         versionName flutter.versionName
-        
-        // Add applicationName placeholder
+
         manifestPlaceholders = [
             applicationName: "io.flutter.app.FlutterApplication",
             mapsApiKey: envProperties.getProperty("GOOGLE_MAPS_API_KEY_ANDROID", "")
         ]
         resValue "string", "MAPS_API_KEY", envProperties.getProperty("GOOGLE_MAPS_API_KEY_ANDROID", "")
     }
-    
- buildTypes {
-    release {
-        signingConfig signingConfigs.debug
-        minifyEnabled false    // ← disable completely
-        shrinkResources false  // ← disable this too
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.debug
+            minifyEnabled false
+            shrinkResources false
+        }
     }
-}
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8

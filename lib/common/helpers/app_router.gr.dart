@@ -17,6 +17,8 @@ import 'package:my_wellness/features/account/domain/entities/health_profile.dart
     as _i29;
 import 'package:my_wellness/features/account/presentation/pages/account_screen.dart'
     as _i1;
+import 'package:my_wellness/features/account/presentation/pages/forgot_password_screen.dart'
+    as _i12;
 import 'package:my_wellness/features/account/presentation/pages/profile__details_screen.dart'
     as _i19;
 import 'package:my_wellness/features/account/presentation/pages/settings_screen.dart'
@@ -63,7 +65,6 @@ import 'package:my_wellness/features/vitals/presentation/pages/vitals_screen.dar
     as _i24;
 import 'package:my_wellness/features/wellness/presentation/pages/wellness_screen.dart'
     as _i26;
-import 'package:my_wellness/features/account/presentation/pages/forgot_password_screen.dart' as _i12;
 import 'package:my_wellness/main_screen.dart' as _i15;
 
 /// generated route for

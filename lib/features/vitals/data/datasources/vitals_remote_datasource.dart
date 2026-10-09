@@ -21,7 +21,7 @@ abstract class VitalsRemoteDataSource {
     String? cursor,
     String? query,
   });
- Future<MedicationScanResult> scanMedication({
+  Future<MedicationScanResult> scanMedication({
     required String filePath,
     required String condition,
   });
@@ -56,7 +56,7 @@ class VitalsRemoteDataSourceImpl implements VitalsRemoteDataSource {
   VitalsRemoteDataSourceImpl(this._apiClient);
 
   // ── Medications: scan ─────────────────────────────────────────────────────
-@override
+  @override
   Future<MedicationScanResult> scanMedication({
     required String filePath,
     required String condition,

@@ -90,7 +90,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
             SliverToBoxAdapter(
               child: SafeArea(
-                top: false, 
+                top: false,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.lg,

@@ -146,7 +146,7 @@ class VitalsBloc extends Bloc<VitalsEvent, VitalsState> {
     );
   }
 
-Future<Either<String, MedicationScanResult>> scanMedication({
+  Future<Either<String, MedicationScanResult>> scanMedication({
     required String filePath,
     required String condition,
   }) async {

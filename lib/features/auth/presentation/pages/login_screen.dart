@@ -46,9 +46,9 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-void _handleLogin() {
+  void _handleLogin() {
     if (_manager.validate()) {
-      HapticFeedback.lightImpact(); 
+      HapticFeedback.lightImpact();
       context.read<AuthBloc>().add(
         SignInEvent(
           identifier: _manager.identifier,

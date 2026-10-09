@@ -15,7 +15,7 @@ class VitalsRepositoryImpl implements VitalsRepository {
   final VitalsRemoteDataSource _remote;
   VitalsRepositoryImpl(this._remote);
 
- @override
+  @override
   Future<Either<Failure, MedicationScanResult>> scanMedication({
     required String filePath,
     required String condition,

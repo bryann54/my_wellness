@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import 'package:my_wellness/common/constants/hero.dart';
+
 class SplashContent extends StatelessWidget {
   const SplashContent({super.key});
 
@@ -16,7 +17,7 @@ class SplashContent extends StatelessWidget {
                 ? toContext.widget
                 : fromContext.widget;
           },
-        child:
+          child:
               Image.asset(
                     'assets/images/logo.png',
                     width: 200,

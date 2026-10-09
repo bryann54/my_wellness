@@ -127,10 +127,10 @@ class _VerificationScreenState extends State<VerificationScreen> {
                       _code = v;
                       if (_errorText != null) _errorText = null;
                     }),
-                   onCompleted: (_) {
+                    onCompleted: (_) {
                       HapticFeedback.lightImpact();
                       _submit(pending);
-                    }
+                    },
                   ),
 
                   if (_errorText != null) ...[

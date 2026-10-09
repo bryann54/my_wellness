@@ -1,9 +1,9 @@
+// lib/features/assessments/presentation/pages/assessment_session_screen.dart
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
-import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_question.dart';
 import 'package:my_wellness/features/assessments/presentation/bloc/assessments_bloc.dart';
@@ -11,11 +11,13 @@ import 'package:my_wellness/features/assessments/presentation/pages/assessment_t
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_bmi_step.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_progress_bar.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_question_view.dart';
+import 'package:my_wellness/features/assessments/presentation/widgets/assessment_session_bottom_bar.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_toast_listener.dart';
 
 @RoutePage()
 class AssessmentSessionScreen extends StatelessWidget {
   final String slug;
+
   const AssessmentSessionScreen({super.key, required this.slug});
 
   @override
@@ -29,6 +31,7 @@ class AssessmentSessionScreen extends StatelessWidget {
 
 class _AssessmentSessionBody extends StatefulWidget {
   final String slug;
+
   const _AssessmentSessionBody({required this.slug});
 
   @override
@@ -93,6 +96,10 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
       );
     }
 
+    final isBmi = q.type == AssessmentQuestionType.bmi;
+    final isSubmitting = state.status == AssessmentStatus.submitting;
+    final canProceed = _pendingAnswer != null && _pendingAnswer!.isNotEmpty;
+
     return Scaffold(
       body: NestedScrollView(
         headerSliverBuilder: (_, __) => [
@@ -111,9 +118,9 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
-                child: q.type == AssessmentQuestionType.bmi
+                child: isBmi
                     ? AssessmentBmiStep(
-                        submitting: state.status == AssessmentStatus.submitting,
+                        submitting: isSubmitting,
                         onContinue: _submitBmi,
                       )
                     : AssessmentQuestionView(
@@ -124,87 +131,17 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
                       ),
               ),
             ),
-            _buildBottomBar(context, q),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildBottomBar(BuildContext context, AssessmentQuestion q) {
-    final cs = Theme.of(context).colorScheme;
-    final submitting = context.select<AssessmentsBloc, bool>(
-      (b) => b.state.status == AssessmentStatus.submitting,
-    );
-
-    if (q.type == AssessmentQuestionType.bmi) {
-      return const SizedBox.shrink();
-    }
-
-    final canProceed = _pendingAnswer != null && _pendingAnswer!.isNotEmpty;
-
-    return Container(
-      padding: EdgeInsets.fromLTRB(
-        24,
-        12,
-        24,
-        MediaQuery.paddingOf(context).bottom + 12,
-      ),
-      decoration: BoxDecoration(
-        color: cs.surface,
-        border: Border(
-          top: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.4)),
-        ),
-      ),
-      child: Row(
-        children: [
-          OutlinedButton.icon(
-            onPressed: () => Navigator.of(context).maybePop(),
-            icon: const Icon(Icons.chevron_left, size: 18),
-            label: Text(
-              AppLocalizations.getString(context, 'common.back'),
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
+      bottomNavigationBar: isBmi
+          ? null
+          : AssessmentSessionBottomBar(
+              canProceed: canProceed,
+              submitting: isSubmitting,
+              onBack: () => Navigator.of(context).maybePop(),
+              onNext: _submitAnswer,
             ),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              side: BorderSide(color: cs.outlineVariant.withValues(alpha: 0.6)),
-              foregroundColor: cs.onSurface,
-            ),
-          ),
-          const Spacer(),
-          FilledButton.icon(
-            onPressed: (canProceed && !submitting) ? _submitAnswer : null,
-            iconAlignment: IconAlignment.end,
-            icon: submitting
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator.adaptive(strokeWidth: 2),
-                  )
-                : const Icon(Icons.chevron_right, size: 18),
-            label: Text(
-              AppLocalizations.getString(context, 'common.next'),
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            style: FilledButton.styleFrom(
-              backgroundColor: cs.primary,
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -213,6 +150,7 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
     final session = state.session;
     final def = state.definition;
     if (session == null || def == null || _pendingAnswer == null) return;
+
     final q = def.questionByIndex(session.currentIndex);
     if (q == null) return;
 

@@ -9,6 +9,7 @@ import 'package:my_wellness/features/auth/presentation/widgets/onBoarding/on_boa
 import 'package:my_wellness/features/auth/presentation/widgets/onBoarding/onBoarding_data.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/onBoarding/page_indicators.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/shared/language_selector.dart';
+
 class AuthContent extends StatefulWidget {
   const AuthContent({super.key});
 
@@ -54,6 +55,7 @@ class _AuthContentState extends State<AuthContent> with WidgetsBindingObserver {
     _timer?.cancel();
     super.dispose();
   }
+
   void _syncTimer() {
     final reducedMotion = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
     final shouldRun = !_isLastPage && _isForeground && !reducedMotion;
@@ -96,18 +98,20 @@ class _AuthContentState extends State<AuthContent> with WidgetsBindingObserver {
                 AppSpacing.lg,
                 0,
               ),
-              child: Row(children: [
-                Hero(
-                  tag: HeroTags.authLogo,
-                  child: Image.asset(
-                    'assets/images/logo.png',
-                    width: 100,
-                    fit: BoxFit.contain,
+              child: Row(
+                children: [
+                  Hero(
+                    tag: HeroTags.authLogo,
+                    child: Image.asset(
+                      'assets/images/logo.png',
+                      width: 100,
+                      fit: BoxFit.contain,
+                    ),
                   ),
-                ),
-                const Spacer(),
-                const LanguageSelector()
-              ]),
+                  const Spacer(),
+                  const LanguageSelector(),
+                ],
+              ),
             ),
 
             Expanded(

@@ -1,7 +1,6 @@
-// lib/main.dart — UI refactor only. Logic preserved.
-
 import 'package:my_wellness/common/helpers/app_router.dart';
 import 'package:my_wellness/common/notifiers/locale_provider.dart';
+import 'package:my_wellness/common/notifiers/theme_provider.dart';
 import 'package:my_wellness/common/res/app_theme.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/global_bloc_observer.dart';
@@ -46,12 +45,14 @@ void main() async {
 
   await getIt<NotificationService>().initialize();
 
-  final localeProvider = LocaleProvider();
+  final localeProvider = LocaleProvider()..loadLocale();
+  final themeProvider = ThemeProvider()..load();
 
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => localeProvider),
+        ChangeNotifierProvider.value(value: localeProvider),
+        ChangeNotifierProvider.value(value: themeProvider),
         BlocProvider(create: (_) => getIt<AuthBloc>()),
         BlocProvider(create: (_) => getIt<AccountBloc>()),
         BlocProvider(create: (_) => getIt<BiometricsBloc>()),
@@ -84,21 +85,38 @@ Future<void> _configureGoogleMaps() async {
   }
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
   static final _appRouter = AppRouter();
 
   @override
+  void dispose() {
+    getIt<NotificationService>().dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final brightness = MediaQuery.of(context).platformBrightness;
+    final locale = context.watch<LocaleProvider>().locale;
+    final themeMode = context.watch<ThemeProvider>().mode;
+
+    // Status-bar icons must contrast with the currently active surface.
+    final brightness = switch (themeMode) {
+      ThemeMode.dark => Brightness.dark,
+      ThemeMode.light => Brightness.light,
+      ThemeMode.system => MediaQuery.of(context).platformBrightness,
+    };
     final overlay = brightness == Brightness.dark
         ? SystemUiOverlayStyle.light
         : SystemUiOverlayStyle.dark;
 
-    final locale = context.watch<LocaleProvider>().locale;
-
-  return AnnotatedRegion<SystemUiOverlayStyle>(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
       value: overlay,
       child: MaterialApp.router(
         title: AppLocalizations.getString(context, 'appName'),
@@ -117,7 +135,7 @@ class MyApp extends StatelessWidget {
         locale: locale,
         theme: AppTheme.light,
         darkTheme: AppTheme.dark,
-        themeMode: ThemeMode.system,
+        themeMode: themeMode,
       ),
     );
   }

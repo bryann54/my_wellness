@@ -46,27 +46,36 @@ class NotificationHost extends StatelessWidget {
   }
 
   void _present(BuildContext context, AppNotification n) {
+    final bloc = context.read<NotificationsBloc>();
     final messenger = ScaffoldMessenger.maybeOf(context);
-    messenger
-      ?..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(n.body.isEmpty ? n.title : '${n.title}\n${n.body}'),
-          behavior: SnackBarBehavior.floating,
-          action: n.route is NotificationRouteNone
-              ? null
-              : SnackBarAction(
-                  label: 'Open',
-                  onPressed: () => _route(context, n.route),
-                ),
-        ),
-      );
+    if (messenger != null) {
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(
+              n.body.isEmpty ? n.title : '${n.title}\n${n.body}',
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+            behavior: SnackBarBehavior.floating,
+            action: n.route is NotificationRouteNone
+                ? null
+                : SnackBarAction(
+                    label: 'Open',
+                    onPressed: () => _route(context, n.route),
+                  ),
+          ),
+        );
+    }
 
-    // If the app was opened by a tap (cold start), route immediately
-    // rather than waiting for the snackbar action. The snackbar is
-    // dismissed because the user is being taken to the destination.
-    _route(context, n.route);
-    context.read<NotificationsBloc>().add(const NotificationTappedEvent());
+    // 2. Route only if the user explicitly tapped the notification.
+    if (n.openedByUser) {
+      _route(context, n.route);
+    }
+
+    // 3. Consume the pending notification.
+    bloc.add(const NotificationTappedEvent());
   }
 
   void _route(BuildContext context, NotificationRoute route) {

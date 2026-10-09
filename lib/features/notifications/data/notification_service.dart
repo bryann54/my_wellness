@@ -14,7 +14,7 @@ import 'package:onesignal_flutter/onesignal_flutter.dart';
 ///
 /// Does NOT own:
 ///   - identity resolution (that's the bloc's job)
-///   - payload parsing / routing
+///   - payload parsing / routing (that's the host's job)
 ///   - snackbar or navigation presentation
 class NotificationService {
   static const externalIdPrefix = 'user-';
@@ -48,12 +48,17 @@ class NotificationService {
     }
     await OneSignal.initialize(_appId.trim());
 
+    // Foreground arrival — snackbar, no forced navigation.
     OneSignal.Notifications.addForegroundWillDisplayListener((event) {
-      _emit(event.notification);
+      _emit(event.notification, openedByUser: false);
     });
+
+    // User tapped the notification (foreground or cold-start).
+    // This is the only path that should trigger navigation.
     OneSignal.Notifications.addClickListener((event) {
-      _emit(event.notification);
+      _emit(event.notification, openedByUser: true);
     });
+
     OneSignal.Notifications.addPermissionObserver((granted) {
       _permission.add(
         granted
@@ -129,7 +134,7 @@ class NotificationService {
     await _permission.close();
   }
 
-  void _emit(OSNotification n) {
+  void _emit(OSNotification n, {required bool openedByUser}) {
     if (_notifications.isClosed) return;
 
     final title = n.title?.trim();
@@ -150,6 +155,7 @@ class NotificationService {
         title: title ?? '',
         body: body ?? '',
         data: data,
+        openedByUser: openedByUser,
       ),
     );
   }
@@ -164,11 +170,16 @@ class IncomingNotification {
   final String body;
   final Map<String, dynamic> data;
 
+  /// True when the notification arrived because the user tapped it.
+  /// False when it arrived in the foreground while the app was already open.
+  final bool openedByUser;
+
   const IncomingNotification({
     required this.id,
     required this.title,
     required this.body,
     this.data = const {},
+    this.openedByUser = false,
   });
 }
 

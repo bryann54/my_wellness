@@ -53,7 +53,7 @@ class ConversationInputBar extends StatelessWidget {
           if (isDone)
             AuthButton(
               heroTag: 'register_button',
-            
+
               onPressed: onSubmit ?? () {},
               isLoading: isLoading,
               text: AppLocalizations.getString(context, 'auth.createAccount'),

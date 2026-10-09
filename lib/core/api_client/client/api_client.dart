@@ -92,7 +92,7 @@ class ApiClient {
     ),
   );
 
-Exception _handleDioError(DioException e) {
+  Exception _handleDioError(DioException e) {
     final data = e.response?.data;
     final message = _extractMessage(data);
 

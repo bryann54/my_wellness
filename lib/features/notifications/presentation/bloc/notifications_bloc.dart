@@ -42,18 +42,11 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     Emitter<NotificationsState> emit,
   ) async {
     if (!_service.isConfigured) {
-      emit(
-        state.copyWith(
-          status: NotificationsStatus.notConfigured,
-          message: 'Push notifications are not configured.',
-        ),
-      );
+      emit(state.copyWith(status: NotificationsStatus.notConfigured));
       return;
     }
 
-    emit(
-      state.copyWith(status: NotificationsStatus.syncing, clearMessage: true),
-    );
+    emit(state.copyWith(status: NotificationsStatus.syncing));
 
     try {
       final tags = <String, String>{
@@ -73,12 +66,7 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
         ),
       );
     } catch (_) {
-      emit(
-        state.copyWith(
-          status: NotificationsStatus.error,
-          message: 'Could not register this device for notifications.',
-        ),
-      );
+      emit(state.copyWith(status: NotificationsStatus.error));
     }
   }
 
@@ -103,10 +91,6 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
         status: granted
             ? NotificationsStatus.connected
             : NotificationsStatus.permissionDenied,
-        message: granted
-            ? null
-            : 'Notifications are disabled. Enable them in system settings.',
-        clearMessage: granted,
       ),
     );
   }
@@ -124,6 +108,7 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
           body: incoming.body,
           route: parseNotificationRoute(incoming.data),
           receivedAt: DateTime.now(),
+          openedByUser: incoming.openedByUser,
         ),
       ),
     );

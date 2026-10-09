@@ -77,10 +77,6 @@ import '../../features/launch/domain/usecases/check_connectivity_usecase.dart'
     as _i656;
 import '../../features/launch/presentation/bloc/launch_bloc.dart' as _i646;
 import '../../features/notifications/data/notification_service.dart' as _i597;
-import '../../features/notifications/data/repositories/notifications_repository_impl.dart'
-    as _i201;
-import '../../features/notifications/domain/repositories/notifications_repository.dart'
-    as _i563;
 import '../../features/notifications/presentation/bloc/notifications_bloc.dart'
     as _i1041;
 import '../../features/vitals/data/datasources/vitals_remote_datasource.dart'
@@ -120,9 +116,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i845.PinService>(() => _i845.PinService());
     gh.lazySingleton<_i656.CheckConnectivityUsecase>(
       () => _i656.CheckConnectivityUsecase(),
-    );
-    gh.lazySingleton<_i563.NotificationsRepository>(
-      () => _i201.NotificationsRepositoryImpl(),
     );
     gh.factory<String>(() => registerModules.baseUrl, instanceName: 'BaseUrl');
     gh.lazySingleton<_i992.AuthLocalDataSource>(

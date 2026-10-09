@@ -7,6 +7,7 @@ class AppNotification extends Equatable {
   final String body;
   final NotificationRoute route;
   final DateTime receivedAt;
+  final bool openedByUser;
 
   const AppNotification({
     required this.id,
@@ -14,10 +15,11 @@ class AppNotification extends Equatable {
     required this.body,
     required this.route,
     required this.receivedAt,
+    this.openedByUser = false,
   });
 
   @override
-  List<Object?> get props => [id, title, body, route, receivedAt];
+  List<Object?> get props => [id, title, body, route, receivedAt, openedByUser];
 }
 
 /// Where a tapped notification should send the user.
