@@ -15,7 +15,11 @@ class AppBarNotificationsButton extends StatelessWidget {
   });
 
   bool get _hasUnread => unreadCount > 0;
-  bool get _showCount => unreadCount > 9;
+
+  String get _badgeLabel {
+    if (unreadCount > 9) return '9+';
+    return '$unreadCount';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +91,6 @@ class AppBarNotificationsButton extends StatelessWidget {
               ),
             ),
           ),
-
           if (_hasUnread)
             Positioned(
               top: -3,
@@ -111,17 +114,15 @@ class AppBarNotificationsButton extends StatelessWidget {
                   ],
                 ),
                 child: Center(
-                  child: _showCount
-                      ? Text(
-                          '9+',
-                          style: GoogleFonts.inter(
-                            fontSize: 10,
-                            height: 1.0,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const SizedBox.shrink(),
+                  child: Text(
+                    _badgeLabel,
+                    style: GoogleFonts.inter(
+                      fontSize: 10,
+                      height: 1.0,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
             ),

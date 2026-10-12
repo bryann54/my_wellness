@@ -18,6 +18,7 @@ class NotificationHost extends StatelessWidget {
       listenWhen: (p, c) => p.status != c.status || p.user?.id != c.user?.id,
       listener: (context, state) {
         final bloc = context.read<NotificationsBloc>();
+
         if (state.status == AuthStatus.authenticated) {
           final userId = state.user?.id;
           if (userId == null || userId.isEmpty) return;

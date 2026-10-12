@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_snackbar.dart';
+import 'package:my_wellness/core/di/injector.dart';
 import 'package:my_wellness/core/services/pin_service.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_state.dart';
@@ -66,7 +67,7 @@ class AuthStateListener extends StatelessWidget {
   }
 
   Future<void> _postAuthNavigation(BuildContext context) async {
-    final hasPin = await PinService().hasPin();
+    final hasPin = await getIt<PinService>().hasPin();
     if (!context.mounted) return;
 
     if (!hasPin) {

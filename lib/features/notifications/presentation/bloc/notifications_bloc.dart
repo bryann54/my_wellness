@@ -1,3 +1,6 @@
+
+// ignore_for_file: invalid_use_of_visible_for_testing_member
+
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
@@ -69,7 +72,6 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
       emit(state.copyWith(status: NotificationsStatus.error));
     }
   }
-
   Future<void> _onClear(
     ClearIdentityEvent event,
     Emitter<NotificationsState> emit,
@@ -110,6 +112,9 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
           receivedAt: DateTime.now(),
           openedByUser: incoming.openedByUser,
         ),
+        unreadCount: incoming.openedByUser
+            ? state.unreadCount
+            : state.unreadCount + 1,
       ),
     );
   }

@@ -54,7 +54,7 @@ void main() async {
         ChangeNotifierProvider.value(value: localeProvider),
         ChangeNotifierProvider.value(value: themeProvider),
         BlocProvider(create: (_) => getIt<AuthBloc>()),
-        BlocProvider(create: (_) => getIt<AccountBloc>()),
+        BlocProvider(create: (_) => getIt<AccountBloc>()..add(FetchProfileEvent())),
         BlocProvider(create: (_) => getIt<BiometricsBloc>()),
         BlocProvider(create: (_) => getIt<HomeBloc>()),
         BlocProvider(create: (_) => getIt<AssessmentsBloc>()),

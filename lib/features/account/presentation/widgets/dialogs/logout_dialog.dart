@@ -11,7 +11,7 @@ class LogoutDialog {
   static Future<void> show(BuildContext context) async {
     final confirmed = await AppDialogs.ask(
       context,
-      title: AppLocalizations.getString(context, 'settings.logOut'),
+      title: AppLocalizations.getString(context, 'auth.logout'),
       message: AppLocalizations.getString(context, 'settings.logoutMessage'),
       isDestructive: true,
     );

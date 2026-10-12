@@ -11,6 +11,7 @@ class BiometricService {
 
   Future<bool> isBiometricAvailable() async {
     try {
+      if (!await _auth.isDeviceSupported()) return false;
       final canCheck = await _auth.canCheckBiometrics;
       if (!canCheck) return false;
       final available = await _auth.getAvailableBiometrics();
@@ -30,13 +31,14 @@ class BiometricService {
 
   Future<bool> authenticate({
     String reason = 'Authenticate to access your account',
+    bool biometricOnly = true,
   }) async {
     try {
       return await _auth.authenticate(
         localizedReason: reason,
-        options: const AuthenticationOptions(
+        options: AuthenticationOptions(
           stickyAuth: true,
-          biometricOnly: false,
+          biometricOnly: biometricOnly,
         ),
       );
     } catch (_) {

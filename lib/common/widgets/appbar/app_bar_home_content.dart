@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/appbar/app_bar_notifications_button.dart';
 import 'package:my_wellness/features/home/presentation/widgets/quick_action_row.dart';
+import 'package:my_wellness/features/notifications/presentation/bloc/notifications_bloc.dart';
 
 class AppBarHomeContent extends StatelessWidget {
   final String username;
@@ -44,7 +46,7 @@ class AppBarHomeContent extends StatelessWidget {
                     children: [
                       Text(
                         AppLocalizations.getString(context, 'common.hello'),
-                        style: GoogleFonts.habibi(
+                        style: GoogleFonts.inter(
                           fontSize: 16,
                           height: 1.1,
                           color: AppColors.textOnPrimary.withValues(
@@ -68,17 +70,17 @@ class AppBarHomeContent extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      AppBarNotificationsButton(),
-                      // BlocBuilder<NotificationsBloc, NotificationsState>(
-                      //   buildWhen: (p, c) => p.unreadCount != c.unreadCount,
-                      //   builder: (context, state) => AppBarNotificationsButton(
-                      //     unreadCount: state.unreadCount,
-                      //   ),
-                      // ),
+                      BlocBuilder<NotificationsBloc, NotificationsState>(
+                        buildWhen: (p, c) => p.unreadCount != c.unreadCount,
+                        builder: (context, state) => state.unreadCount > 0
+                            ? AppBarNotificationsButton(
+                                unreadCount: state.unreadCount,
+                              )
+                            : const SizedBox.shrink(),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 25),
-
                   const QuickActionRow(),
                 ],
               ),

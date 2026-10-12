@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/res/colors.dart';
+import 'package:my_wellness/core/di/injector.dart';
 import 'package:my_wellness/core/services/biometric_service.dart';
 import 'package:my_wellness/core/services/pin_service.dart';
 
@@ -36,6 +37,7 @@ class _SecuritySetupSheetState extends State<SecuritySetupSheet> {
   bool _biometricsAvailable = false;
   bool _biometricsEnrolled = false;
   bool _enrollingBiometrics = false;
+  bool _enableBiometricsAfterPinSetup = false;
   String? _error;
 
   // PIN controllers
@@ -60,7 +62,7 @@ class _SecuritySetupSheetState extends State<SecuritySetupSheet> {
   }
 
   Future<void> _checkBiometrics() async {
-    final available = await BiometricService().isBiometricAvailable();
+    final available = await getIt<BiometricService>().isBiometricAvailable();
     if (mounted) {
       setState(() => _biometricsAvailable = available);
     }
@@ -71,14 +73,16 @@ class _SecuritySetupSheetState extends State<SecuritySetupSheet> {
       _enrollingBiometrics = true;
       _error = null;
     });
-    final success = await BiometricService().authenticate(
-      reason: 'Register your biometrics for quick and secure access',
+    final success = await getIt<BiometricService>().authenticate(
+      reason: 'Verify your identity to enable biometric unlock',
     );
     if (mounted) {
       setState(() => _enrollingBiometrics = false);
       if (success) {
-        await BiometricService().setEnabled(true);
-        setState(() => _biometricsEnrolled = true);
+        setState(() {
+          _biometricsEnrolled = true;
+          _enableBiometricsAfterPinSetup = true;
+        });
       } else {
         setState(
           () => _error =
@@ -134,7 +138,20 @@ class _SecuritySetupSheetState extends State<SecuritySetupSheet> {
       return;
     }
     HapticFeedback.heavyImpact();
-    await PinService().setPin(_pin);
+    try {
+      await getIt<PinService>().setPin(_pin);
+      if (_enableBiometricsAfterPinSetup) {
+        await getIt<BiometricService>().setEnabled(true);
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(
+          () => _error =
+              'Could not save your security settings. Please try again.',
+        );
+      }
+      return;
+    }
     if (mounted) Navigator.pop(context);
   }
 
