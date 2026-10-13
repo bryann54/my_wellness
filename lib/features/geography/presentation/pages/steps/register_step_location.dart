@@ -15,12 +15,16 @@ typedef LocationCallback =
 class RegisterStepLocation extends StatefulWidget {
   final County? initialCounty;
   final SubCounty? initialSubCounty;
+  final int? verifiedCountyId;
+  final int? verifiedSubCountyId;
   final LocationCallback onContinue;
 
   const RegisterStepLocation({
     super.key,
     this.initialCounty,
     this.initialSubCounty,
+    this.verifiedCountyId,
+    this.verifiedSubCountyId,
     required this.onContinue,
   });
 
@@ -37,6 +41,38 @@ class _RegisterStepLocationState extends State<RegisterStepLocation> {
     super.initState();
     _county = widget.initialCounty;
     _subCounty = widget.initialSubCounty;
+    _applyVerifiedLocation(context.read<GeographyBloc>().state);
+  }
+
+  @override
+  void didUpdateWidget(covariant RegisterStepLocation oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.verifiedCountyId != widget.verifiedCountyId ||
+        oldWidget.verifiedSubCountyId != widget.verifiedSubCountyId) {
+      _applyVerifiedLocation(context.read<GeographyBloc>().state);
+    }
+  }
+
+  void _applyVerifiedLocation(GeographyState state) {
+    SubCounty? verifiedSubCounty;
+    for (final subCounty in state.subCounties) {
+      if (subCounty.id == widget.verifiedSubCountyId) {
+        verifiedSubCounty = subCounty;
+        break;
+      }
+    }
+    final countyId = widget.verifiedCountyId ?? verifiedSubCounty?.countyId;
+    final verifiedCounty = countyId == null
+        ? null
+        : state.countyByIdOrNull(countyId);
+
+    if ((verifiedCounty != null && _county?.id != verifiedCounty.id) ||
+        (verifiedSubCounty != null && _subCounty?.id != verifiedSubCounty.id)) {
+      setState(() {
+        if (verifiedCounty != null) _county = verifiedCounty;
+        if (verifiedSubCounty != null) _subCounty = verifiedSubCounty;
+      });
+    }
   }
 
   void _continue() {
@@ -55,66 +91,76 @@ class _RegisterStepLocationState extends State<RegisterStepLocation> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            AppLocalizations.getString(context, 'auth.whereAreYou'),
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'We use this to show you relevant health facilities and services.',
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          const SizedBox(height: 24),
-          CountyDropdown(
-            selectedCountyId: _county?.id,
-            onChanged: (id) {
-              if (id == null) {
+    return BlocListener<GeographyBloc, GeographyState>(
+      listenWhen: (previous, current) =>
+          previous.counties != current.counties ||
+          previous.subCounties != current.subCounties,
+      listener: (context, state) => _applyVerifiedLocation(state),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              AppLocalizations.getString(context, 'auth.whereAreYou'),
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'We use this to show you relevant health facilities and services.',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 24),
+            CountyDropdown(
+              selectedCountyId: _county?.id,
+              isLocked:
+                  widget.verifiedCountyId != null ||
+                  widget.verifiedSubCountyId != null,
+              onChanged: (id) {
+                if (id == null) {
+                  setState(() {
+                    _county = null;
+                    _subCounty = null;
+                  });
+                  return;
+                }
+                final selected = context
+                    .read<GeographyBloc>()
+                    .state
+                    .countyByIdOrNull(id);
                 setState(() {
-                  _county = null;
+                  _county = selected;
                   _subCounty = null;
                 });
-                return;
-              }
-              final selected = context
-                  .read<GeographyBloc>()
-                  .state
-                  .countyByIdOrNull(id);
-              setState(() {
-                _county = selected;
-                _subCounty = null;
-              });
-            },
-          ),
-          const SizedBox(height: 16),
-          SubCountyDropdown(
-            countyId: _county?.id,
-            selectedSubCountyId: _subCounty?.id,
-            onChanged: (id) {
-              if (id == null) {
-                setState(() => _subCounty = null);
-                return;
-              }
-              final selected = context
-                  .read<GeographyBloc>()
-                  .state
-                  .subCountiesIn(_county!.id)
-                  .firstWhere((s) => s.id == id);
-              setState(() => _subCounty = selected);
-            },
-          ),
-          const SizedBox(height: 32),
-          AppPrimaryButton(
-            borderRadius: 12,
-            color: AppColors.primaryColor,
-            onPressed: _continue,
-            label: AppLocalizations.getString(context, 'common.continue'),
-          ),
-        ],
+              },
+            ),
+            const SizedBox(height: 16),
+            SubCountyDropdown(
+              countyId: _county?.id,
+              selectedSubCountyId: _subCounty?.id,
+              isLocked: widget.verifiedSubCountyId != null,
+              onChanged: (id) {
+                if (id == null) {
+                  setState(() => _subCounty = null);
+                  return;
+                }
+                final selected = context
+                    .read<GeographyBloc>()
+                    .state
+                    .subCountiesIn(_county!.id)
+                    .firstWhere((s) => s.id == id);
+                setState(() => _subCounty = selected);
+              },
+            ),
+            const SizedBox(height: 32),
+            AppPrimaryButton(
+              borderRadius: 12,
+              color: AppColors.primaryColor,
+              onPressed: _continue,
+              label: AppLocalizations.getString(context, 'common.continue'),
+            ),
+          ],
+        ),
       ),
     );
   }

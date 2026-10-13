@@ -212,7 +212,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       RegisterStepCredentials(
                         initialEmail: _email,
-                        initialPhone: _phone,
+                        initialPhone: _identity?.verifiedPhone ?? _phone,
+                        phoneIsVerified:
+                            _identity?.verifiedPhone?.isNotEmpty ?? false,
                         onContinue:
                             ({
                               required email,
@@ -230,6 +232,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       RegisterStepLocation(
                         initialCounty: _county,
                         initialSubCounty: _subCounty,
+                        verifiedCountyId: _identity?.countyId,
+                        verifiedSubCountyId: _identity?.subCountyId,
                         onContinue: ({required county, required subCounty}) {
                           setState(() {
                             _county = county;

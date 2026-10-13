@@ -8,14 +8,12 @@ import 'package:my_wellness/features/assessments/domain/entities/assessment_summ
 class AssessmentCard extends StatelessWidget {
   final AssessmentSummary summary;
   final VoidCallback onTap;
-  final String? statusLabel;
   final bool isRecommended;
 
   const AssessmentCard({
     super.key,
     required this.summary,
     required this.onTap,
-    this.statusLabel,
     this.isRecommended = false,
   });
 
@@ -24,129 +22,90 @@ class AssessmentCard extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final style = CategoryStyle.forCategory(summary.category);
 
-    final borderColor = isRecommended
-        ? cs.primary.withValues(alpha: 0.25)
-        : cs.outlineVariant.withValues(alpha: 0.6);
-    final borderWidth = isRecommended ? 1.4 : 1.0;
+    final background = isRecommended
+        ? cs.primaryContainer
+        : cs.surfaceContainerLow;
+    final border = isRecommended
+        ? cs.primary.withValues(alpha: 0.22)
+        : cs.outlineVariant.withValues(alpha: 0.55);
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+    return Semantics(
+      button: true,
+      label: '${summary.shortTitle}. ${summary.tagline}',
+      excludeSemantics: true,
       child: Material(
-        color: cs.onPrimaryContainer.withValues(alpha: .05),
-        borderRadius: BorderRadius.circular(12),
+        color: background,
+        borderRadius: BorderRadius.circular(isRecommended ? 20 : 16),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
           child: Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: borderColor, width: borderWidth),
+              borderRadius: BorderRadius.circular(isRecommended ? 20 : 16),
+              border: Border.all(color: border),
             ),
-            padding: const EdgeInsets.all(14),
-            child: Row(
+            padding: EdgeInsets.all(isRecommended ? 20 : 16),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (isRecommended) ...[
+                  Text(
+                    style.localizedLabel(context, summary.category),
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.6,
+                      color: cs.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
                 Hero(
-                  tag: assessmentIconTag(summary.slug),
-                  flightShuttleBuilder: iconShuttleBuilder,
-                  child: CategoryIconTile(style: style, size: 40),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Hero(
-                              tag: assessmentTitleTag(summary.slug),
-                              flightShuttleBuilder: textShuttleBuilder,
-                              child: Material(
-                                color: Colors.transparent,
-                                child: Text(
-                                  summary.shortTitle,
-                                  style: GoogleFonts.inter(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w700,
-                                    height: 1.25,
-                                    color: cs.onSurface,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ),
-                          ),
-                          if (statusLabel != null) ...[
-                            const SizedBox(width: 8),
-                            _StatusPill(
-                              label: statusLabel!,
-                              color: style.color,
-                            ),
-                          ],
-                        ],
+                  tag: assessmentTitleTag(summary.slug),
+                  flightShuttleBuilder: textShuttleBuilder,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: Text(
+                      summary.shortTitle,
+                      style: GoogleFonts.inter(
+                        fontSize: isRecommended ? 20 : 16,
+                        fontWeight: FontWeight.w700,
+                        height: 1.3,
+                        color: cs.onSurface,
                       ),
-                      const SizedBox(height: 4),
-                      Hero(
-                        tag: assessmentTaglineTag(summary.slug),
-                        flightShuttleBuilder: textShuttleBuilder,
-                        child: Material(
-                          color: Colors.transparent,
-                          child: Text(
-                            summary.tagline,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.inter(
-                              fontSize: 12.5,
-                              height: 1.4,
-                              color: cs.onSurface.withValues(alpha: 0.65),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-                const SizedBox(width: 6),
-                Padding(
-                  padding: const EdgeInsets.only(top: 2),
-                  child: Icon(
-                    Icons.chevron_right_rounded,
-                    size: 20,
-                    color: cs.onSurface.withValues(alpha: 0.3),
+                const SizedBox(height: 6),
+                Hero(
+                  tag: assessmentTaglineTag(summary.slug),
+                  flightShuttleBuilder: textShuttleBuilder,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: Text(
+                      summary.tagline,
+                      style: GoogleFonts.inter(
+                        fontSize: isRecommended ? 14 : 13.5,
+                        height: 1.5,
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
                   ),
                 ),
+                if (isRecommended) ...[
+                  const SizedBox(height: 14),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Icon(
+                      Icons.arrow_forward_rounded,
+                      size: 20,
+                      color: cs.primary,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _StatusPill extends StatelessWidget {
-  final String label;
-  final Color color;
-  const _StatusPill({required this.label, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.inter(
-          fontSize: 10.5,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.3,
-          color: color,
         ),
       ),
     );

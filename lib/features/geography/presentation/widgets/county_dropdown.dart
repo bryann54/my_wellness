@@ -8,11 +8,13 @@ import 'package:my_wellness/features/geography/presentation/bloc/geography_bloc.
 class CountyDropdown extends StatelessWidget {
   final int? selectedCountyId;
   final ValueChanged<int?> onChanged;
+  final bool isLocked;
 
   const CountyDropdown({
     super.key,
     required this.selectedCountyId,
     required this.onChanged,
+    this.isLocked = false,
   });
 
   @override
@@ -38,7 +40,7 @@ class CountyDropdown extends StatelessWidget {
         return DropDownWidget<County>(
           label: AppLocalizations.getString(context, 'auth.county'),
           isRequired: true,
-          isEnabled: !isLoading && counties.isNotEmpty,
+          isEnabled: !isLocked && !isLoading && counties.isNotEmpty,
           selectedItem: selected,
           hintText: isLoading
               ? AppLocalizations.getString(context, 'common.loading')
@@ -48,7 +50,7 @@ class CountyDropdown extends StatelessWidget {
                 (c) => DropdownMenuItem<County>(value: c, child: Text(c.name)),
               )
               .toList(),
-          onChanged: (county) => onChanged(county?.id),
+          onChanged: isLocked ? null : (county) => onChanged(county?.id),
         );
       },
     );

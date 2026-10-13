@@ -384,9 +384,6 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i6.SubmitAssessmentAnswerUseCase(gh<_i544.AssessmentsRepository>()),
     );
-    gh.lazySingleton<_i6.SubmitAssessmentBmiUseCase>(
-      () => _i6.SubmitAssessmentBmiUseCase(gh<_i544.AssessmentsRepository>()),
-    );
     gh.lazySingleton<_i6.GetAssessmentScoreUseCase>(
       () => _i6.GetAssessmentScoreUseCase(gh<_i544.AssessmentsRepository>()),
     );
@@ -402,11 +399,10 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i6.StartAssessmentSessionUseCase>(),
         gh<_i6.GetAssessmentAnswersUseCase>(),
         gh<_i6.SubmitAssessmentAnswerUseCase>(),
-        gh<_i6.SubmitAssessmentBmiUseCase>(),
         gh<_i6.GetReferralForSessionUseCase>(),
         gh<_i6.GetAssessmentScoreUseCase>(),
         gh<_i6.PreviewBmiUseCase>(),
-        gh<_i708.AccountBloc>(),
+        gh<_i23.UpdateProfileUseCase>(),
       ),
     );
     return this;

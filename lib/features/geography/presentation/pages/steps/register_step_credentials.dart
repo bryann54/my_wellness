@@ -16,12 +16,14 @@ typedef CredentialsCallback =
 class RegisterStepCredentials extends StatefulWidget {
   final String? initialEmail;
   final String? initialPhone;
+  final bool phoneIsVerified;
   final CredentialsCallback onContinue;
 
   const RegisterStepCredentials({
     super.key,
     this.initialEmail,
     this.initialPhone,
+    this.phoneIsVerified = false,
     required this.onContinue,
   });
 
@@ -62,6 +64,15 @@ class _RegisterStepCredentialsState extends State<RegisterStepCredentials> {
     _passwordCtrl.dispose();
     _confirmCtrl.dispose();
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant RegisterStepCredentials oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialPhone != widget.initialPhone) {
+      _phoneCtrl.text = widget.initialPhone ?? '';
+      _recheck();
+    }
   }
 
   void _recheck() {
@@ -122,6 +133,7 @@ class _RegisterStepCredentialsState extends State<RegisterStepCredentials> {
               label: AppLocalizations.getString(context, 'auth.phoneNumber'),
               icon: Icons.phone_outlined,
               keyboardType: TextInputType.phone,
+              enabled: !widget.phoneIsVerified,
               validator: (v) =>
                   AuthValidators.validatePhone(context, v, isRequired: false),
             ),

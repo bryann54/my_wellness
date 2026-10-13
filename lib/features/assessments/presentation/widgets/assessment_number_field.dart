@@ -27,7 +27,7 @@ class AssessmentNumberField extends StatelessWidget {
       hint: hint,
       keyboardType: TextInputType.number,
       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-      // onChanged: onChanged,
+      onChanged: onChanged,
       validator:
           validator ??
           (v) {

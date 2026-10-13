@@ -93,8 +93,6 @@ class ApiEndpoints {
       '/api/assessments/$slug/session/';
   static String assessmentAnswers(String slug, String sessionId) =>
       '/api/assessments/$slug/session/$sessionId/answers/';
-  static String assessmentBmiMetrics(String slug, String sessionId) =>
-      '/api/assessments/$slug/session/$sessionId/bmi-metrics/';
   static String assessmentReport(String slug, String sessionId) =>
       '/api/assessments/$slug/session/$sessionId/report/';
   static String assessmentReportEmail(String slug, String sessionId) =>

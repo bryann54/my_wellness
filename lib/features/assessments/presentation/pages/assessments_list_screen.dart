@@ -21,14 +21,46 @@ class AssessmentsListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userGender = context.select<AccountBloc, String?>(
-      (b) => b.state.profile?.gender,
-    );
-
     return BlocProvider(
-      create: (_) =>
-          getIt<AssessmentsBloc>()
-            ..add(LoadAssessmentsEvent(userGender: userGender)),
+      create: (_) => getIt<AssessmentsBloc>(),
+      child: const _AssessmentsListCoordinator(),
+    );
+  }
+}
+
+class _AssessmentsListCoordinator extends StatefulWidget {
+  const _AssessmentsListCoordinator();
+
+  @override
+  State<_AssessmentsListCoordinator> createState() =>
+      _AssessmentsListCoordinatorState();
+}
+
+class _AssessmentsListCoordinatorState
+    extends State<_AssessmentsListCoordinator> {
+  @override
+  void initState() {
+    super.initState();
+    _loadForCurrentMember();
+  }
+
+  void _loadForCurrentMember() {
+    final gender = context.read<AccountBloc>().state.profile?.gender;
+    context.read<AssessmentsBloc>().add(
+      LoadAssessmentsEvent(userGender: gender),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<AccountBloc, AccountState>(
+      listenWhen: (previous, current) =>
+          previous.profile?.gender != current.profile?.gender,
+      listener: (context, state) {
+        context.read<AssessmentsBloc>().add(
+          LoadAssessmentsEvent(userGender: state.profile?.gender),
+        );
+      },
       child: const _AssessmentsListBody(),
     );
   }
@@ -66,7 +98,10 @@ class _AssessmentsListBodyState extends State<_AssessmentsListBody> {
   }
 
   Future<void> _refresh() async {
-    context.read<AssessmentsBloc>().add(const LoadAssessmentsEvent());
+    final gender = context.read<AccountBloc>().state.profile?.gender;
+    context.read<AssessmentsBloc>().add(
+      LoadAssessmentsEvent(userGender: gender),
+    );
   }
 
   @override

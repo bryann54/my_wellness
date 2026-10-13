@@ -39,6 +39,7 @@ Health collection requires explicit consent. Notifications, deep links, analytic
 4. A member can see care-plan actions, log approved vitals, and complete backend-supported booking/navigation paths.
 5. Sign-in, consent, assessment, and booking critical paths have automated coverage.
 6. All released clinical content has clinical-owner approval and a versioned backend contract.
+7. The assessment catalogue hides entries whose `excluded_gender` matches the signed-in member's fetched profile gender. Entries with no gender exclusion remain visible; entries with an exclusion stay hidden until a profile gender is available.
 
 ## Non-goals
 

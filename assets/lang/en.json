@@ -70,6 +70,7 @@
   "assessment": {
     "title": "Health Assessments",
     "titlebot": "Screenings",
+    "referenceLabel": "Reference",
     "searchHint": "Search screenings",
  "completedLabel": "Completed",
   "nextStep": "Next step",

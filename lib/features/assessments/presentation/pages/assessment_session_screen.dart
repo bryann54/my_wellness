@@ -13,6 +13,7 @@ import 'package:my_wellness/features/assessments/presentation/widgets/assessment
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_question_view.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_session_bottom_bar.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_toast_listener.dart';
+import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
 
 @RoutePage()
 class AssessmentSessionScreen extends StatelessWidget {
@@ -99,49 +100,65 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
     final isBmi = q.type == AssessmentQuestionType.bmi;
     final isSubmitting = state.status == AssessmentStatus.submitting;
     final canProceed = _pendingAnswer != null && _pendingAnswer!.isNotEmpty;
+    final profile = context.watch<AccountBloc>().state.profile;
 
-    return Scaffold(
-      body: NestedScrollView(
-        headerSliverBuilder: (_, __) => [
-          CustomAppBar(title: def.shortTitle, isHome: false),
-        ],
-        body: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 12, 24, 8),
-              child: AssessmentProgressBar(
-                current: session.currentIndex,
-                total: session.totalQuestions,
-                section: q.section,
-              ),
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
-                child: isBmi
-                    ? AssessmentBmiStep(
-                        submitting: isSubmitting,
-                        onContinue: _submitBmi,
-                      )
-                    : AssessmentQuestionView(
-                        key: ValueKey(q.key),
-                        question: q,
-                        initialValue: _pendingAnswer,
-                        onChanged: (v) => setState(() => _pendingAnswer = v),
-                      ),
-              ),
-            ),
+    return BlocListener<AssessmentsBloc, AssessmentsState>(
+      listenWhen: (previous, current) {
+        final previousQuestion = previous.definition?.questionByIndex(
+          previous.session?.currentIndex ?? -1,
+        );
+        return previous.status == AssessmentStatus.submitting &&
+            (current.status == AssessmentStatus.ready ||
+                current.status == AssessmentStatus.completed) &&
+            previousQuestion?.type == AssessmentQuestionType.bmi;
+      },
+      listener: (context, state) {
+        context.read<AccountBloc>().add(const FetchProfileEvent());
+      },
+      child: Scaffold(
+        body: NestedScrollView(
+          headerSliverBuilder: (_, __) => [
+            CustomAppBar(title: def.shortTitle, isHome: false),
           ],
+          body: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 12, 24, 8),
+                child: AssessmentProgressBar(
+                  current: session.currentIndex,
+                  total: session.totalQuestions,
+                  section: q.section,
+                ),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+                  child: isBmi
+                      ? AssessmentBmiStep(
+                          initialWeightKg: profile?.weightKg?.toString(),
+                          initialHeightCm: profile?.heightCm?.toString(),
+                          submitting: isSubmitting,
+                        )
+                      : AssessmentQuestionView(
+                          key: ValueKey(q.key),
+                          question: q,
+                          initialValue: _pendingAnswer,
+                          onChanged: (v) => setState(() => _pendingAnswer = v),
+                        ),
+                ),
+              ),
+            ],
+          ),
         ),
+        bottomNavigationBar: isBmi
+            ? null
+            : AssessmentSessionBottomBar(
+                canProceed: canProceed,
+                submitting: isSubmitting,
+                onBack: () => Navigator.of(context).maybePop(),
+                onNext: _submitAnswer,
+              ),
       ),
-      bottomNavigationBar: isBmi
-          ? null
-          : AssessmentSessionBottomBar(
-              canProceed: canProceed,
-              submitting: isSubmitting,
-              onBack: () => Navigator.of(context).maybePop(),
-              onNext: _submitAnswer,
-            ),
     );
   }
 
@@ -161,9 +178,5 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
         answer: _pendingAnswer!,
       ),
     );
-  }
-
-  void _submitBmi() {
-    context.read<AssessmentsBloc>().add(const FetchScoreEvent());
   }
 }

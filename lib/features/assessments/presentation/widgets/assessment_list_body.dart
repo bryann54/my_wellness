@@ -4,9 +4,7 @@ import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_summary.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_card.dart';
-import 'package:my_wellness/features/assessments/presentation/widgets/assessment_category_rail.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_section_label.dart';
-import 'package:my_wellness/features/assessments/presentation/widgets/category_header_icon.dart';
 
 class AssessmentListBody extends StatelessWidget {
   final List<AssessmentSummary> assessments;
@@ -23,85 +21,53 @@ class AssessmentListBody extends StatelessWidget {
     final isSearching = searchQuery.trim().isNotEmpty;
     final hasRecommended = !isSearching && assessments.isNotEmpty;
     final recommended = hasRecommended ? assessments.first : null;
-    final rest = hasRecommended ? assessments.sublist(1) : assessments;
+    final remaining = hasRecommended ? assessments.skip(1) : assessments;
 
-    // Bucket by category.
     final grouped = <String, List<AssessmentSummary>>{};
-    for (final a in rest) {
-      grouped.putIfAbsent(a.category, () => []).add(a);
+    for (final assessment in remaining) {
+      grouped.putIfAbsent(assessment.category, () => []).add(assessment);
     }
-    final categories = grouped.keys.toList(growable: false);
 
-    // Number of vertical "rows" in the outer list.
-    // +1 for the recommended block, +1 for the gap before the first rail.
-    final int recommendedBlocks = hasRecommended ? 1 : 0;
-
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 96),
-      itemCount: recommendedBlocks + categories.length,
-      itemBuilder: (context, index) {
-        // ── Recommended card ─────────────────────────────────────────
-        if (hasRecommended && index == 0) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AssessmentSectionLabel(
-                  AppLocalizations.getString(
-                    context,
-                    'assessment.forYouSectionTitle',
-                  ),
-                ),
-                const SizedBox(height: 10),
-                AssessmentCard(
-                  summary: recommended!,
-                  isRecommended: true,
-                  statusLabel: AppLocalizations.getString(
-                    context,
-                    'assessment.recommendedPill',
-                  ),
-                  onTap: () => context.router.push(
-                    AssessmentIntroRoute(slug: recommended.slug),
-                  ),
-                ),
-              ],
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
+      children: [
+        if (hasRecommended) ...[
+          AssessmentSectionLabel(
+            AppLocalizations.getString(
+              context,
+              'assessment.forYouSectionTitle',
             ),
-          );
-        }
-
-        final category = categories[index - recommendedBlocks];
-        final items = grouped[category]!;
-        if (items.length == 1) {
-          final only = items.first;
-          final style = CategoryStyle.forCategory(category);
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AssessmentSectionLabel(
-                  style.localizedLabel(context, category),
-                  leading: CategoryHeaderIcon(style: style),
-                ),
-                const SizedBox(height: 10),
-                AssessmentCard(
-                  summary: only,
-                  onTap: () => context.router.push(
-                    AssessmentIntroRoute(slug: only.slug),
-                  ),
-                ),
-              ],
+          ),
+          const SizedBox(height: 10),
+          AssessmentCard(
+            summary: recommended!,
+            isRecommended: true,
+            onTap: () => context.router.push(
+              AssessmentIntroRoute(slug: recommended.slug),
             ),
-          );
-        }
-
-        // Multi-item → horizontal rail.
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 24),
-          child: AssessmentCategoryRail(category: category, items: items),
-        );
-      },
+          ),
+          const SizedBox(height: 28),
+        ],
+        for (final entry in grouped.entries) ...[
+          AssessmentSectionLabel(
+            CategoryStyle.forCategory(
+              entry.key,
+            ).localizedLabel(context, entry.key),
+          ),
+          const SizedBox(height: 10),
+          for (final assessment in entry.value) ...[
+            AssessmentCard(
+              summary: assessment,
+              onTap: () => context.router.push(
+                AssessmentIntroRoute(slug: assessment.slug),
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+          const SizedBox(height: 24),
+        ],
+      ],
     );
   }
 }

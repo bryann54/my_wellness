@@ -18,6 +18,12 @@ class IdentityDraft {
   final String surname;
   final String? gender;
   final DateTime? dateOfBirth;
+  final String? verifiedPhone;
+  final int? countyId;
+  final int? subCountyId;
+  final int? constituencyId;
+  final int? wardId;
+  final bool fromAfyaConnect;
 
   const IdentityDraft({
     required this.idType,
@@ -27,6 +33,12 @@ class IdentityDraft {
     this.surname = '',
     this.gender,
     this.dateOfBirth,
+    this.verifiedPhone,
+    this.countyId,
+    this.subCountyId,
+    this.constituencyId,
+    this.wardId,
+    this.fromAfyaConnect = false,
   });
 
   bool get isVerified => verificationId != null && verificationId!.isNotEmpty;
@@ -39,6 +51,12 @@ class IdentityDraft {
     String? surname,
     String? gender,
     DateTime? dateOfBirth,
+    String? verifiedPhone,
+    int? countyId,
+    int? subCountyId,
+    int? constituencyId,
+    int? wardId,
+    bool? fromAfyaConnect,
     bool clearVerification = false,
   }) {
     return IdentityDraft(
@@ -51,6 +69,12 @@ class IdentityDraft {
       surname: surname ?? this.surname,
       gender: gender ?? this.gender,
       dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+      verifiedPhone: verifiedPhone ?? this.verifiedPhone,
+      countyId: countyId ?? this.countyId,
+      subCountyId: subCountyId ?? this.subCountyId,
+      constituencyId: constituencyId ?? this.constituencyId,
+      wardId: wardId ?? this.wardId,
+      fromAfyaConnect: fromAfyaConnect ?? this.fromAfyaConnect,
     );
   }
 }
@@ -78,6 +102,12 @@ class _RegisterStepIdentityState extends State<RegisterStepIdentity> {
   String _surname = '';
   String? _gender;
   DateTime? _dateOfBirth;
+  String? _verifiedPhone;
+  int? _countyId;
+  int? _subCountyId;
+  int? _constituencyId;
+  int? _wardId;
+  bool _fromAfyaConnect = false;
 
   @override
   void initState() {
@@ -91,6 +121,12 @@ class _RegisterStepIdentityState extends State<RegisterStepIdentity> {
       _surname = i.surname;
       _gender = i.gender;
       _dateOfBirth = i.dateOfBirth;
+      _verifiedPhone = i.verifiedPhone;
+      _countyId = i.countyId;
+      _subCountyId = i.subCountyId;
+      _constituencyId = i.constituencyId;
+      _wardId = i.wardId;
+      _fromAfyaConnect = i.fromAfyaConnect;
     } else {
       _idCtrl = TextEditingController();
     }
@@ -124,6 +160,12 @@ class _RegisterStepIdentityState extends State<RegisterStepIdentity> {
       _surname = '';
       _gender = null;
       _dateOfBirth = null;
+      _verifiedPhone = null;
+      _countyId = null;
+      _subCountyId = null;
+      _constituencyId = null;
+      _wardId = null;
+      _fromAfyaConnect = false;
       _idCtrl.clear();
     });
   }
@@ -139,6 +181,12 @@ class _RegisterStepIdentityState extends State<RegisterStepIdentity> {
         surname: _surname,
         gender: _gender,
         dateOfBirth: _dateOfBirth,
+        verifiedPhone: _verifiedPhone,
+        countyId: _countyId,
+        subCountyId: _subCountyId,
+        constituencyId: _constituencyId,
+        wardId: _wardId,
+        fromAfyaConnect: _fromAfyaConnect,
       ),
     );
   }
@@ -157,11 +205,17 @@ class _RegisterStepIdentityState extends State<RegisterStepIdentity> {
           setState(() {
             _verificationId = v.verificationId;
             _firstName = v.firstName;
-            _surname = v.lastName;
+            _surname = v.fullSurname;
             _gender = v.gender;
             _dateOfBirth = v.dateOfBirth == null
                 ? null
                 : DateTime.tryParse(v.dateOfBirth!);
+            _verifiedPhone = v.phone;
+            _countyId = v.countyId;
+            _subCountyId = v.subCountyId;
+            _constituencyId = v.constituencyId;
+            _wardId = v.wardId;
+            _fromAfyaConnect = v.fromAfyaConnect;
           });
         }
         if (state.kycStatus == KycStatus.error && state.kycError != null) {
@@ -285,17 +339,17 @@ class _RegisterStepIdentityState extends State<RegisterStepIdentity> {
                 const SizedBox(height: 16),
                 _ReadOnlyField(
                   label: AppLocalizations.getString(context, 'auth.gender'),
-                  value: _gender == null
-                      ? ''
-                      : (_gender == 'female'
-                            ? AppLocalizations.getString(
-                                context,
-                                'auth.genderFemale',
-                              )
-                            : AppLocalizations.getString(
-                                context,
-                                'auth.genderMale',
-                              )),
+                  value: switch (_gender?.trim().toLowerCase()) {
+                    'female' => AppLocalizations.getString(
+                      context,
+                      'auth.genderFemale',
+                    ),
+                    'male' => AppLocalizations.getString(
+                      context,
+                      'auth.genderMale',
+                    ),
+                    _ => _gender ?? '',
+                  },
                 ),
                 const SizedBox(height: 16),
                 _ReadOnlyField(

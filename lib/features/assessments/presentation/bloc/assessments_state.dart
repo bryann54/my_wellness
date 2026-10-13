@@ -8,7 +8,8 @@ class AssessmentsState extends Equatable {
   final AssessmentStatus status;
   final VitalsAccess? access;
 
-  /// Full list as returned by the backend (already filtered by gender).
+  /// Assessments visible to the signed-in member after applying
+  /// `excluded_gender` against their profile gender.
   final List<AssessmentSummary> assessments;
 
   /// `assessments` filtered by [searchQuery]. When [searchQuery] is empty,
@@ -23,6 +24,8 @@ class AssessmentsState extends Equatable {
   final List<AssessmentAnswer> answers;
   final AssessmentScore? score;
   final BmiPreview? bmiPreview;
+  final bool bmiPreviewLoading;
+  final String? bmiPreviewInputKey;
   final bool terminated;
   final String? terminationReference;
   final String? errorMessage;
@@ -44,6 +47,8 @@ class AssessmentsState extends Equatable {
     this.answers = const [],
     this.score,
     this.bmiPreview,
+    this.bmiPreviewLoading = false,
+    this.bmiPreviewInputKey,
     this.terminated = false,
     this.terminationReference,
     this.errorMessage,
@@ -66,6 +71,8 @@ class AssessmentsState extends Equatable {
     List<AssessmentAnswer>? answers,
     AssessmentScore? score,
     BmiPreview? bmiPreview,
+    bool? bmiPreviewLoading,
+    String? bmiPreviewInputKey,
     bool? terminated,
     String? terminationReference,
     String? errorMessage,
@@ -75,6 +82,7 @@ class AssessmentsState extends Equatable {
     bool clearError = false,
     bool clearToast = false,
     bool clearBmiPreview = false,
+    bool clearBmiPreviewInputKey = false,
     bool clearSession = false,
     bool? alreadyCompleted,
     bool? completionHandled,
@@ -92,6 +100,10 @@ class AssessmentsState extends Equatable {
       answers: answers ?? this.answers,
       score: score ?? this.score,
       bmiPreview: clearBmiPreview ? null : (bmiPreview ?? this.bmiPreview),
+      bmiPreviewLoading: bmiPreviewLoading ?? this.bmiPreviewLoading,
+      bmiPreviewInputKey: clearBmiPreviewInputKey
+          ? null
+          : (bmiPreviewInputKey ?? this.bmiPreviewInputKey),
       terminated: terminated ?? this.terminated,
       terminationReference: terminationReference ?? this.terminationReference,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
@@ -116,6 +128,8 @@ class AssessmentsState extends Equatable {
     answers,
     score,
     bmiPreview,
+    bmiPreviewLoading,
+    bmiPreviewInputKey,
     terminated,
     terminationReference,
     errorMessage,

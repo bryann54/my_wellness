@@ -52,6 +52,7 @@ Datasource → DTO/mapper → Repository implementation
 
 - BLoC events/states are immutable, explicit and equatable. Do not use ambiguous boolean state bags.
 - BLoCs call use cases. BlocListener owns one-time effects; BlocBuilder/selectors render state.
+- The assessment catalogue receives the signed-in member's gender from the profile-owning UI/BLoC and filters the API's `excluded_gender` field locally. Compare gender values after trimming whitespace and ignoring case. Keep untagged assessments visible; keep gender-excluded assessments hidden while profile gender is unavailable, and re-filter when the profile gender changes.
 - Use a single configured Dio instance, safe interceptors, bounded timeouts, and typed failure mapping.
 - Do not retain request/response/body/error logging, public fallback tokens, automatic refresh/replay, Firebase auth/push assumptions, or preference-held access tokens from copied code.
 - Implement an endpoint, stream, mutation, retry, idempotency scheme, or session policy only from an approved My Wellness contract.

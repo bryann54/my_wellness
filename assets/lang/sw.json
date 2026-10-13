@@ -71,6 +71,7 @@
 "assessment": {
  "title": "Uchunguzi wa Afya",
     "titlebot": "Uchunguzi",
+    "referenceLabel": "Marejeleo",
     "searchHint": "Tafuta uchunguzi",
  "completedLabel": "Imekamilika",
   "nextStep": "Hatua inayofuata",

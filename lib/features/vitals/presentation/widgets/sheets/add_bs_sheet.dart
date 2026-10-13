@@ -1,4 +1,6 @@
 // lib/features/vitals/presentation/widgets/sheets/add_bs_sheet.dart
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -38,9 +40,21 @@ class _AddBsSheetState extends State<AddBsSheet> {
   String _readingType = 'random';
   String? _mealTiming;
   DateTime _takenAt = DateTime.now();
+  StreamSubscription<VitalsState>? _submissionSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _submissionSubscription = context.read<VitalsBloc>().stream.listen((state) {
+      if (state.toastType == ToastType.success && mounted) {
+        Navigator.of(context).pop();
+      }
+    });
+  }
 
   @override
   void dispose() {
+    unawaited(_submissionSubscription?.cancel());
     _valueCtrl.dispose();
     _weightCtrl.dispose();
     _notesCtrl.dispose();
@@ -65,8 +79,6 @@ class _AddBsSheetState extends State<AddBsSheet> {
     };
 
     context.read<VitalsBloc>().add(AddBsReadingEvent(payload));
-    Navigator.of(context).pop();
-    AppSnackbar.success(context, 'Blood sugar reading saved.');
   }
 
   Future<void> _pickDateTime() async {
