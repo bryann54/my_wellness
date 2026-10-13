@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_wellness/common/res/l10n.dart';
+import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/widgets/app_fab.dart';
 import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
 import 'package:my_wellness/features/vitals/presentation/bloc/vitals_bloc.dart';
@@ -82,31 +83,51 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                 ],
                 body: appts.isEmpty
                     ? ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
                         children: [
-                          SizedBox(
-                            height: MediaQuery.sizeOf(context).height * 0.5,
-                            child: VitalsEmptyState(
-                              icon: Icons.calendar_today_outlined,
-                              title: AppLocalizations.getString(
-                                context,
-                                'appointments.empty',
+                          ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minHeight:
+                                  MediaQuery.sizeOf(context).height * 0.5,
+                            ),
+                            child: Center(
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxWidth: 480,
+                                ),
+                                child: Padding(
+                                  padding: AppSpacing.page,
+                                  child: VitalsEmptyState(
+                                    icon: Icons.calendar_today_outlined,
+                                    title: AppLocalizations.getString(
+                                      context,
+                                      'appointments.empty',
+                                    ),
+                                    subtitle: AppLocalizations.getString(
+                                      context,
+                                      'appointments.emptySub',
+                                    ),
+                                    ctaLabel: AppLocalizations.getString(
+                                      context,
+                                      'appointments.book',
+                                    ),
+                                    onCta: () =>
+                                        AddAppointmentSheet.show(context),
+                                  ),
+                                ),
                               ),
-                              subtitle: AppLocalizations.getString(
-                                context,
-                                'appointments.emptySub',
-                              ),
-                              ctaLabel: AppLocalizations.getString(
-                                context,
-                                'appointments.book',
-                              ),
-                              onCta: () => AddAppointmentSheet.show(context),
                             ),
                           ),
                         ],
                       )
                     : ListView.builder(
                         controller: _scroll,
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+                        padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.md,
+                          AppSpacing.sm,
+                          AppSpacing.md,
+                          112,
+                        ),
                         itemCount:
                             appts.length +
                             (state.appointmentsCursor != null ? 1 : 0),
@@ -120,10 +141,15 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                             );
                           }
                           final a = appts[i];
-                          return AppointmentTile(
-                            appointment: a,
-                            onDelete: () => context.read<VitalsBloc>().add(
-                              DeleteAppointmentEvent(a.id),
+                          return Center(
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 680),
+                              child: AppointmentTile(
+                                appointment: a,
+                                onDelete: () => context.read<VitalsBloc>().add(
+                                  DeleteAppointmentEvent(a.id),
+                                ),
+                              ),
                             ),
                           );
                         },

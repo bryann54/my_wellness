@@ -158,6 +158,7 @@
   "systolic": "Systolic",
   "diastolic": "Diastolic",
   "pulse": "Pulse (optional)",
+  "pulseReading": "Pulse: {value} bpm",
   "weight": "Weight (optional)",
   "value": "Value",
   "unit": "Unit",

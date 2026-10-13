@@ -14,7 +14,7 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          const CustomAppBar(isHome: true, expandedHeight: 220),
+          const CustomAppBar(isHome: true, isTabRoot: true),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(
               AppSpacing.md,

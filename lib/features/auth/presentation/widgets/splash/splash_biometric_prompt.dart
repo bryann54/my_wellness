@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
@@ -42,8 +42,8 @@ class SplashBiometricPrompt extends StatelessWidget {
                         strokeWidth: 2.5,
                       ),
                     )
-                  : FaIcon(
-                      FontAwesomeIcons.fingerprint,
+                  : Icon(
+                      PhosphorIconsRegular.fingerprint,
                       size: 30,
                       color: cs.primary,
                     ),

@@ -159,6 +159,7 @@
   "systolic": "Systolic",
   "diastolic": "Diastolic",
   "pulse": "Mapigo (si lazima)",
+  "pulseReading": "Mapigo: {value} bpm",
   "weight": "Uzito (si lazima)",
   "value": "Thamani",
   "unit": "Kipimo",

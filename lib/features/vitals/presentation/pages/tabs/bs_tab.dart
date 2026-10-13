@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_fab.dart';
 import 'package:my_wellness/common/widgets/shimmer_box.dart';
+import 'package:my_wellness/features/vitals/domain/entities/bs_reading.dart';
 import 'package:my_wellness/features/vitals/presentation/bloc/vitals_bloc.dart';
 import 'package:my_wellness/features/vitals/presentation/widgets/sheets/add_bs_sheet.dart';
 import 'package:my_wellness/features/vitals/presentation/widgets/latest_reading_card.dart';
@@ -17,7 +19,9 @@ class BsTab extends StatelessWidget {
     return BlocBuilder<VitalsBloc, VitalsState>(
       buildWhen: (p, c) => p.status != c.status || p.bsReadings != c.bsReadings,
       builder: (context, state) {
-        if (state.status == VitalsStatus.loading && state.bsReadings.isEmpty) {
+        if ((state.status == VitalsStatus.initial ||
+                state.status == VitalsStatus.loading) &&
+            state.bsReadings.isEmpty) {
           return const _BsSkeleton();
         }
         if (state.status == VitalsStatus.error && state.bsReadings.isEmpty) {
@@ -57,40 +61,56 @@ class BsTab extends StatelessWidget {
               context.read<VitalsBloc>().add(const LoadVitalsEvent());
             },
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.md,
+                AppSpacing.lg,
+                112,
+              ),
               children: [
-                LatestReadingCard(
-                  kind: ReadingKind.bs,
-                  classification: state.bsReadings.first.classification,
-                  primary: state.bsReadings.first.value,
-                  unit: state.bsReadings.first.unit,
-                  timestampIso: state.bsReadings.first.takenAt,
-                  secondary: _readingTypeLabel(
-                    context,
-                    state.bsReadings.first.readingType,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  AppLocalizations.getString(context, 'vitals.history'),
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                ReadingHistoryList(
-                  readings: state.bsReadings
-                      .map(
-                        (r) => ReadingHistoryRow(
-                          id: r.id,
-                          primary: r.value,
-                          unit: r.unit,
-                          classification: r.classification,
-                          timestampIso: r.takenAt,
-                          onDelete: () => context.read<VitalsBloc>().add(
-                            DeleteBsReadingEvent(r.id),
+                Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 720),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        LatestReadingCard(
+                          classification: state.bsReadings.first.classification,
+                          primary: state.bsReadings.first.value,
+                          unit: state.bsReadings.first.unit,
+                          timestampIso: state.bsReadings.first.takenAt,
+                          secondary: _readingContext(
+                            context,
+                            state.bsReadings.first,
                           ),
                         ),
-                      )
-                      .toList(),
+                        const SizedBox(height: AppSpacing.xl),
+                        Text(
+                          AppLocalizations.getString(context, 'vitals.history'),
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        ReadingHistoryList(
+                          readings: state.bsReadings
+                              .map(
+                                (r) => ReadingHistoryRow(
+                                  id: r.id,
+                                  primary: r.value,
+                                  unit: r.unit,
+                                  classification: r.classification,
+                                  timestampIso: r.takenAt,
+                                  secondary: _readingContext(context, r),
+                                  onDelete: () => context
+                                      .read<VitalsBloc>()
+                                      .add(DeleteBsReadingEvent(r.id)),
+                                ),
+                              )
+                              .toList(),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -102,11 +122,38 @@ class BsTab extends StatelessWidget {
 
   static String _readingTypeLabel(BuildContext context, String type) {
     return switch (type) {
-      'fasting' => AppLocalizations.getString(context, 'vitals.fasting'),
-      'random' => AppLocalizations.getString(context, 'vitals.random'),
-      'post_meal' => AppLocalizations.getString(context, 'vitals.postMeal'),
+      'fasting' => AppLocalizations.getString(
+        context,
+        'vitals.readingTypeFasting',
+      ),
+      'random' => AppLocalizations.getString(
+        context,
+        'vitals.readingTypeRandom',
+      ),
+      'post_meal' => AppLocalizations.getString(
+        context,
+        'vitals.readingTypePostMeal',
+      ),
       _ => type,
     };
+  }
+
+  static String _readingContext(BuildContext context, BsReading reading) {
+    final timing = switch (reading.mealTiming) {
+      'less_than_2h' => AppLocalizations.getString(
+        context,
+        'vitals.mealTimingLt2h',
+      ),
+      'more_than_2h' => AppLocalizations.getString(
+        context,
+        'vitals.mealTimingGt2h',
+      ),
+      _ => null,
+    };
+    return [
+      _readingTypeLabel(context, reading.readingType),
+      if (timing != null) timing,
+    ].join(' · ');
   }
 }
 
@@ -116,15 +163,31 @@ class _BsSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
-      children: const [
-        ShimmerLatestCard(),
-        SizedBox(height: 24),
-        ShimmerBox(width: 90, height: 18),
-        SizedBox(height: 12),
-        ShimmerListTile(),
-        ShimmerListTile(),
-        ShimmerListTile(),
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.md,
+        AppSpacing.lg,
+        112,
+      ),
+      children: [
+        Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 720),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                ShimmerLatestCard(),
+                SizedBox(height: AppSpacing.xl),
+                ShimmerBox(width: 90, height: 18),
+                SizedBox(height: AppSpacing.sm),
+                ShimmerListTile(),
+                ShimmerListTile(),
+                ShimmerListTile(),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }

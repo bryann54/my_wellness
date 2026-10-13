@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/colors.dart';
 
 class MenuCard extends StatelessWidget {
-  final Object? icon;
+  final IconData? icon;
 
   final String title;
   final String subtitle;
@@ -24,11 +23,7 @@ class MenuCard extends StatelessWidget {
   Widget? _buildIcon(Color color, {double size = 25}) {
     final icon = this.icon;
     if (icon == null) return null;
-
-    if (icon is FaIconData) return FaIcon(icon, size: size, color: color);
-    if (icon is IconData) return Icon(icon, size: size, color: color);
-    assert(false, 'Unsupported icon type: ${icon.runtimeType}');
-    return null;
+    return Icon(icon, size: size, color: color);
   }
 
   Color _resolvedBg(Color base, bool isDark) {

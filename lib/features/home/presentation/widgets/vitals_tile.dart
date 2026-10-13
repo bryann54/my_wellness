@@ -6,6 +6,7 @@ import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
+import 'package:my_wellness/common/utils/formatters.dart';
 import 'package:my_wellness/features/vitals/presentation/bloc/vitals_bloc.dart';
 
 enum VitalsTileKind { bp, bs }
@@ -25,7 +26,6 @@ class VitalsTile extends StatelessWidget {
     final accent = isBp
         ? (isDark ? AppColors.vitalBpDark : AppColors.vitalBp)
         : (isDark ? AppColors.vitalBsDark : AppColors.vitalBs);
-
     final surface = isBp
         ? (isDark ? AppColors.vitalBpSurfaceDark : AppColors.vitalBpSurface)
         : (isDark ? AppColors.vitalBsSurfaceDark : AppColors.vitalBsSurface);
@@ -35,6 +35,9 @@ class VitalsTile extends StatelessWidget {
           p.bpReadings != c.bpReadings || p.bsReadings != c.bsReadings,
       builder: (context, state) {
         final reading = isBp ? state.latestBp : state.latestBs;
+        final takenAt = isBp
+            ? state.latestBp?.takenAt
+            : state.latestBs?.takenAt;
 
         return InkWell(
           onTap: () =>
@@ -45,6 +48,7 @@ class VitalsTile extends StatelessWidget {
             decoration: BoxDecoration(
               color: surface,
               borderRadius: AppRadius.lgAll,
+              border: Border.all(color: accent.withValues(alpha: 0.22)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,42 +56,32 @@ class VitalsTile extends StatelessWidget {
                 Row(
                   children: [
                     Container(
-                      width: 40,
-                      height: 40,
+                      width: 34,
+                      height: 34,
                       decoration: BoxDecoration(
-                        color: accent,
-                        borderRadius: AppRadius.mdAll,
+                        color: accent.withValues(alpha: 0.12),
+                        borderRadius: AppRadius.smAll,
                       ),
                       child: Icon(
-                        isBp ? Icons.favorite : Icons.water_drop,
-                        color: AppColors.background,
-                        size: 20,
+                        isBp
+                            ? Icons.favorite_outline
+                            : Icons.water_drop_outlined,
+                        color: accent,
+                        size: 18,
                       ),
                     ),
-                    const SizedBox(width: AppSpacing.sm + 4),
+                    const SizedBox(width: AppSpacing.sm),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            AppLocalizations.getString(
-                              context,
-                              isBp
-                                  ? 'vitals.bloodPressure'
-                                  : 'vitals.bloodSugar',
-                            ),
-                            style: theme.textTheme.titleSmall,
-                          ),
-                          Text(
-                            AppLocalizations.getString(
-                              context,
-                              isBp ? 'vitals.bpSubtitle' : 'vitals.bsSubtitle',
-                            ),
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: cs.onSurface.withValues(alpha: 0.6),
-                            ),
-                          ),
-                        ],
+                      child: Text(
+                        AppLocalizations.getString(
+                          context,
+                          isBp ? 'vitals.bloodPressure' : 'vitals.bloodSugar',
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ],
@@ -100,19 +94,28 @@ class VitalsTile extends StatelessWidget {
                       context,
                       'vitals.logFirstReading',
                     ),
-                    style: theme.textTheme.titleMedium,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: cs.onSurface.withValues(alpha: 0.72),
+                    ),
                   )
                 else
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(
-                        isBp
-                            ? '${state.latestBp!.systolic}/${state.latestBp!.diastolic}'
-                            : state.latestBs!.value,
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
+                      Flexible(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            isBp
+                                ? '${state.latestBp!.systolic}/${state.latestBp!.diastolic}'
+                                : state.latestBs!.value,
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(width: AppSpacing.xs),
@@ -126,14 +129,17 @@ class VitalsTile extends StatelessWidget {
                   ),
 
                 const SizedBox(height: AppSpacing.sm),
-                Padding(
-                  padding: const EdgeInsets.all(AppSpacing.sm),
-                  child: Text(
-                    AppLocalizations.getString(context, 'vitals.startTracking'),
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      color: accent,
-                      fontWeight: FontWeight.w600,
-                    ),
+                Text(
+                  reading == null
+                      ? AppLocalizations.getString(
+                          context,
+                          'vitals.startTracking',
+                        )
+                      : friendlyDateTime(takenAt!),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: cs.onSurface.withValues(alpha: 0.55),
                   ),
                 ),
               ],

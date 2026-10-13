@@ -1,104 +1,116 @@
+import 'dart:math' as math;
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 import 'package:my_wellness/common/res/colors.dart';
 
-class QuickActionChip extends StatefulWidget {
-  final Object? icon;
+class QuickActionChip extends StatelessWidget {
+  static const labelGap = 8.0;
+  static const verticalPadding = 4.0;
+
+  final IconData icon;
   final String label;
   final PageRouteInfo route;
+  final double width;
 
   const QuickActionChip({
     super.key,
     required this.icon,
     required this.label,
     required this.route,
-  });
+    required this.width,
+  }) : assert(width > 0);
 
-  @override
-  State<QuickActionChip> createState() => _QuickActionChipState();
-}
+  static double iconDiameterForWidth(double width) =>
+      math.min(width, math.min(56.0, math.max(32.0, width - 8))).toDouble();
 
-class _QuickActionChipState extends State<QuickActionChip> {
-  static const _pressDuration = Duration(milliseconds: 120);
-
-  bool _pressed = false;
-
-  Widget? _buildIcon(Color color, {double size = 20}) {
-    final icon = widget.icon;
-    if (icon == null) return null;
-    if (icon is FaIconData) return FaIcon(icon, size: size, color: color);
-    if (icon is IconData) return Icon(icon, size: size, color: color);
-    assert(false, 'Unsupported icon type: ${icon.runtimeType}');
-    return null;
-  }
-
-  void _onTapDown(_) => setState(() => _pressed = true);
-  void _onTapUp(_) => setState(() => _pressed = false);
-  void _onTapCancel() => setState(() => _pressed = false);
-
-  void _onTap() {
-    HapticFeedback.selectionClick();
-    AutoRouter.of(context).push(widget.route);
+  static double preferredHeight(BuildContext context, double width) {
+    final style = Theme.of(context).textTheme.labelMedium;
+    final fontSize = style?.fontSize ?? 12;
+    final labelHeight = MediaQuery.textScalerOf(context).scale(fontSize) * 1.15;
+    final height =
+        iconDiameterForWidth(width) +
+        labelGap +
+        labelHeight +
+        verticalPadding * 2;
+    return math.max(48.0, height).toDouble();
   }
 
   @override
   Widget build(BuildContext context) {
-    final iconWidget = _buildIcon(AppColors.background);
+    final diameter = iconDiameterForWidth(width);
+    final iconSize = diameter * 0.42;
 
     return Semantics(
       button: true,
-      label: widget.label,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTapDown: _onTapDown,
-        onTapUp: _onTapUp,
-        onTapCancel: _onTapCancel,
-        onTap: _onTap,
-        child: AnimatedScale(
-          scale: _pressed ? 0.94 : 1.0,
-          duration: _pressDuration,
-          curve: Curves.easeOut,
-          child: SizedBox(
-            width: 72,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppColors.background.withValues(alpha: 0.14),
-                    border: Border.all(
-                      color: AppColors.background.withValues(alpha: 0.22),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
+      label: label,
+      child: ExcludeSemantics(
+        child: SizedBox(
+          width: width,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(14),
+              onTap: () {
+                HapticFeedback.selectionClick();
+                AutoRouter.of(context).push(route);
+              },
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 48),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: verticalPadding,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Ink(
+                        width: diameter,
+                        height: diameter,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors.background.withValues(alpha: 0.14),
+                          border: Border.all(
+                            color: AppColors.background.withValues(alpha: 0.22),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.08),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Icon(
+                            icon,
+                            size: iconSize,
+                            color: AppColors.background,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: labelGap),
+                      Text(
+                        label,
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(
+                              height: 1.15,
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 0.1,
+                              color: AppColors.background.withValues(
+                                alpha: 0.92,
+                              ),
+                            ),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
-                  child: Center(child: iconWidget ?? const SizedBox.shrink()),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  widget.label,
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    height: 1.15,
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: 0.1,
-                    color: AppColors.background.withValues(alpha: 0.92),
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
+              ),
             ),
           ),
         ),

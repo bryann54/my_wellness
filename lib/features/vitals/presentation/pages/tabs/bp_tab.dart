@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_fab.dart';
 import 'package:my_wellness/common/widgets/shimmer_box.dart';
@@ -17,7 +18,9 @@ class BpTab extends StatelessWidget {
     return BlocBuilder<VitalsBloc, VitalsState>(
       buildWhen: (p, c) => p.status != c.status || p.bpReadings != c.bpReadings,
       builder: (context, state) {
-        if (state.status == VitalsStatus.loading && state.bpReadings.isEmpty) {
+        if ((state.status == VitalsStatus.initial ||
+                state.status == VitalsStatus.loading) &&
+            state.bpReadings.isEmpty) {
           return const _BpSkeleton();
         }
         if (state.status == VitalsStatus.error && state.bpReadings.isEmpty) {
@@ -56,41 +59,66 @@ class BpTab extends StatelessWidget {
             onRefresh: () async =>
                 context.read<VitalsBloc>().add(const LoadVitalsEvent()),
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.md,
+                AppSpacing.lg,
+                112,
+              ),
               children: [
-                LatestReadingCard(
-                  kind: ReadingKind.bp,
-                  classification: state.bpReadings.first.classification,
-                  primary:
-                      '${state.bpReadings.first.systolic}/${state.bpReadings.first.diastolic}',
-                  unit: 'mmHg',
-                  timestampIso: state.bpReadings.first.takenAt,
-                  secondary: state.bpReadings.first.pulse == null
-                      ? null
-                      : '${AppLocalizations.getString(context, 'vitals.pulse')}: '
-                            '${state.bpReadings.first.pulse}',
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  AppLocalizations.getString(context, 'vitals.history'),
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 8),
-                ReadingHistoryList(
-                  readings: state.bpReadings
-                      .map(
-                        (r) => ReadingHistoryRow(
-                          id: r.id,
-                          primary: '${r.systolic}/${r.diastolic}',
+                Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 720),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        LatestReadingCard(
+                          classification: state.bpReadings.first.classification,
+                          primary:
+                              '${state.bpReadings.first.systolic}/${state.bpReadings.first.diastolic}',
                           unit: 'mmHg',
-                          classification: r.classification,
-                          timestampIso: r.takenAt,
-                          onDelete: () => context.read<VitalsBloc>().add(
-                            DeleteBpReadingEvent(r.id),
-                          ),
+                          timestampIso: state.bpReadings.first.takenAt,
+                          secondary: state.bpReadings.first.pulse == null
+                              ? null
+                              : AppLocalizations.t(
+                                  context,
+                                  'vitals.pulseReading',
+                                  {'value': '${state.bpReadings.first.pulse}'},
+                                ),
                         ),
-                      )
-                      .toList(),
+                        const SizedBox(height: AppSpacing.xl),
+                        Text(
+                          AppLocalizations.getString(context, 'vitals.history'),
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        ReadingHistoryList(
+                          readings: state.bpReadings
+                              .map(
+                                (r) => ReadingHistoryRow(
+                                  id: r.id,
+                                  primary: '${r.systolic}/${r.diastolic}',
+                                  unit: 'mmHg',
+                                  classification: r.classification,
+                                  timestampIso: r.takenAt,
+                                  secondary: r.pulse == null
+                                      ? null
+                                      : AppLocalizations.t(
+                                          context,
+                                          'vitals.pulseReading',
+                                          {'value': '${r.pulse}'},
+                                        ),
+                                  onDelete: () => context
+                                      .read<VitalsBloc>()
+                                      .add(DeleteBpReadingEvent(r.id)),
+                                ),
+                              )
+                              .toList(),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -107,15 +135,31 @@ class _BpSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
-      children: const [
-        ShimmerLatestCard(),
-        SizedBox(height: 24),
-        ShimmerBox(width: 90, height: 18),
-        SizedBox(height: 12),
-        ShimmerListTile(),
-        ShimmerListTile(),
-        ShimmerListTile(),
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.md,
+        AppSpacing.lg,
+        112,
+      ),
+      children: [
+        Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 720),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                ShimmerLatestCard(),
+                SizedBox(height: AppSpacing.xl),
+                ShimmerBox(width: 90, height: 18),
+                SizedBox(height: AppSpacing.sm),
+                ShimmerListTile(),
+                ShimmerListTile(),
+                ShimmerListTile(),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }

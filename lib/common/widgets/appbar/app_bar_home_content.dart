@@ -9,24 +9,22 @@ import 'package:my_wellness/features/notifications/presentation/bloc/notificatio
 
 class AppBarHomeContent extends StatelessWidget {
   final String username;
-  final List<Widget>? actions;
   final double progress;
   final double statusBarHeight;
-  final double bottomHeight;
 
   const AppBarHomeContent({
     super.key,
     required this.username,
-    required this.actions,
     required this.progress,
     required this.statusBarHeight,
-    required this.bottomHeight,
   });
 
   @override
   Widget build(BuildContext context) {
-    final expandedOpacity = (1.0 - progress * 2.2).clamp(0.0, 1.0);
-    final collapsedOpacity = ((progress - 0.75) / 0.25).clamp(0.0, 1.0);
+    final expandedOpacity = (1.0 - progress * 2.2).clamp(0.0, 1.0).toDouble();
+    final collapsedOpacity = ((progress - 0.75) / 0.25)
+        .clamp(0.0, 1.0)
+        .toDouble();
 
     return Stack(
       children: [
@@ -80,7 +78,7 @@ class AppBarHomeContent extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 25),
+                  const SizedBox(height: 16),
                   const QuickActionRow(),
                 ],
               ),
@@ -112,13 +110,6 @@ class AppBarHomeContent extends StatelessWidget {
             ),
           ),
         ),
-
-        if (actions != null)
-          Positioned(
-            top: statusBarHeight,
-            right: 4,
-            child: Row(children: actions!),
-          ),
       ],
     );
   }

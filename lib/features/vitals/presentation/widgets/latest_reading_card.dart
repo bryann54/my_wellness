@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:my_wellness/common/res/app_spacing.dart';
+import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/utils/formatters.dart';
 import 'package:my_wellness/features/vitals/presentation/utils/classification_colors.dart';
 
-enum ReadingKind { bp, bs }
-
 class LatestReadingCard extends StatelessWidget {
-  final ReadingKind kind;
   final String classification;
   final String primary;
   final String unit;
@@ -15,7 +14,6 @@ class LatestReadingCard extends StatelessWidget {
 
   const LatestReadingCard({
     super.key,
-    required this.kind,
     required this.classification,
     required this.primary,
     required this.unit,
@@ -29,86 +27,86 @@ class LatestReadingCard extends StatelessWidget {
     final color = classificationColor(classification);
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withValues(alpha: 0.25)),
+        color: cs.surface,
+        borderRadius: AppRadius.lgAll,
+        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.55)),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(16),
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            Container(
+              width: 3,
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: AppRadius.pillAll,
+              ),
             ),
-            child: Icon(
-              kind == ReadingKind.bp
-                  ? Icons.favorite_rounded
-                  : Icons.water_drop_rounded,
-              color: color,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  kind == ReadingKind.bp ? 'Latest reading' : 'Latest reading',
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    color: cs.onSurface.withValues(alpha: 0.6),
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
-                  children: [
-                    Text(
-                      primary,
-                      style: GoogleFonts.inter(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w700,
-                        color: cs.onSurface,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      unit,
-                      style: GoogleFonts.inter(
-                        fontSize: 14,
-                        color: cs.onSurface.withValues(alpha: 0.7),
-                      ),
-                    ),
-                  ],
-                ),
-                if (secondary != null) ...[
-                  const SizedBox(height: 2),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    secondary!,
+                    AppLocalizations.getString(context, 'vitals.latestReading'),
                     style: GoogleFonts.inter(
                       fontSize: 12,
+                      fontWeight: FontWeight.w600,
                       color: cs.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
-                ],
-                const SizedBox(height: 4),
-                Text(
-                  friendlyDateTime(timestampIso),
-                  style: GoogleFonts.inter(
-                    fontSize: 12,
-                    color: cs.onSurface.withValues(alpha: 0.5),
+                  const SizedBox(height: AppSpacing.xs),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Flexible(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            primary,
+                            style: GoogleFonts.inter(
+                              fontSize: 30,
+                              fontWeight: FontWeight.w700,
+                              color: cs.onSurface,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        unit,
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          color: cs.onSurface.withValues(alpha: 0.7),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                  if (secondary != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      secondary!,
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        color: cs.onSurface.withValues(alpha: 0.6),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 4),
+                  Text(
+                    friendlyDateTime(timestampIso),
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: cs.onSurface.withValues(alpha: 0.5),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

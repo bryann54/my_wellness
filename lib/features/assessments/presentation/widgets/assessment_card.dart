@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
@@ -177,7 +177,7 @@ class CategoryIconTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(radius),
       ),
       child: Center(
-        child: FaIcon(
+        child: Icon(
           style.icon,
           color: AppColors.background,
           size: glyphSize ?? size * 0.55,
@@ -188,38 +188,38 @@ class CategoryIconTile extends StatelessWidget {
 }
 
 class CategoryStyle {
-  final FaIconData icon;
+  final IconData icon;
   final Color color;
   final String? i18nKey;
 
   const CategoryStyle({required this.icon, required this.color, this.i18nKey});
 
   static const cancer = CategoryStyle(
-    icon: FontAwesomeIcons.ribbon,
+    icon: PhosphorIconsRegular.dna,
     color: Color(0xFFD63384),
     i18nKey: 'assessment.category.cancer',
   );
 
   static const metabolic = CategoryStyle(
-    icon: FontAwesomeIcons.droplet,
+    icon: PhosphorIconsRegular.drop,
     color: Color(0xFFF97316),
     i18nKey: 'assessment.category.metabolic',
   );
 
   static const mentalHealth = CategoryStyle(
-    icon: FontAwesomeIcons.brain,
+    icon: PhosphorIconsRegular.brain,
     color: Color(0xFF7C3AED),
     i18nKey: 'assessment.category.mentalHealth',
   );
 
   static const sexualUrinary = CategoryStyle(
-    icon: FontAwesomeIcons.personWalking,
+    icon: PhosphorIconsRegular.personSimpleWalk,
     color: Color(0xFF0EA5E9),
     i18nKey: 'assessment.category.sexualUrinary',
   );
 
   static const fallback = CategoryStyle(
-    icon: FontAwesomeIcons.clipboardCheck,
+    icon: PhosphorIconsRegular.clipboardText,
     color: Color(0xFF14B8A6),
   );
 

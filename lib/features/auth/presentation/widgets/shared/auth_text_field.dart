@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:phosphor_icons/phosphor_icons.dart';
 
 class AuthTextField extends StatelessWidget {
   const AuthTextField({
@@ -63,10 +63,10 @@ class AuthTextField extends StatelessWidget {
                 tooltip: isPasswordVisible ?? false
                     ? 'Hide password'
                     : 'Show password',
-                icon: FaIcon(
+                icon: Icon(
                   isPasswordVisible ?? false
-                      ? FontAwesomeIcons.eyeSlash
-                      : FontAwesomeIcons.eye,
+                      ? PhosphorIconsRegular.eyeSlash
+                      : PhosphorIconsRegular.eye,
                   size: 15,
                   color: cs.onSurface.withValues(alpha: 0.55),
                 ),

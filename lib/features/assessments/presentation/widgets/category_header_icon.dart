@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_card.dart';
 
 class CategoryHeaderIcon extends StatelessWidget {
@@ -10,7 +9,7 @@ class CategoryHeaderIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FaIcon(
+    return Icon(
       style.icon,
       size: size,
       color: style.color.withValues(alpha: 0.5),

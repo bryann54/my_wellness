@@ -2,43 +2,34 @@ import 'package:flutter/material.dart';
 import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/widgets/appbar/app_bar_clipper.dart';
 import 'package:my_wellness/common/widgets/appbar/app_bar_home_content.dart';
-import 'package:my_wellness/common/widgets/appbar/app_bar_inner_content.dart';
-import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
 
 class AppBarFlexibleHeader extends StatelessWidget {
   final bool isHome;
   final String username;
-  final String? title;
-  final List<Widget>? actions;
   final double expandedHeight;
-  final PreferredSizeWidget? bottom;
+  final double bottomHeight;
 
   const AppBarFlexibleHeader({
     super.key,
     required this.isHome,
     required this.username,
-    required this.title,
-    required this.actions,
     required this.expandedHeight,
-    required this.bottom,
+    required this.bottomHeight,
   });
 
   @override
   Widget build(BuildContext context) {
     final statusBarHeight = MediaQuery.of(context).padding.top;
-    final bottomHeight = bottom?.preferredSize.height ?? 0;
-
     return LayoutBuilder(
       builder: (context, constraints) {
         final cur = constraints.biggest.height;
-        final collapsed =
-            statusBarHeight + kToolbarHeight + CustomAppBar.curveExtra;
-        final progress = expandedHeight <= collapsed
+        final maximumExtent = expandedHeight + statusBarHeight + bottomHeight;
+        final minimumExtent = statusBarHeight + kToolbarHeight + bottomHeight;
+        final progress = maximumExtent <= minimumExtent
             ? 1.0
-            : ((expandedHeight - cur) / (expandedHeight - collapsed)).clamp(
-                0.0,
-                1.0,
-              );
+            : ((maximumExtent - cur) / (maximumExtent - minimumExtent))
+                  .clamp(0.0, 1.0)
+                  .toDouble();
 
         return ClipPath(
           clipper: AppBarClipper(),
@@ -48,17 +39,10 @@ class AppBarFlexibleHeader extends StatelessWidget {
             child: isHome
                 ? AppBarHomeContent(
                     username: username,
-                    actions: actions,
                     progress: progress,
                     statusBarHeight: statusBarHeight,
-                    bottomHeight: bottomHeight,
                   )
-                : AppBarInnerContent(
-                    title: title ?? '',
-                    actions: actions,
-                    statusBarHeight: statusBarHeight,
-                    bottomHeight: bottomHeight,
-                  ),
+                : const SizedBox.expand(),
           ),
         );
       },
