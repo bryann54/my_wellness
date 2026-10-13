@@ -1,7 +1,7 @@
 // lib/features/auth/presentation/widgets/language_dropdown.dart
 
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/drop_down_field.dart';
@@ -68,8 +68,8 @@ class LanguageDropdown extends StatelessWidget {
       borderColor: Colors.grey[300],
       prefixIcon: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: FaIcon(
-          FontAwesomeIcons.globe,
+        child: Icon(
+          PhosphorIconsRegular.globe,
           size: 16,
           color: Colors.grey[500],
         ),

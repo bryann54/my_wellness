@@ -104,7 +104,7 @@ class _AppSearchBarState extends State<AppSearchBar> {
               curve: Curves.easeOut,
               height: 48,
               decoration: BoxDecoration(
-                color: cs.surfaceContainerLow,
+                color: cs.surfaceContainerLow.withValues(alpha: 0.8),
                 borderRadius: radius,
                 border: Border.all(
                   color: borderColor,

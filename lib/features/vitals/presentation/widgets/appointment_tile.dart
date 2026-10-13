@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/utils/functions.dart';
@@ -28,6 +29,11 @@ class _AppointmentTileState extends State<AppointmentTile> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accent = isDark ? AppColors.vitalBpDark : AppColors.vitalBp;
+    final tint = isDark
+        ? AppColors.vitalBpSurfaceDark
+        : AppColors.vitalBpSurface;
     final hasNotes = a.notes?.trim().isNotEmpty == true;
 
     return Dismissible(
@@ -37,6 +43,8 @@ class _AppointmentTileState extends State<AppointmentTile> {
       onDismissed: (_) => widget.onDelete(),
       background: _DismissBackground(color: cs.error),
       child: _Card(
+        accent: accent,
+        tint: tint,
         onTap: hasNotes ? () => setState(() => _expanded = !_expanded) : null,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,7 +60,7 @@ class _AppointmentTileState extends State<AppointmentTile> {
               curve: Curves.easeOutCubic,
               alignment: Alignment.topCenter,
               child: _expanded && hasNotes
-                  ? _ExpandedNotes(notes: a.notes!, cs: cs)
+                  ? _ExpandedNotes(notes: a.notes!.trim(), cs: cs)
                   : const SizedBox.shrink(),
             ),
           ],
@@ -97,9 +105,14 @@ class _CollapsedRow extends StatelessWidget {
     final dt = parseDateTime(a.appointmentDate, a.appointmentTime);
     final dayLabel = dt != null ? friendlyDay(dt) : a.appointmentDate;
     final timeLabel = dt != null ? friendlyTime(dt) : a.appointmentTime;
+    final condition = a.condition?.trim();
+    final showCondition =
+        condition != null &&
+        condition.isNotEmpty &&
+        condition.toLowerCase() != 'other';
 
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -130,12 +143,12 @@ class _CollapsedRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              if (a.condition != null) ...[
-                const SizedBox(width: 8),
-                _ConditionPill(condition: a.condition!, cs: cs),
+              if (showCondition) ...[
+                const SizedBox(width: AppSpacing.sm),
+                _ConditionPill(condition: condition),
               ],
               if (showChevron) ...[
-                const SizedBox(width: 4),
+                const SizedBox(width: AppSpacing.xs),
                 AnimatedRotation(
                   turns: expanded ? 0.5 : 0,
                   duration: const Duration(milliseconds: 220),
@@ -149,27 +162,18 @@ class _CollapsedRow extends StatelessWidget {
               ],
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 2),
-                child: Icon(
-                  Icons.local_hospital_outlined,
-                  size: 18,
-                  color: cs.onSurface.withValues(alpha: 0.45),
-                ),
-              ),
-              const SizedBox(width: 8),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      a.clinicName.toUpperCase(),
+                      a.clinicName,
                       style: GoogleFonts.inter(
-                        fontSize: 17,
+                        fontSize: 16,
                         fontWeight: FontWeight.w600,
                         height: 1.3,
                         color: cs.onSurface.withValues(alpha: 0.8),
@@ -226,12 +230,9 @@ class _ExpandedNotes extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Divider(height: 1, color: cs.outlineVariant.withValues(alpha: 0.4)),
-          const SizedBox(height: 12),
+          const SizedBox(height: AppSpacing.md),
           Text(
-            AppLocalizations.getString(
-              context,
-              'appointments.notesLabel',
-            ).toUpperCase(),
+            AppLocalizations.getString(context, 'appointments.notesLabel'),
             style: GoogleFonts.inter(
               fontSize: 12,
               fontWeight: FontWeight.w700,
@@ -256,33 +257,37 @@ class _ExpandedNotes extends StatelessWidget {
 
 class _ConditionPill extends StatelessWidget {
   final String condition;
-  final ColorScheme cs;
 
-  const _ConditionPill({required this.condition, required this.cs});
+  const _ConditionPill({required this.condition});
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final (label, color) = switch (condition.toLowerCase()) {
-      'hypertension' => ('Hypertension', const Color(0xFF2563EB)),
-      'diabetes' => ('Diabetes', const Color(0xFFDC2626)),
-      _ => (
-        AppLocalizations.getString(context, 'condition.other'),
-        cs.onSurface.withValues(alpha: 0.5),
+      'hypertension' => (
+        AppLocalizations.getString(context, 'condition.hypertension'),
+        cs.primary,
       ),
+      'diabetes' => (
+        AppLocalizations.getString(context, 'condition.diabetes'),
+        cs.primary,
+      ),
+      _ => (condition.replaceAll('_', ' '), cs.primary),
     };
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(6),
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withValues(alpha: 0.16)),
       ),
       child: Text(
         label,
         style: GoogleFonts.inter(
-          fontSize: 10.5,
+          fontSize: 11,
           fontWeight: FontWeight.w600,
-          letterSpacing: 0.2,
+          letterSpacing: 0.1,
           color: color,
         ),
       ),
@@ -293,26 +298,30 @@ class _ConditionPill extends StatelessWidget {
 class _Card extends StatelessWidget {
   final Widget child;
   final VoidCallback? onTap;
+  final Color accent;
+  final Color tint;
 
-  const _Card({required this.child, this.onTap});
+  const _Card({
+    required this.child,
+    required this.accent,
+    required this.tint,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Material(
-        color: AppColors.textLight.withValues(alpha: .1),
-        borderRadius: BorderRadius.circular(6),
+        color: tint,
+        borderRadius: AppRadius.lgAll,
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
           child: DecoratedBox(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(
-                color: cs.outlineVariant.withValues(alpha: 0.4),
-              ),
+              borderRadius: AppRadius.lgAll,
+              border: Border.all(color: accent.withValues(alpha: 0.22)),
             ),
             child: child,
           ),
@@ -331,10 +340,7 @@ class _DismissBackground extends StatelessWidget {
     return Container(
       alignment: Alignment.centerRight,
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(6),
-      ),
+      decoration: BoxDecoration(color: color, borderRadius: AppRadius.lgAll),
       child: const Icon(
         Icons.delete_outline_rounded,
         color: Colors.white,

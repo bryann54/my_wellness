@@ -172,7 +172,7 @@ class DropDownWidget<T> extends StatelessWidget {
             dropdownColor: appColors?.surface ?? theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(borderRadius ?? 12),
             menuMaxHeight: 300,
-         selectedItemBuilder: (context) {
+            selectedItemBuilder: (context) {
               return items.map((item) {
                 return Container(
                   alignment: Alignment.centerLeft,

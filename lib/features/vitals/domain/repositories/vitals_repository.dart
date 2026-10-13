@@ -21,6 +21,7 @@ abstract class VitalsRepository {
   );
   Future<Either<Failure, MedicationScanResult>> scanMedication({
     required String filePath,
+    required String condition,
   });
   Future<Either<Failure, List<Facility>>> searchFacilities(String query);
   Future<Either<Failure, void>> deleteAppointment(String id);

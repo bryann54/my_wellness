@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/res/colors.dart';
@@ -27,7 +26,6 @@ class VerifiedIdentitySection extends StatelessWidget {
         children: [
           Row(
             children: [
-            
               Expanded(
                 child: Text(
                   AppLocalizations.getString(
@@ -45,10 +43,7 @@ class VerifiedIdentitySection extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            AppLocalizations.getString(
-              context,
-              'profile.verifiedIdentityHelp',
-            ),
+            AppLocalizations.getString(context, 'profile.verifiedIdentityHelp'),
             style: GoogleFonts.inter(
               fontSize: 12.5,
               height: 1.4,
@@ -93,12 +88,15 @@ class VerifiedIdentitySection extends StatelessWidget {
           ),
 
           const SizedBox(height: 18),
-      AppPrimaryButton(
-        onPressed: () => UpdateIdentitySheet.show(context),
-        label: AppLocalizations.getString(context, 'profile.updateIdentity'),
-          borderRadius: 12,
+          AppPrimaryButton(
+            onPressed: () => UpdateIdentitySheet.show(context),
+            label: AppLocalizations.getString(
+              context,
+              'profile.updateIdentity',
+            ),
+            borderRadius: 12,
             color: AppColors.primaryColor,
-      ),
+          ),
         ],
       ),
     );

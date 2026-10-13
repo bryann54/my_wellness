@@ -117,26 +117,6 @@ class SubmitAssessmentAnswerUseCase
 }
 
 @lazySingleton
-class SubmitAssessmentBmiUseCase
-    implements
-        UseCase<
-          bool,
-          ({String slug, String sessionId, String weightKg, String heightCm})
-        > {
-  final AssessmentsRepository _r;
-  SubmitAssessmentBmiUseCase(this._r);
-  @override
-  Future<Either<Failure, bool>> call(
-    ({String slug, String sessionId, String weightKg, String heightCm}) p,
-  ) => _r.submitBmiMetrics(
-    p.slug,
-    p.sessionId,
-    weightKg: p.weightKg,
-    heightCm: p.heightCm,
-  );
-}
-
-@lazySingleton
 class GetAssessmentScoreUseCase
     implements UseCase<AssessmentScore, ({String slug, String sessionId})> {
   final AssessmentsRepository _r;

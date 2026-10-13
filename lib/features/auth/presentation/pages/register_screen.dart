@@ -1,12 +1,15 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+
+import 'package:my_wellness/common/constants/hero.dart';
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/notifiers/locale_provider.dart';
+import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/step_progress.dart';
 import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
-import 'package:my_wellness/common/widgets/language_selector_row.dart';
 import 'package:my_wellness/features/auth/data/models/signup_request_model.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_event.dart';
@@ -14,6 +17,7 @@ import 'package:my_wellness/features/auth/presentation/bloc/auth_state.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/auth_state_listener.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/shared/auth_bottom_bar.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/shared/auth_header.dart';
+import 'package:my_wellness/features/auth/presentation/widgets/shared/language_selector.dart';
 import 'package:my_wellness/features/geography/domain/entities/county.dart';
 import 'package:my_wellness/features/geography/domain/entities/sub_county.dart';
 import 'package:my_wellness/features/geography/presentation/bloc/geography_bloc.dart';
@@ -21,7 +25,6 @@ import 'package:my_wellness/features/geography/presentation/pages/steps/register
 import 'package:my_wellness/features/geography/presentation/pages/steps/register_step_identity.dart';
 import 'package:my_wellness/features/geography/presentation/pages/steps/register_step_location.dart';
 import 'package:my_wellness/features/geography/presentation/pages/steps/register_step_submit.dart';
-import 'package:provider/provider.dart';
 
 @RoutePage()
 class RegisterScreen extends StatefulWidget {
@@ -36,10 +39,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   final _pageController = PageController();
   int _step = 0;
+
+  IdentityDraft? _identity;
   String? _email;
   String? _phone;
   String? _password;
-  IdentityDraft? _identity;
   County? _county;
   SubCounty? _subCounty;
 
@@ -117,13 +121,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     final isLoading = context.select<AuthBloc, bool>(
       (b) => b.state.status == AuthStatus.loading,
     );
 
     return Scaffold(
-      backgroundColor: cs.surface,
       body: BlocListener<AccountBloc, AccountState>(
         listenWhen: (prev, curr) => prev.currentLang != curr.currentLang,
         listener: _handleAccountState,
@@ -133,7 +135,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.sm,
+                    AppSpacing.sm,
+                    AppSpacing.lg,
+                    0,
+                  ),
                   child: Row(
                     children: [
                       if (_step > 0)
@@ -148,12 +155,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       else
                         const SizedBox(width: 48),
                       const Spacer(),
-                      const LanguageSelectorCompact(),
+                      const LanguageSelector(),
                     ],
                   ),
                 ),
+
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 4, 24, 0),
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.lg,
+                    AppSpacing.sm,
+                    AppSpacing.lg,
+                    0,
+                  ),
                   child: AuthHeader(
                     title: AppLocalizations.getString(
                       context,
@@ -163,12 +176,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       context,
                       'auth.setupAccount',
                     ),
+                    heroTag: HeroTags.authLogo,
                   ),
                 ),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: AppSpacing.lg),
+
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                  ),
                   child: StepProgress(
                     currentStep: _step + 1,
                     totalSteps: _totalSteps,
@@ -179,15 +196,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: AppSpacing.md),
+
                 Expanded(
                   child: PageView(
                     controller: _pageController,
                     physics: const NeverScrollableScrollPhysics(),
                     children: [
+                      RegisterStepIdentity(
+                        initial: _identity,
+                        onContinue: (draft) {
+                          setState(() => _identity = draft);
+                          _next();
+                        },
+                      ),
                       RegisterStepCredentials(
                         initialEmail: _email,
-                        initialPhone: _phone,
+                        initialPhone: _identity?.verifiedPhone ?? _phone,
+                        phoneIsVerified:
+                            _identity?.verifiedPhone?.isNotEmpty ?? false,
                         onContinue:
                             ({
                               required email,
@@ -202,16 +229,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               _next();
                             },
                       ),
-                      RegisterStepIdentity(
-                        initial: _identity,
-                        onContinue: (draft) {
-                          setState(() => _identity = draft);
-                          _next();
-                        },
-                      ),
                       RegisterStepLocation(
                         initialCounty: _county,
                         initialSubCounty: _subCounty,
+                        verifiedCountyId: _identity?.countyId,
+                        verifiedSubCountyId: _identity?.subCountyId,
                         onContinue: ({required county, required subCounty}) {
                           setState(() {
                             _county = county;
@@ -248,10 +270,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
           'auth.alreadyHaveAccount',
         ),
         actionText: AppLocalizations.getString(context, 'auth.signInLink'),
-        onActionPressed: () {
-          context.router.replace(const LoginRoute());
-        },
-        heroTag: 'auth_toggle_button',
+        heroTag: HeroTags.authToggle,
+        onActionPressed: () => context.router.replace(const LoginRoute()),
       ),
     );
   }

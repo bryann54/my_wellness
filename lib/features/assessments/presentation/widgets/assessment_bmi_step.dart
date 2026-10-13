@@ -4,20 +4,19 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/utils/debouncer.dart';
+import 'package:my_wellness/common/widgets/app_primary_button.dart';
 import 'package:my_wellness/common/widgets/soft_input.dart';
 import 'package:my_wellness/features/assessments/presentation/bloc/assessments_bloc.dart';
 
 class AssessmentBmiStep extends StatefulWidget {
   final String? initialWeightKg;
   final String? initialHeightCm;
-  final VoidCallback onContinue;
   final bool submitting;
 
   const AssessmentBmiStep({
     super.key,
     this.initialWeightKg,
     this.initialHeightCm,
-    required this.onContinue,
     this.submitting = false,
   });
 
@@ -26,6 +25,7 @@ class AssessmentBmiStep extends StatefulWidget {
 }
 
 class _AssessmentBmiStepState extends State<AssessmentBmiStep> {
+  bool _submissionPending = false;
   late final TextEditingController _weightCtrl = TextEditingController(
     text: widget.initialWeightKg ?? '',
   );
@@ -33,8 +33,7 @@ class _AssessmentBmiStepState extends State<AssessmentBmiStep> {
     text: widget.initialHeightCm ?? '',
   );
 
-  final _weightDebounce = Debouncer(milliseconds: 600);
-  final _heightDebounce = Debouncer(milliseconds: 600);
+  final _previewDebounce = Debouncer(milliseconds: 600);
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -45,9 +44,16 @@ class _AssessmentBmiStepState extends State<AssessmentBmiStep> {
   }
 
   @override
+  void didUpdateWidget(covariant AssessmentBmiStep oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.submitting && !widget.submitting && _submissionPending) {
+      _submissionPending = false;
+    }
+  }
+
+  @override
   void dispose() {
-    _weightDebounce.cancel();
-    _heightDebounce.cancel();
+    _previewDebounce.cancel();
     _weightCtrl.dispose();
     _heightCtrl.dispose();
     super.dispose();
@@ -56,20 +62,40 @@ class _AssessmentBmiStepState extends State<AssessmentBmiStep> {
   void _triggerPreview() {
     final w = _weightCtrl.text.trim();
     final h = _heightCtrl.text.trim();
-    if (w.isEmpty || h.isEmpty) return;
+    final weightKg = double.tryParse(w);
+    final heightCm = double.tryParse(h);
+    if (weightKg == null ||
+        heightCm == null ||
+        !weightKg.isFinite ||
+        !heightCm.isFinite ||
+        weightKg <= 0 ||
+        heightCm <= 0) {
+      context.read<AssessmentsBloc>().add(const ClearBmiPreviewEvent());
+      return;
+    }
     context.read<AssessmentsBloc>().add(
       PreviewBmiEvent(weightKg: w, heightCm: h),
     );
   }
 
   void _onChanged() {
-    _weightDebounce.run(_triggerPreview);
-    _heightDebounce.run(_triggerPreview);
+    context.read<AssessmentsBloc>().add(const ClearBmiPreviewEvent());
+    _previewDebounce.run(_triggerPreview);
   }
 
   void _submit() {
+    if (widget.submitting || _submissionPending) return;
     if (_formKey.currentState?.validate() != true) return;
-    context.read<AssessmentsBloc>().add(
+    final bloc = context.read<AssessmentsBloc>();
+    final inputKey = _currentInputKey;
+    if (inputKey == null ||
+        bloc.state.bmiPreview == null ||
+        bloc.state.bmiPreviewInputKey != inputKey ||
+        bloc.state.bmiPreviewLoading) {
+      return;
+    }
+    setState(() => _submissionPending = true);
+    bloc.add(
       SubmitBmiEvent(
         weightKg: _weightCtrl.text.trim(),
         heightCm: _heightCtrl.text.trim(),
@@ -77,12 +103,33 @@ class _AssessmentBmiStepState extends State<AssessmentBmiStep> {
     );
   }
 
+  String? get _currentInputKey {
+    final weightKg = double.tryParse(_weightCtrl.text.trim());
+    final heightCm = double.tryParse(_heightCtrl.text.trim());
+    if (weightKg == null ||
+        heightCm == null ||
+        !weightKg.isFinite ||
+        !heightCm.isFinite ||
+        weightKg <= 0 ||
+        heightCm <= 0) {
+      return null;
+    }
+    return '${weightKg.toString()}|${heightCm.toString()}';
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final preview = context.select<AssessmentsBloc, dynamic>(
-      (b) => b.state.bmiPreview,
+    final bmiState = context.select<AssessmentsBloc, AssessmentsState>(
+      (bloc) => bloc.state,
     );
+    final isSubmitting = widget.submitting || _submissionPending;
+    final preview = bmiState.bmiPreview;
+    final isPreviewReady =
+        preview != null &&
+        bmiState.bmiPreviewInputKey == _currentInputKey &&
+        !bmiState.bmiPreviewLoading;
+    final canContinue = isPreviewReady && !isSubmitting;
 
     return Form(
       key: _formKey,
@@ -116,10 +163,11 @@ class _AssessmentBmiStepState extends State<AssessmentBmiStep> {
                   controller: _weightCtrl,
                   label: AppLocalizations.getString(
                     context,
-                    'assessment.bmi.weightLabel',
+                    'assessment.bmi.weightKg',
                   ),
                   hint: 'e.g. 76',
                   suffixText: 'kg',
+                  readOnly: isSubmitting,
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
@@ -137,10 +185,11 @@ class _AssessmentBmiStepState extends State<AssessmentBmiStep> {
                   controller: _heightCtrl,
                   label: AppLocalizations.getString(
                     context,
-                    'assessment.bmi.heightLabel',
+                    'assessment.bmi.heightCm',
                   ),
                   hint: 'e.g. 177',
                   suffixText: 'cm',
+                  readOnly: isSubmitting,
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
@@ -156,35 +205,20 @@ class _AssessmentBmiStepState extends State<AssessmentBmiStep> {
           ),
 
           const SizedBox(height: 20),
-          if (preview != null)
+          if (isPreviewReady)
             _BmiPreviewCard(
-              bmi: preview.bmi as double,
-              classification: preview.classification as String,
-              deficitKg: preview.deficitKg as double,
+              bmi: preview.bmi,
+              classification: preview.classification,
+              deficitKg: preview.deficitKg,
             ),
           const SizedBox(height: 28),
-          FilledButton(
-            onPressed: widget.submitting ? null : _submit,
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              backgroundColor: cs.primary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: widget.submitting
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator.adaptive(strokeWidth: 2),
-                  )
-                : Text(
-                    AppLocalizations.getString(context, 'common.continue'),
-                    style: GoogleFonts.inter(
-                      fontSize: 14.5,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+          AppPrimaryButton(
+            onPressed: canContinue ? _submit : null,
+            label: AppLocalizations.getString(context, 'common.continue'),
+            borderRadius: 12,
+            color: cs.primary,
+            isLoading: isSubmitting || bmiState.bmiPreviewLoading,
+            disabled: !canContinue || bmiState.bmiPreviewLoading,
           ),
         ],
       ),

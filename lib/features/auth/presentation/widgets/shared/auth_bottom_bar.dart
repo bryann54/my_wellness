@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
+import 'package:my_wellness/common/res/app_spacing.dart';
 
 class AuthBottomBar extends StatelessWidget {
-  final String promptText;
-  final String actionText;
-  final VoidCallback onActionPressed;
-  final String heroTag;
-
   const AuthBottomBar({
     super.key,
     required this.promptText,
@@ -15,42 +11,84 @@ class AuthBottomBar extends StatelessWidget {
     required this.heroTag,
   });
 
+  final String promptText;
+  final String actionText;
+  final VoidCallback onActionPressed;
+  final String heroTag;
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      child: SafeArea(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              promptText,
-              style: TextStyle(
-                fontSize: 17,
-                color: Theme.of(
-                  context,
-                ).textTheme.bodyLarge?.color?.withValues(alpha: 0.7),
-              ),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerLow,
+        border: Border(
+          top: BorderSide(
+            color: cs.outlineVariant.withValues(alpha: 0.5),
+            width: 1,
+          ),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: (isDark ? Colors.black : cs.shadow).withValues(
+              alpha: isDark ? 0.35 : 0.04,
             ),
-            Hero(
-              tag: heroTag,
-              child: TextButton(
-                onPressed: onActionPressed,
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            blurRadius: 8,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                promptText,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: cs.onSurface.withValues(alpha: 0.65),
                 ),
-                child: Text(
-                  actionText,
-                  style: GoogleFonts.inter(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 17,
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              Hero(
+                tag: heroTag,
+                flightShuttleBuilder:
+                    (_, __, direction, fromContext, toContext) {
+                      return direction == HeroFlightDirection.push
+                          ? toContext.widget
+                          : fromContext.widget;
+                    },
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: onActionPressed,
+                    borderRadius: AppRadius.smAll,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                        vertical: AppSpacing.xs,
+                      ),
+                      child: Text(
+                        actionText,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: cs.primary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -101,27 +101,6 @@ class AssessmentRepositoryImpl implements AssessmentsRepository {
   }
 
   @override
-  Future<Either<Failure, bool>> submitBmiMetrics(
-    String slug,
-    String sessionId, {
-    required String weightKg,
-    required String heightCm,
-  }) async {
-    try {
-      return Right(
-        await _remote.submitBmiMetrics(
-          slug,
-          sessionId,
-          weightKg: weightKg,
-          heightCm: heightCm,
-        ),
-      );
-    } on Exception catch (e) {
-      return Left(_map(e));
-    }
-  }
-
-  @override
   Future<Either<Failure, AssessmentScore>> getScore(
     String slug,
     String sessionId,

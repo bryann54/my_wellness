@@ -1,146 +1,194 @@
-// lib/features/auth/presentation/widgets/language_selector.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:my_wellness/common/res/colors.dart'; // Using AppColors as requested
+
+import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
 
 class LanguageSelector extends StatelessWidget {
-  const LanguageSelector({super.key});
+  const LanguageSelector({super.key, this.mode = LanguageSelectorMode.compact});
+
+  final LanguageSelectorMode mode;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
     return BlocBuilder<AccountBloc, AccountState>(
+      buildWhen: (p, c) =>
+          p.currentLang != c.currentLang || p.status != c.status,
       builder: (context, state) {
-        // Use the new enum status check
-        final bool isLoading = state.status == AccountStatus.loading;
-        final currentLocale = Localizations.localeOf(context);
+        final current = Localizations.localeOf(context);
+        final isBusy = state.status == AccountStatus.updating;
 
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: isDark
-                ? AppColors.background.withValues(alpha: 0.1)
-                : Colors.black.withValues(alpha: 0.05),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: isDark
-                  ? AppColors.background.withValues(alpha: 0.2)
-                  : Colors.black.withValues(alpha: 0.1),
-            ),
+        return switch (mode) {
+          LanguageSelectorMode.compact => _Compact(
+            current: current,
+            isBusy: isBusy,
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.language,
-                size: 18,
-                color: isDark ? AppColors.background : Colors.black54,
-              ),
-              const SizedBox(width: 6),
-              DropdownButton<Locale>(
-                value: currentLocale,
-                underline: const SizedBox(),
-                icon: isLoading
-                    ? _buildLoader(isDark)
-                    : Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        size: 18,
-                        color: isDark ? AppColors.background : Colors.black54,
-                      ),
-                isDense: true,
-                borderRadius: BorderRadius.circular(12),
-                dropdownColor: isDark
-                    ? AppColors.darkBackgroundColor
-                    : AppColors.background,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: isDark ? AppColors.background : Colors.black87,
-                ),
-                onChanged: isLoading
-                    ? null
-                    : (locale) {
-                        if (locale != null &&
-                            locale.languageCode != currentLocale.languageCode) {
-                          context.read<AccountBloc>().add(
-                            ChangeLanguageEvent(langCode: locale.languageCode),
-                          );
-                        }
-                      },
-                items: [
-                  _buildDropdownItem(
-                    context,
-                    const Locale('en'),
-                    'english',
-                    '🇺🇸',
-                  ),
-                  _buildDropdownItem(
-                    context,
-                    const Locale('sw'),
-                    'swahili',
-                    '🇰🇪',
-                  ),
-                ],
-                selectedItemBuilder: (context) => [
-                  _buildSelectedText('EN', isDark),
-                  _buildSelectedText('SW', isDark),
-                ],
-              ),
-            ],
+          LanguageSelectorMode.inline => _Inline(
+            current: current,
+            isBusy: isBusy,
           ),
-        );
+        };
       },
     );
   }
+}
 
-  DropdownMenuItem<Locale> _buildDropdownItem(
-    BuildContext context,
-    Locale locale,
-    String labelKey,
-    String flag,
-  ) {
-    return DropdownMenuItem(
-      value: locale,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(flag, style: const TextStyle(fontSize: 16)),
-          const SizedBox(width: 8),
-          Text(AppLocalizations.getString(context, labelKey)),
-        ],
+enum LanguageSelectorMode { compact, inline }
+
+class _Compact extends StatelessWidget {
+  const _Compact({required this.current, required this.isBusy});
+  final Locale current;
+  final bool isBusy;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return PopupMenuButton<Locale>(
+      enabled: !isBusy,
+      tooltip: AppLocalizations.getString(context, 'language.selectLanguage'),
+      position: PopupMenuPosition.under,
+      onSelected: (locale) => _setLang(context, locale),
+      itemBuilder: (context) => _menuItems(context, current),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm + 2,
+          vertical: 6,
+        ),
+        decoration: BoxDecoration(
+          color: cs.surfaceContainerLow,
+          borderRadius: AppRadius.smAll,
+          border: Border.all(color: cs.outline.withValues(alpha: 0.4)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.language,
+              size: 16,
+              color: cs.onSurface.withValues(alpha: 0.7),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              current.languageCode.toUpperCase(),
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: cs.onSurface,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.4,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
+}
 
-  Widget _buildSelectedText(String code, bool isDark) {
-    return Center(
-      child: Text(
-        code,
-        style: TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w700,
-          color: isDark ? AppColors.background : Colors.black54,
+class _Inline extends StatelessWidget {
+  const _Inline({required this.current, required this.isBusy});
+  final Locale current;
+  final bool isBusy;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+
+    return InkWell(
+      onTap: isBusy ? null : () => _openPicker(context),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.md,
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.language, size: 20, color: cs.primary),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Text(
+                AppLocalizations.getString(context, 'language.selectLanguage'),
+                style: theme.textTheme.bodyLarge,
+              ),
+            ),
+            Text(
+              current.languageCode.toUpperCase(),
+              style: theme.textTheme.labelLarge?.copyWith(color: cs.primary),
+            ),
+            const SizedBox(width: AppSpacing.xs),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: cs.onSurface.withValues(alpha: 0.4),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildLoader(bool isDark) {
-    return Container(
-      margin: const EdgeInsets.only(left: 4),
-      width: 12,
-      height: 12,
-      child: CircularProgressIndicator.adaptive(
-        strokeWidth: 2,
-        valueColor: AlwaysStoppedAnimation(
-          isDark ? AppColors.background : AppColors.primaryColor,
+  void _openPicker(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (_) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: AppSpacing.md),
+            for (final locale in const [Locale('en'), Locale('sw')])
+              ListTile(
+                title: Text(_label(locale)),
+                trailing:
+                    locale.languageCode ==
+                        Localizations.localeOf(context).languageCode
+                    ? Icon(
+                        Icons.check,
+                        color: Theme.of(context).colorScheme.primary,
+                      )
+                    : null,
+                onTap: () {
+                  Navigator.of(context).pop();
+                  _setLang(context, locale);
+                },
+              ),
+            const SizedBox(height: AppSpacing.md),
+          ],
         ),
       ),
     );
   }
+}
+
+List<PopupMenuEntry<Locale>> _menuItems(BuildContext context, Locale current) {
+  return [
+    for (final locale in const [Locale('en'), Locale('sw')])
+      PopupMenuItem<Locale>(
+        value: locale,
+        child: Row(
+          children: [
+            Expanded(child: Text(_label(locale))),
+            if (locale.languageCode == current.languageCode)
+              Icon(
+                Icons.check,
+                size: 18,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+          ],
+        ),
+      ),
+  ];
+}
+
+String _label(Locale locale) => switch (locale.languageCode) {
+  'sw' => 'Kiswahili',
+  _ => 'English',
+};
+
+void _setLang(BuildContext context, Locale locale) {
+  if (locale.languageCode == Localizations.localeOf(context).languageCode) {
+    return;
+  }
+  context.read<AccountBloc>().add(
+    ChangeLanguageEvent(langCode: locale.languageCode),
+  );
 }

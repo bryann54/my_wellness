@@ -1,6 +1,9 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:my_wellness/common/notifiers/locale_provider.dart';
+import 'package:my_wellness/common/notifiers/theme_provider.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
 import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
@@ -28,7 +31,6 @@ class SettingsScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ── Preferences ────────────────────────────────────
                 _SectionLabel(
                   label: AppLocalizations.getString(
                     context,
@@ -48,6 +50,20 @@ class SettingsScreen extends StatelessWidget {
                         'settings.languageSub',
                       ),
                       onTap: () => _pickLanguage(context),
+                    ),
+                    _divider(context),
+                    // Rebuilds when the theme changes so the subtitle
+                    // always reflects the currently active mode.
+                    Consumer<ThemeProvider>(
+                      builder: (context, theme, _) => MenuItemTile(
+                        icon: Icons.dark_mode_outlined,
+                        title: AppLocalizations.getString(
+                          context,
+                          'settings.theme',
+                        ),
+                        subtitle: _themeLabel(context, theme.mode),
+                        onTap: () => _pickTheme(context),
+                      ),
                     ),
                     _divider(context),
                     MenuItemTile(
@@ -82,7 +98,6 @@ class SettingsScreen extends StatelessWidget {
                   ],
                 ),
 
-                // ── Account ────────────────────────────────────────
                 _SectionLabel(
                   label: AppLocalizations.getString(
                     context,
@@ -121,7 +136,6 @@ class SettingsScreen extends StatelessWidget {
                   ],
                 ),
 
-                // ── Support ────────────────────────────────────────
                 _SectionLabel(
                   label: AppLocalizations.getString(
                     context,
@@ -171,13 +185,23 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  // ── Helpers ──────────────────────────────────────────────────────────
-
   Widget _divider(BuildContext context) => Divider(
     height: 1,
     indent: 60,
     color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
   );
+
+  String _themeLabel(BuildContext context, ThemeMode mode) => switch (mode) {
+    ThemeMode.light => AppLocalizations.getString(
+      context,
+      'settings.themeLight',
+    ),
+    ThemeMode.dark => AppLocalizations.getString(context, 'settings.themeDark'),
+    ThemeMode.system => AppLocalizations.getString(
+      context,
+      'settings.themeSystem',
+    ),
+  };
 
   Future<void> _pickLanguage(BuildContext context) async {
     final provider = Provider.of<LocaleProvider>(context, listen: false);
@@ -193,17 +217,7 @@ class SettingsScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: 8),
-            Container(
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurface.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
+            _sheetHandle(context),
             const SizedBox(height: 16),
             Text(
               AppLocalizations.getString(context, 'settings.language'),
@@ -236,9 +250,72 @@ class SettingsScreen extends StatelessWidget {
       context.read<AccountBloc>().add(ChangeLanguageEvent(langCode: picked));
     }
   }
-}
 
-// ── Local widgets ────────────────────────────────────────────────────────────
+  Future<void> _pickTheme(BuildContext context) async {
+    final provider = Provider.of<ThemeProvider>(context, listen: false);
+    final current = provider.mode;
+
+    final picked = await showModalBottomSheet<ThemeMode>(
+      context: context,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _sheetHandle(context),
+            const SizedBox(height: 16),
+            Text(
+              AppLocalizations.getString(context, 'settings.theme'),
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            RadioListTile<ThemeMode>(
+              value: ThemeMode.light,
+              groupValue: current,
+              title: Text(
+                AppLocalizations.getString(context, 'settings.themeLight'),
+              ),
+              onChanged: (v) => Navigator.of(context).pop(v),
+            ),
+            RadioListTile<ThemeMode>(
+              value: ThemeMode.dark,
+              groupValue: current,
+              title: Text(
+                AppLocalizations.getString(context, 'settings.themeDark'),
+              ),
+              onChanged: (v) => Navigator.of(context).pop(v),
+            ),
+            RadioListTile<ThemeMode>(
+              value: ThemeMode.system,
+              groupValue: current,
+              title: Text(
+                AppLocalizations.getString(context, 'settings.themeSystem'),
+              ),
+              onChanged: (v) => Navigator.of(context).pop(v),
+            ),
+            const SizedBox(height: 12),
+          ],
+        ),
+      ),
+    );
+
+    if (picked != null && context.mounted) {
+      await provider.setMode(picked);
+    }
+  }
+
+  Widget _sheetHandle(BuildContext context) => Container(
+    width: 36,
+    height: 4,
+    decoration: BoxDecoration(
+      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
+      borderRadius: BorderRadius.circular(2),
+    ),
+  );
+}
 
 class _SectionLabel extends StatelessWidget {
   final String label;

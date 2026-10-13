@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/widgets/custom_alert_dialog.dart';
@@ -136,7 +136,7 @@ class AppFab extends StatelessWidget {
           _onConfirmed?.call();
         }
       },
-      child: const FaIcon(FontAwesomeIcons.trash, size: 16),
+      child: const Icon(PhosphorIconsRegular.trash, size: 16),
     );
   }
 

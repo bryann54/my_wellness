@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
@@ -64,8 +64,8 @@ class _SplashPinUnlockState extends State<SplashPinUnlock> {
               shape: BoxShape.circle,
             ),
             child: Center(
-              child: FaIcon(
-                FontAwesomeIcons.lock,
+              child: Icon(
+                PhosphorIconsRegular.lock,
                 size: 28,
                 color: cs.onPrimaryContainer,
               ),

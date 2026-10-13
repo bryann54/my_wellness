@@ -70,6 +70,7 @@
   "assessment": {
     "title": "Health Assessments",
     "titlebot": "Screenings",
+    "referenceLabel": "Reference",
     "searchHint": "Search screenings",
  "completedLabel": "Completed",
   "nextStep": "Next step",
@@ -157,6 +158,7 @@
   "systolic": "Systolic",
   "diastolic": "Diastolic",
   "pulse": "Pulse (optional)",
+  "pulseReading": "Pulse: {value} bpm",
   "weight": "Weight (optional)",
   "value": "Value",
   "unit": "Unit",
@@ -363,6 +365,7 @@
     "passwordTooShort": "Password must be at least 5 characters long",
     "passwordsDontMatch": "Passwords do not match",
     "forgotPassword": "Forgot Password?",
+    "passwordReset": "Reset Password",
     "missingFields": "Missing Information",
     "pleaseFillFields": "Please fill in the following fields:\n\n{fields}",
     "pleaseFillAllFields": "Please fill in all required fields:\n\n• Email\n• Password",
@@ -447,7 +450,10 @@
   "locationSection": "Location"
 
   },
-
+ "notifications": {
+    "emptyTitle": "No notifications yet",
+    "emptyBody": "We'll let you know when something needs your attention."
+  },
   "settings": {
     "title": "Settings",
     "profile": "Profile",
@@ -492,10 +498,11 @@
 
     "about": "About",
     "aboutSub": "Version, terms, and licences",
-
-    "logOut": "Log out",
-    "logOutSub": "Sign out of this device",
-
+"themeLight": "Light",
+"themeDark": "Dark",
+"themeSystem": "System default",
+ "theme": "Theme",
+  "themeSub": "Light or dark mode",
     "deleteAccount": "Delete account",
     "deleteAccountSub": "Permanently remove your account"
   },

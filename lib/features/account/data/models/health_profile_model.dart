@@ -1,9 +1,8 @@
-
-
 import 'package:json_annotation/json_annotation.dart';
 import 'package:my_wellness/features/account/domain/entities/health_profile.dart';
 
 part 'health_profile_model.g.dart';
+
 int? _intFromJson(Object? value) {
   if (value == null) return null;
   if (value is int) return value;

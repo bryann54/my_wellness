@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -38,9 +40,21 @@ class _AddAppointmentSheetState extends State<AddAppointmentSheet> {
   /// Populated by [FacilitySearchField].
   String? _clinicName;
   String? _facilityId;
+  StreamSubscription<VitalsState>? _submissionSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _submissionSubscription = context.read<VitalsBloc>().stream.listen((state) {
+      if (state.toastType == ToastType.success && mounted) {
+        Navigator.of(context).pop();
+      }
+    });
+  }
 
   @override
   void dispose() {
+    unawaited(_submissionSubscription?.cancel());
     _notesCtrl.dispose();
     super.dispose();
   }
@@ -84,7 +98,6 @@ class _AddAppointmentSheetState extends State<AddAppointmentSheet> {
     };
 
     context.read<VitalsBloc>().add(AddAppointmentEvent(payload));
-    Navigator.of(context).pop();
   }
 
   static String _formatTimeHm(TimeOfDay t) =>
@@ -140,6 +153,10 @@ class _AddAppointmentSheetState extends State<AddAppointmentSheet> {
             const SizedBox(height: 8),
             SoftDropdown<String>(
               value: _condition,
+              label: AppLocalizations.getString(
+                context,
+                'medications.conditionLabel',
+              ),
               items: [
                 DropdownMenuItem(
                   value: 'other',

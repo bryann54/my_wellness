@@ -148,8 +148,12 @@ class VitalsBloc extends Bloc<VitalsEvent, VitalsState> {
 
   Future<Either<String, MedicationScanResult>> scanMedication({
     required String filePath,
+    required String condition,
   }) async {
-    final result = await _scanMedication(filePath);
+    final result = await _scanMedication((
+      filePath: filePath,
+      condition: condition,
+    ));
     return result.fold((f) => Left(mapFailure(f)), (scan) => Right(scan));
   }
 

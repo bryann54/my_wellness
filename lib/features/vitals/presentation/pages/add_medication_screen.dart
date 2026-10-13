@@ -6,6 +6,7 @@ import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/utils/formatters.dart';
 import 'package:my_wellness/common/widgets/app_primary_button.dart';
+import 'package:my_wellness/common/widgets/app_snackbar.dart';
 import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
 import 'package:my_wellness/common/widgets/drop_down_field.dart';
 import 'package:my_wellness/common/widgets/soft_input.dart';
@@ -44,11 +45,11 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
   final _doseCtrl = TextEditingController();
-  final _freqCtrl = TextEditingController();
   final _notesCtrl = TextEditingController();
   final _durationCtrl = TextEditingController();
 
-  String? _condition;
+  late String _condition;
+  String _frequency = 'once_daily';
   String _durationUnit = 'days';
   DateTime _startDate = DateTime.now();
 
@@ -59,14 +60,13 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
   @override
   void initState() {
     super.initState();
-    _condition = widget.condition;
+    _condition = widget.condition ?? 'other';
   }
 
   @override
   void dispose() {
     _nameCtrl.dispose();
     _doseCtrl.dispose();
-    _freqCtrl.dispose();
     _notesCtrl.dispose();
     _durationCtrl.dispose();
     super.dispose();
@@ -74,6 +74,14 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
 
   Future<void> _scan(ImageSource source) async {
     if (_scanning) return;
+    if (_condition.isEmpty) {
+      AppSnackbar.warning(
+        context,
+        AppLocalizations.getString(context, 'medications.conditionRequired'),
+      );
+      return;
+    }
+
     final picker = ImagePicker();
     final file = await picker.pickImage(
       source: source,
@@ -90,6 +98,7 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
 
     final result = await context.read<VitalsBloc>().scanMedication(
       filePath: file.path,
+      condition: _condition,
     );
 
     if (!mounted) return;
@@ -97,14 +106,14 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
     result.fold(
       (f) {
         setState(() => _scanning = false);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(f)));
+        AppSnackbar.error(context, f);
       },
       (scan) {
         setState(() {
           _scanning = false;
           _scanResult = scan;
+          _applyScanResult(scan);
         });
-        _applyScanResult(scan);
       },
     );
   }
@@ -114,22 +123,38 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
       final m = scan.confirmed.first;
       _nameCtrl.text = m.name ?? m.rawName ?? '';
       _doseCtrl.text = m.dosage ?? '';
-      _freqCtrl.text = m.frequency ?? '';
       _notesCtrl.text = m.notes ?? '';
+      if (m.frequency?.isNotEmpty ?? false) {
+        _frequency = m.frequency!;
+      }
       return;
     }
 
     if (scan.needsConfirmation.isNotEmpty) {
       final nc = scan.needsConfirmation.first;
+
       _nameCtrl.text = nc.rawName ?? '';
       _doseCtrl.text = nc.dosage ?? '';
-      _freqCtrl.text = nc.frequency ?? '';
       _notesCtrl.text = nc.notes ?? '';
+      if (nc.frequency?.isNotEmpty ?? false) {
+        _frequency = nc.frequency!;
+      }
 
       if (nc.candidates.isNotEmpty) {
-        _pickedCandidate = nc.candidates.first;
-        _nameCtrl.text = _pickedCandidate!.name;
+        final first = nc.candidates.first;
+        _pickedCandidate = first;
+        _applyCandidate(first);
       }
+    }
+  }
+
+  void _applyCandidate(MedicationCandidateOption candidate) {
+    _nameCtrl.text = candidate.name;
+    if (candidate.dosage?.isNotEmpty ?? false) {
+      _doseCtrl.text = candidate.dosage!;
+    }
+    if (candidate.frequency?.isNotEmpty ?? false) {
+      _frequency = candidate.frequency!;
     }
   }
 
@@ -145,12 +170,13 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
 
   void _submit() {
     if (_formKey.currentState?.validate() != true) return;
+    if (_pickedCandidate == null) return;
 
     final payload = <String, dynamic>{
-      if (_condition != null) 'condition': _condition,
-      'name': _nameCtrl.text.trim(),
+      'condition': _condition,
+      'generic_product_id': _pickedCandidate!.id,
       'dosage': _doseCtrl.text.trim(),
-      'frequency': _freqCtrl.text.trim(),
+      'frequency': _frequency,
       if (_notesCtrl.text.trim().isNotEmpty) 'notes': _notesCtrl.text.trim(),
       'start_date': isoDate(_startDate),
       if (_durationCtrl.text.trim().isNotEmpty)
@@ -199,7 +225,7 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
                         onSelected: (opt) {
                           setState(() {
                             _pickedCandidate = opt;
-                            _nameCtrl.text = opt.name;
+                            _applyCandidate(opt);
                           });
                         },
                       ),
@@ -221,7 +247,6 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Name
         SoftInput(
           controller: _nameCtrl,
           label: AppLocalizations.getString(context, 'medications.name'),
@@ -229,8 +254,6 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
           validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
         ),
         const SizedBox(height: 14),
-
-        // Dosage + Frequency
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -248,20 +271,42 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: SoftInput(
-                controller: _freqCtrl,
+              child: SoftDropdown<String>(
+                value: _frequency,
                 label: AppLocalizations.getString(
                   context,
                   'medications.frequency',
                 ),
-                hint: 'Twice daily',
+                items: const [
+                  DropdownMenuItem(
+                    value: 'once_daily',
+                    child: Text('Once daily'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'twice_daily',
+                    child: Text('Twice daily'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'thrice_daily',
+                    child: Text('Three times daily'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'four_times_daily',
+                    child: Text('Four times daily'),
+                  ),
+                  DropdownMenuItem(value: 'weekly', child: Text('Weekly')),
+                  DropdownMenuItem(
+                    value: 'as_needed',
+                    child: Text('As needed'),
+                  ),
+                ],
+                onChanged: (v) =>
+                    setState(() => _frequency = v ?? 'once_daily'),
               ),
             ),
           ],
         ),
         const SizedBox(height: 14),
-
-        // Condition
         SoftDropdown<String>(
           value: _condition,
           label: AppLocalizations.getString(
@@ -269,6 +314,12 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
             'medications.conditionLabel',
           ),
           items: [
+            DropdownMenuItem(
+              value: 'other',
+              child: Text(
+                AppLocalizations.getString(context, 'condition.other'),
+              ),
+            ),
             DropdownMenuItem(
               value: 'hypertension',
               child: Text(
@@ -282,11 +333,9 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
               ),
             ),
           ],
-          onChanged: (v) => setState(() => _condition = v),
+          onChanged: (v) => setState(() => _condition = v ?? 'other'),
         ),
         const SizedBox(height: 14),
-
-        // Start date
         InkWell(
           onTap: _pickStart,
           borderRadius: BorderRadius.circular(12),
@@ -335,8 +384,6 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
           ),
         ),
         const SizedBox(height: 14),
-
-        // Duration
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -398,8 +445,6 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
           ],
         ),
         const SizedBox(height: 14),
-
-        // Notes
         SoftInput(
           controller: _notesCtrl,
           label: AppLocalizations.getString(context, 'medications.notes'),
@@ -453,7 +498,7 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
             flex: 2,
             child: AppPrimaryButton(
               color: AppColors.primaryColor,
-              onPressed: _submit,
+              onPressed: _pickedCandidate == null ? null : _submit,
               isLoading: isSubmitting,
               borderRadius: 14,
               label: AppLocalizations.getString(context, 'medications.save'),

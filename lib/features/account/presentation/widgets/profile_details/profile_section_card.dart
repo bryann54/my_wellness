@@ -31,7 +31,6 @@ class ProfileSectionCard extends StatelessWidget {
         children: [
           Row(
             children: [
-            
               Expanded(
                 child: Text(
                   title.toUpperCase(),

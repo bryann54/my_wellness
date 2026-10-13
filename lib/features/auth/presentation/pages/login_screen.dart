@@ -1,23 +1,26 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+
+import 'package:my_wellness/common/constants/hero.dart';
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/notifiers/locale_provider.dart';
+import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/utils/auth_controllers_manager.dart';
 import 'package:my_wellness/common/utils/auth_validators.dart';
-import 'package:my_wellness/common/widgets/language_selector_row.dart';
 import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_event.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_state.dart';
+import 'package:my_wellness/features/auth/presentation/widgets/auth_state_listener.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/shared/auth_bottom_bar.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/shared/auth_button.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/shared/auth_header.dart';
-import 'package:my_wellness/features/auth/presentation/widgets/auth_state_listener.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/shared/auth_text_field.dart';
-import 'package:provider/provider.dart';
+import 'package:my_wellness/features/auth/presentation/widgets/shared/language_selector.dart';
 
 @RoutePage()
 class LoginScreen extends StatefulWidget {
@@ -45,6 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _handleLogin() {
     if (_manager.validate()) {
+      HapticFeedback.lightImpact();
       context.read<AuthBloc>().add(
         SignInEvent(
           identifier: _manager.identifier,
@@ -70,19 +74,20 @@ class _LoginScreenState extends State<LoginScreen> {
         child: AuthStateListener(
           child: SafeArea(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg,
+                vertical: AppSpacing.lg,
+              ),
               child: Form(
                 key: _manager.formKey,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Align(
                       alignment: Alignment.centerRight,
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: const LanguageSelectorCompact(),
-                      ),
+                      child: const LanguageSelector(),
                     ),
+                    const SizedBox(height: AppSpacing.xl),
 
                     AuthHeader(
                       title: AppLocalizations.getString(
@@ -93,87 +98,73 @@ class _LoginScreenState extends State<LoginScreen> {
                         context,
                         'auth.signIn',
                       ),
+                      heroTag: HeroTags.authLogo,
                     ),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: AppSpacing.xl),
 
                     AuthTextField(
-                          controller: _manager.identifierController,
-                          label: AppLocalizations.getString(
-                            context,
-                            'auth.emailOrPhone',
-                          ),
-                          icon: Icons.person_outline,
-                          keyboardType: TextInputType.emailAddress,
-                          validator: (value) =>
-                              AuthValidators.validateIdentifier(context, value),
-                        )
-                        .animate(delay: 300.ms)
-                        .fadeIn(duration: 400.ms)
-                        .slideX(begin: 0.8, end: 0, curve: Curves.easeOut),
-
-                    const SizedBox(height: 16),
+                      controller: _manager.identifierController,
+                      label: AppLocalizations.getString(
+                        context,
+                        'auth.emailOrPhone',
+                      ),
+                      icon: Icons.person_outline,
+                      keyboardType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.next,
+                      autofillHints: const [AutofillHints.username],
+                      validator: (v) =>
+                          AuthValidators.validateIdentifier(context, v),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
 
                     AuthTextField(
-                          controller: _manager.passwordController,
-                          label: AppLocalizations.getString(
+                      controller: _manager.passwordController,
+                      label: AppLocalizations.getString(
+                        context,
+                        'auth.password',
+                      ),
+                      icon: Icons.lock_outline,
+                      isPassword: true,
+                      isPasswordVisible: _isPasswordVisible,
+                      textInputAction: TextInputAction.done,
+                      autofillHints: const [AutofillHints.password],
+                      onVisibilityToggle: () => setState(
+                        () => _isPasswordVisible = !_isPasswordVisible,
+                      ),
+                      onSubmitted: (_) => _handleLogin(),
+                      validator: (v) => AuthValidators.validatePassword(
+                        context,
+                        v,
+                        isStrict: true,
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () =>
+                            context.router.push(const ForgotPasswordRoute()),
+                        child: Text(
+                          AppLocalizations.getString(
                             context,
-                            'auth.password',
+                            'auth.forgotPassword',
                           ),
-                          isPassword: true,
-                          icon: Icons.lock_outline,
-                          isPasswordVisible: _isPasswordVisible,
-                          onVisibilityToggle: () => setState(
-                            () => _isPasswordVisible = !_isPasswordVisible,
-                          ),
-                          validator: (value) => AuthValidators.validatePassword(
-                            context,
-                            value,
-                            isStrict: true,
-                          ),
-                        )
-                        .animate(delay: 300.ms)
-                        .fadeIn(duration: 400.ms)
-                        .slideX(begin: -0.8, end: 0, curve: Curves.easeOut),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xl),
 
-                    Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            TextButton(
-                              onPressed: () {
-                                context.router.push(
-                                  const ForgotPasswordRoute(),
-                                );
-                              },
-                              child: Text(
-                                AppLocalizations.getString(
-                                  context,
-                                  'auth.forgotPassword',
-                                ),
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ],
-                        )
-                        .animate(delay: 1400.ms)
-                        .fadeIn()
-                        .slideX(begin: -0.8, end: 0, curve: Curves.easeOut),
-                    const SizedBox(height: 100),
                     BlocBuilder<AuthBloc, AuthState>(
                       builder: (context, state) {
-                        final isReady =
+                        final ready =
                             _manager.canAttemptLogin &&
                             state.status != AuthStatus.loading;
-
                         return AuthButton(
                           text: AppLocalizations.getString(
                             context,
                             'auth.signInLink',
                           ),
-                          heroTag: 'login_button',
-                          isEnabled: isReady,
+                          heroTag: HeroTags.authPrimaryCta,
+                          enabled: ready,
                           isLoading: state.status == AuthStatus.loading,
                           onPressed: _handleLogin,
                         );
@@ -189,10 +180,8 @@ class _LoginScreenState extends State<LoginScreen> {
       bottomNavigationBar: AuthBottomBar(
         promptText: AppLocalizations.getString(context, 'auth.dontHaveAccount'),
         actionText: AppLocalizations.getString(context, 'auth.signUpLink'),
-        onActionPressed: () {
-          context.router.push(const RegisterRoute());
-        },
-        heroTag: 'auth_toggle_button',
+        heroTag: HeroTags.authToggle,
+        onActionPressed: () => context.router.push(const RegisterRoute()),
       ),
     );
   }

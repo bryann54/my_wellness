@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:my_wellness/common/widgets/shimmer.dart';
 
@@ -79,7 +78,7 @@ class AccountShimmer extends StatelessWidget {
           ),
         ),
         ...List.generate(4, (index) => _buildMenuItemShimmer(context)),
-      
+
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
@@ -94,7 +93,7 @@ class AccountShimmer extends StatelessWidget {
           ),
         ),
         ...List.generate(5, (index) => _buildMenuItemShimmer(context)),
-      
+
         const SliverToBoxAdapter(child: SizedBox(height: 32)),
       ],
     );
@@ -148,7 +147,7 @@ class AccountShimmer extends StatelessWidget {
                   ],
                 ),
               ),
-          
+
               Container(
                 width: 20,
                 height: 20,

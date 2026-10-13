@@ -52,9 +52,8 @@ class ConversationInputBar extends StatelessWidget {
             ),
           if (isDone)
             AuthButton(
-              color: Colors.orange,
               heroTag: 'register_button',
-              isEnabled: true,
+
               onPressed: onSubmit ?? () {},
               isLoading: isLoading,
               text: AppLocalizations.getString(context, 'auth.createAccount'),

@@ -1,8 +1,11 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:my_wellness/common/res/colors.dart';
+import 'package:my_wellness/common/widgets/appbar/app_bar_clipper.dart';
 import 'package:my_wellness/common/widgets/appbar/app_bar_flexible_header.dart';
 import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
+import 'package:my_wellness/features/home/presentation/widgets/quick_action_row.dart';
 
 class CustomAppBar extends StatelessWidget {
   final String? title;
@@ -10,19 +13,18 @@ class CustomAppBar extends StatelessWidget {
   final bool isHome;
   final bool isTabRoot;
 
-  final double expandedHeight;
+  /// Expanded sliver extent, excluding the system top inset and bottom widget.
+  final double? expandedHeight;
   final PreferredSizeWidget? bottom;
 
-  static const curveExtra = 28.0;
-  static const _homeFallbackContentHeight = 90.0;
-
+  static const curveExtra = AppBarClipper.radius;
   const CustomAppBar({
     super.key,
     this.title,
     this.actions,
     this.isHome = false,
     this.isTabRoot = false,
-    this.expandedHeight = 180.0,
+    this.expandedHeight,
     this.bottom,
   });
 
@@ -31,98 +33,55 @@ class CustomAppBar extends StatelessWidget {
     return BlocBuilder<AccountBloc, AccountState>(
       buildWhen: (p, c) => p.profile != c.profile,
       builder: (context, state) {
-        final topInset = MediaQuery.of(context).padding.top;
-
+        final textScale = MediaQuery.textScalerOf(context).scale(1);
+        final homeContentHeight =
+            8.0 +
+            (44.0 > 20.0 * textScale ? 44.0 : 20.0 * textScale) +
+            16.0 +
+            QuickActionRow.preferredHeight(context) +
+            curveExtra +
+            8.0;
         final resolvedExpanded = isHome
-            ? topInset + _homeFallbackContentHeight + curveExtra
-            : kToolbarHeight + curveExtra;
+            ? (expandedHeight ?? homeContentHeight)
+            : (expandedHeight ?? kToolbarHeight + curveExtra);
 
         return SliverAppBar(
           expandedHeight: resolvedExpanded,
           pinned: true,
           elevation: 0,
           backgroundColor: Colors.transparent,
-
-          automaticallyImplyLeading: false,
-          leading: isTabRoot ? const SizedBox.shrink() : null,
-          leadingWidth: isTabRoot ? 0 : null,
-          title: null,
-          bottom: bottom,
-          flexibleSpace: AppBarFlexibleHeader(
-            isHome: isHome,
-            username: state.profile?.displayName ?? '',
-            title: title?.toUpperCase(),
-            actions: [
-              if (!isTabRoot && context.router.canPop())
-                if (actions != null) ...actions!,
-            ],
-            expandedHeight: resolvedExpanded,
-            bottom: bottom,
+          foregroundColor: AppColors.textOnPrimary,
+          iconTheme: const IconThemeData(
+            color: AppColors.textOnPrimary,
+            size: 24,
           ),
-        );
-      },
-    );
-  }
-}
-
-class CustomAppBarWithLeading extends StatelessWidget {
-  final Widget leading;
-  final String? title;
-  final List<Widget>? actions;
-  final bool isHome;
-  final bool isTabRoot;
-  final double expandedHeight;
-  final PreferredSizeWidget? bottom;
-
-  static const curveExtra = 28.0;
-
-  const CustomAppBarWithLeading({
-    super.key,
-    required this.leading,
-    this.title,
-    this.actions,
-    this.isHome = false,
-    this.isTabRoot = false,
-    this.expandedHeight = 180.0,
-    this.bottom,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<AccountBloc, AccountState>(
-      buildWhen: (p, c) => p.profile != c.profile,
-      builder: (context, state) {
-        final topInset = MediaQuery.of(context).padding.top;
-
-        final resolvedExpanded = isHome
-            ? topInset + 90.0 + curveExtra
-            : kToolbarHeight + curveExtra;
-
-        return SliverAppBar(
-          expandedHeight: resolvedExpanded,
-          pinned: true,
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-          automaticallyImplyLeading: false,
-          title: null,
-          bottom: bottom,
-          leadingWidth: isTabRoot ? 0 : 60,
-          leading: isTabRoot
-              ? const SizedBox.shrink()
-              : Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 12, top: 4, bottom: 4),
-                    child: leading,
+          actionsIconTheme: const IconThemeData(
+            color: AppColors.textOnPrimary,
+            size: 24,
+          ),
+          surfaceTintColor: Colors.transparent,
+          centerTitle: true,
+          automaticallyImplyLeading: !isTabRoot,
+          title: isHome || title == null
+              ? null
+              : Text(
+                  title!.toUpperCase(),
+                  maxLines: 1,
+                  softWrap: false,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 18,
+                    color: AppColors.textOnPrimary,
                   ),
                 ),
+          actions: actions,
+          bottom: bottom,
           flexibleSpace: AppBarFlexibleHeader(
             isHome: isHome,
             username: state.profile?.displayName ?? '',
-            title: title?.toUpperCase(),
-            actions: [if (actions != null) ...actions!],
             expandedHeight: resolvedExpanded,
-            bottom: bottom,
+            bottomHeight: bottom?.preferredSize.height ?? 0,
           ),
         );
       },

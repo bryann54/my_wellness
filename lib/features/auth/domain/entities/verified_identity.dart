@@ -7,6 +7,12 @@ class VerifiedIdentity extends Equatable {
   final String? otherName;
   final String? gender;
   final String? dateOfBirth;
+  final String? phone;
+  final bool fromAfyaConnect;
+  final int? countyId;
+  final int? subCountyId;
+  final int? constituencyId;
+  final int? wardId;
 
   const VerifiedIdentity({
     required this.verificationId,
@@ -15,6 +21,12 @@ class VerifiedIdentity extends Equatable {
     this.otherName,
     this.gender,
     this.dateOfBirth,
+    this.phone,
+    this.fromAfyaConnect = false,
+    this.countyId,
+    this.subCountyId,
+    this.constituencyId,
+    this.wardId,
   });
 
   String get fullSurname => [
@@ -30,5 +42,11 @@ class VerifiedIdentity extends Equatable {
     otherName,
     gender,
     dateOfBirth,
+    phone,
+    fromAfyaConnect,
+    countyId,
+    subCountyId,
+    constituencyId,
+    wardId,
   ];
 }

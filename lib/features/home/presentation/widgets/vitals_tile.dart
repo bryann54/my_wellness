@@ -1,38 +1,54 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
+import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
+import 'package:my_wellness/common/utils/formatters.dart';
 import 'package:my_wellness/features/vitals/presentation/bloc/vitals_bloc.dart';
-import 'package:auto_route/auto_route.dart';
 
 enum VitalsTileKind { bp, bs }
 
 class VitalsTile extends StatelessWidget {
-  final VitalsTileKind kind;
   const VitalsTile({super.key, required this.kind});
+
+  final VitalsTileKind kind;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     final isBp = kind == VitalsTileKind.bp;
+
+    final accent = isBp
+        ? (isDark ? AppColors.vitalBpDark : AppColors.vitalBp)
+        : (isDark ? AppColors.vitalBsDark : AppColors.vitalBs);
+    final surface = isBp
+        ? (isDark ? AppColors.vitalBpSurfaceDark : AppColors.vitalBpSurface)
+        : (isDark ? AppColors.vitalBsSurfaceDark : AppColors.vitalBsSurface);
 
     return BlocBuilder<VitalsBloc, VitalsState>(
       buildWhen: (p, c) =>
           p.bpReadings != c.bpReadings || p.bsReadings != c.bsReadings,
       builder: (context, state) {
         final reading = isBp ? state.latestBp : state.latestBs;
+        final takenAt = isBp
+            ? state.latestBp?.takenAt
+            : state.latestBs?.takenAt;
 
         return InkWell(
           onTap: () =>
               context.router.push(VitalsRoute(initialTab: isBp ? 0 : 1)),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: AppRadius.lgAll,
           child: Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
-              color: isBp ? const Color(0xFFEFF6FF) : const Color(0xFFFFF1F2),
-              borderRadius: BorderRadius.circular(16),
+              color: surface,
+              borderRadius: AppRadius.lgAll,
+              border: Border.all(color: accent.withValues(alpha: 0.22)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,100 +56,90 @@ class VitalsTile extends StatelessWidget {
                 Row(
                   children: [
                     Container(
-                      width: 40,
-                      height: 40,
+                      width: 34,
+                      height: 34,
                       decoration: BoxDecoration(
-                        color: isBp
-                            ? const Color(0xFF3B82F6)
-                            : const Color(0xFFDC2626),
-                        borderRadius: BorderRadius.circular(12),
+                        color: accent.withValues(alpha: 0.12),
+                        borderRadius: AppRadius.smAll,
                       ),
                       child: Icon(
-                        isBp ? Icons.favorite : Icons.water_drop,
-                        color: AppColors.background,
-                        size: 20,
+                        isBp
+                            ? Icons.favorite_outline
+                            : Icons.water_drop_outlined,
+                        color: accent,
+                        size: 18,
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: AppSpacing.sm),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            AppLocalizations.getString(
-                              context,
-                              isBp
-                                  ? 'vitals.bloodPressure'
-                                  : 'vitals.bloodSugar',
-                            ),
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          Text(
-                            AppLocalizations.getString(
-                              context,
-                              isBp ? 'vitals.bpSubtitle' : 'vitals.bsSubtitle',
-                            ),
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              color: cs.onSurface.withValues(alpha: 0.6),
-                            ),
-                          ),
-                        ],
+                      child: Text(
+                        AppLocalizations.getString(
+                          context,
+                          isBp ? 'vitals.bloodPressure' : 'vitals.bloodSugar',
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.md),
+
                 if (reading == null)
                   Text(
                     AppLocalizations.getString(
                       context,
                       'vitals.logFirstReading',
                     ),
-                    style: GoogleFonts.inter(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: cs.onSurface.withValues(alpha: 0.72),
                     ),
                   )
                 else
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(
-                        isBp
-                            ? '${state.latestBp!.systolic}/${state.latestBp!.diastolic}'
-                            : state.latestBs!.value,
-                        style: GoogleFonts.inter(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w700,
+                      Flexible(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            isBp
+                                ? '${state.latestBp!.systolic}/${state.latestBp!.diastolic}'
+                                : state.latestBs!.value,
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: AppSpacing.xs),
                       Text(
                         isBp ? 'mmHg' : state.latestBs!.unit,
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
+                        style: theme.textTheme.labelMedium?.copyWith(
                           color: cs.onSurface.withValues(alpha: 0.6),
                         ),
                       ),
                     ],
                   ),
-                const SizedBox(height: 8),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    AppLocalizations.getString(context, 'vitals.startTracking'),
-                    style: GoogleFonts.inter(
-                      fontSize: 13,
-                      color: isBp
-                          ? const Color(0xFF3B82F6)
-                          : const Color(0xFFDC2626),
-                      fontWeight: FontWeight.w600,
-                    ),
+
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  reading == null
+                      ? AppLocalizations.getString(
+                          context,
+                          'vitals.startTracking',
+                        )
+                      : friendlyDateTime(takenAt!),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: cs.onSurface.withValues(alpha: 0.55),
                   ),
                 ),
               ],

@@ -1,25 +1,27 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
-import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
+import 'package:my_wellness/common/widgets/app_snackbar.dart';
+import 'package:my_wellness/core/di/injector.dart';
 import 'package:my_wellness/core/services/pin_service.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_state.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/security_setup_sheet.dart';
 
 class AuthStateListener extends StatelessWidget {
-  final Widget child;
-  final String? successMessage;
-  final bool isRegistration;
-
   const AuthStateListener({
     super.key,
     required this.child,
     this.successMessage,
     this.isRegistration = false,
   });
+
+  final Widget child;
+  final String? successMessage;
+  final bool isRegistration;
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +39,7 @@ class AuthStateListener extends StatelessWidget {
 
     switch (state.status) {
       case AuthStatus.authenticated:
-        _showSuccessSnackBar(context);
+        _showSuccess(context);
         await _postAuthNavigation(context);
 
       case AuthStatus.awaitingSignupConfirmation:
@@ -48,11 +50,14 @@ class AuthStateListener extends StatelessWidget {
 
       case AuthStatus.passwordResetRequested:
       case AuthStatus.passwordResetCompleted:
-        _showSuccessSnackBar(context);
+        _showSuccess(context);
         if (context.mounted) context.router.replace(const LoginRoute());
 
       case AuthStatus.error:
-        _showErrorSnackBar(context, state.errorMessage);
+        AppSnackbar.error(
+          context,
+          state.errorMessage ?? _genericError(context),
+        );
 
       case AuthStatus.unauthenticated:
       case AuthStatus.initial:
@@ -62,7 +67,7 @@ class AuthStateListener extends StatelessWidget {
   }
 
   Future<void> _postAuthNavigation(BuildContext context) async {
-    final hasPin = await PinService().hasPin();
+    final hasPin = await getIt<PinService>().hasPin();
     if (!context.mounted) return;
 
     if (!hasPin) {
@@ -73,68 +78,15 @@ class AuthStateListener extends StatelessWidget {
     context.router.replace(const MainRoute());
   }
 
-  void _showSuccessSnackBar(BuildContext context) {
+  void _showSuccess(BuildContext context) {
     final message =
         successMessage ??
         (isRegistration
             ? AppLocalizations.getString(context, 'auth.signedIn')
             : AppLocalizations.getString(context, 'auth.welcomeBack'));
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(
-              Icons.check_circle,
-              color: AppColors.background,
-              size: 20,
-            ),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                message,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: Colors.green[600],
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        duration: const Duration(seconds: 3),
-        margin: const EdgeInsets.all(16),
-      ),
-    );
+    AppSnackbar.success(context, message);
   }
 
-  void _showErrorSnackBar(BuildContext context, String? errorMessage) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(
-              Icons.error_outline,
-              color: AppColors.background,
-              size: 20,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                errorMessage ??
-                    AppLocalizations.getString(context, 'auth.genericError'),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: Colors.red[600],
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        duration: const Duration(seconds: 4),
-        margin: const EdgeInsets.all(16),
-      ),
-    );
-  }
+  String _genericError(BuildContext context) =>
+      AppLocalizations.getString(context, 'auth.genericError');
 }

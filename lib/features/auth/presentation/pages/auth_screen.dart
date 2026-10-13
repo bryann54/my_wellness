@@ -22,10 +22,7 @@ class AuthScreen extends StatelessWidget {
     return BlocListener<AccountBloc, AccountState>(
       listenWhen: (prev, curr) => prev.currentLang != curr.currentLang,
       listener: _handleAccountState,
-      child: const Scaffold(
-        backgroundColor: Colors.transparent,
-        body: AuthContent(),
-      ),
+      child: const Scaffold(body: AuthContent()),
     );
   }
 }

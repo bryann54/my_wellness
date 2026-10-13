@@ -71,6 +71,7 @@
 "assessment": {
  "title": "Uchunguzi wa Afya",
     "titlebot": "Uchunguzi",
+    "referenceLabel": "Marejeleo",
     "searchHint": "Tafuta uchunguzi",
  "completedLabel": "Imekamilika",
   "nextStep": "Hatua inayofuata",
@@ -158,6 +159,7 @@
   "systolic": "Systolic",
   "diastolic": "Diastolic",
   "pulse": "Mapigo (si lazima)",
+  "pulseReading": "Mapigo: {value} bpm",
   "weight": "Uzito (si lazima)",
   "value": "Thamani",
   "unit": "Kipimo",
@@ -385,6 +387,7 @@
     "invalidEmail": "Anwani ya barua pepe si sahihi",
     "passwordTooShort": "Nenosiri lazima liwe na angalau herufi 5",
     "passwordsDontMatch": "Manenosiri hayafanani",
+    "passwordReset": "Badilisha nenosiri",
     "forgotPassword": "Umesahau Nenosiri?",
     "missingFields": "Taarifa Inayokosekana",
     "pleaseFillFields": "Tafadhali jaza sehemu zifuatazo:\n\n{fields}",
@@ -439,6 +442,10 @@
     "phoneInvalidCharacters": "Namba ya simu inaweza kuwa na tarakimu na alama za uumbizaji (nafasi, kistari, mabano, +) tu",
     "phoneInvalidLength": "Tafadhali weka namba sahihi ya simu (tarakimu 10-15)"
   },
+   "notifications": {
+    "emptyTitle": "Hakuna arifa bado",
+    "emptyBody": "Tutakujulisha wakati kuna jambo linalohitaji uangalizi wako."
+  },
   "settings": {
     
     "profile": "Wasifu",
@@ -456,6 +463,11 @@
     "referral": "Rufaa na Pata Pesa",
     "referralProgram": "Rufaa marafiki na upate punguzo",
     "logOut": "Toka",
+     "theme": "Mandhari",
+  "themeSub": "Hali ya mwanga au giza",
+  "themeLight": "Mwanga",
+"themeDark": "Giza",
+"themeSystem": "Mfumo",
     "loggingOut": "Inatoka...",
     "logoutMessage": "Una uhakika unataka kutoka?",
     "logoutError": "Imeshindwa kutoka. Tafadhali jaribu tena.",

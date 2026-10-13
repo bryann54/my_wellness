@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/res/l10n.dart';
+import 'package:my_wellness/common/widgets/drop_down_field.dart';
 import 'package:my_wellness/features/vitals/domain/entities/medication_scan.dart';
 
 class MedicationCandidatePicker extends StatelessWidget {
@@ -21,7 +22,7 @@ class MedicationCandidatePicker extends StatelessWidget {
     final candidates = entry.candidates;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(12),
@@ -64,36 +65,40 @@ class MedicationCandidatePicker extends StatelessWidget {
               color: cs.onSurface.withValues(alpha: 0.65),
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
 
           if (candidates.isEmpty)
-            // No candidates — the raw OCR text is all we have.
-            Text(
-              '${entry.rawName ?? "—"} • ${entry.dosage ?? "—"}',
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: cs.onSurface,
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Text(
+                '${entry.rawName ?? "—"} • ${entry.dosage ?? "—"}',
+                style: GoogleFonts.inter(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSurface,
+                ),
               ),
             )
           else
-            // Candidates — use a dropdown so the user picks with one tap.
-            DropdownButtonFormField<MedicationCandidateOption>(
-              initialValue: selected,
-              isExpanded: true,
-              decoration: InputDecoration(
-                labelText: AppLocalizations.getString(
-                  context,
-                  'medications.pickMatch',
-                ),
-                border: const OutlineInputBorder(),
+            DropDownWidget<MedicationCandidateOption>(
+              label: AppLocalizations.getString(
+                context,
+                'medications.pickMatch',
               ),
+              selectedItem: selected,
+              isRequired: true,
+              filled: true,
+              filledColor: cs.surfaceContainerHighest,
+              borderRadius: 12,
+              contentPadding: 14,
+              padding: EdgeInsets.zero,
               items: [
                 for (final c in candidates)
-                  DropdownMenuItem(
+                  DropdownMenuItem<MedicationCandidateOption>(
                     value: c,
                     child: Text(
-                      c.dosage == null ? c.name : '${c.name} · ${c.dosage}',
+                      c.name,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),

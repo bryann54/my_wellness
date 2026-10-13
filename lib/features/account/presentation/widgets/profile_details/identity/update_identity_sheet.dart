@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -184,7 +183,7 @@ class _UpdateIdentitySheetState extends State<UpdateIdentitySheet> {
                     context,
                     'profile.updateIdentity',
                   ),
-                    borderRadius: 12,
+                  borderRadius: 12,
                   color: AppColors.primaryColor,
                 );
               },

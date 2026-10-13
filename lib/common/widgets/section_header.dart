@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class SectionHeader extends StatelessWidget {
-  /// Accepts either an [IconData] (Material) or an [FaIconData] (Font Awesome).
-  final Object? icon;
+  /// Accepts an [IconData].
+  final IconData? icon;
 
   final String label;
   final double fontSize;
@@ -17,19 +16,10 @@ class SectionHeader extends StatelessWidget {
     this.fontSize = 14,
   });
 
-  /// Renders Material and Font Awesome icons uniformly.
   Widget? _buildIcon(Color color, {double size = 14}) {
     final icon = this.icon;
     if (icon == null) return null;
-
-    if (icon is FaIconData) {
-      return FaIcon(icon, size: size, color: color);
-    }
-    if (icon is IconData) {
-      return Icon(icon, size: size, color: color);
-    }
-    assert(false, 'Unsupported icon type: ${icon.runtimeType}');
-    return null;
+    return Icon(icon, size: size, color: color);
   }
 
   @override

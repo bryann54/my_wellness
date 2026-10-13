@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
+import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_fab.dart';
 import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
@@ -89,32 +90,52 @@ class _MedicationsScreenState extends State<MedicationsScreen> {
                 ],
                 body: meds.isEmpty
                     ? ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
                         children: [
-                          SizedBox(
-                            height: MediaQuery.sizeOf(context).height * 0.5,
-                            child: VitalsEmptyState(
-                              icon: Icons.medication_outlined,
-                              title: AppLocalizations.getString(
-                                context,
-                                'medications.empty',
+                          ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minHeight:
+                                  MediaQuery.sizeOf(context).height * 0.5,
+                            ),
+                            child: Center(
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  maxWidth: 480,
+                                ),
+                                child: Padding(
+                                  padding: AppSpacing.page,
+                                  child: VitalsEmptyState(
+                                    icon: Icons.medication_outlined,
+                                    title: AppLocalizations.getString(
+                                      context,
+                                      'medications.empty',
+                                    ),
+                                    subtitle: AppLocalizations.getString(
+                                      context,
+                                      'medications.emptySub',
+                                    ),
+                                    ctaLabel: AppLocalizations.getString(
+                                      context,
+                                      'medications.add',
+                                    ),
+                                    onCta: () => context.router.push(
+                                      AddMedicationRoute(),
+                                    ),
+                                  ),
+                                ),
                               ),
-                              subtitle: AppLocalizations.getString(
-                                context,
-                                'medications.emptySub',
-                              ),
-                              ctaLabel: AppLocalizations.getString(
-                                context,
-                                'medications.add',
-                              ),
-                              onCta: () =>
-                                  context.router.push(AddMedicationRoute()),
                             ),
                           ),
                         ],
                       )
                     : ListView.builder(
                         controller: _scroll,
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+                        padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.md,
+                          AppSpacing.sm,
+                          AppSpacing.md,
+                          112,
+                        ),
                         itemCount:
                             meds.length +
                             (state.medicationsCursor != null ? 1 : 0),
@@ -123,10 +144,15 @@ class _MedicationsScreenState extends State<MedicationsScreen> {
                             return const MedicationTileShimmer();
                           }
                           final m = meds[i];
-                          return MedicationTile(
-                            medication: m,
-                            onDelete: () => context.read<VitalsBloc>().add(
-                              DeleteMedicationEvent(m.id),
+                          return Center(
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 680),
+                              child: MedicationTile(
+                                medication: m,
+                                onDelete: () => context.read<VitalsBloc>().add(
+                                  DeleteMedicationEvent(m.id),
+                                ),
+                              ),
                             ),
                           );
                         },

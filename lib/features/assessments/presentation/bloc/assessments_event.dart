@@ -8,7 +8,7 @@ abstract class AssessmentsEvent extends Equatable {
 
 class LoadAssessmentsEvent extends AssessmentsEvent {
   final String? userGender;
-  const LoadAssessmentsEvent({this.userGender});
+  const LoadAssessmentsEvent({required this.userGender});
   @override
   List<Object?> get props => [userGender];
 }

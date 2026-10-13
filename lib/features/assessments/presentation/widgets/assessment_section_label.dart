@@ -19,23 +19,21 @@ class AssessmentSectionLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final textColor = leading != null
-        ? cs.onSurface.withValues(alpha: 0.65)
-        : (color ?? cs.onSurface.withValues(alpha: 0.55));
+    final textColor = color ?? cs.onSurfaceVariant;
 
     return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 2),
+      padding: const EdgeInsets.only(bottom: 2),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           if (leading != null) ...[leading!, const SizedBox(width: 8)],
           Expanded(
             child: Text(
-              label.toUpperCase(),
+              label,
               style: GoogleFonts.inter(
-                fontSize: 15,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 1.1,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.2,
                 color: textColor,
               ),
             ),

@@ -1,32 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
-import 'package:google_fonts/google_fonts.dart';
+
+import 'package:my_wellness/common/res/app_spacing.dart';
 
 class AuthHeader extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final String? heroTag;
-
   const AuthHeader({
     super.key,
     required this.title,
     required this.subtitle,
     this.heroTag,
+    this.showLogo = true,
   });
+
+  final String title;
+  final String subtitle;
+  final String? heroTag;
+  final bool showLogo;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     final logo = SizedBox(
-      width: 100,
-      height: 100,
+      width: 96,
+      height: 96,
       child: Image.asset(
         'assets/images/logo.png',
         fit: BoxFit.contain,
         errorBuilder: (_, __, ___) => Icon(
           Icons.health_and_safety_rounded,
-          size: 64,
+          size: 60,
           color: theme.colorScheme.primary,
         ),
       ),
@@ -35,31 +37,31 @@ class AuthHeader extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Center(
-          child: heroTag == null ? logo : Hero(tag: heroTag!, child: logo),
-        ),
-
-        const SizedBox(height: 16),
-
+        if (showLogo)
+          Center(
+            child: heroTag == null
+                ? logo
+                : Hero(
+                    tag: heroTag!,
+                    flightShuttleBuilder: (_, __, ___, ____, toHero) =>
+                        toHero.widget,
+                    child: logo,
+                  ),
+          ),
+        if (showLogo) const SizedBox(height: AppSpacing.md),
         Text(
           title,
           textAlign: TextAlign.center,
-          style: GoogleFonts.inter(
-            fontSize: 25,
-            fontWeight: FontWeight.w700,
+          style: theme.textTheme.headlineMedium?.copyWith(
             color: theme.colorScheme.onSurface,
           ),
-        ).animate().slideY(duration: 800.ms).fadeIn(duration: 800.ms),
-
-        const SizedBox(height: 8),
-
+        ),
+        const SizedBox(height: AppSpacing.xs),
         Text(
           subtitle,
           textAlign: TextAlign.center,
-          style: GoogleFonts.inter(
-            fontSize: 16,
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-            fontWeight: FontWeight.w400,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
           ),
         ),
       ],

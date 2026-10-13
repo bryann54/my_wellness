@@ -94,31 +94,7 @@ class ApiClient {
 
   Exception _handleDioError(DioException e) {
     final data = e.response?.data;
-
-    String? message;
-
-    if (data is Map) {
-      final topLevel =
-          data['non_field_errors'] ?? data['detail'] ?? data['message'];
-
-      if (topLevel is List && topLevel.isNotEmpty) {
-        message = topLevel.first.toString();
-      } else if (topLevel is String) {
-        message = topLevel;
-      } else {
-        for (final entry in data.entries) {
-          final value = entry.value;
-
-          if (value is List && value.isNotEmpty) {
-            message = '${entry.key}: ${value.first}';
-            break;
-          } else if (value is String && value.isNotEmpty) {
-            message = '${entry.key}: $value';
-            break;
-          }
-        }
-      }
-    }
+    final message = _extractMessage(data);
 
     if (e.type == DioExceptionType.connectionError ||
         e.type == DioExceptionType.connectionTimeout) {
@@ -132,5 +108,44 @@ class ApiClient {
       409 => ConflictException(message: message ?? 'Conflict occurred'),
       _ => ServerException(message ?? 'Something went wrong'),
     };
+  }
+
+  /// Walks the response body and returns the first human-readable string.
+  /// Handles the three shapes the backend emits:
+  ///   1. { "detail": "string" }
+  ///   2. { "field": ["msg1", "msg2"] }
+  ///   3. { "error": { "detail": { "field": ["msg1", "msg2"] } } }
+  String? _extractMessage(dynamic data) {
+    if (data is! Map) return null;
+
+    // Unwrap the "error" envelope if present.
+    final body = data['error'] is Map ? data['error'] as Map : data;
+
+    // Case 1: top-level detail string.
+    final detail = body['detail'];
+    if (detail is String && detail.isNotEmpty) return detail;
+
+    // Case 3: nested detail map — recurse.
+    if (detail is Map) {
+      final nested = _extractMessage(detail);
+      if (nested != null) return nested;
+    }
+
+    // Case 2: field → list-of-strings, joined into one message.
+    final parts = <String>[];
+    for (final entry in body.entries) {
+      if (entry.key == 'status_code') continue;
+      final v = entry.value;
+      if (v is List && v.isNotEmpty) {
+        parts.add(v.first.toString());
+      } else if (v is String && v.isNotEmpty) {
+        parts.add(v);
+      } else if (v is Map) {
+        final nested = _extractMessage(v);
+        if (nested != null) parts.add(nested);
+      }
+    }
+
+    return parts.isEmpty ? null : parts.join('\n');
   }
 }

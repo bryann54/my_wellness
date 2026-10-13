@@ -27,7 +27,7 @@ class ApiEndpoints {
   static const String exportData = '/api/auth/export-data/';
   static const String shaConsent = '/api/auth/sha-consent/';
 
-  // MFA 
+  // MFA
   static const String mfaConfirm = '/api/auth/mfa/confirm/';
   static const String mfaDisable = '/api/auth/mfa/disable/';
   static const String mfaEnroll = '/api/auth/mfa/enroll/';
@@ -50,9 +50,9 @@ class ApiEndpoints {
   static String appointmentDetail(String id) => '/api/appointments/$id/';
   static String referralFromSession(String sessionId) =>
       '/api/care-navigation/referrals/from-session/$sessionId';
-  // Facilities 
+  // Facilities
   static const String facilitySearch = '/api/facilities/patient-search';
-  // Vitals: Medications 
+  // Vitals: Medications
   static const String medications = '/api/medications/';
   static const String medicationsScan = '/api/medications/scan/';
   static String medicationDetail(String id) => '/api/medications/$id/';
@@ -93,8 +93,6 @@ class ApiEndpoints {
       '/api/assessments/$slug/session/';
   static String assessmentAnswers(String slug, String sessionId) =>
       '/api/assessments/$slug/session/$sessionId/answers/';
-  static String assessmentBmiMetrics(String slug, String sessionId) =>
-      '/api/assessments/$slug/session/$sessionId/bmi-metrics/';
   static String assessmentReport(String slug, String sessionId) =>
       '/api/assessments/$slug/session/$sessionId/report/';
   static String assessmentReportEmail(String slug, String sessionId) =>
@@ -162,17 +160,17 @@ class ApiEndpoints {
   static const String healthExchangeShaEligibility =
       '/api/health-exchange/sha-eligibility/';
 
-  // Chatbot 
+  // Chatbot
   static const String chatbotMessage = '/api/chatbot/message/';
 
-  // Geography 
+  // Geography
   static const String geographyConstituencies =
       '/api/geography/constituencies/';
   static const String geographyCounties = '/api/geography/counties/';
   static const String geographySubCounties = '/api/geography/sub-counties/';
   static const String geographyWards = '/api/geography/wards/';
 
-  // Notifications (Push) 
+  // Notifications (Push)
   static const String pushSubscribe = '/api/push/subscribe/';
   static const String pushVapidPublicKey = '/api/push/vapid-public-key/';
   static const String pushPartnerNotifications =

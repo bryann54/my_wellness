@@ -1,68 +1,95 @@
-// lib/features/auth/presentation/widgets/auth_button.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:my_wellness/common/res/colors.dart';
 
 class AuthButton extends StatelessWidget {
-  final String text;
-  final bool isEnabled;
-  final bool isLoading;
-  final VoidCallback onPressed;
-  final String heroTag;
-  final Color? color;
   const AuthButton({
     super.key,
     required this.text,
-    required this.isEnabled,
-    required this.isLoading,
     required this.onPressed,
-    required this.heroTag,
-    this.color,
+    this.isLoading = false,
+    this.enabled = true,
+    this.heroTag,
+    this.icon,
+    this.variant = AuthButtonVariant.primary,
   });
+
+  final String text;
+  final VoidCallback onPressed;
+  final bool isLoading;
+  final bool enabled;
+  final String? heroTag;
+  final IconData? icon;
+  final AuthButtonVariant variant;
+
+  bool get _interactive => enabled && !isLoading;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final canTap = isEnabled && !isLoading;
+    final button = _buildButton(context);
+    if (heroTag == null) return button;
 
-    return SizedBox(
-      width: double.infinity,
-      height: 50,
-      child: Hero(
-        tag: heroTag,
-        child: ElevatedButton(
-          onPressed: canTap
-              ? () {
-                  HapticFeedback.lightImpact();
-                  onPressed();
-                }
-              : null,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: color ?? AppColors.primaryColor,
-            foregroundColor: color ?? cs.onPrimary,
-            disabledBackgroundColor: cs.onSurface.withValues(alpha: 0.12),
-            disabledForegroundColor: cs.onSurface.withValues(alpha: 0.38),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            elevation: 0,
+    return Hero(
+      tag: heroTag!,
+      flightShuttleBuilder: (_, __, direction, fromContext, toContext) {
+        return direction == HeroFlightDirection.push
+            ? toContext.widget
+            : fromContext.widget;
+      },
+      child: button,
+    );
+  }
+
+  Widget _buildButton(BuildContext context) {
+    final child = _buildChild(context);
+
+    switch (variant) {
+      case AuthButtonVariant.primary:
+        return SizedBox(
+          height: 52,
+          width: double.infinity,
+          child: FilledButton(
+            onPressed: _interactive ? onPressed : null,
+            child: child,
           ),
-          child: isLoading
-              ? SizedBox(
-                  height: 22,
-                  width: 22,
-                  child: CircularProgressIndicator.adaptive(strokeWidth: 2.5),
-                )
-              : Text(
-                  text,
-                  style: GoogleFonts.inter(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                  ),
-                ),
+        );
+      case AuthButtonVariant.outlined:
+        return SizedBox(
+          height: 52,
+          width: double.infinity,
+          child: OutlinedButton(
+            onPressed: _interactive ? onPressed : null,
+            child: child,
+          ),
+        );
+    }
+  }
+
+  Widget _buildChild(BuildContext context) {
+    if (isLoading) {
+      return SizedBox(
+        height: 20,
+        width: 20,
+        child: CircularProgressIndicator.adaptive(
+          strokeWidth: 2.2,
+          valueColor: AlwaysStoppedAnimation(
+            Theme.of(context).colorScheme.onPrimary,
+          ),
         ),
-      ),
+      );
+    }
+
+    if (icon == null) {
+      return Text(text, overflow: TextOverflow.ellipsis);
+    }
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 20),
+        const SizedBox(width: 8),
+        Flexible(child: Text(text, overflow: TextOverflow.ellipsis)),
+      ],
     );
   }
 }
+
+enum AuthButtonVariant { primary, outlined }

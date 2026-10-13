@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/res/colors.dart';
+import 'package:my_wellness/core/di/injector.dart';
 import 'package:my_wellness/core/services/biometric_service.dart';
 import 'package:my_wellness/core/services/pin_service.dart';
 
@@ -36,6 +37,7 @@ class _SecuritySetupSheetState extends State<SecuritySetupSheet> {
   bool _biometricsAvailable = false;
   bool _biometricsEnrolled = false;
   bool _enrollingBiometrics = false;
+  bool _enableBiometricsAfterPinSetup = false;
   String? _error;
 
   // PIN controllers
@@ -60,7 +62,7 @@ class _SecuritySetupSheetState extends State<SecuritySetupSheet> {
   }
 
   Future<void> _checkBiometrics() async {
-    final available = await BiometricService().isBiometricAvailable();
+    final available = await getIt<BiometricService>().isBiometricAvailable();
     if (mounted) {
       setState(() => _biometricsAvailable = available);
     }
@@ -71,14 +73,16 @@ class _SecuritySetupSheetState extends State<SecuritySetupSheet> {
       _enrollingBiometrics = true;
       _error = null;
     });
-    final success = await BiometricService().authenticate(
-      reason: 'Register your biometrics for quick and secure access',
+    final success = await getIt<BiometricService>().authenticate(
+      reason: 'Verify your identity to enable biometric unlock',
     );
     if (mounted) {
       setState(() => _enrollingBiometrics = false);
       if (success) {
-        await BiometricService().setEnabled(true);
-        setState(() => _biometricsEnrolled = true);
+        setState(() {
+          _biometricsEnrolled = true;
+          _enableBiometricsAfterPinSetup = true;
+        });
       } else {
         setState(
           () => _error =
@@ -134,7 +138,20 @@ class _SecuritySetupSheetState extends State<SecuritySetupSheet> {
       return;
     }
     HapticFeedback.heavyImpact();
-    await PinService().setPin(_pin);
+    try {
+      await getIt<PinService>().setPin(_pin);
+      if (_enableBiometricsAfterPinSetup) {
+        await getIt<BiometricService>().setEnabled(true);
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(
+          () => _error =
+              'Could not save your security settings. Please try again.',
+        );
+      }
+      return;
+    }
     if (mounted) Navigator.pop(context);
   }
 
@@ -301,10 +318,10 @@ class _BiometricsStep extends StatelessWidget {
                     height: 28,
                     child: CircularProgressIndicator.adaptive(strokeWidth: 2.5),
                   )
-                : FaIcon(
+                : Icon(
                     enrolled
-                        ? FontAwesomeIcons.solidCircleCheck
-                        : FontAwesomeIcons.fingerprint,
+                        ? PhosphorIconsRegular.checkCircle
+                        : PhosphorIconsRegular.fingerprint,
                     size: 30,
                     color: enrolled
                         ? cs.onPrimaryContainer
@@ -359,7 +376,7 @@ class _BiometricsStep extends StatelessWidget {
         else ...[
           _PrimaryBtn(
             label: enrolling ? 'Registering...' : 'Register Biometrics',
-            icon: FontAwesomeIcons.fingerprint.data,
+            icon: PhosphorIconsRegular.fingerprint,
             onPressed: enrolling ? null : onEnroll,
           ),
           const SizedBox(height: 10),
@@ -414,8 +431,8 @@ class _PinStep extends StatelessWidget {
             shape: BoxShape.circle,
           ),
           child: Center(
-            child: FaIcon(
-              FontAwesomeIcons.lock,
+            child: Icon(
+              PhosphorIconsRegular.lock,
               size: 28,
               color: cs.onPrimaryContainer,
             ),
@@ -485,24 +502,15 @@ class _PinStep extends StatelessWidget {
 // ── Shared primary button
 class _PrimaryBtn extends StatelessWidget {
   final String label;
-  final Object? icon;
+  final IconData? icon;
   final VoidCallback? onPressed;
 
   const _PrimaryBtn({required this.label, this.icon, this.onPressed});
 
-  /// Renders Material and Font Awesome icons uniformly.
   Widget? _buildIcon(Color color, {double size = 20}) {
     final icon = this.icon;
     if (icon == null) return null;
-
-    if (icon is FaIconData) {
-      return FaIcon(icon, size: size, color: color);
-    }
-    if (icon is IconData) {
-      return Icon(icon, size: size, color: color);
-    }
-    assert(false, 'Unsupported icon type: ${icon.runtimeType}');
-    return null;
+    return Icon(icon, size: size, color: color);
   }
 
   @override

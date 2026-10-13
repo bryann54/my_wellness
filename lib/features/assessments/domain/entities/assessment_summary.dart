@@ -21,7 +21,9 @@ class AssessmentSummary extends Equatable {
     final excluded = excludedGender?.trim().toLowerCase();
     if (excluded == null || excluded.isEmpty) return true;
     final mine = userGender?.trim().toLowerCase();
-    if (mine == null || mine.isEmpty) return true;
+    // If the member's gender is not available yet, don't expose assessments
+    // with a gender exclusion until we can determine whether they apply.
+    if (mine == null || mine.isEmpty) return false;
     return excluded != mine;
   }
 

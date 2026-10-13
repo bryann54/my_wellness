@@ -18,9 +18,12 @@ class VitalsRepositoryImpl implements VitalsRepository {
   @override
   Future<Either<Failure, MedicationScanResult>> scanMedication({
     required String filePath,
+    required String condition,
   }) async {
     try {
-      return Right(await _remote.scanMedication(filePath: filePath));
+      return Right(
+        await _remote.scanMedication(filePath: filePath, condition: condition),
+      );
     } on Exception catch (e) {
       return Left(_map(e));
     }

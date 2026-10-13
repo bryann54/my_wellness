@@ -8,7 +8,6 @@ class AssessmentSummaryModel {
   final String slug;
   final String category;
   final String title;
-
   @JsonKey(name: 'short_title')
   final String shortTitle;
 

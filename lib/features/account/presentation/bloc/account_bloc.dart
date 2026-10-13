@@ -1,8 +1,5 @@
-// lib/features/account/presentation/bloc/account_bloc.dart
-
 import 'dart:async';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:my_wellness/common/helpers/base_usecase.dart';
@@ -14,8 +11,6 @@ import 'package:my_wellness/features/account/domain/usecases/delete_account_usec
 import 'package:my_wellness/features/account/domain/usecases/export_data_usecase.dart';
 import 'package:my_wellness/features/account/domain/usecases/get_profile_usecase.dart';
 import 'package:my_wellness/features/account/domain/usecases/update_profile_usecase.dart';
-import 'package:my_wellness/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:my_wellness/features/subscriptions/presentation/bloc/subscriptions_bloc.dart';
 
 part 'account_event.dart';
 part 'account_state.dart';
@@ -28,8 +23,8 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
   final DeleteAccountUseCase _deleteAccount;
   final CancelAccountDeletionUseCase _cancelDeletion;
   final ExportDataUseCase _exportData;
-  final SubscriptionsBloc _subscriptionsBloc;
-  final AuthBloc _authBloc;
+  // final SubscriptionsBloc _subscriptionsBloc;
+  // final AuthBloc _authBloc;
 
   AccountBloc(
     this._getProfile,
@@ -38,8 +33,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     this._deleteAccount,
     this._cancelDeletion,
     this._exportData,
-    this._subscriptionsBloc,
-    this._authBloc,
+    // this._authBloc,
   ) : super(const AccountState()) {
     on<FetchProfileEvent>(_onFetchProfile);
     on<UpdateProfileEvent>(_onUpdateProfile);
@@ -73,19 +67,19 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
       ),
       (profile) {
         // RC init is keyed on the auth user's id, not on the health profile.
-        if (_subscriptionsBloc.state.status == SubscriptionStatus.initial) {
-          final userId = _authBloc.state.user?.id;
-          if (userId != null && userId.isNotEmpty) {
-            debugPrint('RC init from AccountBloc with user id: $userId');
-            _subscriptionsBloc.add(InitializeRC(userId));
-          }
-        }
+        // if (_subscriptionsBloc.state.status == SubscriptionStatus.initial) {
+        //   final userId = _authBloc.state.user?.id;
+        //   if (userId != null && userId.isNotEmpty) {
+        //     debugPrint('RC init from AccountBloc with user id: $userId');
+        //     _subscriptionsBloc.add(InitializeRC(userId));
+        //   }
+        // }
         emit(state.copyWith(status: AccountStatus.loaded, profile: profile));
       },
     );
   }
 
-Future<void> _onUpdateProfile(
+  Future<void> _onUpdateProfile(
     UpdateProfileEvent event,
     Emitter<AccountState> emit,
   ) async {

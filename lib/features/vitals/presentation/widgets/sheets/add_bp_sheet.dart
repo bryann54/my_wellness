@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -36,9 +38,21 @@ class _AddBpSheetState extends State<AddBpSheet> {
   final _notesCtrl = TextEditingController();
   DateTime _takenAt = DateTime.now();
   String? _dialysisPhase;
+  StreamSubscription<VitalsState>? _submissionSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _submissionSubscription = context.read<VitalsBloc>().stream.listen((state) {
+      if (state.toastType == ToastType.success && mounted) {
+        Navigator.of(context).pop();
+      }
+    });
+  }
 
   @override
   void dispose() {
+    unawaited(_submissionSubscription?.cancel());
     _sysCtrl.dispose();
     _diaCtrl.dispose();
     _pulseCtrl.dispose();
@@ -74,8 +88,6 @@ class _AddBpSheetState extends State<AddBpSheet> {
     };
 
     context.read<VitalsBloc>().add(AddBpReadingEvent(payload));
-    Navigator.of(context).pop();
-    AppSnackbar.success(context, 'Blood pressure reading saved.');
   }
 
   Future<void> _pickDateTime() async {

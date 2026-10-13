@@ -31,11 +31,17 @@ class BiometricsBloc extends Bloc<BiometricsEvent, BiometricsState> {
     Emitter<BiometricsState> emit,
   ) async {
     emit(state.copyWith(status: BiometricsStatus.checking));
-    final available = await _biometricService.isBiometricAvailable();
-    if (available) {
-      add(AuthenticateWithBiometrics());
-    } else {
-      // No biometrics — check if PIN exists before showing PIN screen
+    try {
+      final enabled = await _biometricService.isEnabled();
+      final available =
+          enabled && await _biometricService.isBiometricAvailable();
+      if (available) {
+        add(AuthenticateWithBiometrics());
+      } else {
+        // Biometrics are opt-in; use the app PIN when they are disabled.
+        add(FallbackToPin());
+      }
+    } catch (_) {
       add(FallbackToPin());
     }
   }
@@ -45,12 +51,19 @@ class BiometricsBloc extends Bloc<BiometricsEvent, BiometricsState> {
     Emitter<BiometricsState> emit,
   ) async {
     emit(state.copyWith(status: BiometricsStatus.authenticating));
-    final success = await _biometricService.authenticate(
-      reason: 'Verify your identity to access mywellness',
-    );
-    if (success) {
-      add(BiometricsAuthenticated());
-    } else {
+    try {
+      final success = await _biometricService.authenticate(
+        reason: 'Verify your identity to access mywellness',
+      );
+      // A PIN fallback may have been selected while the system prompt was open.
+      if (state.status != BiometricsStatus.authenticating) return;
+      if (success) {
+        add(BiometricsAuthenticated());
+      } else {
+        add(const BiometricsFailed('Could not verify your identity.'));
+      }
+    } catch (_) {
+      if (state.status != BiometricsStatus.authenticating) return;
       add(const BiometricsFailed('Could not verify your identity.'));
     }
   }
@@ -87,7 +100,20 @@ class BiometricsBloc extends Bloc<BiometricsEvent, BiometricsState> {
     // If no PIN has been set yet (pre-existing account or simulator),
     // treat as authenticated so the splash triggers SecuritySetupSheet.
     // The user will set their PIN there before reaching MainRoute.
-    final hasPin = await _pinService.hasPin();
+    late final bool hasPin;
+    try {
+      hasPin = await _pinService.hasPin();
+    } catch (_) {
+      emit(
+        state.copyWith(
+          status: BiometricsStatus.error,
+          errorMessage:
+              'Unable to access secure credentials. Please try again.',
+        ),
+      );
+      return;
+    }
+    if (state.isAuthenticated) return;
     if (!hasPin) {
       emit(
         state.copyWith(

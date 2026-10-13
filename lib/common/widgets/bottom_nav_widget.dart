@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flashy_tab_bar2/flashy_tab_bar2.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 
@@ -46,8 +46,8 @@ class CustomFlashyBottomNav extends StatelessWidget {
             _buildItem(
               context: context,
               index: 0,
-              activeIcon: FontAwesomeIcons.stethoscope,
-              inactiveIcon: FontAwesomeIcons.stethoscope,
+              activeIcon: PhosphorIconsFill.house,
+              inactiveIcon: PhosphorIconsRegular.house,
               title: AppLocalizations.getString(context, 'common.home'),
               activeColor: activeColor,
               inactiveColor: inactiveColor,
@@ -55,8 +55,8 @@ class CustomFlashyBottomNav extends StatelessWidget {
             _buildItem(
               context: context,
               index: 1,
-              activeIcon: FontAwesomeIcons.heartPulse,
-              inactiveIcon: FontAwesomeIcons.heartPulse,
+              activeIcon: PhosphorIconsFill.clipboardText,
+              inactiveIcon: PhosphorIconsRegular.clipboardText,
               title: AppLocalizations.getString(context, 'assessment.titlebot'),
               activeColor: activeColor,
               inactiveColor: inactiveColor,
@@ -64,8 +64,8 @@ class CustomFlashyBottomNav extends StatelessWidget {
             _buildItem(
               context: context,
               index: 2,
-              activeIcon: FontAwesomeIcons.calendarCheck,
-              inactiveIcon: FontAwesomeIcons.calendar,
+              activeIcon: PhosphorIconsFill.calendarCheck,
+              inactiveIcon: PhosphorIconsRegular.calendarBlank,
               title: AppLocalizations.getString(context, 'bookings.title'),
               activeColor: activeColor,
               inactiveColor: inactiveColor,
@@ -73,8 +73,8 @@ class CustomFlashyBottomNav extends StatelessWidget {
             _buildItem(
               context: context,
               index: 3,
-              activeIcon: FontAwesomeIcons.leaf,
-              inactiveIcon: FontAwesomeIcons.leaf,
+              activeIcon: PhosphorIconsFill.leaf,
+              inactiveIcon: PhosphorIconsRegular.leaf,
               title: AppLocalizations.getString(context, 'wellness.title'),
               activeColor: activeColor,
               inactiveColor: inactiveColor,
@@ -82,8 +82,8 @@ class CustomFlashyBottomNav extends StatelessWidget {
             _buildItem(
               context: context,
               index: 4,
-              activeIcon: FontAwesomeIcons.userDoctor,
-              inactiveIcon: FontAwesomeIcons.user,
+              activeIcon: PhosphorIconsFill.userCircle,
+              inactiveIcon: PhosphorIconsRegular.user,
               title: AppLocalizations.getString(context, 'profile.title'),
               activeColor: activeColor,
               inactiveColor: inactiveColor,
@@ -97,8 +97,8 @@ class CustomFlashyBottomNav extends StatelessWidget {
   FlashyTabBarItem _buildItem({
     required BuildContext context,
     required int index,
-    required FaIconData activeIcon,
-    required FaIconData inactiveIcon,
+    required IconData activeIcon,
+    required IconData inactiveIcon,
     required String title,
     required Color activeColor,
     required Color inactiveColor,
@@ -106,7 +106,7 @@ class CustomFlashyBottomNav extends StatelessWidget {
     final isActive = currentIndex == index;
 
     return FlashyTabBarItem(
-      icon: FaIcon(
+      icon: Icon(
         isActive ? activeIcon : inactiveIcon,
         color: isActive ? activeColor : inactiveColor,
       ),

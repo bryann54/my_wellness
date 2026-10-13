@@ -35,12 +35,6 @@ abstract class AssessmentsRemoteDataSource {
     required int questionIndex,
     required String answer,
   });
-  Future<bool> submitBmiMetrics(
-    String slug,
-    String sessionId, {
-    required String weightKg,
-    required String heightCm,
-  });
   Future<AssessmentScore> getScore(String slug, String sessionId);
   Future<BmiPreview> previewBmi({
     required String weightKg,
@@ -165,21 +159,6 @@ class AssessmentsRemoteDataSourceImpl implements AssessmentsRemoteDataSource {
       completed: res['completed'] as bool? ?? false,
       reference: res['reference'] as String?,
     );
-  }
-
-  @override
-  Future<bool> submitBmiMetrics(
-    String slug,
-    String sessionId, {
-    required String weightKg,
-    required String heightCm,
-  }) async {
-    final res = await _api.post<Map<String, dynamic>>(
-      url: ApiEndpoints.assessmentBmiMetrics(slug, sessionId),
-      payload: {'weight_kg': weightKg, 'height_cm': heightCm},
-      options: ApiClient.protected,
-    );
-    return res['ok'] as bool? ?? false;
   }
 
   @override

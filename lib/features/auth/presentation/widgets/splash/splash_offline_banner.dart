@@ -28,7 +28,7 @@ class SplashOfflineBanner extends StatelessWidget {
                 child: Text(
                   AppLocalizations.getString(context, 'splash.noConnection'),
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    fontSize: 15,
+                    fontSize: 18,
                     height: 1.35,
                     fontWeight: FontWeight.w500,
                     color: cs.onSurface,

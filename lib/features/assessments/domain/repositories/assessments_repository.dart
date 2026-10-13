@@ -50,12 +50,6 @@ abstract class AssessmentsRepository {
     required int questionIndex,
     required String answer,
   });
-  Future<Either<Failure, bool>> submitBmiMetrics(
-    String slug,
-    String sessionId, {
-    required String weightKg,
-    required String heightCm,
-  });
   Future<Either<Failure, AssessmentScore>> getScore(
     String slug,
     String sessionId,

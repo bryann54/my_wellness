@@ -10,6 +10,7 @@ class ReadingHistoryRow {
   final String unit;
   final String classification;
   final String timestampIso;
+  final String? secondary;
   final VoidCallback onDelete;
 
   const ReadingHistoryRow({
@@ -18,6 +19,7 @@ class ReadingHistoryRow {
     required this.unit,
     required this.classification,
     required this.timestampIso,
+    this.secondary,
     required this.onDelete,
   });
 }
@@ -82,12 +84,16 @@ class ReadingHistoryList extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.baseline,
                 textBaseline: TextBaseline.alphabetic,
                 children: [
-                  Text(
-                    r.primary,
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: cs.onSurface,
+                  Flexible(
+                    child: Text(
+                      r.primary,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: cs.onSurface,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 4),
@@ -100,12 +106,30 @@ class ReadingHistoryList extends StatelessWidget {
                   ),
                 ],
               ),
-              subtitle: Text(
-                friendlyDateTime(r.timestampIso),
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  color: cs.onSurface.withValues(alpha: 0.6),
-                ),
+              isThreeLine: r.secondary != null,
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (r.secondary != null)
+                    Text(
+                      r.secondary!,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: cs.onSurface.withValues(alpha: 0.72),
+                      ),
+                    ),
+                  Text(
+                    friendlyDateTime(r.timestampIso),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: cs.onSurface.withValues(alpha: 0.6),
+                    ),
+                  ),
+                ],
               ),
             ),
           );
