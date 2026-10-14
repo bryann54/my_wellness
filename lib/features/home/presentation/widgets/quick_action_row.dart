@@ -7,20 +7,12 @@ import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/features/home/presentation/widgets/quick_action_chip.dart';
 
 class QuickActionRow extends StatelessWidget {
-  static const _minimumFourColumnWidth = 192.0;
-  static const _columnSpacing = 8.0;
-  static const _rowSpacing = 8.0;
-
   const QuickActionRow({super.key});
 
   static double preferredHeight(BuildContext context) {
     final availableWidth = MediaQuery.sizeOf(context).width - 2 * AppSpacing.lg;
-    final columns = availableWidth < _minimumFourColumnWidth ? 2 : 4;
-    final spacing = columns == 2 ? _columnSpacing : 0.0;
-    final itemWidth = (availableWidth - spacing * (columns - 1)) / columns;
-    final rows = (4 / columns).ceil();
-    return QuickActionChip.preferredHeight(context, itemWidth) * rows +
-        _rowSpacing * (rows - 1);
+    final itemWidth = availableWidth / 4;
+    return QuickActionChip.preferredHeight(context, itemWidth);
   }
 
   @override
@@ -51,31 +43,19 @@ class QuickActionRow extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: LayoutBuilder(
-        builder: (context, constraints) {
-          final columns = constraints.maxWidth < _minimumFourColumnWidth
-              ? 2
-              : items.length;
-          final spacing = columns == 2 ? _columnSpacing : 0.0;
-          final itemWidth =
-              (constraints.maxWidth - spacing * (columns - 1)) / columns;
-          return Wrap(
-            alignment: WrapAlignment.spaceBetween,
-            spacing: spacing,
-            runSpacing: _rowSpacing,
-            children: [
-              for (final item in items)
-                SizedBox(
-                  width: itemWidth,
-                  child: QuickActionChip(
-                    icon: item.icon,
-                    label: item.label,
-                    route: item.route,
-                    width: itemWidth,
-                  ),
+        builder: (context, constraints) => Row(
+          children: [
+            for (final item in items)
+              Expanded(
+                child: QuickActionChip(
+                  icon: item.icon,
+                  label: item.label,
+                  route: item.route,
+                  width: constraints.maxWidth / items.length,
                 ),
-            ],
-          );
-        },
+              ),
+          ],
+        ),
       ),
     );
   }

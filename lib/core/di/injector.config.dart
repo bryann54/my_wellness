@@ -73,6 +73,14 @@ import '../../features/geography/domain/usecases/get_wards_usecase.dart'
     as _i903;
 import '../../features/geography/presentation/bloc/geography_bloc.dart'
     as _i137;
+import '../../features/home/data/datasources/home_dashboard_remote_datasource.dart'
+    as _i219;
+import '../../features/home/data/repositories/home_dashboard_repository_impl.dart'
+    as _i730;
+import '../../features/home/domain/repositories/home_dashboard_repository.dart'
+    as _i636;
+import '../../features/home/domain/usecases/get_home_dashboard.dart' as _i493;
+import '../../features/home/presentation/bloc/home_bloc.dart' as _i202;
 import '../../features/launch/domain/usecases/check_connectivity_usecase.dart'
     as _i656;
 import '../../features/launch/presentation/bloc/launch_bloc.dart' as _i646;
@@ -148,6 +156,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i878.AuthInterceptor>(),
       ),
     );
+    gh.lazySingleton<_i219.HomeDashboardRemoteDataSource>(
+      () => _i219.HomeDashboardRemoteDataSourceImpl(gh<_i671.ApiClient>()),
+    );
     gh.lazySingleton<_i474.GeographyRemoteDataSource>(
       () => _i474.GeographyRemoteDataSourceImpl(gh<_i671.ApiClient>()),
     );
@@ -178,6 +189,11 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i470.AssessmentsRemoteDataSource>(
       () => _i470.AssessmentsRemoteDataSourceImpl(gh<_i671.ApiClient>()),
+    );
+    gh.lazySingleton<_i636.HomeDashboardRepository>(
+      () => _i730.HomeDashboardRepositoryImpl(
+        gh<_i219.HomeDashboardRemoteDataSource>(),
+      ),
     );
     gh.lazySingleton<_i515.VitalsRepository>(
       () => _i214.VitalsRepositoryImpl(gh<_i216.VitalsRemoteDataSource>()),
@@ -244,6 +260,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i23.UpdateProfileUseCase>(
       () => _i23.UpdateProfileUseCase(gh<_i1067.AccountRepository>()),
+    );
+    gh.lazySingleton<_i493.GetHomeDashboardUseCase>(
+      () => _i493.GetHomeDashboardUseCase(gh<_i636.HomeDashboardRepository>()),
     );
     gh.lazySingleton<_i425.GetAppointmentsByConditionUseCase>(
       () =>
@@ -313,6 +332,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i425.DeleteAppointmentUseCase>(),
         gh<_i425.ScanMedicationUseCase>(),
       ),
+    );
+    gh.factory<_i202.HomeBloc>(
+      () => _i202.HomeBloc(gh<_i493.GetHomeDashboardUseCase>()),
     );
     gh.lazySingleton<_i544.AssessmentsRepository>(
       () => _i958.AssessmentRepositoryImpl(

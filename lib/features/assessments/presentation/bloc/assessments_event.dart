@@ -31,9 +31,24 @@ class StartAssessmentsEvent extends AssessmentsEvent {
 class ResumeAssessmentsEvent extends AssessmentsEvent {
   final String slug;
   final String sessionId;
-  const ResumeAssessmentsEvent({required this.slug, required this.sessionId});
+  final int currentIndex;
+  final int totalQuestions;
+  final int completionPercent;
+  const ResumeAssessmentsEvent({
+    required this.slug,
+    required this.sessionId,
+    required this.currentIndex,
+    required this.totalQuestions,
+    required this.completionPercent,
+  });
   @override
-  List<Object?> get props => [slug, sessionId];
+  List<Object?> get props => [
+    slug,
+    sessionId,
+    currentIndex,
+    totalQuestions,
+    completionPercent,
+  ];
 }
 
 class SubmitAnswerEvent extends AssessmentsEvent {

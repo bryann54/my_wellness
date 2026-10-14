@@ -68,8 +68,27 @@
 "vitals":"Vitali",
     "myVitals":"Vitali & Huduma za Kudumu"
   },
+"homeDashboard": {
+  "welcome": "Habari, {name}",
+  "welcomeFallback": "Karibu",
+  "recordReading": "Weka kipimo",
+  "healthOverview": "Muhtasari wa afya",
+  "quickActions": "Vitendo vya haraka",
+  "viewHistory": "Angalia historia",
+  "noReadingRecorded": "Bado hakuna kipimo kilichorekodiwa",
+  "readingsUnavailable": "Vipimo havikuweza kupakiwa. Gusa kujaribu tena.",
+  "screeningInProgress": "Uchunguzi unaendelea",
+  "continueScreening": "Endelea",
+  "screeningActivity": "Hali ya uchunguzi",
+  "seeAll": "Ona zote",
+  "pending": "Inasubiri",
+  "inProgress": "Inaendelea",
+  "dashboardUnavailable": "Dashibodi haipatikani kwa sasa.",
+  "progressPercent": "Imekamilika kwa asilimia {percent}"
+},
 "assessment": {
  "title": "Uchunguzi wa Afya",
+ "loadFailed": "Uchunguzi huu haukuweza kupakiwa. Tafadhali jaribu tena baadaye.",
     "titlebot": "Uchunguzi",
     "referenceLabel": "Marejeleo",
     "searchHint": "Tafuta uchunguzi",
@@ -444,7 +463,8 @@
   },
    "notifications": {
     "emptyTitle": "Hakuna arifa bado",
-    "emptyBody": "Tutakujulisha wakati kuna jambo linalohitaji uangalizi wako."
+    "emptyBody": "Tutakujulisha wakati kuna jambo linalohitaji uangalizi wako.",
+    "unreadCountLabel": "Arifa, {count} ambazo hazijasomwa"
   },
   "settings": {
     

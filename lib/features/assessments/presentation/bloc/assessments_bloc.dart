@@ -267,6 +267,11 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
         clearBmiPreview: true,
         bmiPreviewLoading: false,
         clearBmiPreviewInputKey: true,
+        terminated: false,
+        alreadyCompleted: false,
+        completionHandled: false,
+        clearSession: true,
+        clearReferral: true,
       ),
     );
     _activeSlug = event.slug;
@@ -295,6 +300,14 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
     emit(
       state.copyWith(
         status: AssessmentStatus.ready,
+        session: AssessmentSession(
+          id: event.sessionId,
+          assessmentSlug: event.slug,
+          status: AssessmentSessionStatus.inProgress,
+          currentIndex: event.currentIndex,
+          totalQuestions: event.totalQuestions,
+          completionPct: event.completionPercent,
+        ),
         definition: defRes.getOrElse(
           () => throw StateError('definition missing'),
         ),

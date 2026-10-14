@@ -54,7 +54,9 @@ void main() async {
         ChangeNotifierProvider.value(value: localeProvider),
         ChangeNotifierProvider.value(value: themeProvider),
         BlocProvider(create: (_) => getIt<AuthBloc>()),
-        BlocProvider(create: (_) => getIt<AccountBloc>()..add(FetchProfileEvent())),
+        BlocProvider(
+          create: (_) => getIt<AccountBloc>()..add(FetchProfileEvent()),
+        ),
         BlocProvider(create: (_) => getIt<BiometricsBloc>()),
         BlocProvider(create: (_) => getIt<HomeBloc>()),
         BlocProvider(create: (_) => getIt<AssessmentsBloc>()),
@@ -120,6 +122,7 @@ class _MyAppState extends State<MyApp> {
       value: overlay,
       child: MaterialApp.router(
         title: AppLocalizations.getString(context, 'appName'),
+        debugShowCheckedModeBanner: false,
         routerConfig: _appRouter.config(),
         builder: (context, child) {
           if (child == null) return const SizedBox.shrink();

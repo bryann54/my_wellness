@@ -67,9 +67,28 @@
 "vitals":"Vitals",
     "myVitals":"Vitals & Chronic care"
   },
+  "homeDashboard": {
+    "welcome": "Hello, {name}",
+    "welcomeFallback": "Welcome",
+    "recordReading": "Record a reading",
+    "healthOverview": "Health overview",
+    "quickActions": "Quick actions",
+    "viewHistory": "View history",
+    "noReadingRecorded": "No reading recorded yet",
+    "readingsUnavailable": "Readings could not be loaded. Tap to retry.",
+    "screeningInProgress": "Screening in progress",
+    "continueScreening": "Continue",
+    "screeningActivity": "Screening activity",
+    "seeAll": "See all",
+    "pending": "Pending",
+    "inProgress": "In progress",
+    "dashboardUnavailable": "Dashboard is temporarily unavailable.",
+    "progressPercent": "{percent} percent complete"
+  },
   "assessment": {
     "title": "Health Assessments",
     "titlebot": "Screenings",
+    "loadFailed": "This screening could not be loaded. Please try again later.",
     "referenceLabel": "Reference",
     "searchHint": "Search screenings",
  "completedLabel": "Completed",
@@ -452,7 +471,8 @@
   },
  "notifications": {
     "emptyTitle": "No notifications yet",
-    "emptyBody": "We'll let you know when something needs your attention."
+    "emptyBody": "We'll let you know when something needs your attention.",
+    "unreadCountLabel": "Notifications, {count} unread"
   },
   "settings": {
     "title": "Settings",

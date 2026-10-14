@@ -11,6 +11,11 @@ class LoadVitalsEvent extends VitalsEvent {
   const LoadVitalsEvent();
 }
 
+/// Loads only the latest readings used by the home dashboard summary.
+class LoadVitalsSummaryEvent extends VitalsEvent {
+  const LoadVitalsSummaryEvent();
+}
+
 class LoadMoreAppointmentsEvent extends VitalsEvent {
   final String? query;
   const LoadMoreAppointmentsEvent({this.query});

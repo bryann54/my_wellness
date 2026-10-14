@@ -4,8 +4,6 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:my_wellness/common/res/colors.dart';
-
 class QuickActionChip extends StatelessWidget {
   static const labelGap = 8.0;
   static const verticalPadding = 4.0;
@@ -27,8 +25,7 @@ class QuickActionChip extends StatelessWidget {
       math.min(width, math.min(56.0, math.max(32.0, width - 8))).toDouble();
 
   static double preferredHeight(BuildContext context, double width) {
-    final style = Theme.of(context).textTheme.labelMedium;
-    final fontSize = style?.fontSize ?? 12;
+    final fontSize = Theme.of(context).textTheme.labelMedium?.fontSize ?? 12;
     final labelHeight = MediaQuery.textScalerOf(context).scale(fontSize) * 1.15;
     final height =
         iconDiameterForWidth(width) +
@@ -40,12 +37,16 @@ class QuickActionChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     final diameter = iconDiameterForWidth(width);
     final iconSize = diameter * 0.42;
+    final displayLabel = label.isEmpty
+        ? label
+        : '${label[0].toUpperCase()}${label.substring(1)}';
 
     return Semantics(
       button: true,
-      label: label,
+      label: displayLabel,
       child: ExcludeSemantics(
         child: SizedBox(
           width: width,
@@ -71,13 +72,13 @@ class QuickActionChip extends StatelessWidget {
                         height: diameter,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: AppColors.background.withValues(alpha: 0.14),
+                          color: colors.primary.withValues(alpha: 0.10),
                           border: Border.all(
-                            color: AppColors.background.withValues(alpha: 0.22),
+                            color: colors.primary.withValues(alpha: 0.16),
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.08),
+                              color: colors.shadow.withValues(alpha: 0.05),
                               blurRadius: 8,
                               offset: const Offset(0, 2),
                             ),
@@ -87,25 +88,25 @@ class QuickActionChip extends StatelessWidget {
                           child: Icon(
                             icon,
                             size: iconSize,
-                            color: AppColors.background,
+                            color: colors.primary,
                           ),
                         ),
                       ),
                       const SizedBox(height: labelGap),
-                      Text(
-                        label,
-                        style: Theme.of(context).textTheme.labelMedium
-                            ?.copyWith(
-                              height: 1.15,
-                              fontWeight: FontWeight.w500,
-                              letterSpacing: 0.1,
-                              color: AppColors.background.withValues(
-                                alpha: 0.92,
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          displayLabel,
+                          style: Theme.of(context).textTheme.labelMedium
+                              ?.copyWith(
+                                height: 1.15,
+                                fontWeight: FontWeight.w500,
+                                letterSpacing: 0.1,
+                                color: colors.onSurface,
                               ),
-                            ),
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                        ),
                       ),
                     ],
                   ),

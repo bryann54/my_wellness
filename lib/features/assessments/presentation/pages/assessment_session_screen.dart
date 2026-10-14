@@ -4,6 +4,8 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
+import 'package:my_wellness/common/res/l10n.dart';
+import 'package:my_wellness/common/widgets/app_primary_button.dart';
 import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_question.dart';
 import 'package:my_wellness/features/assessments/presentation/bloc/assessments_bloc.dart';
@@ -62,6 +64,39 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
     if (state.terminated) {
       return AssessmentTerminatedRouteView(
         reference: state.terminationReference,
+      );
+    }
+
+    if (state.status == AssessmentStatus.error) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(AppLocalizations.getString(context, 'assessment.title')),
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  state.errorMessage ??
+                      AppLocalizations.getString(
+                        context,
+                        'assessment.loadFailed',
+                      ),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                const SizedBox(height: 16),
+                AppPrimaryButton(
+                  onPressed: () => context.router.maybePop(),
+                  label: AppLocalizations.getString(context, 'common.back'),
+                  height: 48,
+                ),
+              ],
+            ),
+          ),
+        ),
       );
     }
 
