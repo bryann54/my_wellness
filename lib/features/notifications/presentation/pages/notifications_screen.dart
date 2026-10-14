@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_wellness/common/constants/hero.dart';
 import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
@@ -90,7 +91,10 @@ class _PermissionBody extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 64, color: cs.primary),
+          Hero(
+            tag: HeroTags.homeNotifications,
+            child: Icon(icon, size: 64, color: cs.primary),
+          ),
           const SizedBox(height: AppSpacing.lg),
           Text(
             title,

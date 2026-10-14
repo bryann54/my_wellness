@@ -509,11 +509,9 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
       emit(
         state.copyWith(
           status: AssessmentStatus.error,
-          errorMessage:
-              'BMI question is out of sequence. Please try again.',
+          errorMessage: 'BMI question is out of sequence. Please try again.',
           toastType: ToastType.error,
-          toastMessage:
-              'BMI question is out of sequence. Please try again.',
+          toastMessage: 'BMI question is out of sequence. Please try again.',
           toastNonce: state.toastNonce + 1,
         ),
       );
@@ -529,9 +527,7 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
       slug: slug,
       sessionId: sessionId,
     ));
-    final latestAnswers = latestAnswersResult.getOrElse(
-      () => state.answers,
-    );
+    final latestAnswers = latestAnswersResult.getOrElse(() => state.answers);
 
     // If BMI was shown before earlier questions were accepted, return to
     // the first unanswered question. The answers API enforces index order.

@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:my_wellness/common/constants/hero.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
 
@@ -14,6 +15,7 @@ class MyHealthScreen extends StatelessWidget {
         headerSliverBuilder: (_, __) => [
           CustomAppBar(
             title: AppLocalizations.getString(context, 'common.myHealth'),
+            titleHeroTag: HeroTags.homeMyHealth,
             isHome: false,
           ),
         ],

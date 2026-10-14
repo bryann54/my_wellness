@@ -1,4 +1,3 @@
-
 // ignore_for_file: invalid_use_of_visible_for_testing_member
 
 import 'dart:async';
@@ -72,6 +71,7 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
       emit(state.copyWith(status: NotificationsStatus.error));
     }
   }
+
   Future<void> _onClear(
     ClearIdentityEvent event,
     Emitter<NotificationsState> emit,

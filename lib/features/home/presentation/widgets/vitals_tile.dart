@@ -2,11 +2,12 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:my_wellness/common/constants/hero.dart';
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/res/app_spacing.dart';
-import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/utils/formatters.dart';
+import 'package:my_wellness/features/home/presentation/widgets/vitals_status_pill.dart';
 import 'package:my_wellness/features/vitals/presentation/bloc/vitals_bloc.dart';
 
 enum VitalsTileKind { bp, bs }
@@ -16,15 +17,23 @@ class VitalsTile extends StatelessWidget {
 
   final VitalsTileKind kind;
 
+  static (Color, Color) _accentFor(bool isBp, bool isDark) => isBp
+      ? (
+          const Color(0xFF3B82F6),
+          isDark ? const Color(0xFF93C5FD) : const Color(0xFF1D4ED8),
+        )
+      : (
+          const Color(0xFFDC2626),
+          isDark ? const Color(0xFFFCA5A5) : const Color(0xFFB91C1C),
+        );
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
     final isBp = kind == VitalsTileKind.bp;
-    final accent = isBp
-        ? (isDark ? AppColors.vitalBpDark : AppColors.vitalBp)
-        : (isDark ? AppColors.vitalBsDark : AppColors.vitalBs);
+    final (accent, accentText) = _accentFor(isBp, isDark);
 
     return BlocBuilder<VitalsBloc, VitalsState>(
       buildWhen: (previous, current) =>
@@ -36,9 +45,6 @@ class VitalsTile extends StatelessWidget {
         final takenAt = isBp
             ? state.latestBp?.takenAt
             : state.latestBs?.takenAt;
-        final dateTimeParts = reading == null
-            ? const <String>[]
-            : friendlyDateTime(takenAt!).split(' · ');
         final isLoading =
             reading == null &&
             (state.status == VitalsStatus.initial ||
@@ -49,13 +55,28 @@ class VitalsTile extends StatelessWidget {
           isBp ? 'vitals.bloodPressure' : 'vitals.bloodSugar',
         );
         final route = VitalsRoute(initialTab: isBp ? 0 : 1);
-        final radius = AppRadius.mdAll;
+
+        final classification = isBp
+            ? state.latestBp?.classification
+            : state.latestBs?.classification;
+        final titleHeroTag = isBp
+            ? HeroTags.homeBloodPressure
+            : HeroTags.homeBloodSugar;
+        final readingHeroTag = isBp
+            ? HeroTags.homeBloodPressureReading
+            : HeroTags.homeBloodSugarReading;
+        final timestampHeroTag = isBp
+            ? HeroTags.homeBloodPressureTimestamp
+            : HeroTags.homeBloodSugarTimestamp;
 
         return Material(
-          color: colors.surfaceContainerLow,
-          borderRadius: radius,
+          color: Color.alphaBlend(
+            accent.withValues(alpha: isDark ? 0.16 : 0.08),
+            colors.surfaceContainerLow,
+          ),
+          borderRadius: AppRadius.mdAll,
           child: InkWell(
-            borderRadius: radius,
+            borderRadius: AppRadius.mdAll,
             onTap: isLoading
                 ? null
                 : hasError
@@ -64,8 +85,8 @@ class VitalsTile extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
-                borderRadius: radius,
-                border: Border.all(color: colors.outlineVariant),
+                borderRadius: AppRadius.mdAll,
+                border: Border.all(color: accent.withValues(alpha: 0.2)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,155 +94,209 @@ class VitalsTile extends StatelessWidget {
                   Row(
                     children: [
                       Container(
-                        width: 40,
-                        height: 40,
+                        width: 32,
+                        height: 32,
                         decoration: BoxDecoration(
-                          color: accent.withValues(alpha: 0.12),
-                          borderRadius: AppRadius.smAll,
+                          color: accent,
+                          borderRadius: BorderRadius.circular(10),
                         ),
                         child: Icon(
                           isBp
-                              ? Icons.favorite_outline
-                              : Icons.water_drop_outlined,
-                          color: accent,
-                          size: 21,
+                              ? Icons.monitor_heart_rounded
+                              : Icons.water_drop_rounded,
+                          size: 18,
+                          color: Colors.white,
                         ),
                       ),
-                      const SizedBox(width: AppSpacing.md),
+                      const SizedBox(width: AppSpacing.sm),
                       Expanded(
-                        child: Text(
-                          title,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w700,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: _hero(
+                            titleHeroTag,
+                            Text(
+                              title,
+                              maxLines: 1,
+                              style: theme.textTheme.labelLarge?.copyWith(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: accentText,
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: AppSpacing.sm),
+                  const SizedBox(height: AppSpacing.md),
                   if (reading != null) ...[
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Flexible(
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              isBp
-                                  ? '${state.latestBp!.systolic}/${state.latestBp!.diastolic}'
-                                  : state.latestBs!.value,
-                              style: theme.textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: colors.onSurface,
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: _hero(
+                        readingHeroTag,
+                        Text.rich(
+                          TextSpan(
+                            style: theme.textTheme.headlineMedium?.copyWith(
+                              fontSize: 26,
+                              fontWeight: FontWeight.w700,
+                              height: 1.0,
+                              letterSpacing: -0.5,
+                              color: colors.onSurface,
+                            ),
+                            children: [
+                              if (isBp) ...[
+                                TextSpan(text: '${state.latestBp!.systolic}'),
+                                TextSpan(
+                                  text: '/',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w300,
+                                    color: colors.onSurfaceVariant,
+                                  ),
+                                ),
+                                TextSpan(text: '${state.latestBp!.diastolic}'),
+                              ] else
+                                TextSpan(
+                                  text: _trimDecimal(state.latestBs!.value),
+                                ),
+                              TextSpan(
+                                text:
+                                    ' ${isBp ? 'mmHg' : state.latestBs!.unit}',
+                                style: theme.textTheme.labelMedium?.copyWith(
+                                  fontSize: 12,
+                                  height: 1.0,
+                                  letterSpacing: 0,
+                                  fontWeight: FontWeight.w500,
+                                  color: colors.onSurfaceVariant,
+                                ),
                               ),
-                            ),
+                            ],
                           ),
-                        ),
-                        const SizedBox(width: AppSpacing.xs),
-                        Text(
-                          isBp ? 'mmHg' : state.latestBs!.unit,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colors.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          dateTimeParts.first,
                           maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colors.onSurfaceVariant,
-                          ),
                         ),
-                        if (dateTimeParts.length > 1)
-                          Text(
-                            dateTimeParts[1],
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: colors.onSurfaceVariant,
-                            ),
-                          ),
-                      ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    VitalsStatusPill(
+                      classification: classification,
+                      compact: true,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    _hero(
+                      timestampHeroTag,
+                      Text(
+                        friendlyDateTime(takenAt!),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          fontSize: 11.5,
+                          color: colors.onSurfaceVariant.withValues(alpha: 0.8),
+                        ),
+                      ),
                     ),
                   ] else
-                    Row(
-                      children: [
-                        if (isLoading) ...[
-                          SizedBox.square(
-                            dimension: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: colors.primary,
-                            ),
-                          ),
-                          const SizedBox(width: AppSpacing.sm),
-                        ],
-                        Expanded(
-                          child: Text(
-                            AppLocalizations.getString(
-                              context,
-                              isLoading
-                                  ? 'common.loading'
-                                  : hasError
-                                  ? 'homeDashboard.readingsUnavailable'
-                                  : 'homeDashboard.noReadingRecorded',
-                            ),
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: colors.onSurfaceVariant,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
+                    _EmptyState(
+                      isLoading: isLoading,
+                      hasError: hasError,
+                      accent: accentText,
                     ),
-                  if (!isLoading) ...[
-                    const SizedBox(height: AppSpacing.sm),
-                    Row(
-                      children: [
-                        Icon(
-                          hasError
-                              ? Icons.refresh_rounded
-                              : reading == null
-                              ? Icons.add_rounded
-                              : Icons.history_rounded,
-                          size: 16,
-                          color: colors.primary,
-                        ),
-                        const SizedBox(width: AppSpacing.xs),
-                        Flexible(
-                          child: Text(
-                            AppLocalizations.getString(
-                              context,
-                              hasError
-                                  ? 'common.retry'
-                                  : reading == null
-                                  ? 'vitals.addReading'
-                                  : 'homeDashboard.viewHistory',
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: colors.primary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
                 ],
               ),
             ),
           ),
         );
       },
+    );
+  }
+
+  static String _trimDecimal(String value) {
+    final parsed = double.tryParse(value);
+    if (parsed == null) return value;
+    return parsed == parsed.roundToDouble()
+        ? parsed.toStringAsFixed(0)
+        : parsed.toStringAsFixed(1);
+  }
+
+  Widget _hero(String tag, Widget child) => Hero(
+    tag: tag,
+    flightShuttleBuilder: (_, __, ___, ____, toHero) =>
+        (toHero.widget as Hero).child,
+    child: Material(color: Colors.transparent, child: child),
+  );
+}
+
+class _EmptyState extends StatelessWidget {
+  const _EmptyState({
+    required this.isLoading,
+    required this.hasError,
+    required this.accent,
+  });
+
+  final bool isLoading;
+  final bool hasError;
+  final Color accent;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    if (isLoading) {
+      return Row(
+        children: [
+          SizedBox.square(
+            dimension: 16,
+            child: CircularProgressIndicator(strokeWidth: 2, color: accent),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Text(
+            AppLocalizations.getString(context, 'common.loading'),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: colors.onSurfaceVariant,
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          AppLocalizations.getString(
+            context,
+            hasError
+                ? 'homeDashboard.readingsUnavailable'
+                : 'homeDashboard.noReadingRecorded',
+          ),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: colors.onSurfaceVariant,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Row(
+          children: [
+            Icon(
+              hasError ? Icons.refresh_rounded : Icons.add_rounded,
+              size: 16,
+              color: accent,
+            ),
+            const SizedBox(width: AppSpacing.xs),
+            Text(
+              AppLocalizations.getString(
+                context,
+                hasError ? 'common.retry' : 'vitals.addReading',
+              ),
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: accent,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

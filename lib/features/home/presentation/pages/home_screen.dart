@@ -73,9 +73,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: _GreetingBlock(firstName: firstName),
                 ),
               ),
-              // Active screenings first: it's the one actionable item.
-              // The card collapses to nothing (including its own bottom
-              // spacing) when there are no sessions.
               const SliverPadding(
                 padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                 sliver: SliverToBoxAdapter(child: AssessmentProgressCard()),

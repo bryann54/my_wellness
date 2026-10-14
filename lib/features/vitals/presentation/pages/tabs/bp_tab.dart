@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_wellness/common/constants/hero.dart';
 import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_fab.dart';
@@ -37,7 +38,7 @@ class BpTab extends StatelessWidget {
         }
         if (state.bpReadings.isEmpty) {
           return VitalsEmptyState(
-            icon: Icons.favorite_outline,
+            icon: Icons.monitor_heart_outlined,
             title: AppLocalizations.getString(context, 'vitals.noBpReadings'),
             subtitle: AppLocalizations.getString(
               context,
@@ -47,6 +48,8 @@ class BpTab extends StatelessWidget {
             onCta: () => AddBpSheet.show(context),
           );
         }
+
+        final latest = state.bpReadings.first;
 
         return Scaffold(
           backgroundColor: Colors.transparent,
@@ -74,23 +77,27 @@ class BpTab extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         LatestReadingCard(
-                          classification: state.bpReadings.first.classification,
-                          primary:
-                              '${state.bpReadings.first.systolic}/${state.bpReadings.first.diastolic}',
+                          kind: ReadingKind.bp,
+                          classification: latest.classification,
+                          primary: '${latest.systolic}/${latest.diastolic}',
                           unit: 'mmHg',
-                          timestampIso: state.bpReadings.first.takenAt,
-                          secondary: state.bpReadings.first.pulse == null
+                          timestampIso: latest.takenAt,
+                          primaryHeroTag: HeroTags.homeBloodPressureReading,
+                          timestampHeroTag: HeroTags.homeBloodPressureTimestamp,
+                          secondaryIcon: Icons.favorite_rounded,
+                          secondary: latest.pulse == null
                               ? null
                               : AppLocalizations.t(
                                   context,
                                   'vitals.pulseReading',
-                                  {'value': '${state.bpReadings.first.pulse}'},
+                                  {'value': '${latest.pulse}'},
                                 ),
                         ),
                         const SizedBox(height: AppSpacing.xl),
                         Text(
                           AppLocalizations.getString(context, 'vitals.history'),
-                          style: Theme.of(context).textTheme.titleMedium,
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w700),
                         ),
                         const SizedBox(height: AppSpacing.sm),
                         ReadingHistoryList(

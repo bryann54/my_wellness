@@ -20,6 +20,7 @@ class RegisterIdentityEvent extends NotificationsEvent {
 class ClearIdentityEvent extends NotificationsEvent {
   const ClearIdentityEvent();
 }
+
 class RequestPermissionEvent extends NotificationsEvent {
   const RequestPermissionEvent();
 }

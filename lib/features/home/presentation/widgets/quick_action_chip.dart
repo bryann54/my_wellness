@@ -12,6 +12,7 @@ class QuickActionChip extends StatelessWidget {
   final String label;
   final PageRouteInfo route;
   final double width;
+  final String heroTag;
 
   const QuickActionChip({
     super.key,
@@ -19,6 +20,7 @@ class QuickActionChip extends StatelessWidget {
     required this.label,
     required this.route,
     required this.width,
+    required this.heroTag,
   }) : assert(width > 0);
 
   static double iconDiameterForWidth(double width) =>
@@ -70,8 +72,6 @@ class QuickActionChip extends StatelessWidget {
                       Ink(
                         width: diameter,
                         height: diameter,
-                        // Squircle, slightly stronger tint, no border/shadow:
-                        // reads as an active control instead of a disabled one.
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(diameter * 0.34),
                           color: colors.primary.withValues(alpha: 0.14),
@@ -87,17 +87,25 @@ class QuickActionChip extends StatelessWidget {
                       const SizedBox(height: labelGap),
                       FittedBox(
                         fit: BoxFit.scaleDown,
-                        child: Text(
-                          displayLabel,
-                          style: Theme.of(context).textTheme.labelMedium
-                              ?.copyWith(
-                                height: 1.15,
-                                fontWeight: FontWeight.w500,
-                                letterSpacing: 0.1,
-                                color: colors.onSurface,
-                              ),
-                          textAlign: TextAlign.center,
-                          maxLines: 1,
+                        child: Hero(
+                          tag: heroTag,
+                          flightShuttleBuilder: (_, __, ___, ____, toHero) =>
+                              (toHero.widget as Hero).child,
+                          child: Material(
+                            color: Colors.transparent,
+                            child: Text(
+                              displayLabel,
+                              style: Theme.of(context).textTheme.labelMedium
+                                  ?.copyWith(
+                                    height: 1.15,
+                                    fontWeight: FontWeight.w500,
+                                    letterSpacing: 0.1,
+                                    color: colors.onSurface,
+                                  ),
+                              textAlign: TextAlign.center,
+                              maxLines: 1,
+                            ),
+                          ),
                         ),
                       ),
                     ],

@@ -62,7 +62,6 @@ class VitalsBloc extends Bloc<VitalsEvent, VitalsState> {
     );
     on<ClearToastEvent>((_, emit) => emit(state.copyWith(clearToast: true)));
   }
-  //helpers
   VitalsState _toast(
     VitalsState s, {
     required ToastType type,
@@ -81,7 +80,6 @@ class VitalsBloc extends Bloc<VitalsEvent, VitalsState> {
   VitalsState _toastSuccess(VitalsState s, String message) =>
       _toast(s, type: ToastType.success, message: message);
 
-  //load
   Future<void> _onLoadSummary(
     LoadVitalsSummaryEvent event,
     Emitter<VitalsState> emit,
@@ -144,6 +142,7 @@ class VitalsBloc extends Bloc<VitalsEvent, VitalsState> {
     emit(
       state.copyWith(
         status: VitalsStatus.loaded,
+        collectionsLoaded: true,
         appointments: appts
             .getOrElse(() => (items: const [], nextCursor: null))
             .items,
@@ -213,7 +212,6 @@ class VitalsBloc extends Bloc<VitalsEvent, VitalsState> {
     );
   }
 
-  //add
   Future<void> _onAddBp(
     AddBpReadingEvent event,
     Emitter<VitalsState> emit,
@@ -314,7 +312,6 @@ class VitalsBloc extends Bloc<VitalsEvent, VitalsState> {
     );
   }
 
-  //delete
   Future<void> _onDeleteBp(
     DeleteBpReadingEvent event,
     Emitter<VitalsState> emit,

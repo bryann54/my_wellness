@@ -9,8 +9,6 @@ import 'package:my_wellness/features/vitals/domain/entities/medication.dart';
 import 'package:my_wellness/features/vitals/domain/entities/medication_scan.dart';
 import 'package:my_wellness/features/vitals/domain/repositories/vitals_repository.dart';
 
-// ── Appointments ────────────────────────────────────────────────────────────
-
 @lazySingleton
 class GetAppointmentsByConditionUseCase
     implements UseCase<List<Appointment>, String> {
@@ -122,8 +120,6 @@ class DeleteMedicationUseCase implements UseCase<void, String> {
   Future<Either<Failure, void>> call(String id) => _repo.deleteMedication(id);
 }
 
-// ── Blood pressure ──────────────────────────────────────────────────────────
-
 @lazySingleton
 class GetBloodPressureReadingsUseCase
     implements UseCase<List<BpReading>, NoParams> {
@@ -152,8 +148,6 @@ class DeleteBloodPressureReadingUseCase implements UseCase<void, String> {
   Future<Either<Failure, void>> call(String id) =>
       _repo.deleteBloodPressureReading(id);
 }
-
-// ── Blood sugar ─────────────────────────────────────────────────────────────
 
 @lazySingleton
 class GetBloodSugarReadingsUseCase

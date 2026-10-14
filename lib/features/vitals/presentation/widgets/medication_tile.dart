@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/res/app_spacing.dart';
-import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/custom_alert_dialog.dart';
 import 'package:my_wellness/features/vitals/domain/entities/medication.dart';
@@ -28,11 +27,6 @@ class _MedicationTileState extends State<MedicationTile> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final accent = isDark ? AppColors.vitalBsDark : AppColors.vitalBs;
-    final tint = isDark
-        ? AppColors.vitalBsSurfaceDark
-        : AppColors.vitalBsSurface;
 
     return Dismissible(
       key: ValueKey(m.id),
@@ -52,12 +46,10 @@ class _MedicationTileState extends State<MedicationTile> {
       background: _DismissBackground(color: cs.error),
       onDismissed: (_) => widget.onDelete(),
       child: _Card(
-        accent: accent,
-        tint: tint,
         child: InkWell(
           onTap: () => setState(() => _isExpanded = !_isExpanded),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            padding: const EdgeInsets.all(AppSpacing.md),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -65,21 +57,28 @@ class _MedicationTileState extends State<MedicationTile> {
                 AnimatedSize(
                   duration: const Duration(milliseconds: 240),
                   curve: Curves.easeOutCubic,
+                  alignment: Alignment.topCenter,
                   child: _isExpanded
                       ? Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const SizedBox(height: AppSpacing.md),
-                            Divider(color: accent.withValues(alpha: 0.16)),
+                            Divider(
+                              height: 1,
+                              color: cs.outlineVariant.withValues(alpha: 0.5),
+                            ),
                             const SizedBox(height: AppSpacing.sm),
                             _Details(medication: m),
-                            const SizedBox(height: AppSpacing.sm),
-                            Divider(color: accent.withValues(alpha: 0.16)),
+                            const SizedBox(height: AppSpacing.xs),
+                            Divider(
+                              height: 1,
+                              color: cs.outlineVariant.withValues(alpha: 0.5),
+                            ),
                             const SizedBox(height: AppSpacing.xs),
                             _DeleteButton(onTap: () => _confirmDelete(context)),
                           ],
                         )
-                      : const SizedBox.shrink(),
+                      : const SizedBox(width: double.infinity),
                 ),
               ],
             ),
@@ -108,22 +107,21 @@ class _MedicationTileState extends State<MedicationTile> {
 
 class _Card extends StatelessWidget {
   final Widget child;
-  final Color accent;
-  final Color tint;
-  const _Card({required this.child, required this.accent, required this.tint});
+  const _Card({required this.child});
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Material(
-        color: tint,
+        color: cs.surfaceContainerLow,
         borderRadius: AppRadius.lgAll,
         clipBehavior: Clip.antiAlias,
         child: DecoratedBox(
           decoration: BoxDecoration(
             borderRadius: AppRadius.lgAll,
-            border: Border.all(color: accent.withValues(alpha: 0.22), width: 1),
+            border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.5)),
           ),
           child: child,
         ),
@@ -147,22 +145,20 @@ class _Header extends StatelessWidget {
         condition != null &&
         condition.isNotEmpty &&
         condition.toLowerCase() != 'other';
-    final accent = Theme.of(context).brightness == Brightness.dark
-        ? AppColors.vitalBsDark
-        : AppColors.vitalBs;
 
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 36,
-          height: 36,
+          width: 40,
+          height: 40,
           decoration: BoxDecoration(
-            color: accent.withValues(alpha: 0.12),
-            borderRadius: AppRadius.smAll,
+            color: cs.primary.withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(12),
           ),
-          child: Icon(Icons.medication_outlined, size: 19, color: accent),
+          child: Icon(Icons.medication_outlined, size: 21, color: cs.primary),
         ),
-        const SizedBox(width: AppSpacing.sm),
+        const SizedBox(width: AppSpacing.md),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -174,9 +170,9 @@ class _Header extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.inter(
                   fontSize: 16,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w700,
                   color: cs.onSurface,
-                  height: 1.2,
+                  height: 1.25,
                 ),
               ),
               if (subtitle != null) ...[
@@ -186,14 +182,15 @@ class _Header extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.inter(
-                    fontSize: 14,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w500,
                     color: cs.onSurface.withValues(alpha: 0.6),
                     height: 1.2,
                   ),
                 ),
               ],
               if (showCondition) ...[
-                const SizedBox(height: AppSpacing.xs),
+                const SizedBox(height: AppSpacing.sm),
                 _ConditionBadge(condition: condition),
               ],
             ],
@@ -206,7 +203,7 @@ class _Header extends StatelessWidget {
           curve: Curves.easeOutCubic,
           child: Icon(
             Icons.keyboard_arrow_down_rounded,
-            size: 20,
+            size: 22,
             color: cs.onSurface.withValues(alpha: 0.4),
           ),
         ),
@@ -214,9 +211,15 @@ class _Header extends StatelessWidget {
     );
   }
 
+  static String _humanize(String raw) {
+    final s = raw.trim().replaceAll('_', ' ');
+    if (s.isEmpty) return s;
+    return '${s[0].toUpperCase()}${s.substring(1)}';
+  }
+
   static String? _subtitle(Medication m) {
     final dosage = m.dosage.trim();
-    final frequency = m.frequency.trim().replaceAll('_', ' ');
+    final frequency = _humanize(m.frequency);
 
     if (dosage.isEmpty && frequency.isEmpty) return null;
     if (frequency.isEmpty) return dosage;
@@ -353,7 +356,7 @@ class _LabeledRow extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     final labelStyle = GoogleFonts.inter(
-      fontSize: 15,
+      fontSize: 13,
       fontWeight: FontWeight.w500,
       color: cs.onSurface.withValues(alpha: 0.55),
       height: 1.3,
@@ -363,11 +366,11 @@ class _LabeledRow extends StatelessWidget {
       fontSize: 14,
       fontWeight: FontWeight.w600,
       color: cs.onSurface,
-      height: 1.35,
+      height: 1.4,
     );
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: multiline
           ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -408,24 +411,21 @@ class _ConditionBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    final (label, color) = switch (condition.toLowerCase()) {
-      'hypertension' => (
-        AppLocalizations.getString(context, 'condition.hypertension'),
-        cs.primary,
+    final label = switch (condition.toLowerCase()) {
+      'hypertension' => AppLocalizations.getString(
+        context,
+        'condition.hypertension',
       ),
-      'diabetes' => (
-        AppLocalizations.getString(context, 'condition.diabetes'),
-        cs.primary,
-      ),
-      _ => (condition, cs.primary),
+      'diabetes' => AppLocalizations.getString(context, 'condition.diabetes'),
+      _ => condition,
     };
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
+        color: cs.primary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.16)),
+        border: Border.all(color: cs.primary.withValues(alpha: 0.16)),
       ),
       child: Text(
         label,
@@ -433,7 +433,7 @@ class _ConditionBadge extends StatelessWidget {
           fontSize: 11,
           fontWeight: FontWeight.w600,
           letterSpacing: 0.2,
-          color: color,
+          color: cs.primary,
         ),
       ),
     );
@@ -453,7 +453,7 @@ class _DeleteButton extends StatelessWidget {
         onPressed: onTap,
         style: TextButton.styleFrom(
           foregroundColor: cs.error,
-          minimumSize: const Size(48, 48),
+          minimumSize: const Size(48, 44),
         ),
         icon: const Icon(Icons.delete_outline_rounded, size: 18),
         label: Text(AppLocalizations.getString(context, 'common.delete')),
@@ -471,13 +471,11 @@ class _DismissBackground extends StatelessWidget {
     return Container(
       alignment: Alignment.centerRight,
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: const Icon(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(color: color, borderRadius: AppRadius.lgAll),
+      child: Icon(
         Icons.delete_outline_rounded,
-        color: AppColors.background,
+        color: Theme.of(context).colorScheme.onError,
       ),
     );
   }

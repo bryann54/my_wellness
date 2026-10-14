@@ -9,43 +9,40 @@ import 'package:my_wellness/features/vitals/data/models/bs_reading_model.dart';
 import 'package:my_wellness/features/vitals/data/models/facility_model.dart';
 import 'package:my_wellness/features/vitals/data/models/medication_model.dart';
 import 'package:my_wellness/features/vitals/data/models/medication_scan_model.dart';
-import 'package:my_wellness/features/vitals/domain/entities/appointment.dart';
-import 'package:my_wellness/features/vitals/domain/entities/bp_reading.dart';
-import 'package:my_wellness/features/vitals/domain/entities/bs_reading.dart';
-import 'package:my_wellness/features/vitals/domain/entities/medication.dart';
-import 'package:my_wellness/features/vitals/domain/entities/medication_scan.dart';
 
 abstract class VitalsRemoteDataSource {
-  Future<List<Appointment>> getAppointmentsByCondition(String condition);
-  Future<({List<Appointment> items, String? nextCursor})> getAppointmentsPaged({
-    String? cursor,
-    String? query,
-  });
-  Future<MedicationScanResult> scanMedication({
+  Future<List<AppointmentModel>> getAppointmentsByCondition(String condition);
+  Future<({List<AppointmentModel> items, String? nextCursor})>
+  getAppointmentsPaged({String? cursor, String? query});
+  Future<MedicationScanModel> scanMedication({
     required String filePath,
     required String condition,
   });
-  Future<Appointment> createAppointment(Map<String, dynamic> data);
-  Future<Appointment> updateAppointment(String id, Map<String, dynamic> data);
+  Future<AppointmentModel> createAppointment(Map<String, dynamic> data);
+  Future<AppointmentModel> updateAppointment(
+    String id,
+    Map<String, dynamic> data,
+  );
   Future<void> deleteAppointment(String id);
-  Future<List<Facility>> searchFacilities(String query);
-  Future<List<Medication>> getMedicationsByCondition(String condition);
+  Future<List<FacilityModel>> searchFacilities(String query);
+  Future<List<MedicationModel>> getMedicationsByCondition(String condition);
 
-  Future<({List<Medication> items, String? nextCursor})> getMedicationsPaged({
-    String? cursor,
-    String? query,
-  });
+  Future<({List<MedicationModel> items, String? nextCursor})>
+  getMedicationsPaged({String? cursor, String? query});
 
-  Future<Medication> createMedication(Map<String, dynamic> data);
-  Future<Medication> updateMedication(String id, Map<String, dynamic> data);
+  Future<MedicationModel> createMedication(Map<String, dynamic> data);
+  Future<MedicationModel> updateMedication(
+    String id,
+    Map<String, dynamic> data,
+  );
   Future<void> deleteMedication(String id);
 
-  Future<List<BpReading>> getBloodPressureReadings();
-  Future<BpReading> createBloodPressureReading(Map<String, dynamic> data);
+  Future<List<BpReadingModel>> getBloodPressureReadings();
+  Future<BpReadingModel> createBloodPressureReading(Map<String, dynamic> data);
   Future<void> deleteBloodPressureReading(String id);
 
-  Future<List<BsReading>> getBloodSugarReadings();
-  Future<BsReading> createBloodSugarReading(Map<String, dynamic> data);
+  Future<List<BsReadingModel>> getBloodSugarReadings();
+  Future<BsReadingModel> createBloodSugarReading(Map<String, dynamic> data);
   Future<void> deleteBloodSugarReading(String id);
 }
 
@@ -55,9 +52,8 @@ class VitalsRemoteDataSourceImpl implements VitalsRemoteDataSource {
 
   VitalsRemoteDataSourceImpl(this._apiClient);
 
-  // ── Medications: scan ─────────────────────────────────────────────────────
   @override
-  Future<MedicationScanResult> scanMedication({
+  Future<MedicationScanModel> scanMedication({
     required String filePath,
     required String condition,
   }) async {
@@ -75,45 +71,38 @@ class VitalsRemoteDataSourceImpl implements VitalsRemoteDataSource {
       options: ApiClient.protected,
     );
 
-    return MedicationScanModel.fromJson(response).toEntity();
+    return MedicationScanModel.fromJson(response);
   }
 
-  // ── Appointments ──────────────────────────────────────────────────────────
-
   @override
-  Future<List<Appointment>> getAppointmentsByCondition(String condition) async {
+  Future<List<AppointmentModel>> getAppointmentsByCondition(
+    String condition,
+  ) async {
     final response = await _apiClient.get<List<dynamic>>(
       url: ApiEndpoints.appointments,
       query: {'condition': condition},
       options: ApiClient.protected,
     );
     return response
-        .map(
-          (e) =>
-              AppointmentModel.fromJson(e as Map<String, dynamic>).toEntity(),
-        )
+        .map((e) => AppointmentModel.fromJson(e as Map<String, dynamic>))
         .toList(growable: false);
   }
 
   @override
-  Future<List<Facility>> searchFacilities(String query) async {
+  Future<List<FacilityModel>> searchFacilities(String query) async {
     final response = await _apiClient.get<List<dynamic>>(
       url: ApiEndpoints.facilitySearch,
       query: {'q': query},
       options: ApiClient.protected,
     );
     return response
-        .map(
-          (e) => FacilityModel.fromJson(e as Map<String, dynamic>).toEntity(),
-        )
+        .map((e) => FacilityModel.fromJson(e as Map<String, dynamic>))
         .toList(growable: false);
   }
 
   @override
-  Future<({List<Appointment> items, String? nextCursor})> getAppointmentsPaged({
-    String? cursor,
-    String? query,
-  }) async {
+  Future<({List<AppointmentModel> items, String? nextCursor})>
+  getAppointmentsPaged({String? cursor, String? query}) async {
     final response = await _apiClient.get<Map<String, dynamic>>(
       url: ApiEndpoints.appointments,
       query: {
@@ -122,26 +111,25 @@ class VitalsRemoteDataSourceImpl implements VitalsRemoteDataSource {
       },
       options: ApiClient.protected,
     );
-    final page = CursorPage<Appointment>.fromJson(
+    final page = CursorPage<AppointmentModel>.fromJson(
       response,
-      (json) =>
-          AppointmentModel.fromJson(json as Map<String, dynamic>).toEntity(),
+      (json) => AppointmentModel.fromJson(json as Map<String, dynamic>),
     );
     return (items: page.results, nextCursor: page.nextCursor);
   }
 
   @override
-  Future<Appointment> createAppointment(Map<String, dynamic> data) async {
+  Future<AppointmentModel> createAppointment(Map<String, dynamic> data) async {
     final response = await _apiClient.post<Map<String, dynamic>>(
       url: ApiEndpoints.appointments,
       payload: data,
       options: ApiClient.protected,
     );
-    return AppointmentModel.fromJson(response).toEntity();
+    return AppointmentModel.fromJson(response);
   }
 
   @override
-  Future<Appointment> updateAppointment(
+  Future<AppointmentModel> updateAppointment(
     String id,
     Map<String, dynamic> data,
   ) async {
@@ -150,7 +138,7 @@ class VitalsRemoteDataSourceImpl implements VitalsRemoteDataSource {
       payload: data,
       options: ApiClient.protected,
     );
-    return AppointmentModel.fromJson(response).toEntity();
+    return AppointmentModel.fromJson(response);
   }
 
   @override
@@ -161,27 +149,23 @@ class VitalsRemoteDataSourceImpl implements VitalsRemoteDataSource {
     );
   }
 
-  // ── Medications ───────────────────────────────────────────────────────────
-
   @override
-  Future<List<Medication>> getMedicationsByCondition(String condition) async {
+  Future<List<MedicationModel>> getMedicationsByCondition(
+    String condition,
+  ) async {
     final response = await _apiClient.get<List<dynamic>>(
       url: ApiEndpoints.medications,
       query: {'condition': condition},
       options: ApiClient.protected,
     );
     return response
-        .map(
-          (e) => MedicationModel.fromJson(e as Map<String, dynamic>).toEntity(),
-        )
+        .map((e) => MedicationModel.fromJson(e as Map<String, dynamic>))
         .toList(growable: false);
   }
 
   @override
-  Future<({List<Medication> items, String? nextCursor})> getMedicationsPaged({
-    String? cursor,
-    String? query,
-  }) async {
+  Future<({List<MedicationModel> items, String? nextCursor})>
+  getMedicationsPaged({String? cursor, String? query}) async {
     final response = await _apiClient.get<Map<String, dynamic>>(
       url: ApiEndpoints.medications,
       query: {
@@ -197,27 +181,24 @@ class VitalsRemoteDataSourceImpl implements VitalsRemoteDataSource {
         : Uri.parse(nextUrl).queryParameters['cursor'];
     return (
       items: results
-          .map(
-            (e) =>
-                MedicationModel.fromJson(e as Map<String, dynamic>).toEntity(),
-          )
+          .map((e) => MedicationModel.fromJson(e as Map<String, dynamic>))
           .toList(growable: false),
       nextCursor: nextCursor,
     );
   }
 
   @override
-  Future<Medication> createMedication(Map<String, dynamic> data) async {
+  Future<MedicationModel> createMedication(Map<String, dynamic> data) async {
     final response = await _apiClient.post<Map<String, dynamic>>(
       url: ApiEndpoints.medications,
       payload: data,
       options: ApiClient.protected,
     );
-    return MedicationModel.fromJson(response).toEntity();
+    return MedicationModel.fromJson(response);
   }
 
   @override
-  Future<Medication> updateMedication(
+  Future<MedicationModel> updateMedication(
     String id,
     Map<String, dynamic> data,
   ) async {
@@ -226,7 +207,7 @@ class VitalsRemoteDataSourceImpl implements VitalsRemoteDataSource {
       payload: data,
       options: ApiClient.protected,
     );
-    return MedicationModel.fromJson(response).toEntity();
+    return MedicationModel.fromJson(response);
   }
 
   @override
@@ -237,23 +218,19 @@ class VitalsRemoteDataSourceImpl implements VitalsRemoteDataSource {
     );
   }
 
-  // ── Blood pressure ────────────────────────────────────────────────────────
-
   @override
-  Future<List<BpReading>> getBloodPressureReadings() async {
+  Future<List<BpReadingModel>> getBloodPressureReadings() async {
     final response = await _apiClient.get<List<dynamic>>(
       url: ApiEndpoints.bloodPressure,
       options: ApiClient.protected,
     );
     return response
-        .map(
-          (e) => BpReadingModel.fromJson(e as Map<String, dynamic>).toEntity(),
-        )
+        .map((e) => BpReadingModel.fromJson(e as Map<String, dynamic>))
         .toList(growable: false);
   }
 
   @override
-  Future<BpReading> createBloodPressureReading(
+  Future<BpReadingModel> createBloodPressureReading(
     Map<String, dynamic> data,
   ) async {
     final response = await _apiClient.post<Map<String, dynamic>>(
@@ -261,7 +238,7 @@ class VitalsRemoteDataSourceImpl implements VitalsRemoteDataSource {
       payload: data,
       options: ApiClient.protected,
     );
-    return BpReadingModel.fromJson(response).toEntity();
+    return BpReadingModel.fromJson(response);
   }
 
   @override
@@ -272,29 +249,27 @@ class VitalsRemoteDataSourceImpl implements VitalsRemoteDataSource {
     );
   }
 
-  // ── Blood sugar ───────────────────────────────────────────────────────────
-
   @override
-  Future<List<BsReading>> getBloodSugarReadings() async {
+  Future<List<BsReadingModel>> getBloodSugarReadings() async {
     final response = await _apiClient.get<List<dynamic>>(
       url: ApiEndpoints.bloodSugar,
       options: ApiClient.protected,
     );
     return response
-        .map(
-          (e) => BsReadingModel.fromJson(e as Map<String, dynamic>).toEntity(),
-        )
+        .map((e) => BsReadingModel.fromJson(e as Map<String, dynamic>))
         .toList(growable: false);
   }
 
   @override
-  Future<BsReading> createBloodSugarReading(Map<String, dynamic> data) async {
+  Future<BsReadingModel> createBloodSugarReading(
+    Map<String, dynamic> data,
+  ) async {
     final response = await _apiClient.post<Map<String, dynamic>>(
       url: ApiEndpoints.bloodSugar,
       payload: data,
       options: ApiClient.protected,
     );
-    return BsReadingModel.fromJson(response).toEntity();
+    return BsReadingModel.fromJson(response);
   }
 
   @override

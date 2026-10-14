@@ -70,9 +70,6 @@ class MedicationsShimmerList extends StatelessWidget {
   }
 }
 
-/// A single skeleton block that inherits your app's shimmer.
-/// Uses `double.infinity` for width but constrains it with [widthFactor]
-/// so the block doesn't span the entire row.
 class _SkeletonBox extends StatelessWidget {
   final double width;
   final double height;

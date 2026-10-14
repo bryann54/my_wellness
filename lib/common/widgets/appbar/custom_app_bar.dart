@@ -13,6 +13,7 @@ class CustomAppBar extends StatelessWidget {
   final bool isTabRoot;
   final double? expandedHeight;
   final PreferredSizeWidget? bottom;
+  final String? titleHeroTag;
 
   static const curveExtra = AppBarClipper.radius;
 
@@ -47,6 +48,7 @@ class CustomAppBar extends StatelessWidget {
     this.isTabRoot = false,
     this.expandedHeight,
     this.bottom,
+    this.titleHeroTag,
   });
 
   @override
@@ -77,11 +79,9 @@ class CustomAppBar extends StatelessWidget {
           automaticallyImplyLeading: !isTabRoot,
           title: isHome || title == null
               ? null
-              : Text(
-                  title!.toUpperCase(),
-                  maxLines: 1,
-                  softWrap: false,
-                  overflow: TextOverflow.ellipsis,
+              : _AppBarTitle(
+                  title: title!,
+                  heroTag: titleHeroTag,
                   style: GoogleFonts.inter(
                     fontWeight: FontWeight.w700,
                     fontSize: 18,
@@ -98,6 +98,33 @@ class CustomAppBar extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _AppBarTitle extends StatelessWidget {
+  const _AppBarTitle({required this.title, required this.style, this.heroTag});
+
+  final String title;
+  final TextStyle style;
+  final String? heroTag;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Text(
+      title.toUpperCase(),
+      maxLines: 1,
+      softWrap: false,
+      overflow: TextOverflow.ellipsis,
+      style: style,
+    );
+    final tag = heroTag;
+    if (tag == null) return text;
+    return Hero(
+      tag: tag,
+      flightShuttleBuilder: (_, __, ___, ____, toHero) =>
+          (toHero.widget as Hero).child,
+      child: Material(color: Colors.transparent, child: text),
     );
   }
 }

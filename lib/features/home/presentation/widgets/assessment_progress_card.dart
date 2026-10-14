@@ -5,15 +5,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
+import 'package:my_wellness/common/widgets/shimmer.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_summary.dart';
 import 'package:my_wellness/features/assessments/presentation/bloc/assessments_bloc.dart';
 import 'package:my_wellness/features/home/domain/entities/dashboard_session.dart';
 import 'package:my_wellness/features/home/presentation/bloc/home_bloc.dart';
-
-// New l10n keys needed:
-//   homeDashboard.startScreening   -> "Start"
-//   homeDashboard.notStarted       -> "Not started yet"
-//   homeDashboard.questionsAnswered-> "{current} of {total} questions answered"
 
 class AssessmentProgressCard extends StatelessWidget {
   const AssessmentProgressCard({super.key});
@@ -22,6 +18,12 @@ class AssessmentProgressCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<HomeBloc, HomeState>(
       builder: (context, homeState) {
+        if (homeState.sessions.isEmpty &&
+            (homeState.status == HomeDashboardStatus.initial ||
+                homeState.status == HomeDashboardStatus.loading)) {
+          return const _AssessmentProgressShimmer();
+        }
+
         if (homeState.sessions.isEmpty &&
             homeState.status != HomeDashboardStatus.error) {
           return const SizedBox.shrink();
@@ -88,6 +90,126 @@ class AssessmentProgressCard extends StatelessWidget {
   }
 }
 
+class _AssessmentProgressShimmer extends StatelessWidget {
+  const _AssessmentProgressShimmer();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final placeholder = colors.onPrimary.withValues(alpha: 0.18);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  AppLocalizations.getString(
+                    context,
+                    'homeDashboard.screeningActivity',
+                  ),
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+              ),
+              TextButton.icon(
+                onPressed: () =>
+                    context.router.push(const AssessmentsListRoute()),
+                icon: const Icon(Icons.arrow_forward_rounded),
+                iconAlignment: IconAlignment.end,
+                label: Text(
+                  AppLocalizations.getString(context, 'homeDashboard.seeAll'),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Shimmer(
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: colors.primary,
+                borderRadius: AppRadius.lgAll,
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 56,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: placeholder, width: 5),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _PlaceholderBlock(
+                              width: 150,
+                              height: 18,
+                              color: placeholder,
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            _PlaceholderBlock(
+                              width: 110,
+                              height: 14,
+                              color: placeholder,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  _PlaceholderBlock(
+                    width: double.infinity,
+                    height: 44,
+                    radius: AppRadius.md,
+                    color: colors.onPrimary.withValues(alpha: 0.22),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PlaceholderBlock extends StatelessWidget {
+  const _PlaceholderBlock({
+    required this.width,
+    required this.height,
+    required this.color,
+    this.radius = 6,
+  });
+
+  final double width;
+  final double height;
+  final double radius;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: width,
+    height: height,
+    decoration: BoxDecoration(
+      color: color,
+      borderRadius: BorderRadius.circular(radius),
+    ),
+  );
+}
+
 class _SessionList extends StatelessWidget {
   const _SessionList({required this.sessions, required this.assessments});
 
@@ -96,9 +218,6 @@ class _SessionList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The first in-progress session gets the hero treatment; everything else
-    // (including awaiting-payment sessions) is a compact row. One primary CTA
-    // on screen instead of one per session.
     final featured = sessions
         .where((s) => s.status == DashboardSessionStatus.inProgress)
         .firstOrNull;
@@ -133,7 +252,6 @@ class _FeaturedSession extends StatelessWidget {
     final notStarted = session.completionPercent == 0;
     final fg = colors.onPrimary;
 
-    // Assumes currentIndex == number of questions already answered.
     final subtitle = notStarted
         ? AppLocalizations.getString(context, 'homeDashboard.notStarted')
         : AppLocalizations.t(context, 'homeDashboard.questionsAnswered', {

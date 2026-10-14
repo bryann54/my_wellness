@@ -1,29 +1,52 @@
 import 'package:flutter/material.dart';
 
-enum VitalsTone { normal, attention, alert, neutral }
+enum VitalsTone { normal, low, attention, alert, neutral }
 
 class VitalsStatusPill extends StatelessWidget {
   const VitalsStatusPill({
     super.key,
     required this.classification,
+    this.label,
     this.compact = false,
   });
 
+  /// Raw classification from the API (a clinical status like `elevated`, or a
+  /// colour band like `blue`). Drives the pill colour.
   final String? classification;
+
+  /// Optional human-readable text. When null it is derived from
+  /// [classification]; bare colour bands never leak to the UI as "Blue".
+  final String? label;
   final bool compact;
 
+  static const _bands = {'green', 'blue', 'yellow', 'amber', 'orange', 'red'};
+
+  static String _key(String? raw) =>
+      (raw ?? '').toLowerCase().trim().replaceAll(RegExp(r'[\s\-]+'), '_');
+
   static VitalsTone toneFor(String? raw) {
-    switch (raw?.toLowerCase().trim()) {
+    switch (_key(raw)) {
       case 'normal':
       case 'healthy':
       case 'optimal':
+      case 'green':
         return VitalsTone.normal;
+      case 'low':
+      case 'low_blood_pressure':
+      case 'hypotension':
+      case 'hypoglycemia':
+      case 'blue':
+        return VitalsTone.low;
       case 'elevated':
       case 'prehypertension':
       case 'pre_hypertension':
       case 'pre_diabetes':
       case 'prediabetes':
       case 'borderline':
+      case 'flagged_for_clinical_interpretation':
+      case 'yellow':
+      case 'amber':
+      case 'orange':
         return VitalsTone.attention;
       case 'high':
       case 'stage_1':
@@ -31,11 +54,8 @@ class VitalsStatusPill extends StatelessWidget {
       case 'hypertension':
       case 'diabetes':
       case 'critical':
+      case 'red':
         return VitalsTone.alert;
-      case 'low':
-      case 'hypotension':
-      case 'hypoglycemia':
-        return VitalsTone.attention;
       default:
         return VitalsTone.neutral;
     }
@@ -43,6 +63,16 @@ class VitalsStatusPill extends StatelessWidget {
 
   static String labelFor(String? raw) {
     if (raw == null || raw.trim().isEmpty) return '';
+    // A bare colour band is meaningless to a patient; show the meaning.
+    if (_bands.contains(_key(raw))) {
+      return switch (toneFor(raw)) {
+        VitalsTone.normal => 'Normal',
+        VitalsTone.low => 'Low',
+        VitalsTone.attention => 'Needs review',
+        VitalsTone.alert => 'Alert',
+        VitalsTone.neutral => '',
+      };
+    }
     return raw
         .trim()
         .replaceAll('_', ' ')
@@ -52,8 +82,7 @@ class VitalsStatusPill extends StatelessWidget {
         .join(' ');
   }
 
-  /// (foreground, background) for a tone. Public so tiles can reuse the
-  /// tone colour (e.g. to tint the border when a reading needs attention).
+  /// (foreground, background) for a tone.
   static (Color, Color) colorsFor(VitalsTone tone, ThemeData theme) {
     final isDark = theme.brightness == Brightness.dark;
     switch (tone) {
@@ -61,6 +90,10 @@ class VitalsStatusPill extends StatelessWidget {
         return isDark
             ? (const Color(0xFF6EE7B7), const Color(0xFF064E3B))
             : (const Color(0xFF047857), const Color(0xFFECFDF5));
+      case VitalsTone.low:
+        return isDark
+            ? (const Color(0xFF93C5FD), const Color(0xFF1E3A8A))
+            : (const Color(0xFF1D4ED8), const Color(0xFFEFF6FF));
       case VitalsTone.attention:
         return isDark
             ? (const Color(0xFFFCD34D), const Color(0xFF78350F))
@@ -79,8 +112,9 @@ class VitalsStatusPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final label = labelFor(classification);
-    if (label.isEmpty) return const SizedBox.shrink();
+    final explicit = label?.trim() ?? '';
+    final text = explicit.isNotEmpty ? explicit : labelFor(classification);
+    if (text.isEmpty) return const SizedBox.shrink();
 
     final tone = toneFor(classification);
     final (fg, bg) = colorsFor(tone, Theme.of(context));
@@ -93,6 +127,8 @@ class VitalsStatusPill extends StatelessWidget {
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(100),
+        // Keeps the pill legible on top of the tinted vitals tiles.
+        border: Border.all(color: fg.withValues(alpha: 0.22), width: 0.75),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -103,14 +139,18 @@ class VitalsStatusPill extends StatelessWidget {
             decoration: BoxDecoration(color: fg, shape: BoxShape.circle),
           ),
           SizedBox(width: compact ? 4 : 6),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: compact ? 10 : 11,
-              height: 1.1,
-              letterSpacing: 0.2,
-              fontWeight: FontWeight.w600,
-              color: fg,
+          Flexible(
+            child: Text(
+              text,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: compact ? 10 : 11,
+                height: 1.1,
+                letterSpacing: 0.2,
+                fontWeight: FontWeight.w600,
+                color: fg,
+              ),
             ),
           ),
         ],

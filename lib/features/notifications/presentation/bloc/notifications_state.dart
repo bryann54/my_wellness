@@ -1,4 +1,3 @@
-
 part of 'notifications_bloc.dart';
 
 enum NotificationsStatus {

@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_wellness/common/constants/hero.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/widgets/app_fab.dart';
@@ -78,6 +79,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                       context,
                       'common.appointments',
                     ),
+                    titleHeroTag: HeroTags.homeAppointments,
                     isHome: false,
                   ),
                 ],
