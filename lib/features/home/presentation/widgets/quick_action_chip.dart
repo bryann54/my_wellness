@@ -39,7 +39,7 @@ class QuickActionChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final diameter = iconDiameterForWidth(width);
-    final iconSize = diameter * 0.42;
+    final iconSize = diameter * 0.46;
     final displayLabel = label.isEmpty
         ? label
         : '${label[0].toUpperCase()}${label.substring(1)}';
@@ -70,19 +70,11 @@ class QuickActionChip extends StatelessWidget {
                       Ink(
                         width: diameter,
                         height: diameter,
+                        // Squircle, slightly stronger tint, no border/shadow:
+                        // reads as an active control instead of a disabled one.
                         decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: colors.primary.withValues(alpha: 0.10),
-                          border: Border.all(
-                            color: colors.primary.withValues(alpha: 0.16),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: colors.shadow.withValues(alpha: 0.05),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
+                          borderRadius: BorderRadius.circular(diameter * 0.34),
+                          color: colors.primary.withValues(alpha: 0.14),
                         ),
                         child: Center(
                           child: Icon(

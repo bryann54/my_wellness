@@ -5,19 +5,40 @@ import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/widgets/appbar/app_bar_clipper.dart';
 import 'package:my_wellness/common/widgets/appbar/app_bar_flexible_header.dart';
 import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
-import 'package:my_wellness/features/home/presentation/widgets/quick_action_row.dart';
 
 class CustomAppBar extends StatelessWidget {
   final String? title;
   final List<Widget>? actions;
   final bool isHome;
   final bool isTabRoot;
-
-  /// Expanded sliver extent, excluding the system top inset and bottom widget.
   final double? expandedHeight;
   final PreferredSizeWidget? bottom;
 
   static const curveExtra = AppBarClipper.radius;
+
+  // Home content stack (from top of the flexibleSpace area):
+  //   brand row (44) + gap (12) + quick-action label (14) + gap (10)
+  //   + pill row 1 (54) + gap (8) + pill row 2 (54) + breathing room (12)
+  // = 208 base + curveExtra.
+  static const _homeBrandRowHeight = 44.0;
+  static const _homeBrandToLabelGap = 12.0;
+  static const _homeSectionLabelHeight = 14.0;
+  static const _homeLabelToGridGap = 10.0;
+  static const _homePillHeight = 54.0;
+  static const _homePillGap = 8.0;
+  static const _homeGridToCurveGap = 12.0;
+
+  static const homeContentHeight =
+      _homeBrandRowHeight +
+      _homeBrandToLabelGap +
+      _homeSectionLabelHeight +
+      _homeLabelToGridGap +
+      _homePillHeight +
+      _homePillGap +
+      _homePillHeight +
+      _homeGridToCurveGap +
+      curveExtra;
+
   const CustomAppBar({
     super.key,
     this.title,
@@ -31,16 +52,8 @@ class CustomAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AccountBloc, AccountState>(
-      buildWhen: (p, c) => p.profile != c.profile,
+      buildWhen: (previous, current) => previous.profile != current.profile,
       builder: (context, state) {
-        final textScale = MediaQuery.textScalerOf(context).scale(1);
-        final homeContentHeight =
-            8.0 +
-            (44.0 > 20.0 * textScale ? 44.0 : 20.0 * textScale) +
-            16.0 +
-            QuickActionRow.preferredHeight(context) +
-            curveExtra +
-            8.0;
         final resolvedExpanded = isHome
             ? (expandedHeight ?? homeContentHeight)
             : (expandedHeight ?? kToolbarHeight + curveExtra);

@@ -2,18 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
-import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/features/home/presentation/widgets/quick_action_chip.dart';
 
 class QuickActionRow extends StatelessWidget {
   const QuickActionRow({super.key});
-
-  static double preferredHeight(BuildContext context) {
-    final availableWidth = MediaQuery.sizeOf(context).width - 2 * AppSpacing.lg;
-    final itemWidth = availableWidth / 4;
-    return QuickActionChip.preferredHeight(context, itemWidth);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,23 +33,26 @@ class QuickActionRow extends StatelessWidget {
       ),
     ];
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-      child: LayoutBuilder(
-        builder: (context, constraints) => Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final gap = constraints.maxWidth < 360 ? 4.0 : 8.0;
+        final itemWidth =
+            (constraints.maxWidth - gap * (items.length - 1)) / items.length;
+
+        return Row(
           children: [
-            for (final item in items)
-              Expanded(
-                child: QuickActionChip(
-                  icon: item.icon,
-                  label: item.label,
-                  route: item.route,
-                  width: constraints.maxWidth / items.length,
-                ),
+            for (var index = 0; index < items.length; index++) ...[
+              if (index > 0) SizedBox(width: gap),
+              QuickActionChip(
+                width: itemWidth,
+                icon: items[index].icon,
+                label: items[index].label,
+                route: items[index].route,
               ),
+            ],
           ],
-        ),
-      ),
+        );
+      },
     );
   }
 }

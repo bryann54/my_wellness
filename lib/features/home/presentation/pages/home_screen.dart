@@ -3,16 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:my_wellness/common/constants/hero.dart';
-import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
 import 'package:my_wellness/features/home/presentation/bloc/home_bloc.dart';
 import 'package:my_wellness/features/home/presentation/widgets/assessment_progress_card.dart';
+import 'package:my_wellness/features/home/presentation/widgets/home_app_bar.dart';
 import 'package:my_wellness/features/home/presentation/widgets/quick_action_row.dart';
 import 'package:my_wellness/features/home/presentation/widgets/vitals_tile.dart';
-import 'package:my_wellness/features/notifications/presentation/bloc/notifications_bloc.dart';
 import 'package:my_wellness/features/vitals/presentation/bloc/vitals_bloc.dart';
 
 @RoutePage()
@@ -31,6 +29,15 @@ class _HomeScreenState extends State<HomeScreen> {
     context.read<VitalsBloc>().add(const LoadVitalsSummaryEvent());
   }
 
+  Future<void> _refresh() async {
+    final homeBloc = context.read<HomeBloc>();
+    homeBloc.add(const LoadHomeDashboardEvent());
+    context.read<VitalsBloc>().add(const LoadVitalsSummaryEvent());
+    await homeBloc.stream.firstWhere(
+      (state) => state.status != HomeDashboardStatus.loading,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final displayName = context.select<AccountBloc, String>(
@@ -39,11 +46,6 @@ class _HomeScreenState extends State<HomeScreen> {
     final firstName = displayName.isEmpty
         ? ''
         : displayName.split(RegExp(r'\s+')).first;
-    final greeting = firstName.isEmpty
-        ? AppLocalizations.getString(context, 'homeDashboard.welcomeFallback')
-        : AppLocalizations.t(context, 'homeDashboard.welcome', {
-            'name': firstName,
-          });
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final overlayStyle = theme.brightness == Brightness.dark
@@ -54,228 +56,182 @@ class _HomeScreenState extends State<HomeScreen> {
       value: overlayStyle,
       child: Scaffold(
         backgroundColor: colors.surface,
-        body: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: _HomeBrandRow(topInset: MediaQuery.paddingOf(context).top),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                AppSpacing.lg,
-                AppSpacing.lg,
-                AppSpacing.md,
+        body: RefreshIndicator(
+          onRefresh: _refresh,
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              const HomeAppBar(),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  AppSpacing.md,
+                  AppSpacing.lg,
+                  AppSpacing.lg,
+                ),
+                sliver: SliverToBoxAdapter(
+                  child: _GreetingBlock(firstName: firstName),
+                ),
               ),
-              sliver: SliverToBoxAdapter(
-                child: _GreetingRow(greeting: greeting, firstName: firstName),
+              // Active screenings first: it's the one actionable item.
+              // The card collapses to nothing (including its own bottom
+              // spacing) when there are no sessions.
+              const SliverPadding(
+                padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                sliver: SliverToBoxAdapter(child: AssessmentProgressCard()),
               ),
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.lg,
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  0,
+                  AppSpacing.lg,
+                  AppSpacing.xl,
+                ),
+                sliver: SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _SectionLabel(
+                        label: AppLocalizations.getString(
+                          context,
+                          'homeDashboard.healthOverview',
+                        ),
                       ),
-                      child: _SectionHeading(
-                        title: AppLocalizations.getString(
+                      const SizedBox(height: AppSpacing.md),
+                      IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: const [
+                            Expanded(
+                              child: VitalsTile(kind: VitalsTileKind.bp),
+                            ),
+                            SizedBox(width: AppSpacing.sm),
+                            Expanded(
+                              child: VitalsTile(kind: VitalsTileKind.bs),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                sliver: SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _SectionLabel(
+                        label: AppLocalizations.getString(
                           context,
                           'homeDashboard.quickActions',
                         ),
                       ),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    const QuickActionRow(),
-                  ],
-                ),
-              ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                AppSpacing.sm,
-                AppSpacing.lg,
-                AppSpacing.sm,
-              ),
-              sliver: SliverToBoxAdapter(
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 720),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _SectionHeading(
-                          title: AppLocalizations.getString(
-                            context,
-                            'homeDashboard.healthOverview',
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                        IntrinsicHeight(
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              const Expanded(
-                                child: VitalsTile(kind: VitalsTileKind.bp),
-                              ),
-                              const SizedBox(width: AppSpacing.sm),
-                              const Expanded(
-                                child: VitalsTile(kind: VitalsTileKind.bs),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.lg),
-                        const AssessmentProgressCard(),
-                      ],
-                    ),
+                      const SizedBox(height: AppSpacing.md),
+                      const QuickActionRow(),
+                    ],
                   ),
                 ),
               ),
-            ),
-            SliverToBoxAdapter(
-              child: SizedBox(
-                height: 104 + MediaQuery.paddingOf(context).bottom,
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 104 + MediaQuery.paddingOf(context).bottom,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _HomeBrandRow extends StatelessWidget {
-  const _HomeBrandRow({required this.topInset});
+class _GreetingBlock extends StatelessWidget {
+  const _GreetingBlock({required this.firstName});
 
-  final double topInset;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: EdgeInsets.fromLTRB(
-      AppSpacing.lg,
-      topInset + AppSpacing.sm,
-      AppSpacing.lg,
-      AppSpacing.sm,
-    ),
-    child: Row(
-      children: [
-        Hero(
-          tag: HeroTags.authLogo,
-          flightShuttleBuilder: (_, __, direction, ___, toHero) =>
-              toHero.widget,
-          child: SizedBox(
-            width: 44,
-            height: 40,
-            child: ClipRect(
-              child: OverflowBox(
-                alignment: Alignment.centerLeft,
-                minWidth: 88,
-                maxWidth: 88,
-                minHeight: 40,
-                maxHeight: 40,
-                child: Image.asset(
-                  'assets/images/logo.png',
-                  width: 58,
-                  height: 50,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Icon(
-                    Icons.health_and_safety_rounded,
-                    color: Theme.of(context).colorScheme.primary,
-                    size: 40,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-        const Spacer(),
-        BlocBuilder<NotificationsBloc, NotificationsState>(
-          buildWhen: (previous, current) =>
-              previous.unreadCount != current.unreadCount,
-          builder: (context, state) {
-            final unreadCount = state.unreadCount;
-            return IconButton(
-              tooltip: AppLocalizations.getString(
-                context,
-                'settings.notifications',
-              ),
-              onPressed: () => context.router.push(const NotificationsRoute()),
-              icon: Badge(
-                isLabelVisible: unreadCount > 0,
-                label: Text(unreadCount > 9 ? '9+' : '$unreadCount'),
-                child: const Icon(Icons.notifications_none_rounded),
-              ),
-            );
-          },
-        ),
-      ],
-    ),
-  );
-}
-
-class _GreetingRow extends StatelessWidget {
-  const _GreetingRow({required this.greeting, required this.firstName});
-
-  final String greeting;
   final String firstName;
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final colors = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final greetingLead = AppLocalizations.getString(
+      context,
+      'homeDashboard.welcomeFallback',
+    );
+
     if (firstName.isEmpty) {
-      return Text(
-        greeting,
-        style: textTheme.headlineSmall?.copyWith(
-          color: colors.primary,
-          fontWeight: FontWeight.w700,
-        ),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            greetingLead,
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontSize: 28,
+              fontWeight: FontWeight.w700,
+              height: 1.15,
+              letterSpacing: -0.5,
+              color: colors.onSurface,
+            ),
+          ),
+        ],
       );
     }
 
-    final greetingLead = greeting.replaceFirst(firstName, '').trimRight();
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.baseline,
-      textBaseline: TextBaseline.alphabetic,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          greetingLead,
-          style: textTheme.titleMedium?.copyWith(
-            color: colors.onSurfaceVariant,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(width: AppSpacing.xs),
-        Flexible(
-          child: Text(
-            firstName,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: textTheme.headlineSmall?.copyWith(
-              color: colors.primary,
-              fontWeight: FontWeight.w700,
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: [
+            Text(
+              AppLocalizations.getString(context, 'common.hello'),
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontSize: 22,
+                fontWeight: FontWeight.w500,
+                color: colors.onSurfaceVariant,
+              ),
             ),
-          ),
+            const SizedBox(width: AppSpacing.xs),
+            Flexible(
+              child: Text(
+                firstName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  fontSize: 30,
+                  fontWeight: FontWeight.w700,
+                  height: 1.1,
+                  letterSpacing: -0.6,
+                  color: colors.primary,
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );
   }
 }
 
-class _SectionHeading extends StatelessWidget {
-  const _SectionHeading({required this.title});
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel({required this.label});
 
-  final String title;
+  final String label;
 
   @override
-  Widget build(BuildContext context) => Text(
-    title,
-    style: Theme.of(
-      context,
-    ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
-  );
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Text(
+      label,
+      style: theme.textTheme.titleSmall?.copyWith(
+        fontSize: 13,
+        letterSpacing: 0.2,
+        fontWeight: FontWeight.w700,
+        color: theme.colorScheme.onSurfaceVariant,
+      ),
+    );
+  }
 }
