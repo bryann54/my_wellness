@@ -22,30 +22,53 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  static final _whitespace = RegExp(r'\s+');
+
   @override
   void initState() {
     super.initState();
+    _load();
+  }
+
+  void _load() {
     context.read<HomeBloc>().add(const LoadHomeDashboardEvent());
     context.read<VitalsBloc>().add(const LoadVitalsSummaryEvent());
   }
 
   Future<void> _refresh() async {
-    final homeBloc = context.read<HomeBloc>();
-    homeBloc.add(const LoadHomeDashboardEvent());
-    context.read<VitalsBloc>().add(const LoadVitalsSummaryEvent());
-    await homeBloc.stream.firstWhere(
-      (state) => state.status != HomeDashboardStatus.loading,
+    final home = context.read<HomeBloc>();
+    final vitals = context.read<VitalsBloc>();
+    final homeDone = home.stream.firstWhere(
+      (s) => s.status != HomeDashboardStatus.loading,
     );
+    final vitalsDone = vitals.stream.firstWhere(
+      (s) => s.status != VitalsStatus.loading,
+    );
+
+    _load();
+
+    try {
+      await Future.wait<Object?>([
+        homeDone,
+        vitalsDone,
+      ]).timeout(const Duration(seconds: 10), onTimeout: () => const []);
+    } catch (_) {
+    }
+  }
+
+  String _greeting(BuildContext context) {
+    final displayName = context.select<AccountBloc, String>(
+      (bloc) => bloc.state.profile?.displayName.trim() ?? '',
+    );
+    if (displayName.isEmpty) return '';
+    final firstName = displayName.split(_whitespace).first;
+    return '${AppLocalizations.getString(context, 'common.hello')}, $firstName';
   }
 
   @override
   Widget build(BuildContext context) {
-    final displayName = context.select<AccountBloc, String>(
-      (bloc) => bloc.state.profile?.displayName.trim() ?? '',
-    );
-    final firstName = displayName.isEmpty
-        ? ''
-        : displayName.split(RegExp(r'\s+')).first;
+    final greeting = _greeting(context);
+
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final overlayStyle = theme.brightness == Brightness.dark
@@ -58,23 +81,18 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: colors.surface,
         body: RefreshIndicator(
           onRefresh: _refresh,
+          edgeOffset: MediaQuery.paddingOf(context).top + kToolbarHeight,
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
-              const HomeAppBar(),
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.lg,
-                  AppSpacing.md,
-                  AppSpacing.lg,
-                  AppSpacing.lg,
-                ),
-                sliver: SliverToBoxAdapter(
-                  child: _GreetingBlock(firstName: firstName),
-                ),
-              ),
+              HomeAppBar(greeting: greeting),
               const SliverPadding(
-                padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                padding: EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  0,
+                  AppSpacing.lg,
+                  AppSpacing.lg,
+                ),
                 sliver: SliverToBoxAdapter(child: AssessmentProgressCard()),
               ),
               SliverPadding(
@@ -95,10 +113,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       const SizedBox(height: AppSpacing.md),
-                      IntrinsicHeight(
+                      const IntrinsicHeight(
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: const [
+                          children: [
                             Expanded(
                               child: VitalsTile(kind: VitalsTileKind.bp),
                             ),
@@ -140,75 +158,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _GreetingBlock extends StatelessWidget {
-  const _GreetingBlock({required this.firstName});
-
-  final String firstName;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-    final greetingLead = AppLocalizations.getString(
-      context,
-      'homeDashboard.welcomeFallback',
-    );
-
-    if (firstName.isEmpty) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            greetingLead,
-            style: theme.textTheme.headlineMedium?.copyWith(
-              fontSize: 28,
-              fontWeight: FontWeight.w700,
-              height: 1.15,
-              letterSpacing: -0.5,
-              color: colors.onSurface,
-            ),
-          ),
-        ],
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
-          children: [
-            Text(
-              AppLocalizations.getString(context, 'common.hello'),
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontSize: 22,
-                fontWeight: FontWeight.w500,
-                color: colors.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(width: AppSpacing.xs),
-            Flexible(
-              child: Text(
-                firstName,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.headlineMedium?.copyWith(
-                  fontSize: 30,
-                  fontWeight: FontWeight.w700,
-                  height: 1.1,
-                  letterSpacing: -0.6,
-                  color: colors.primary,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
     );
   }
 }

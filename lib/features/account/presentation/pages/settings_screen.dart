@@ -10,6 +10,7 @@ import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart
 import 'package:my_wellness/features/account/presentation/widgets/dialogs/delete_account_dialog.dart';
 import 'package:my_wellness/features/account/presentation/widgets/dialogs/logout_dialog.dart';
 import 'package:my_wellness/features/account/presentation/widgets/menu_item_tile.dart';
+import 'package:my_wellness/features/notifications/presentation/widgets/notification_permission_sheet.dart';
 import 'package:provider/provider.dart';
 
 @RoutePage()
@@ -66,7 +67,7 @@ class SettingsScreen extends StatelessWidget {
                       ),
                     ),
                     _divider(context),
-                    MenuItemTile(
+                 MenuItemTile(
                       icon: Icons.notifications_none_rounded,
                       title: AppLocalizations.getString(
                         context,
@@ -76,25 +77,23 @@ class SettingsScreen extends StatelessWidget {
                         context,
                         'settings.alertPreferencesSub',
                       ),
-                      onTap: () {
-                        // TODO: push NotificationPreferencesRoute()
-                      },
+                      onTap: () => NotificationPermissionSheet.show(context),
                     ),
-                    _divider(context),
-                    MenuItemTile(
-                      icon: Icons.lock_outline_rounded,
-                      title: AppLocalizations.getString(
-                        context,
-                        'settings.security',
-                      ),
-                      subtitle: AppLocalizations.getString(
-                        context,
-                        'settings.securitySub',
-                      ),
-                      onTap: () {
-                        // TODO: push SecuritySettingsRoute()
-                      },
-                    ),
+                    // _divider(context),
+                    // MenuItemTile(
+                    //   icon: Icons.lock_outline_rounded,
+                    //   title: AppLocalizations.getString(
+                    //     context,
+                    //     'settings.security',
+                    //   ),
+                    //   subtitle: AppLocalizations.getString(
+                    //     context,
+                    //     'settings.securitySub',
+                    //   ),
+                    //   onTap: () {
+                    //     // TODO: push SecuritySettingsRoute()
+                    //   },
+                    // ),
                   ],
                 ),
 
@@ -125,7 +124,7 @@ class SettingsScreen extends StatelessWidget {
                       icon: Icons.logout_rounded,
                       title: AppLocalizations.getString(
                         context,
-                        'settings.logOut',
+                        'auth.logout',
                       ),
                       subtitle: AppLocalizations.getString(
                         context,

@@ -463,7 +463,16 @@
    "notifications": {
     "emptyTitle": "Hakuna arifa bado",
     "emptyBody": "Tutakujulisha wakati kuna jambo linalohitaji uangalizi wako.",
-    "unreadCountLabel": "Arifa, {count} ambazo hazijasomwa"
+    "unreadCountLabel": "Arifa, {count} ambazo hazijasomwa",
+     
+  "emptySubtitle": "Vikumbusho vya miadi, arifa za dawa, na taarifa za afya zitaonekana hapa.",
+  "offTitle": "Arifa zimezimwa",
+  "offSubtitle": "Washa tena kwenye mipangilio ya kifaa chako ili kupokea vikumbusho vya miadi na arifa za dawa.",
+  "optInTitle": "Kaa katika mzunguko",
+  "optInSubtitle": "Washa arifa ili kupokea vikumbusho vya miadi, arifa za dawa, na taarifa za afya.",
+  "enable": "Washa arifa",
+  "openSettings": "Fungua mipangilio",
+  "manageTooltip": "Dhibiti arifa"
   },
   "settings": {
     

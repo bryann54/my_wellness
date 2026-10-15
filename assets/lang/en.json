@@ -471,7 +471,16 @@
  "notifications": {
     "emptyTitle": "No notifications yet",
     "emptyBody": "We'll let you know when something needs your attention.",
-    "unreadCountLabel": "Notifications, {count} unread"
+    "unreadCountLabel": "Notifications, {count} unread",
+     
+  "emptySubtitle": "Appointment reminders, medication alerts, and health updates will appear here.",
+  "offTitle": "Notifications are off",
+  "offSubtitle": "Turn them back on in your device settings to receive appointment reminders and medication alerts.",
+  "optInTitle": "Stay in the loop",
+  "optInSubtitle": "Enable notifications to receive appointment reminders, medication alerts, and health updates.",
+  "enable": "Enable notifications",
+  "openSettings": "Open settings",
+  "manageTooltip": "Manage notifications"
   },
   "settings": {
     "title": "Settings",
@@ -504,7 +513,7 @@
     "sectionAccount": "Account",
     "sectionSupport": "Support",
 
-   
+   "logOutSub": "Sign out of your account",
     "languageSub": "App display language",
 
    

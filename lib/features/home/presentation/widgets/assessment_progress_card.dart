@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -60,7 +62,13 @@ class AssessmentProgressCard extends StatelessWidget {
                   ),
                   onPressed: () =>
                       context.router.push(const AssessmentsListRoute()),
-                  icon: const Icon(Icons.arrow_forward_rounded),
+                  icon: Icon(
+                      Platform.isAndroid
+                          ? Icons.arrow_forward
+                          : Icons.arrow_forward_ios,
+                      size: 16,
+                      color: colors.primary,
+                    ),
                   iconAlignment: IconAlignment.end,
                   label: Text(
                     AppLocalizations.getString(context, 'homeDashboard.seeAll'),
@@ -310,7 +318,13 @@ class _FeaturedSession extends StatelessWidget {
               ),
             ),
             onPressed: () => _resume(context, session),
-            icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+            icon:   Icon(
+              Platform.isAndroid
+                  ? Icons.arrow_forward
+                  : Icons.arrow_forward_ios,
+              size: 16,
+              color: colors.primary,
+            ),
             iconAlignment: IconAlignment.end,
             label: Text(
               AppLocalizations.getString(
