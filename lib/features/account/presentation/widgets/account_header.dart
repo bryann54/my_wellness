@@ -1,50 +1,63 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:my_wellness/common/res/colors.dart';
+
+import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/features/account/domain/entities/health_profile.dart';
 
 class AccountHeader extends StatelessWidget {
-  final HealthProfile profile;
-  final VoidCallback onLogout;
-
   const AccountHeader({
     super.key,
     required this.profile,
     required this.onLogout,
   });
 
+  final HealthProfile profile;
+  final VoidCallback onLogout;
+
+  static const _expandedContent = 150.0;
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final topInset = MediaQuery.paddingOf(context).top;
+    final expandedHeight = _expandedContent + topInset;
+
     return SliverAppBar(
-      expandedHeight: 150,
+      expandedHeight: expandedHeight,
       floating: false,
       pinned: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: cs.surface,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       leading: const SizedBox.shrink(),
       leadingWidth: 0,
       actions: [
         Padding(
-          padding: const EdgeInsets.only(right: 8),
+          padding: const EdgeInsets.only(right: AppSpacing.sm),
           child: IconButton(
             onPressed: onLogout,
-            icon: const Icon(Icons.logout),
-            color: Colors.red,
+            icon: const Icon(Icons.logout_rounded),
+            color: cs.error,
+            tooltip: 'Log out',
           ),
         ),
       ],
       flexibleSpace: LayoutBuilder(
         builder: (context, constraints) {
-          final collapsedHeight =
-              kToolbarHeight + MediaQuery.of(context).padding.top;
-          const expandedHeight = 150.0;
-          final progress =
-              ((constraints.biggest.height - expandedHeight) /
-                      (collapsedHeight - expandedHeight))
-                  .clamp(0.0, 1.0);
+          final collapsedHeight = kToolbarHeight + topInset;
+          final range = expandedHeight - collapsedHeight;
+          final progress = range <= 0
+              ? 1.0
+              : ((expandedHeight - constraints.biggest.height) / range).clamp(
+                  0.0,
+                  1.0,
+                );
+
           return FlexibleSpaceBar(
-            titlePadding: const EdgeInsets.only(left: 16, bottom: 16),
+            titlePadding: const EdgeInsetsDirectional.only(
+              start: AppSpacing.md,
+              bottom: AppSpacing.md,
+            ),
             title: Opacity(
               opacity: progress,
               child: _buildCollapsedTitle(context),
@@ -57,21 +70,25 @@ class AccountHeader extends StatelessWidget {
   }
 
   Widget _buildCollapsedTitle(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         CircleAvatar(
           radius: 16,
-          backgroundColor: AppColors.primaryColor.withValues(alpha: 0.1),
+          backgroundColor: cs.primary.withValues(alpha: 0.10),
           child: Text(
             _getInitials(profile),
-            style: GoogleFonts.inter(
+            style: theme.textTheme.labelMedium?.copyWith(
               fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: AppColors.primaryColor,
+              fontWeight: FontWeight.w700,
+              color: cs.primary,
             ),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: AppSpacing.md),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -79,24 +96,21 @@ class AccountHeader extends StatelessWidget {
             children: [
               Text(
                 profile.displayName,
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontSize: 14,
+                  color: cs.onSurface,
+                ),
               ),
               Text(
                 profile.email,
-                style: GoogleFonts.inter(
-                  fontSize: 12,
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withValues(alpha: 0.6),
-                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontSize: 12,
+                  color: cs.onSurface.withValues(alpha: 0.6),
+                ),
               ),
             ],
           ),
@@ -106,26 +120,33 @@ class AccountHeader extends StatelessWidget {
   }
 
   Widget _buildExpandedHeader(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final topInset = MediaQuery.paddingOf(context).top;
+
     return Container(
-      color: Theme.of(context).scaffoldBackgroundColor,
-      padding: const EdgeInsets.fromLTRB(20, 70, 20, 20),
+      color: cs.surface,
+      padding: EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        topInset + AppSpacing.xxl,
+        AppSpacing.lg,
+        AppSpacing.lg,
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           CircleAvatar(
             radius: 40,
-            backgroundColor: cs.onPrimaryFixed.withValues(alpha: 0.2),
+            backgroundColor: cs.primary.withValues(alpha: 0.10),
             child: Text(
               _getInitials(profile),
-              style: GoogleFonts.inter(
+              style: theme.textTheme.displaySmall?.copyWith(
                 fontSize: 28,
-                fontWeight: FontWeight.w600,
-                color: cs.primary.withValues(alpha: 0.5),
+                color: cs.primary,
               ),
             ),
           ),
-          const SizedBox(width: 20),
+          const SizedBox(width: AppSpacing.lg),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -133,25 +154,21 @@ class AccountHeader extends StatelessWidget {
               children: [
                 Text(
                   profile.displayName,
-                  style: GoogleFonts.inter(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontSize: 22,
+                    color: cs.onSurface,
+                  ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSpacing.xs),
                 Text(
                   profile.email,
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: 0.7),
-                  ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: cs.onSurface.withValues(alpha: 0.7),
+                  ),
                 ),
               ],
             ),

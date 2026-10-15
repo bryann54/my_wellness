@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
+import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/features/account/presentation/widgets/profile_details/profile_section_label.dart';
 
 class ProfileReadOnlyRow extends StatelessWidget {
-  final String label;
-  final String value;
-  final String? helper;
-
   const ProfileReadOnlyRow({
     super.key,
     required this.label,
@@ -14,40 +11,48 @@ class ProfileReadOnlyRow extends StatelessWidget {
     this.helper,
   });
 
+  final String label;
+  final String value;
+  final String? helper;
+
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ProfileSectionLabel(label),
-        const SizedBox(height: 6),
+        const SizedBox(height: AppSpacing.xs),
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm + 4,
+          ),
           decoration: BoxDecoration(
             color: cs.surfaceContainerHighest.withValues(alpha: 0.6),
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: AppRadius.mdAll,
           ),
           child: Text(
             value,
-            style: GoogleFonts.inter(
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodyLarge?.copyWith(
               fontSize: 14.5,
               fontWeight: FontWeight.w500,
               color: cs.onSurface.withValues(alpha: 0.8),
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
         ),
         if (helper != null) ...[
-          const SizedBox(height: 6),
+          const SizedBox(height: AppSpacing.xs),
           Padding(
-            padding: const EdgeInsets.only(left: 4),
+            padding: const EdgeInsets.only(left: AppSpacing.xs),
             child: Text(
               helper!,
-              style: GoogleFonts.inter(
+              style: theme.textTheme.labelSmall?.copyWith(
                 fontSize: 11.5,
                 color: cs.onSurface.withValues(alpha: 0.5),
               ),

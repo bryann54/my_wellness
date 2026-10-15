@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:my_wellness/common/widgets/shimmer.dart';
+
+import 'package:my_wellness/common/res/app_spacing.dart';
 
 class AccountShimmer extends StatelessWidget {
   const AccountShimmer({super.key});
@@ -7,6 +8,7 @@ class AccountShimmer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final placeholder = cs.surfaceContainerHighest.withValues(alpha: 0.6);
 
     return CustomScrollView(
       physics: const NeverScrollableScrollPhysics(),
@@ -21,40 +23,29 @@ class AccountShimmer extends StatelessWidget {
             background: Container(
               color: cs.surface,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 70, 20, 20),
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  70,
+                  AppSpacing.lg,
+                  AppSpacing.lg,
+                ),
                 child: Row(
                   children: [
-                    Container(
+                    _block(
                       width: 80,
                       height: 80,
-                      decoration: BoxDecoration(
-                        color: Colors.grey,
-                        shape: BoxShape.circle,
-                      ),
+                      color: placeholder,
+                      radius: 40,
                     ),
-                    const SizedBox(width: 20),
+                    const SizedBox(width: AppSpacing.lg),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Container(
-                            width: 150,
-                            height: 24,
-                            decoration: BoxDecoration(
-                              color: Colors.grey,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ).withShimmer(isLoading: true),
-                          const SizedBox(height: 8),
-                          Container(
-                            width: 200,
-                            height: 16,
-                            decoration: BoxDecoration(
-                              color: Colors.grey,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ).withShimmer(isLoading: true),
+                          _block(width: 150, height: 24, color: placeholder),
+                          const SizedBox(height: AppSpacing.sm),
+                          _block(width: 200, height: 16, color: placeholder),
                         ],
                       ),
                     ),
@@ -66,96 +57,90 @@ class AccountShimmer extends StatelessWidget {
         ),
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
-            child: Container(
-              width: 100,
-              height: 20,
-              decoration: BoxDecoration(
-                color: Colors.grey,
-                borderRadius: BorderRadius.circular(6),
-              ),
-            ).withShimmer(isLoading: true),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.lg,
+              AppSpacing.lg,
+              AppSpacing.sm,
+            ),
+            child: _block(width: 100, height: 20, color: placeholder),
           ),
         ),
-        ...List.generate(4, (index) => _buildMenuItemShimmer(context)),
-
+        ...List.generate(4, (index) => _menuItemShimmer(context, placeholder)),
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
-            child: Container(
-              width: 80,
-              height: 20,
-              decoration: BoxDecoration(
-                color: Colors.grey,
-                borderRadius: BorderRadius.circular(6),
-              ),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              AppSpacing.lg,
+              AppSpacing.lg,
+              AppSpacing.sm,
             ),
+            child: _block(width: 80, height: 20, color: placeholder),
           ),
         ),
-        ...List.generate(5, (index) => _buildMenuItemShimmer(context)),
-
-        const SliverToBoxAdapter(child: SizedBox(height: 32)),
+        ...List.generate(5, (index) => _menuItemShimmer(context, placeholder)),
+        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xl)),
       ],
     );
   }
 
-  Widget _buildMenuItemShimmer(BuildContext context) {
+  Widget _block({
+    required double width,
+    required double height,
+    required Color color,
+    double radius = 6,
+  }) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(radius),
+      ),
+    );
+  }
+
+  Widget _menuItemShimmer(BuildContext context, Color placeholder) {
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.xs,
+        ),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.md,
+          ),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(5),
+            borderRadius: AppRadius.mdAll,
             border: Border.all(
-              color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+              color: Theme.of(
+                context,
+              ).colorScheme.outlineVariant.withValues(alpha: 0.5),
             ),
           ),
           child: Row(
             children: [
-              Container(
+              _block(
                 width: 40,
                 height: 40,
-                decoration: BoxDecoration(
-                  color: Colors.grey,
-                  borderRadius: BorderRadius.circular(5),
-                ),
+                color: placeholder,
+                radius: AppRadius.sm,
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 120,
-                      height: 16,
-                      decoration: BoxDecoration(
-                        color: Colors.grey,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      width: 80,
-                      height: 14,
-                      decoration: BoxDecoration(
-                        color: Colors.grey,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                    ),
+                    _block(width: 120, height: 16, color: placeholder),
+                    const SizedBox(height: AppSpacing.sm),
+                    _block(width: 80, height: 14, color: placeholder),
                   ],
                 ),
               ),
-
-              Container(
-                width: 20,
-                height: 20,
-                decoration: BoxDecoration(
-                  color: Colors.grey,
-                  shape: BoxShape.circle,
-                ),
-              ),
+              _block(width: 20, height: 20, color: placeholder, radius: 10),
             ],
           ),
         ),

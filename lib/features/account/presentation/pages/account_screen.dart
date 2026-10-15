@@ -2,21 +2,22 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:my_wellness/common/helpers/app_router.gr.dart';
-import 'package:my_wellness/common/widgets/app_version_footer.dart';
-import 'package:my_wellness/features/account/presentation/widgets/dialogs/logout_dialog.dart';
-import 'package:my_wellness/features/auth/presentation/bloc/auth_event.dart';
 import 'package:provider/provider.dart';
+
+import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/notifiers/locale_provider.dart';
+import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
+import 'package:my_wellness/common/widgets/app_version_footer.dart';
 import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
 import 'package:my_wellness/features/account/presentation/widgets/account_header.dart';
 import 'package:my_wellness/features/account/presentation/widgets/account_menu_section.dart';
-import 'package:my_wellness/features/account/presentation/widgets/support_menu_section.dart';
-import 'package:my_wellness/features/account/presentation/widgets/loading_view.dart';
+import 'package:my_wellness/features/account/presentation/widgets/dialogs/logout_dialog.dart';
 import 'package:my_wellness/features/account/presentation/widgets/error_view.dart';
+import 'package:my_wellness/features/account/presentation/widgets/loading_view.dart';
+import 'package:my_wellness/features/account/presentation/widgets/support_menu_section.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:my_wellness/features/auth/presentation/bloc/auth_event.dart';
 
 @RoutePage()
 class AccountScreen extends StatefulWidget {
@@ -89,34 +90,18 @@ class _AccountScreenState extends State<AccountScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionLabel(
-          context,
-          AppLocalizations.getString(context, 'profile.account'),
+        _SectionLabel(
+          label: AppLocalizations.getString(context, 'profile.account'),
         ),
         AccountMenuSection(state: state, currentLocale: currentLocale),
-        _buildSectionLabel(
-          context,
-          AppLocalizations.getString(context, 'profile.getHelp'),
+        _SectionLabel(
+          label: AppLocalizations.getString(context, 'profile.getHelp'),
         ),
         const SupportMenuSection(),
-        const SizedBox(height: 32),
+        const SizedBox(height: AppSpacing.xl),
         const Center(child: AppVersionFooter()),
-        const SizedBox(height: 24),
+        const SizedBox(height: AppSpacing.lg),
       ],
-    );
-  }
-
-  Widget _buildSectionLabel(BuildContext context, String label) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
-      child: Text(
-        label,
-        style: GoogleFonts.inter(
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
-        ),
-      ),
     );
   }
 
@@ -149,9 +134,7 @@ class _AccountScreenState extends State<AccountScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.green,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        backgroundColor: Theme.of(context).colorScheme.primary,
         duration: const Duration(seconds: 2),
       ),
     );
@@ -161,14 +144,37 @@ class _AccountScreenState extends State<AccountScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         action: SnackBarAction(
           label: 'Retry',
           onPressed: () =>
               context.read<AccountBloc>().add(const FetchProfileEvent()),
         ),
         duration: const Duration(seconds: 4),
+      ),
+    );
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.sm,
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w600,
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
+        ),
       ),
     );
   }
