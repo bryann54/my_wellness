@@ -39,7 +39,6 @@ class AppRouter extends RootStackRouter {
 
     // Account / auth-adjacent
     AutoRoute(page: VerificationRoute.page),
-    AutoRoute(page: ConversationalRegisterRoute.page),
     AutoRoute(page: SettingsRoute.page),
     AutoRoute(page: ProfileDetailsRoute.page),
 

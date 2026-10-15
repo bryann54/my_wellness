@@ -18,8 +18,10 @@ import 'package:my_wellness/features/auth/presentation/widgets/auth_state_listen
 import 'package:my_wellness/features/auth/presentation/widgets/shared/auth_bottom_bar.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/shared/auth_header.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/shared/language_selector.dart';
+import 'package:my_wellness/features/geography/domain/entities/constituency.dart';
 import 'package:my_wellness/features/geography/domain/entities/county.dart';
 import 'package:my_wellness/features/geography/domain/entities/sub_county.dart';
+import 'package:my_wellness/features/geography/domain/entities/ward.dart';
 import 'package:my_wellness/features/geography/presentation/bloc/geography_bloc.dart';
 import 'package:my_wellness/features/geography/presentation/pages/steps/register_step_credentials.dart';
 import 'package:my_wellness/features/geography/presentation/pages/steps/register_step_identity.dart';
@@ -46,6 +48,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String? _password;
   County? _county;
   SubCounty? _subCounty;
+  Constituency? _constituency;
+  Ward? _ward;
 
   @override
   void initState() {
@@ -107,6 +111,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       identityVerificationId: identity.verificationId,
       countyId: _county?.id,
       subCountyId: _subCounty?.id,
+      constituencyId: _constituency?.id,
+      wardId: _ward?.id,
     );
 
     context.read<AuthBloc>().add(SignUpEvent(request));
@@ -229,18 +235,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               _next();
                             },
                       ),
-                      RegisterStepLocation(
+                  RegisterStepLocation(
                         initialCounty: _county,
                         initialSubCounty: _subCounty,
-                        verifiedCountyId: _identity?.countyId,
-                        verifiedSubCountyId: _identity?.subCountyId,
-                        onContinue: ({required county, required subCounty}) {
-                          setState(() {
-                            _county = county;
-                            _subCounty = subCounty;
-                          });
-                          _next();
-                        },
+                        initialConstituency: _constituency,
+                        initialWard: _ward,
+                        seedCountyId: _identity?.countyId,
+                        seedSubCountyId: _identity?.subCountyId,
+                        seedConstituencyId: _identity?.constituencyId,
+                        seedWardId: _identity?.wardId,
+                        onContinue:
+                            ({
+                              required county,
+                              required subCounty,
+                              required constituency,
+                              ward,
+                            }) {
+                              setState(() {
+                                _county = county;
+                                _subCounty = subCounty;
+                                _constituency = constituency;
+                                _ward = ward;
+                              });
+                              _next();
+                            },
                       ),
                       RegisterStepSubmit(
                         summary: SubmitSummary(
@@ -252,6 +270,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           dateOfBirth: _identity?.dateOfBirth,
                           county: _county,
                           subCounty: _subCounty,
+                          constituency: _constituency,
+                          ward: _ward,
                         ),
                         isLoading: isLoading,
                         onSubmit: _submit,

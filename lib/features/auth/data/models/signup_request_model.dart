@@ -24,10 +24,19 @@ class SignupRequestModel {
 
   @JsonKey(name: 'county')
   final int? countyId;
-  @JsonKey(name: 'identity_verification_id')
-  final String? identityVerificationId;
+
   @JsonKey(name: 'sub_county')
   final int? subCountyId;
+
+  @JsonKey(name: 'constituency')
+  final int? constituencyId;
+
+  @JsonKey(name: 'ward')
+  final int? wardId;
+
+  @JsonKey(name: 'identity_verification_id')
+  final String? identityVerificationId;
+
   @JsonKey(includeFromJson: false, includeToJson: false)
   final IdType? idType;
 
@@ -42,6 +51,8 @@ class SignupRequestModel {
     this.nationalIdNumber,
     this.countyId,
     this.subCountyId,
+    this.constituencyId,
+    this.wardId,
     this.identityVerificationId,
     this.idType,
   }) : assert(

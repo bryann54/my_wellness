@@ -6,16 +6,14 @@ import 'package:my_wellness/features/geography/domain/entities/county.dart';
 import 'package:my_wellness/features/geography/presentation/bloc/geography_bloc.dart';
 
 class CountyDropdown extends StatelessWidget {
-  final int? selectedCountyId;
-  final ValueChanged<int?> onChanged;
-  final bool isLocked;
-
   const CountyDropdown({
     super.key,
     required this.selectedCountyId,
     required this.onChanged,
-    this.isLocked = false,
   });
+
+  final int? selectedCountyId;
+  final ValueChanged<int?> onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +38,7 @@ class CountyDropdown extends StatelessWidget {
         return DropDownWidget<County>(
           label: AppLocalizations.getString(context, 'auth.county'),
           isRequired: true,
-          isEnabled: !isLocked && !isLoading && counties.isNotEmpty,
+          isEnabled: !isLoading && counties.isNotEmpty,
           selectedItem: selected,
           hintText: isLoading
               ? AppLocalizations.getString(context, 'common.loading')
@@ -50,7 +48,7 @@ class CountyDropdown extends StatelessWidget {
                 (c) => DropdownMenuItem<County>(value: c, child: Text(c.name)),
               )
               .toList(),
-          onChanged: isLocked ? null : (county) => onChanged(county?.id),
+          onChanged: (county) => onChanged(county?.id),
         );
       },
     );

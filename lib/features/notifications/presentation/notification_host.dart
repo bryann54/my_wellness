@@ -21,6 +21,7 @@ class NotificationHost extends StatelessWidget {
 
         if (state.status == AuthStatus.authenticated) {
           final userId = state.user?.id;
+          debugPrint('[Notifications] registering userId: $userId');
           if (userId == null || userId.isEmpty) return;
           final memberCode = context
               .read<AccountBloc>()
