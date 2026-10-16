@@ -104,7 +104,7 @@
 
     "searchResultCountOne": "Matokeo 1 kwa “{query}”",
     "searchResultCountMany": "Matokeo {count} kwa “{query}”",
-
+"consent": "Nimesoma na kuelewa taarifa hapo juu na nakubali kushiriki katika tathmini hii.",
     "emptySearchTitle": "Hakuna uchunguzi unaolingana na “{query}”",
     "emptySearchBody": "Jaribu neno lingine, au safisha utafutaji.",
     "emptySearchClear": "Safisha utafutaji",

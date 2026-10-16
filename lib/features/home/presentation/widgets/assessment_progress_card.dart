@@ -63,12 +63,12 @@ class AssessmentProgressCard extends StatelessWidget {
                   onPressed: () =>
                       context.router.push(const AssessmentsListRoute()),
                   icon: Icon(
-                      Platform.isAndroid
-                          ? Icons.arrow_forward
-                          : Icons.arrow_forward_ios,
-                      size: 16,
-                      color: colors.primary,
-                    ),
+                    Platform.isAndroid
+                        ? Icons.arrow_forward
+                        : Icons.arrow_forward_ios,
+                    size: 16,
+                    color: colors.primary,
+                  ),
                   iconAlignment: IconAlignment.end,
                   label: Text(
                     AppLocalizations.getString(context, 'homeDashboard.seeAll'),
@@ -329,8 +329,8 @@ class _FeaturedSession extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            onPressed: () => _resume(context, session),
-            icon:   Icon(
+            onPressed: () => _openSession(context, session),
+            icon: Icon(
               Platform.isAndroid
                   ? Icons.arrow_forward
                   : Icons.arrow_forward_ios,
@@ -417,7 +417,7 @@ class _SessionRow extends StatelessWidget {
       borderRadius: AppRadius.mdAll,
       child: InkWell(
         borderRadius: AppRadius.mdAll,
-        onTap: isPending ? null : () => _resume(context, session),
+        onTap: isPending ? null : () => _openSession(context, session),
         child: Container(
           padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
@@ -526,7 +526,12 @@ class _DashboardError extends StatelessWidget {
   }
 }
 
-void _resume(BuildContext context, DashboardSession session) {
+void _openSession(BuildContext context, DashboardSession session) {
+  if (session.completionPercent == 0) {
+    context.router.push(AssessmentIntroRoute(slug: session.assessmentSlug));
+    return;
+  }
+
   context.read<AssessmentsBloc>().add(
     ResumeAssessmentsEvent(
       slug: session.assessmentSlug,

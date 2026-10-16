@@ -41,6 +41,7 @@ class _AssessmentsListCoordinatorState
   @override
   void initState() {
     super.initState();
+     context.read<AssessmentsBloc>().add(const ResetAssessmentsEvent());
     _loadForCurrentMember();
   }
 

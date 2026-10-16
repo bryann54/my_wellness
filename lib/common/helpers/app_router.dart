@@ -24,7 +24,7 @@ class AppRouter extends RootStackRouter {
 
     // Vitals / health
     AutoRoute(page: NotificationsRoute.page),
-    // AutoRoute(page: SubscriptionsRoute.page),
+    // AutoRoute(page: EbolaIntroRoute.page),
     AutoRoute(page: MedicationsRoute.page),
     AutoRoute(page: VitalsRoute.page),
     AutoRoute(page: MyHealthRoute.page),

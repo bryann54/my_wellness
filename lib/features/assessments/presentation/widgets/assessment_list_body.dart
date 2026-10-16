@@ -16,6 +16,10 @@ class AssessmentListBody extends StatelessWidget {
     required this.searchQuery,
   });
 
+  void _open(BuildContext context, AssessmentSummary summary) {
+    context.router.push(AssessmentIntroRoute(slug: summary.slug));
+  }
+
   @override
   Widget build(BuildContext context) {
     final isSearching = searchQuery.trim().isNotEmpty;
@@ -43,9 +47,7 @@ class AssessmentListBody extends StatelessWidget {
           AssessmentCard(
             summary: recommended!,
             isRecommended: true,
-            onTap: () => context.router.push(
-              AssessmentIntroRoute(slug: recommended.slug),
-            ),
+            onTap: () => _open(context, recommended),
           ),
           const SizedBox(height: 28),
         ],
@@ -59,9 +61,7 @@ class AssessmentListBody extends StatelessWidget {
           for (final assessment in entry.value) ...[
             AssessmentCard(
               summary: assessment,
-              onTap: () => context.router.push(
-                AssessmentIntroRoute(slug: assessment.slug),
-              ),
+              onTap: () => _open(context, assessment),
             ),
             const SizedBox(height: 8),
           ],

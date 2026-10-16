@@ -53,7 +53,6 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
     this._previewBmi,
     this._updateProfile,
   ) : super(const AssessmentsState()) {
-    // Each event registered exactly once.
     on<LoadAssessmentsEvent>(_onLoad, transformer: restartable());
     on<SearchAssessmentsEvent>(_onSearch);
     on<StartAssessmentsEvent>(_onStart);
@@ -71,9 +70,6 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
     });
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // List + search
-  // ─────────────────────────────────────────────────────────────────────────
 
   Future<void> _onLoad(
     LoadAssessmentsEvent event,
@@ -141,14 +137,19 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
     emit(state.copyWith(searchQuery: query, filteredAssessments: filtered));
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // Session lifecycle
-  // ─────────────────────────────────────────────────────────────────────────
+  bool _isWarmForSlug(String slug) {
+    return state.status == AssessmentStatus.ready &&
+        state.definition?.slug == slug &&
+        state.session?.assessmentSlug == slug &&
+        !state.alreadyCompleted;
+  }
 
   Future<void> _onStart(
     StartAssessmentsEvent event,
     Emitter<AssessmentsState> emit,
   ) async {
+    if (_isWarmForSlug(event.slug)) return;
+
     _bmiPreviewRequestId++;
     emit(
       state.copyWith(
@@ -166,7 +167,6 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
 
     _activeSlug = event.slug;
 
-    // 1. can-start is the source of truth for "already done".
     final canStartRes = await _canStart(event.slug);
     final canStart = canStartRes.fold(
       (_) => const CanStartResult(allowed: false),
@@ -197,7 +197,6 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
     );
     _activeSessionId = session.id;
 
-    // 2. Already completed -> land on complete; kick score + referral fetch.
     if (alreadyDone) {
       emit(
         state.copyWith(
@@ -211,7 +210,6 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
       return;
     }
 
-    // 3. Terminated -> show terminated screen.
     if (session.status == AssessmentSessionStatus.terminated) {
       emit(
         state.copyWith(
@@ -225,7 +223,6 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
       return;
     }
 
-    // 4. Not allowed for any other reason.
     if (!canStart.allowed) {
       emit(
         state.copyWith(
@@ -238,7 +235,6 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
       return;
     }
 
-    // 5. Fresh session: load any saved answers and enter.
     final answersRes = await _getAnswers((
       slug: event.slug,
       sessionId: session.id,
@@ -259,6 +255,12 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
     ResumeAssessmentsEvent event,
     Emitter<AssessmentsState> emit,
   ) async {
+    if (state.status == AssessmentStatus.ready &&
+        state.session?.id == event.sessionId &&
+        state.definition?.slug == event.slug) {
+      return;
+    }
+
     _bmiPreviewRequestId++;
     emit(
       state.copyWith(
@@ -316,10 +318,7 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
     );
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // Answer / BMI submission
-  // ─────────────────────────────────────────────────────────────────────────
-
+ 
   Future<void> _onSubmitAnswer(
     SubmitAnswerEvent event,
     Emitter<AssessmentsState> emit,
@@ -468,8 +467,6 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
       return;
     }
 
-    // Keep the member's health profile in sync before recording the BMI
-    // answer. Do not continue if PATCH fails.
     final profileResult = await _updateProfile({
       'weight_kg': weightKg,
       'height_cm': heightCm,
@@ -520,17 +517,12 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
 
     final currentBmiQuestion = bmiQuestion!;
 
-    // Refresh the answer list before this ordered submission. A session can
-    // be resumed or the server can reject an earlier answer, so the list
-    // loaded when the screen opened may no longer reflect server state.
     final latestAnswersResult = await _getAnswers((
       slug: slug,
       sessionId: sessionId,
     ));
     final latestAnswers = latestAnswersResult.getOrElse(() => state.answers);
 
-    // If BMI was shown before earlier questions were accepted, return to
-    // the first unanswered question. The answers API enforces index order.
     final previousUnanswered = _firstUnansweredQuestion(
       definition,
       latestAnswers,
@@ -556,8 +548,6 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
       return;
     }
 
-    // Store the classified BMI as the ordered assessment answer. The
-    // server response supplies the authoritative next question index.
     final answer = bmiPreview.bmi.toStringAsFixed(1);
     final answerResult = await _submitAnswer((
       slug: slug,
@@ -750,10 +740,6 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
   String _bmiPreviewInputKey(double weightKg, double heightCm) =>
       '${weightKg.toString()}|${heightCm.toString()}';
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // Score + referral
-  // ─────────────────────────────────────────────────────────────────────────
-
   Future<void> _onFetchScore(
     FetchScoreEvent event,
     Emitter<AssessmentsState> emit,
@@ -764,9 +750,6 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
     await _loadScoreAndReferral(emit);
   }
 
-  /// Fetches score (required) and referral (optional) in parallel, then
-  /// emits `completed` with both in state. Sets [completionHandled] so
-  /// downstream screens know not to refetch.
   Future<void> _loadScoreAndReferral(Emitter<AssessmentsState> emit) async {
     final slug = _activeSlug;
     final sessionId = _activeSessionId;

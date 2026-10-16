@@ -1,4 +1,3 @@
-// lib/features/assessments/presentation/pages/assessment_session_screen.dart
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +10,7 @@ import 'package:my_wellness/features/assessments/domain/entities/assessment_ques
 import 'package:my_wellness/features/assessments/presentation/bloc/assessments_bloc.dart';
 import 'package:my_wellness/features/assessments/presentation/pages/assessment_terminated_screen.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_bmi_step.dart';
+import 'package:my_wellness/features/assessments/presentation/widgets/assessment_intro_skeleton.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_progress_bar.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_question_view.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_session_bottom_bar.dart';
@@ -102,15 +102,11 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
 
     if (state.status == AssessmentStatus.completed) {
       _scheduleCompleteRedirect();
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator.adaptive()),
-      );
+      return const Scaffold(body: SafeArea(child: AssessmentIntroSkeleton()));
     }
 
     if (session == null || def == null) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator.adaptive()),
-      );
+      return const Scaffold(body: SafeArea(child: AssessmentIntroSkeleton()));
     }
 
     if (session.currentIndex != _lastIndex) {
@@ -127,9 +123,7 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
           bloc.add(const FetchScoreEvent());
         }
       });
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator.adaptive()),
-      );
+      return const Scaffold(body: SafeArea(child: AssessmentIntroSkeleton()));
     }
 
     final isBmi = q.type == AssessmentQuestionType.bmi;
