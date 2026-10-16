@@ -109,7 +109,7 @@ class _AssessmentsListBodyState extends State<_AssessmentsListBody> {
     return AssessmentToastListener(
       child: Scaffold(
         body: NestedScrollView(
-          headerSliverBuilder: (_, __) => [
+          headerSliverBuilder: (_, _) => [
             CustomAppBar(
               title: AppLocalizations.getString(context, 'assessment.title'),
               isHome: false,

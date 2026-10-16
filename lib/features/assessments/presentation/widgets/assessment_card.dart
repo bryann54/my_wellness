@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -35,16 +37,16 @@ class AssessmentCard extends StatelessWidget {
       excludeSemantics: true,
       child: Material(
         color: background,
-        borderRadius: BorderRadius.circular(isRecommended ? 20 : 16),
+        borderRadius: BorderRadius.circular(isRecommended ? 12 : 16),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
           child: Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(isRecommended ? 20 : 16),
+              borderRadius: BorderRadius.circular(isRecommended ? 12 : 16),
               border: Border.all(color: border),
             ),
-            padding: EdgeInsets.all(isRecommended ? 20 : 16),
+            padding: EdgeInsets.all(isRecommended ? 22 : 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -97,8 +99,10 @@ class AssessmentCard extends StatelessWidget {
                   Align(
                     alignment: Alignment.centerRight,
                     child: Icon(
-                      Icons.arrow_forward_rounded,
-                      size: 20,
+                      Platform.isAndroid
+                          ? Icons.arrow_forward
+                          : Icons.arrow_forward_ios,
+                      size: 16,
                       color: cs.primary,
                     ),
                   ),

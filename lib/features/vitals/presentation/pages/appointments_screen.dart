@@ -69,11 +69,11 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
               p.appointmentsCursor != c.appointmentsCursor,
           builder: (context, state) {
             final appts = state.appointments;
-            return RefreshIndicator(
+            return RefreshIndicator.adaptive(
               onRefresh: () async =>
                   context.read<VitalsBloc>().add(const LoadVitalsEvent()),
               child: NestedScrollView(
-                headerSliverBuilder: (_, __) => [
+                headerSliverBuilder: (_, _) => [
                   CustomAppBar(
                     title: AppLocalizations.getString(
                       context,

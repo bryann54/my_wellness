@@ -1,47 +1,55 @@
-import 'dart:math' as math;
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class QuickActionChip extends StatelessWidget {
-  static const labelGap = 8.0;
-  static const verticalPadding = 4.0;
+import 'package:my_wellness/common/res/app_spacing.dart';
 
-  final IconData icon;
+class QuickActionChip extends StatelessWidget {
+  static const _maxDiameter = 64.0;
+
+  final String imageAsset;
   final String label;
   final PageRouteInfo route;
-  final double width;
   final String heroTag;
+static const _grayscale = ColorFilter.matrix(<double>[
+    0.2126,
+    0.7152,
+    0.0722,
+    0,
+    0,
+    0.2126,
+    0.7152,
+    0.0722,
+    0,
+    0,
+    0.2126,
+    0.7152,
+    0.0722,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+  ]);
+  final IconData fallbackIcon;
 
   const QuickActionChip({
     super.key,
-    required this.icon,
+    required this.imageAsset,
     required this.label,
     required this.route,
-    required this.width,
     required this.heroTag,
-  }) : assert(width > 0);
-
-  static double iconDiameterForWidth(double width) =>
-      math.min(width, math.min(56.0, math.max(32.0, width - 8))).toDouble();
-
-  static double preferredHeight(BuildContext context, double width) {
-    final fontSize = Theme.of(context).textTheme.labelMedium?.fontSize ?? 12;
-    final labelHeight = MediaQuery.textScalerOf(context).scale(fontSize) * 1.15;
-    final height =
-        iconDiameterForWidth(width) +
-        labelGap +
-        labelHeight +
-        verticalPadding * 2;
-    return math.max(48.0, height).toDouble();
-  }
+    this.fallbackIcon = Icons.apps_rounded,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    final diameter = iconDiameterForWidth(width);
-    final iconSize = diameter * 0.46;
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     final displayLabel = label.isEmpty
         ? label
         : '${label[0].toUpperCase()}${label.substring(1)}';
@@ -49,72 +57,97 @@ class QuickActionChip extends StatelessWidget {
     return Semantics(
       button: true,
       label: displayLabel,
-      child: ExcludeSemantics(
-        child: SizedBox(
-          width: width,
-          child: Material(
+      excludeSemantics: true,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final diameter = constraints.maxWidth.isFinite
+              ? (constraints.maxWidth - AppSpacing.sm).clamp(40.0, _maxDiameter)
+              : _maxDiameter;
+          final inset = diameter * 0.18;
+          final imageSize = diameter - inset * 2;
+
+          // Decode at display size, not source size.
+          final cacheSize = (imageSize * MediaQuery.devicePixelRatioOf(context))
+              .round();
+
+          return Material(
             color: Colors.transparent,
             child: InkWell(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(16),
               onTap: () {
                 HapticFeedback.selectionClick();
                 AutoRouter.of(context).push(route);
               },
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(minHeight: 48),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: verticalPadding,
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Ink(
-                        width: diameter,
-                        height: diameter,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(diameter * 0.34),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: diameter,
+                      height: diameter,
+                      padding: EdgeInsets.all(inset),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: colors.primary.withValues(
+                          alpha: isDark ? 0.18 : 0.08,
+                        ),
+                        border: Border.all(
                           color: colors.primary.withValues(alpha: 0.14),
                         ),
-                        child: Center(
-                          child: Icon(
-                            icon,
-                            size: iconSize,
-                            color: colors.primary,
-                          ),
-                        ),
                       ),
-                      const SizedBox(height: labelGap),
-                      FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Hero(
-                          tag: heroTag,
-                          flightShuttleBuilder: (_, __, ___, ____, toHero) =>
-                              (toHero.widget as Hero).child,
-                          child: Material(
-                            color: Colors.transparent,
-                            child: Text(
-                              displayLabel,
-                              style: Theme.of(context).textTheme.labelMedium
-                                  ?.copyWith(
-                                    height: 1.15,
-                                    fontWeight: FontWeight.w500,
-                                    letterSpacing: 0.1,
-                                    color: colors.onSurface,
-                                  ),
-                              textAlign: TextAlign.center,
-                              maxLines: 1,
+                      child: ClipOval(
+  child: ColorFiltered(
+    colorFilter: ColorFilter.mode(
+      colors.primary.withValues(alpha: isDark ? 0.45 : 0.6),
+      BlendMode.srcATop,
+    ),
+    child: ColorFiltered(
+      colorFilter: _grayscale,
+      child: Image.asset(
+        imageAsset,
+        cacheWidth: cacheSize,
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.medium,
+        errorBuilder: (_, _, _) => Icon(
+          fallbackIcon,
+          size: imageSize * 0.7,
+          color: colors.primary,
+        ),
+      ),
+    ),
+  ),
+),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Hero(
+                        tag: heroTag,
+                        flightShuttleBuilder: (_, _, _, _, toHero) =>
+                            (toHero.widget as Hero).child,
+                        child: Material(
+                          color: Colors.transparent,
+                          child: Text(
+                            displayLabel,
+                            maxLines: 1,
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              height: 1.15,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.1,
+                              color: colors.onSurface,
                             ),
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

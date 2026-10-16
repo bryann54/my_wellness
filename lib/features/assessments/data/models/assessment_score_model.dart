@@ -150,6 +150,7 @@ class AssessmentScoreModel {
     screeningRecommendation: screeningRecommendation?.toEntity(),
     additionalCtaKeys: additionalCtaKeys,
     needsNutritionConsultation: needsNutritionConsultation,
+    resultDisplay: resultDisplay?.toEntity(),
   );
 }
 
@@ -160,15 +161,31 @@ class ResultDisplayModel {
   final String? title;
   final String? body;
 
-  @JsonKey(name: 'severity_color')
-  final Map<String, dynamic>? severityColor;
+  @JsonKey(name: 'color')
+  final Map<String, dynamic>? colorMap;
+
+  @JsonKey(name: 'colour_emoji')
+  final String? colourEmoji;
+
+  @JsonKey(name: 'colour_label')
+  final String? colourLabel;
+
+  @JsonKey(name: 'immediate_recommendation')
+  final String? immediateRecommendation;
+
+  @JsonKey(name: 'important_note')
+  final String? importantNote;
 
   const ResultDisplayModel({
     this.kind,
     this.severity,
     this.title,
     this.body,
-    this.severityColor,
+    this.colorMap,
+    this.colourEmoji,
+    this.colourLabel,
+    this.immediateRecommendation,
+    this.importantNote,
   });
 
   factory ResultDisplayModel.fromJson(Map<String, dynamic> json) =>
@@ -177,7 +194,11 @@ class ResultDisplayModel {
         severity: json['severity'] as String?,
         title: json['title'] as String?,
         body: json['body'] as String?,
-        severityColor: json['color'] as Map<String, dynamic>?,
+        colorMap: json['color'] as Map<String, dynamic>?,
+        colourEmoji: json['colour_emoji'] as String?,
+        colourLabel: json['colour_label'] as String?,
+        immediateRecommendation: json['immediate_recommendation'] as String?,
+        importantNote: json['important_note'] as String?,
       );
 
   Map<String, dynamic> toJson() => {
@@ -185,8 +206,30 @@ class ResultDisplayModel {
     'severity': severity,
     'title': title,
     'body': body,
-    'color': severityColor,
+    'color': colorMap,
+    'colour_emoji': colourEmoji,
+    'colour_label': colourLabel,
+    'immediate_recommendation': immediateRecommendation,
+    'important_note': importantNote,
   };
+
+  ResultDisplay toEntity() => ResultDisplay(
+    kind: kind,
+    severity: severity,
+    title: title,
+    body: body,
+    color: colorMap == null
+        ? null
+        : ResultDisplayColor(
+            accent: colorMap!['accent'] as String? ?? '#6B7280',
+            background: colorMap!['background'] as String? ?? '#F9FAFB',
+            text: colorMap!['text'] as String? ?? '#111827',
+          ),
+    colourEmoji: colourEmoji,
+    colourLabel: colourLabel,
+    immediateRecommendation: immediateRecommendation,
+    importantNote: importantNote,
+  );
 }
 
 @JsonSerializable()

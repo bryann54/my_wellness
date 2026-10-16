@@ -21,8 +21,31 @@ class ClearIdentityEvent extends NotificationsEvent {
   const ClearIdentityEvent();
 }
 
-class RequestPermissionEvent extends NotificationsEvent {
-  const RequestPermissionEvent();
+class RefreshPermissionEvent extends NotificationsEvent {
+  const RefreshPermissionEvent();
+}
+class SetPushEnabledEvent extends NotificationsEvent {
+  final bool enabled;
+  const SetPushEnabledEvent(this.enabled);
+
+  @override
+  List<Object?> get props => [enabled];
+}
+
+class PermissionChangedEvent extends NotificationsEvent {
+  final NotificationPermission permission;
+  const PermissionChangedEvent(this.permission);
+
+  @override
+  List<Object?> get props => [permission];
+}
+
+class SubscriptionChangedEvent extends NotificationsEvent {
+  final bool optedIn;
+  const SubscriptionChangedEvent(this.optedIn);
+
+  @override
+  List<Object?> get props => [optedIn];
 }
 
 class IncomingNotificationEvent extends NotificationsEvent {
@@ -35,4 +58,8 @@ class IncomingNotificationEvent extends NotificationsEvent {
 
 class NotificationTappedEvent extends NotificationsEvent {
   const NotificationTappedEvent();
+}
+
+class MarkAllReadEvent extends NotificationsEvent {
+  const MarkAllReadEvent();
 }

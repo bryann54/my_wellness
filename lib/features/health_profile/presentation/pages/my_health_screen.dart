@@ -12,7 +12,7 @@ class MyHealthScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: NestedScrollView(
-        headerSliverBuilder: (_, __) => [
+        headerSliverBuilder: (_, _) => [
           CustomAppBar(
             title: AppLocalizations.getString(context, 'common.myHealth'),
             titleHeroTag: HeroTags.homeMyHealth,

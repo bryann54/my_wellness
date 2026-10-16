@@ -120,13 +120,13 @@ class _FlexibleHeader extends StatelessWidget {
                     alignment: Alignment.centerLeft,
                     child: Hero(
                       tag: HeroTags.authLogo,
-                      flightShuttleBuilder: (_, __, direction, ___, toHero) =>
+                      flightShuttleBuilder: (_, _, direction, _, toHero) =>
                           toHero.widget,
                       child: Image.asset(
                         'assets/images/logo.png',
                         height: 48,
                         fit: BoxFit.contain,
-                        errorBuilder: (_, __, ___) => Icon(
+                        errorBuilder: (_, _, _) => Icon(
                           PhosphorIconsRegular.heart,
                           color: colors.primary,
                           size: 32,

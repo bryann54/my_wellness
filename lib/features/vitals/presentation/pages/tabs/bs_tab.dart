@@ -157,7 +157,7 @@ class BsTab extends StatelessWidget {
     };
     return [
       _readingTypeLabel(context, reading.readingType),
-      if (timing != null) timing,
+      ?timing,
     ].join(' · ');
   }
 }

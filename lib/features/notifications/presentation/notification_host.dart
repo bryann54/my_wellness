@@ -8,9 +8,34 @@ import 'package:my_wellness/features/auth/presentation/bloc/auth_state.dart';
 import 'package:my_wellness/features/notifications/domain/entities/app_notification.dart';
 import 'package:my_wellness/features/notifications/presentation/bloc/notifications_bloc.dart';
 
-class NotificationHost extends StatelessWidget {
+class NotificationHost extends StatefulWidget {
   final Widget child;
   const NotificationHost({super.key, required this.child});
+
+  @override
+  State<NotificationHost> createState() => _NotificationHostState();
+}
+
+class _NotificationHostState extends State<NotificationHost>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      context.read<NotificationsBloc>().add(const RefreshPermissionEvent());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +46,6 @@ class NotificationHost extends StatelessWidget {
 
         if (state.status == AuthStatus.authenticated) {
           final userId = state.user?.id;
-          debugPrint('[Notifications] registering userId: $userId');
           if (userId == null || userId.isEmpty) return;
           final memberCode = context
               .read<AccountBloc>()
@@ -42,17 +66,20 @@ class NotificationHost extends StatelessWidget {
           if (n == null) return;
           _present(context, n);
         },
-        child: child,
+        child: widget.child,
       ),
     );
   }
 
   void _present(BuildContext context, AppNotification n) {
     final bloc = context.read<NotificationsBloc>();
-    final messenger = ScaffoldMessenger.maybeOf(context);
-    if (messenger != null) {
+
+    if (n.openedByUser) {
+      _route(context, n.route);
+    } else {
+      final messenger = ScaffoldMessenger.maybeOf(context);
       messenger
-        ..hideCurrentSnackBar()
+        ?..hideCurrentSnackBar()
         ..showSnackBar(
           SnackBar(
             content: Text(
@@ -71,12 +98,6 @@ class NotificationHost extends StatelessWidget {
         );
     }
 
-    // 2. Route only if the user explicitly tapped the notification.
-    if (n.openedByUser) {
-      _route(context, n.route);
-    }
-
-    // 3. Consume the pending notification.
     bloc.add(const NotificationTappedEvent());
   }
 
@@ -91,7 +112,6 @@ class NotificationHost extends StatelessWidget {
         router.push(const AppointmentsRoute());
 
       case NotificationRouteAppointment():
-        // No per-appointment route yet. Land on the list.
         router.push(const AppointmentsRoute());
 
       case NotificationRouteMedications():

@@ -85,11 +85,11 @@ class _MedicationsScreenState extends State<MedicationsScreen> {
                 return const _MedicationsSkeleton();
               }
 
-              return RefreshIndicator(
+              return RefreshIndicator.adaptive(
                 onRefresh: () async =>
                     context.read<VitalsBloc>().add(const LoadVitalsEvent()),
                 child: NestedScrollView(
-                  headerSliverBuilder: (_, __) => [
+                  headerSliverBuilder: (_, _) => [
                     CustomAppBar(
                       title: AppLocalizations.getString(
                         context,
@@ -186,7 +186,7 @@ class _MedicationsSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return NestedScrollView(
-      headerSliverBuilder: (_, __) => [
+      headerSliverBuilder: (_, _) => [
         CustomAppBar(
           title: AppLocalizations.getString(context, 'medications.title'),
           isHome: false,

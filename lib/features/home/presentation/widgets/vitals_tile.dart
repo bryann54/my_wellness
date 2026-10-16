@@ -220,7 +220,7 @@ class VitalsTile extends StatelessWidget {
 
   Widget _hero(String tag, Widget child) => Hero(
     tag: tag,
-    flightShuttleBuilder: (_, __, ___, ____, toHero) =>
+    flightShuttleBuilder: (_, _, _, _, toHero) =>
         (toHero.widget as Hero).child,
     child: Material(color: Colors.transparent, child: child),
   );

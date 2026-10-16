@@ -211,7 +211,7 @@ class _ReadingValue extends StatelessWidget {
     if (tag == null) return content;
     return Hero(
       tag: tag,
-      flightShuttleBuilder: (_, __, ___, ____, toHero) =>
+      flightShuttleBuilder: (_, _, _, _, toHero) =>
           (toHero.widget as Hero).child,
       child: Material(color: Colors.transparent, child: content),
     );
@@ -239,7 +239,7 @@ class _ReadingTimestamp extends StatelessWidget {
     if (tag == null) return text;
     return Hero(
       tag: tag,
-      flightShuttleBuilder: (_, __, ___, ____, toHero) =>
+      flightShuttleBuilder: (_, _, _, _, toHero) =>
           (toHero.widget as Hero).child,
       child: Material(color: Colors.transparent, child: text),
     );

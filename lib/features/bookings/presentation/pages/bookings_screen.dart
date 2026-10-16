@@ -11,7 +11,7 @@ class BookingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: NestedScrollView(
-        headerSliverBuilder: (_, __) => [
+        headerSliverBuilder: (_, _) => [
           CustomAppBar(
             title: AppLocalizations.getString(context, 'bookings.title'),
             isHome: false,

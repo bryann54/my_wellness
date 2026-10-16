@@ -106,7 +106,7 @@ class VitalsRemoteDataSourceImpl implements VitalsRemoteDataSource {
     final response = await _apiClient.get<Map<String, dynamic>>(
       url: ApiEndpoints.appointments,
       query: {
-        if (cursor != null) 'cursor': cursor,
+        'cursor': ?cursor,
         if (query != null && query.isNotEmpty) 'q': query,
       },
       options: ApiClient.protected,
@@ -169,7 +169,7 @@ class VitalsRemoteDataSourceImpl implements VitalsRemoteDataSource {
     final response = await _apiClient.get<Map<String, dynamic>>(
       url: ApiEndpoints.medications,
       query: {
-        if (cursor != null) 'cursor': cursor,
+        'cursor': ?cursor,
         if (query != null && query.isNotEmpty) 'q': query,
       },
       options: ApiClient.protected,

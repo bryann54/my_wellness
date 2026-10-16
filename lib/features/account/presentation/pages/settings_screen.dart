@@ -123,11 +123,11 @@ class SettingsScreen extends StatelessWidget {
                       icon: Icons.logout_rounded,
                       title: AppLocalizations.getString(
                         context,
-                        'settings.logOut',
+                        'auth.logout',
                       ),
                       subtitle: AppLocalizations.getString(
                         context,
-                        'settings.logOutSub',
+                        'auth.logOutSub',
                       ),
                       onTap: () => LogoutDialog.show(context),
                     ),

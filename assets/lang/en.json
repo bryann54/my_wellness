@@ -261,7 +261,7 @@
     "unitDay": "Day",
     "unitWeek": "Week",
     "unitMonth": "Month",
-
+"emptyCondition": "No medications logged for this condition yet.",
     "save": "Save medication",
     "empty": "No medications yet",
     "emptySub": "Add a medication to keep track of your prescriptions.",

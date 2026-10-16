@@ -65,7 +65,7 @@ class MedicationsShimmerList extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
       itemCount: count,
-      itemBuilder: (_, __) => const MedicationTileShimmer(),
+      itemBuilder: (_, _) => const MedicationTileShimmer(),
     );
   }
 }

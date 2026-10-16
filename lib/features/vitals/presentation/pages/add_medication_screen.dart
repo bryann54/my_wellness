@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/utils/formatters.dart';
@@ -132,14 +133,12 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
 
     if (scan.needsConfirmation.isNotEmpty) {
       final nc = scan.needsConfirmation.first;
-
       _nameCtrl.text = nc.rawName ?? '';
       _doseCtrl.text = nc.dosage ?? '';
       _notesCtrl.text = nc.notes ?? '';
       if (nc.frequency?.isNotEmpty ?? false) {
         _frequency = nc.frequency!;
       }
-
       if (nc.candidates.isNotEmpty) {
         final first = nc.candidates.first;
         _pickedCandidate = first;
@@ -197,7 +196,7 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
 
     return Scaffold(
       body: NestedScrollView(
-        headerSliverBuilder: (_, __) => [
+        headerSliverBuilder: (_, _) => [
           CustomAppBar(
             title: AppLocalizations.getString(context, 'medications.addTitle'),
             isHome: false,
@@ -209,7 +208,12 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
             children: [
               Expanded(
                 child: ListView(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.lg,
+                    AppSpacing.md,
+                    AppSpacing.lg,
+                    AppSpacing.xl,
+                  ),
                   children: [
                     ScanMedicationCard(
                       scanning: _scanning,
@@ -218,7 +222,7 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
                     ),
                     if (_scanResult != null &&
                         _scanResult!.needsConfirmation.isNotEmpty) ...[
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppSpacing.lg),
                       MedicationCandidatePicker(
                         entry: _scanResult!.needsConfirmation.first,
                         selected: _pickedCandidate,
@@ -230,7 +234,7 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
                         },
                       ),
                     ],
-                    const SizedBox(height: 20),
+                    const SizedBox(height: AppSpacing.lg),
                     _buildFormFields(cs),
                   ],
                 ),
@@ -253,7 +257,7 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
           textCapitalization: TextCapitalization.words,
           validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: AppSpacing.md),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -269,7 +273,7 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
                     (v == null || v.trim().isEmpty) ? 'Required' : null,
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
               child: SoftDropdown<String>(
                 value: _frequency,
@@ -306,7 +310,7 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
             ),
           ],
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: AppSpacing.md),
         SoftDropdown<String>(
           value: _condition,
           label: AppLocalizations.getString(
@@ -335,16 +339,17 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
           ],
           onChanged: (v) => setState(() => _condition = v ?? 'other'),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: AppSpacing.md),
         InkWell(
           onTap: _pickStart,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: AppRadius.mdAll,
           child: InputDecorator(
             decoration: InputDecoration(
               labelText: AppLocalizations.getString(
                 context,
                 'medications.startDate',
               ),
+              floatingLabelBehavior: FloatingLabelBehavior.always,
               prefixIcon: const Icon(Icons.calendar_today_outlined, size: 20),
               filled: true,
               fillColor: cs.surfaceContainerHighest,
@@ -353,25 +358,34 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
                 fontWeight: FontWeight.w600,
                 color: cs.onSurface.withValues(alpha: 0.7),
               ),
+              floatingLabelStyle: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: cs.primary,
+              ),
               contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 4,
+                horizontal: AppSpacing.md,
+                vertical: AppSpacing.md,
               ),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: AppRadius.mdAll,
                 borderSide: BorderSide(
                   color: cs.outlineVariant.withValues(alpha: 0.5),
                 ),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: AppRadius.mdAll,
                 borderSide: BorderSide(
                   color: cs.outlineVariant.withValues(alpha: 0.5),
                 ),
               ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: AppRadius.mdAll,
+                borderSide: BorderSide(color: cs.primary, width: 1.6),
+              ),
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
+              padding: const EdgeInsets.symmetric(vertical: 4),
               child: Text(
                 isoDate(_startDate),
                 style: TextStyle(
@@ -383,7 +397,7 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
             ),
           ),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: AppSpacing.md),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -402,7 +416,7 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
                 keyboardType: TextInputType.number,
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
               child: SoftDropdown<String>(
                 value: _durationUnit,
@@ -444,7 +458,7 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
             ),
           ],
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: AppSpacing.md),
         SoftInput(
           controller: _notesCtrl,
           label: AppLocalizations.getString(context, 'medications.notes'),
@@ -458,10 +472,10 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
   Widget _buildBottomBar(ColorScheme cs, bool isSubmitting) {
     return Container(
       padding: EdgeInsets.fromLTRB(
-        20,
-        12,
-        20,
-        MediaQuery.paddingOf(context).bottom + 12,
+        AppSpacing.lg,
+        AppSpacing.md,
+        AppSpacing.lg,
+        MediaQuery.paddingOf(context).bottom + AppSpacing.md,
       ),
       decoration: BoxDecoration(
         color: cs.surface,
@@ -476,9 +490,7 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
               onPressed: isSubmitting ? null : () => context.router.maybePop(),
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
                 side: BorderSide(
                   color: cs.outlineVariant.withValues(alpha: 0.6),
                 ),
@@ -493,14 +505,14 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             flex: 2,
             child: AppPrimaryButton(
               color: AppColors.primaryColor,
               onPressed: _pickedCandidate == null ? null : _submit,
               isLoading: isSubmitting,
-              borderRadius: 14,
+              borderRadius: AppRadius.md,
               label: AppLocalizations.getString(context, 'medications.save'),
             ),
           ),

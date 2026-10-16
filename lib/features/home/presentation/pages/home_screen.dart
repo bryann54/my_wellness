@@ -79,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
       value: overlayStyle,
       child: Scaffold(
         backgroundColor: colors.surface,
-        body: RefreshIndicator(
+        body: RefreshIndicator.adaptive(
           onRefresh: _refresh,
           edgeOffset: MediaQuery.paddingOf(context).top + kToolbarHeight,
           child: CustomScrollView(

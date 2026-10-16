@@ -1,14 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:my_wellness/common/res/colors.dart';
+
+import 'package:my_wellness/common/res/app_spacing.dart';
 
 class VitalsEmptyState extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final String? ctaLabel;
-  final VoidCallback? onCta;
-
   const VitalsEmptyState({
     super.key,
     required this.icon,
@@ -18,14 +12,21 @@ class VitalsEmptyState extends StatelessWidget {
     this.onCta,
   });
 
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final String? ctaLabel;
+  final VoidCallback? onCta;
+
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     final showCta = ctaLabel != null && onCta != null;
 
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(AppSpacing.xl),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 320),
           child: Column(
@@ -50,47 +51,24 @@ class VitalsEmptyState extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.lg),
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  height: 1.25,
-                  color: cs.onSurface,
-                ),
+                style: theme.textTheme.titleLarge,
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               Text(
                 subtitle,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  height: 1.5,
+                style: theme.textTheme.bodyMedium?.copyWith(
                   color: cs.onSurface.withValues(alpha: 0.6),
+                  height: 1.5,
                 ),
               ),
               if (showCta) ...[
-                const SizedBox(height: 28),
-                FilledButton(
-                  onPressed: onCta,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.primaryColor,
-                    minimumSize: const Size(200, 48),
-                    padding: const EdgeInsets.symmetric(horizontal: 32),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                  child: Text(
-                    ctaLabel!,
-                    style: GoogleFonts.inter(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
+                const SizedBox(height: AppSpacing.xl),
+                FilledButton(onPressed: onCta, child: Text(ctaLabel!)),
               ],
             ],
           ),

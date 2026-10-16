@@ -223,13 +223,25 @@ class _SessionList extends StatelessWidget {
 
   final List<DashboardSession> sessions;
   final List<AssessmentSummary> assessments;
+  static const _pinnedSlugs = ['ebola-screening'];
 
   @override
   Widget build(BuildContext context) {
-    final featured = sessions
-        .where((s) => s.status == DashboardSessionStatus.inProgress)
-        .firstOrNull;
-    final rest = sessions.where((s) => s != featured).toList();
+    final sorted = [...sessions]
+      ..sort((a, b) {
+        final ai = _pinnedSlugs.indexOf(a.assessmentSlug);
+        final bi = _pinnedSlugs.indexOf(b.assessmentSlug);
+        if (ai != -1 && bi != -1) return ai.compareTo(bi);
+        if (ai != -1) return -1;
+        if (bi != -1) return 1;
+        final aInProgress = a.status == DashboardSessionStatus.inProgress;
+        final bInProgress = b.status == DashboardSessionStatus.inProgress;
+        if (aInProgress != bInProgress) return aInProgress ? -1 : 1;
+        return a.assessmentSlug.compareTo(b.assessmentSlug);
+      });
+
+    final featured = sorted.firstOrNull;
+    final rest = sorted.skip(1).toList();
 
     return Column(
       children: [

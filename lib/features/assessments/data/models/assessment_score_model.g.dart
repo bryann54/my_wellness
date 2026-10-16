@@ -1,5 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// ignore_for_file: unused_element
+
 part of 'assessment_score_model.dart';
 
 // **************************************************************************
@@ -85,7 +87,11 @@ ResultDisplayModel _$ResultDisplayModelFromJson(Map<String, dynamic> json) =>
       severity: json['severity'] as String?,
       title: json['title'] as String?,
       body: json['body'] as String?,
-      severityColor: json['severity_color'] as Map<String, dynamic>?,
+      colorMap: json['color'] as Map<String, dynamic>?,
+      colourEmoji: json['colour_emoji'] as String?,
+      colourLabel: json['colour_label'] as String?,
+      immediateRecommendation: json['immediate_recommendation'] as String?,
+      importantNote: json['important_note'] as String?,
     );
 
 Map<String, dynamic> _$ResultDisplayModelToJson(ResultDisplayModel instance) =>
@@ -94,7 +100,11 @@ Map<String, dynamic> _$ResultDisplayModelToJson(ResultDisplayModel instance) =>
       'severity': instance.severity,
       'title': instance.title,
       'body': instance.body,
-      'severity_color': instance.severityColor,
+      'color': instance.colorMap,
+      'colour_emoji': instance.colourEmoji,
+      'colour_label': instance.colourLabel,
+      'immediate_recommendation': instance.immediateRecommendation,
+      'important_note': instance.importantNote,
     };
 
 ScoreItemModel _$ScoreItemModelFromJson(Map<String, dynamic> json) =>

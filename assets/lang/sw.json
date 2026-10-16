@@ -258,7 +258,7 @@
     "unitDay": "Siku",
     "unitWeek": "Wiki",
     "unitMonth": "Mwezi",
-
+"emptyCondition": "Hakuna dawa zilizorekodiwa kwa hali hii bado.",
     "save": "Hifadhi dawa",
     "empty": "Hakuna dawa bado",
     "emptySub": "Ongeza dawa ili kufuatilia maagizo yako.",

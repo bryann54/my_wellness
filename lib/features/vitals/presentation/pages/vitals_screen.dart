@@ -49,7 +49,7 @@ class _VitalsScreenState extends State<VitalsScreen>
     return VitalsToastListener(
       child: Scaffold(
         body: NestedScrollView(
-          headerSliverBuilder: (_, __) => [
+          headerSliverBuilder: (_, _) => [
             CustomAppBar(
               title: AppLocalizations.getString(context, 'vitals.title'),
               titleHeroTag: HeroTags.homeVitals,

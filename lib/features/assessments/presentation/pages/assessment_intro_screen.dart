@@ -64,7 +64,7 @@ class _AssessmentIntroBodyState extends State<_AssessmentIntroBody> {
 
     return Scaffold(
       body: NestedScrollView(
-        headerSliverBuilder: (_, __) => [
+        headerSliverBuilder: (_, _) => [
           CustomAppBar(title: def?.shortTitle ?? '', isHome: false),
         ],
         body: def == null

@@ -122,7 +122,7 @@ class _AppBarTitle extends StatelessWidget {
     if (tag == null) return text;
     return Hero(
       tag: tag,
-      flightShuttleBuilder: (_, __, ___, ____, toHero) =>
+      flightShuttleBuilder: (_, _, _, _, toHero) =>
           (toHero.widget as Hero).child,
       child: Material(color: Colors.transparent, child: text),
     );

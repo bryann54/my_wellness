@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/utils/formatters.dart';
@@ -7,14 +7,6 @@ import 'package:my_wellness/common/widgets/custom_alert_dialog.dart';
 import 'package:my_wellness/features/home/presentation/widgets/vitals_status_pill.dart';
 
 class ReadingHistoryRow {
-  final String id;
-  final String primary;
-  final String unit;
-  final String classification;
-  final String timestampIso;
-  final String? secondary;
-  final VoidCallback onDelete;
-
   const ReadingHistoryRow({
     required this.id,
     required this.primary,
@@ -24,11 +16,20 @@ class ReadingHistoryRow {
     this.secondary,
     required this.onDelete,
   });
+
+  final String id;
+  final String primary;
+  final String unit;
+  final String classification;
+  final String timestampIso;
+  final String? secondary;
+  final VoidCallback onDelete;
 }
 
 class ReadingHistoryList extends StatelessWidget {
-  final List<ReadingHistoryRow> readings;
   const ReadingHistoryList({super.key, required this.readings});
+
+  final List<ReadingHistoryRow> readings;
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +78,6 @@ class _HistoryItem extends StatelessWidget {
     return Dismissible(
       key: ValueKey(row.id),
       direction: DismissDirection.endToStart,
-      // Medical records: never delete on a stray swipe.
       confirmDismiss: (_) async {
         final ok = await AppDialogs.ask(
           context,
@@ -96,14 +96,14 @@ class _HistoryItem extends StatelessWidget {
       onDismissed: (_) => row.onDelete(),
       background: Container(
         alignment: Alignment.centerRight,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
         color: cs.error,
         child: Icon(Icons.delete_outline_rounded, color: cs.onError),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
-          vertical: 12,
+          vertical: AppSpacing.sm + 4,
         ),
         child: Row(
           children: [
@@ -139,18 +139,15 @@ class _HistoryItem extends StatelessWidget {
                           row.primary,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.inter(
-                            fontSize: 17,
+                          style: theme.textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.w700,
-                            color: cs.onSurface,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: AppSpacing.xs),
                       Text(
                         row.unit,
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
+                        style: theme.textTheme.labelMedium?.copyWith(
                           color: cs.onSurface.withValues(alpha: 0.6),
                         ),
                       ),
@@ -161,8 +158,7 @@ class _HistoryItem extends StatelessWidget {
                     friendlyDateTime(row.timestampIso),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
-                      fontSize: 12,
+                    style: theme.textTheme.labelMedium?.copyWith(
                       color: cs.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
@@ -171,8 +167,7 @@ class _HistoryItem extends StatelessWidget {
                       row.secondary!,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
+                      style: theme.textTheme.labelMedium?.copyWith(
                         color: cs.onSurface.withValues(alpha: 0.72),
                       ),
                     ),
