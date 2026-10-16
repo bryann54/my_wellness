@@ -70,7 +70,6 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
     });
   }
 
-
   Future<void> _onLoad(
     LoadAssessmentsEvent event,
     Emitter<AssessmentsState> emit,
@@ -318,7 +317,6 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
     );
   }
 
- 
   Future<void> _onSubmitAnswer(
     SubmitAnswerEvent event,
     Emitter<AssessmentsState> emit,

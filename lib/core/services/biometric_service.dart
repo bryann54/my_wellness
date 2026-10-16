@@ -34,10 +34,7 @@ class BiometricService {
     bool biometricOnly = true,
   }) async {
     try {
-      return await _auth.authenticate(
-        localizedReason: reason,
-      
-      );
+      return await _auth.authenticate(localizedReason: reason);
     } catch (_) {
       return false;
     }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 Color hexToColor(String? hex, {Color fallback = Colors.grey}) {
   if (hex == null) return fallback;
   var cleaned = hex.trim().replaceFirst('#', '');

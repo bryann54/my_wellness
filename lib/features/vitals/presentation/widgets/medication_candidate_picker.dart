@@ -42,11 +42,7 @@ class MedicationCandidatePicker extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(
-                Icons.help_outline_rounded,
-                size: 18,
-                color: _warning,
-              ),
+              const Icon(Icons.help_outline_rounded, size: 18, color: _warning),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(

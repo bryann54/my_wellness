@@ -121,10 +121,7 @@ class SettingsScreen extends StatelessWidget {
                     const AccountSectionDivider(),
                     MenuItemTile(
                       icon: Icons.logout_rounded,
-                      title: AppLocalizations.getString(
-                        context,
-                        'auth.logout',
-                      ),
+                      title: AppLocalizations.getString(context, 'auth.logout'),
                       subtitle: AppLocalizations.getString(
                         context,
                         'auth.logOutSub',

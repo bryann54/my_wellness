@@ -40,7 +40,6 @@ class RegisterStepLocation extends StatefulWidget {
   final Constituency? initialConstituency;
   final Ward? initialWard;
 
-  
   final int? seedCountyId;
   final int? seedSubCountyId;
   final int? seedConstituencyId;

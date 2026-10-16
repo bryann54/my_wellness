@@ -24,6 +24,7 @@ class ClearIdentityEvent extends NotificationsEvent {
 class RefreshPermissionEvent extends NotificationsEvent {
   const RefreshPermissionEvent();
 }
+
 class SetPushEnabledEvent extends NotificationsEvent {
   final bool enabled;
   const SetPushEnabledEvent(this.enabled);

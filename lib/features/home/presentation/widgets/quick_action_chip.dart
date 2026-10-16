@@ -11,7 +11,7 @@ class QuickActionChip extends StatelessWidget {
   final String label;
   final PageRouteInfo route;
   final String heroTag;
-static const _grayscale = ColorFilter.matrix(<double>[
+  static const _grayscale = ColorFilter.matrix(<double>[
     0.2126,
     0.7152,
     0.0722,
@@ -97,27 +97,29 @@ static const _grayscale = ColorFilter.matrix(<double>[
                         ),
                       ),
                       child: ClipOval(
-  child: ColorFiltered(
-    colorFilter: ColorFilter.mode(
-      colors.primary.withValues(alpha: isDark ? 0.45 : 0.6),
-      BlendMode.srcATop,
-    ),
-    child: ColorFiltered(
-      colorFilter: _grayscale,
-      child: Image.asset(
-        imageAsset,
-        cacheWidth: cacheSize,
-        fit: BoxFit.contain,
-        filterQuality: FilterQuality.medium,
-        errorBuilder: (_, _, _) => Icon(
-          fallbackIcon,
-          size: imageSize * 0.7,
-          color: colors.primary,
-        ),
-      ),
-    ),
-  ),
-),
+                        child: ColorFiltered(
+                          colorFilter: ColorFilter.mode(
+                            colors.primary.withValues(
+                              alpha: isDark ? 0.45 : 0.6,
+                            ),
+                            BlendMode.srcATop,
+                          ),
+                          child: ColorFiltered(
+                            colorFilter: _grayscale,
+                            child: Image.asset(
+                              imageAsset,
+                              cacheWidth: cacheSize,
+                              fit: BoxFit.contain,
+                              filterQuality: FilterQuality.medium,
+                              errorBuilder: (_, _, _) => Icon(
+                                fallbackIcon,
+                                size: imageSize * 0.7,
+                                color: colors.primary,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     FittedBox(

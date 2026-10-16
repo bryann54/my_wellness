@@ -20,9 +20,7 @@ class AccountSectionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: AppRadius.mdAll,
-        border: Border.all(
-          color: cs.outlineVariant.withValues(alpha: 0.5),
-        ),
+        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Column(children: children),
     );

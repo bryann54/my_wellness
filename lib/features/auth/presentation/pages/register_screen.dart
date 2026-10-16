@@ -235,7 +235,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               _next();
                             },
                       ),
-                  RegisterStepLocation(
+                      RegisterStepLocation(
                         initialCounty: _county,
                         initialSubCounty: _subCounty,
                         initialConstituency: _constituency,

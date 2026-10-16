@@ -38,8 +38,7 @@ class HomeAppBar extends StatelessWidget {
             final unreadCount = state.unreadCount;
             const icon = Hero(
               tag: HeroTags.homeNotifications,
-              child: Icon(
-                PhosphorIconsRegular.bell,size: 30),
+              child: Icon(PhosphorIconsRegular.bell, size: 30),
             );
             return IconButton(
               tooltip: AppLocalizations.getString(
@@ -91,7 +90,6 @@ class _FlexibleHeader extends StatelessWidget {
 
     final hasGreeting = greeting.isNotEmpty;
 
-  
     final logoOpacity = hasGreeting
         ? Curves.easeIn.transform((1 - progress * 2).clamp(0.0, 1.0))
         : 1.0;
@@ -141,7 +139,7 @@ class _FlexibleHeader extends StatelessWidget {
           if (hasGreeting)
             Positioned(
               left: AppSpacing.lg,
-              right: 60, 
+              right: 60,
               top: topInset,
               height: toolbarHeight,
               child: Opacity(
@@ -156,7 +154,7 @@ class _FlexibleHeader extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontSize: 17,
-                      
+
                         fontWeight: FontWeight.w700,
                         letterSpacing: -0.2,
                         color: colors.onSurface,

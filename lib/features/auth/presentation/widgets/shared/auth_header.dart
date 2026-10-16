@@ -43,8 +43,7 @@ class AuthHeader extends StatelessWidget {
                 ? logo
                 : Hero(
                     tag: heroTag!,
-                    flightShuttleBuilder: (_, _, _, _, toHero) =>
-                        toHero.widget,
+                    flightShuttleBuilder: (_, _, _, _, toHero) => toHero.widget,
                     child: logo,
                   ),
           ),

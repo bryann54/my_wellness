@@ -52,8 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
         homeDone,
         vitalsDone,
       ]).timeout(const Duration(seconds: 10), onTimeout: () => const []);
-    } catch (_) {
-    }
+    } catch (_) {}
   }
 
   String _greeting(BuildContext context) {

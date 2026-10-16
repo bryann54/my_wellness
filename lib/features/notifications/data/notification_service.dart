@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
+
 class NotificationService {
   final String _appId;
   final StreamController<IncomingNotification> _notifications =
@@ -49,7 +50,7 @@ class NotificationService {
 
       _initialized = true;
     } catch (_) {
-      _initFuture = null; 
+      _initFuture = null;
       rethrow;
     }
   }

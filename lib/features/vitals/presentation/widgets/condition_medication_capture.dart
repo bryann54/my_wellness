@@ -67,9 +67,7 @@ class _ConditionMedicationCaptureState
             ),
             TextButton(
               onPressed: _load,
-              child: Text(
-                AppLocalizations.getString(context, 'common.retry'),
-              ),
+              child: Text(AppLocalizations.getString(context, 'common.retry')),
             ),
           ],
         ),
