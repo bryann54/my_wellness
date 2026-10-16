@@ -3,19 +3,12 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_primary_button.dart';
+import 'package:my_wellness/features/geography/domain/entities/constituency.dart';
 import 'package:my_wellness/features/geography/domain/entities/county.dart';
 import 'package:my_wellness/features/geography/domain/entities/sub_county.dart';
+import 'package:my_wellness/features/geography/domain/entities/ward.dart';
 
 class SubmitSummary {
-  final String? email;
-  final String? phone;
-  final String firstName;
-  final String surname;
-  final String? gender;
-  final DateTime? dateOfBirth;
-  final County? county;
-  final SubCounty? subCounty;
-
   const SubmitSummary({
     this.email,
     this.phone,
@@ -25,20 +18,33 @@ class SubmitSummary {
     this.dateOfBirth,
     this.county,
     this.subCounty,
+    this.constituency,
+    this.ward,
   });
+
+  final String? email;
+  final String? phone;
+  final String firstName;
+  final String surname;
+  final String? gender;
+  final DateTime? dateOfBirth;
+  final County? county;
+  final SubCounty? subCounty;
+  final Constituency? constituency;
+  final Ward? ward;
 }
 
 class RegisterStepSubmit extends StatelessWidget {
-  final SubmitSummary summary;
-  final bool isLoading;
-  final VoidCallback? onSubmit;
-
   const RegisterStepSubmit({
     super.key,
     required this.summary,
     this.isLoading = false,
     this.onSubmit,
   });
+
+  final SubmitSummary summary;
+  final bool isLoading;
+  final VoidCallback? onSubmit;
 
   static String _isoDate(DateTime d) =>
       '${d.day.toString().padLeft(2, '0')}/'
@@ -106,7 +112,7 @@ class RegisterStepSubmit extends StatelessWidget {
                 ),
             ],
           ),
-          if (summary.county != null || summary.subCounty != null) ...[
+          if (summary.county != null) ...[
             const SizedBox(height: 16),
             _Section(
               title: AppLocalizations.getString(
@@ -114,11 +120,10 @@ class RegisterStepSubmit extends StatelessWidget {
                 'auth.locationSection',
               ),
               rows: [
-                if (summary.county != null)
-                  _Row(
-                    label: AppLocalizations.getString(context, 'auth.county'),
-                    value: summary.county!.name,
-                  ),
+                _Row(
+                  label: AppLocalizations.getString(context, 'auth.county'),
+                  value: summary.county!.name,
+                ),
                 if (summary.subCounty != null)
                   _Row(
                     label: AppLocalizations.getString(
@@ -126,6 +131,19 @@ class RegisterStepSubmit extends StatelessWidget {
                       'auth.subCounty',
                     ),
                     value: summary.subCounty!.name,
+                  ),
+                if (summary.constituency != null)
+                  _Row(
+                    label: AppLocalizations.getString(
+                      context,
+                      'auth.constituency',
+                    ),
+                    value: summary.constituency!.name,
+                  ),
+                if (summary.ward != null)
+                  _Row(
+                    label: AppLocalizations.getString(context, 'auth.ward'),
+                    value: summary.ward!.name,
                   ),
               ],
             ),
@@ -145,9 +163,10 @@ class RegisterStepSubmit extends StatelessWidget {
 }
 
 class _Section extends StatelessWidget {
+  const _Section({required this.title, required this.rows});
+
   final String title;
   final List<Widget> rows;
-  const _Section({required this.title, required this.rows});
 
   @override
   Widget build(BuildContext context) {
@@ -180,9 +199,10 @@ class _Section extends StatelessWidget {
 }
 
 class _Row extends StatelessWidget {
+  const _Row({required this.label, required this.value});
+
   final String label;
   final String value;
-  const _Row({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_wellness/common/constants/hero.dart';
 import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_fab.dart';
@@ -49,6 +50,8 @@ class BsTab extends StatelessWidget {
           );
         }
 
+        final latest = state.bsReadings.first;
+
         return Scaffold(
           backgroundColor: Colors.transparent,
           floatingActionButton: AppFab.compact(
@@ -76,19 +79,21 @@ class BsTab extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         LatestReadingCard(
-                          classification: state.bsReadings.first.classification,
-                          primary: state.bsReadings.first.value,
-                          unit: state.bsReadings.first.unit,
-                          timestampIso: state.bsReadings.first.takenAt,
-                          secondary: _readingContext(
-                            context,
-                            state.bsReadings.first,
-                          ),
+                          kind: ReadingKind.bs,
+                          classification: latest.classification,
+                          primary: latest.value,
+                          unit: latest.unit,
+                          timestampIso: latest.takenAt,
+                          primaryHeroTag: HeroTags.homeBloodSugarReading,
+                          timestampHeroTag: HeroTags.homeBloodSugarTimestamp,
+                          secondaryIcon: Icons.restaurant_outlined,
+                          secondary: _readingContext(context, latest),
                         ),
                         const SizedBox(height: AppSpacing.xl),
                         Text(
                           AppLocalizations.getString(context, 'vitals.history'),
-                          style: Theme.of(context).textTheme.titleMedium,
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w700),
                         ),
                         const SizedBox(height: AppSpacing.sm),
                         ReadingHistoryList(
@@ -152,7 +157,7 @@ class BsTab extends StatelessWidget {
     };
     return [
       _readingTypeLabel(context, reading.readingType),
-      if (timing != null) timing,
+      ?timing,
     ].join(' · ');
   }
 }

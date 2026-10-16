@@ -26,7 +26,7 @@ class AuthHeader extends StatelessWidget {
       child: Image.asset(
         'assets/images/logo.png',
         fit: BoxFit.contain,
-        errorBuilder: (_, __, ___) => Icon(
+        errorBuilder: (_, _, _) => Icon(
           Icons.health_and_safety_rounded,
           size: 60,
           color: theme.colorScheme.primary,
@@ -43,8 +43,7 @@ class AuthHeader extends StatelessWidget {
                 ? logo
                 : Hero(
                     tag: heroTag!,
-                    flightShuttleBuilder: (_, __, ___, ____, toHero) =>
-                        toHero.widget,
+                    flightShuttleBuilder: (_, _, _, _, toHero) => toHero.widget,
                     child: logo,
                   ),
           ),

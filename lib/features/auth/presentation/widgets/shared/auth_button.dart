@@ -29,7 +29,7 @@ class AuthButton extends StatelessWidget {
 
     return Hero(
       tag: heroTag!,
-      flightShuttleBuilder: (_, __, direction, fromContext, toContext) {
+      flightShuttleBuilder: (_, _, direction, fromContext, toContext) {
         return direction == HeroFlightDirection.push
             ? toContext.widget
             : fromContext.widget;

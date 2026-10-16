@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class ProfileSectionLabel extends StatelessWidget {
-  final String text;
   const ProfileSectionLabel(this.text, {super.key});
+
+  final String text;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
     return Text(
       text.toUpperCase(),
-      style: GoogleFonts.inter(
+      style: theme.textTheme.labelSmall?.copyWith(
         fontSize: 10.5,
         fontWeight: FontWeight.w700,
         letterSpacing: 1.0,
-        color: cs.onSurface.withValues(alpha: 0.5),
+        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
       ),
     );
   }

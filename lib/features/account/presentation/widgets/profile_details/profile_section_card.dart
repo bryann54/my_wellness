@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
+import 'package:my_wellness/common/res/app_spacing.dart';
 
 class ProfileSectionCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String? subtitle;
-  final List<Widget> children;
-
   const ProfileSectionCard({
     super.key,
     required this.icon,
@@ -15,41 +11,41 @@ class ProfileSectionCard extends StatelessWidget {
     this.subtitle,
   });
 
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final List<Widget> children;
+
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
         color: cs.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: AppRadius.lgAll,
         border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  title.toUpperCase(),
-                  style: GoogleFonts.inter(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: cs.onSurface,
-                  ),
-                ),
-              ),
-            ],
+          Text(
+            title.toUpperCase(),
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: cs.onSurface,
+            ),
           ),
           if (subtitle != null) ...[
-            const SizedBox(height: 6),
+            const SizedBox(height: AppSpacing.sm),
             Padding(
               padding: const EdgeInsets.only(left: 42),
               child: Text(
                 subtitle!,
-                style: GoogleFonts.inter(
+                style: theme.textTheme.bodySmall?.copyWith(
                   fontSize: 12.5,
                   height: 1.4,
                   color: cs.onSurface.withValues(alpha: 0.55),
@@ -57,7 +53,7 @@ class ProfileSectionCard extends StatelessWidget {
               ),
             ),
           ],
-          const SizedBox(height: 18),
+          const SizedBox(height: AppSpacing.lg),
           ...children,
         ],
       ),

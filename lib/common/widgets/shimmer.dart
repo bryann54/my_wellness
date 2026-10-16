@@ -58,7 +58,7 @@ class _ShimmerState extends State<Shimmer> with SingleTickerProviderStateMixin {
     final gradient = widget.gradient ?? _defaultGradient(context);
     return AnimatedBuilder(
       animation: _animation,
-      builder: (_, __) => ShaderMask(
+      builder: (_, _) => ShaderMask(
         blendMode: BlendMode.srcATop,
         shaderCallback: (bounds) {
           return gradient.createShader(

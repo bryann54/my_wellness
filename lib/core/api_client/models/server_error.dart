@@ -24,15 +24,15 @@ class ServerError implements Exception {
     return this;
   }
 
-  getErrorCode() {
+  int? getErrorCode() {
     return _errorCode;
   }
 
-  getErrorMessage() {
+  String getErrorMessage() {
     return _errorMessage;
   }
 
-  _handleError(DioException error) {
+  String _handleError(DioException error) {
     switch (error.type) {
       case DioExceptionType.cancel:
         _errorMessage = "Request was cancelled";

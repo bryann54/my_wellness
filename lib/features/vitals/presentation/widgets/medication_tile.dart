@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:my_wellness/common/res/app_spacing.dart';
-import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/custom_alert_dialog.dart';
 import 'package:my_wellness/features/vitals/domain/entities/medication.dart';
 
 class MedicationTile extends StatefulWidget {
-  final Medication medication;
-  final VoidCallback onDelete;
-
   const MedicationTile({
     super.key,
     required this.medication,
     required this.onDelete,
   });
+
+  final Medication medication;
+  final VoidCallback onDelete;
 
   @override
   State<MedicationTile> createState() => _MedicationTileState();
@@ -28,11 +27,6 @@ class _MedicationTileState extends State<MedicationTile> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final accent = isDark ? AppColors.vitalBsDark : AppColors.vitalBs;
-    final tint = isDark
-        ? AppColors.vitalBsSurfaceDark
-        : AppColors.vitalBsSurface;
 
     return Dismissible(
       key: ValueKey(m.id),
@@ -52,34 +46,39 @@ class _MedicationTileState extends State<MedicationTile> {
       background: _DismissBackground(color: cs.error),
       onDismissed: (_) => widget.onDelete(),
       child: _Card(
-        accent: accent,
-        tint: tint,
         child: InkWell(
           onTap: () => setState(() => _isExpanded = !_isExpanded),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            padding: const EdgeInsets.all(AppSpacing.md),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _Header(medication: m, expanded: _isExpanded),
                 AnimatedSize(
-                  duration: const Duration(milliseconds: 240),
+                  duration: AppDurations.medium,
                   curve: Curves.easeOutCubic,
+                  alignment: Alignment.topCenter,
                   child: _isExpanded
                       ? Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const SizedBox(height: AppSpacing.md),
-                            Divider(color: accent.withValues(alpha: 0.16)),
+                            Divider(
+                              height: 1,
+                              color: cs.outlineVariant.withValues(alpha: 0.5),
+                            ),
                             const SizedBox(height: AppSpacing.sm),
                             _Details(medication: m),
-                            const SizedBox(height: AppSpacing.sm),
-                            Divider(color: accent.withValues(alpha: 0.16)),
+                            const SizedBox(height: AppSpacing.xs),
+                            Divider(
+                              height: 1,
+                              color: cs.outlineVariant.withValues(alpha: 0.5),
+                            ),
                             const SizedBox(height: AppSpacing.xs),
                             _DeleteButton(onTap: () => _confirmDelete(context)),
                           ],
                         )
-                      : const SizedBox.shrink(),
+                      : const SizedBox(width: double.infinity),
                 ),
               ],
             ),
@@ -107,23 +106,23 @@ class _MedicationTileState extends State<MedicationTile> {
 }
 
 class _Card extends StatelessWidget {
+  const _Card({required this.child});
+
   final Widget child;
-  final Color accent;
-  final Color tint;
-  const _Card({required this.child, required this.accent, required this.tint});
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm + 2),
       child: Material(
-        color: tint,
+        color: cs.surfaceContainerLow,
         borderRadius: AppRadius.lgAll,
         clipBehavior: Clip.antiAlias,
         child: DecoratedBox(
           decoration: BoxDecoration(
             borderRadius: AppRadius.lgAll,
-            border: Border.all(color: accent.withValues(alpha: 0.22), width: 1),
+            border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.5)),
           ),
           child: child,
         ),
@@ -133,36 +132,36 @@ class _Card extends StatelessWidget {
 }
 
 class _Header extends StatelessWidget {
+  const _Header({required this.medication, required this.expanded});
+
   final Medication medication;
   final bool expanded;
 
-  const _Header({required this.medication, required this.expanded});
-
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     final subtitle = _subtitle(medication);
     final condition = medication.condition?.trim();
     final showCondition =
         condition != null &&
         condition.isNotEmpty &&
         condition.toLowerCase() != 'other';
-    final accent = Theme.of(context).brightness == Brightness.dark
-        ? AppColors.vitalBsDark
-        : AppColors.vitalBs;
 
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: accent.withValues(alpha: 0.12),
-            borderRadius: AppRadius.smAll,
+        CircleAvatar(
+          radius: 22,
+          backgroundColor: cs.secondary.withValues(alpha: 0.04),
+          child: Image.asset(
+            'assets/images/meds.png',
+            fit: BoxFit.contain,
+            errorBuilder: (_, _, _) =>
+                Icon(Icons.shield_rounded, size: 22, color: cs.primary),
           ),
-          child: Icon(Icons.medication_outlined, size: 19, color: accent),
         ),
-        const SizedBox(width: AppSpacing.sm),
+        const SizedBox(width: AppSpacing.md),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -172,41 +171,37 @@ class _Header extends StatelessWidget {
                 medication.name,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.inter(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: cs.onSurface,
-                  height: 1.2,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               if (subtitle != null) ...[
-                const SizedBox(height: 3),
+                const SizedBox(height: AppSpacing.xs),
                 Text(
                   subtitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(
-                    fontSize: 14,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w500,
                     color: cs.onSurface.withValues(alpha: 0.6),
-                    height: 1.2,
                   ),
                 ),
               ],
               if (showCondition) ...[
-                const SizedBox(height: AppSpacing.xs),
+                const SizedBox(height: AppSpacing.sm),
                 _ConditionBadge(condition: condition),
               ],
             ],
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: AppSpacing.sm),
         AnimatedRotation(
           turns: expanded ? 0.5 : 0,
-          duration: const Duration(milliseconds: 220),
+          duration: AppDurations.medium,
           curve: Curves.easeOutCubic,
           child: Icon(
             Icons.keyboard_arrow_down_rounded,
-            size: 20,
+            size: 22,
             color: cs.onSurface.withValues(alpha: 0.4),
           ),
         ),
@@ -214,9 +209,15 @@ class _Header extends StatelessWidget {
     );
   }
 
+  static String _humanize(String raw) {
+    final s = raw.trim().replaceAll('_', ' ');
+    if (s.isEmpty) return s;
+    return '${s[0].toUpperCase()}${s.substring(1)}';
+  }
+
   static String? _subtitle(Medication m) {
     final dosage = m.dosage.trim();
-    final frequency = m.frequency.trim().replaceAll('_', ' ');
+    final frequency = _humanize(m.frequency);
 
     if (dosage.isEmpty && frequency.isEmpty) return null;
     if (frequency.isEmpty) return dosage;
@@ -226,8 +227,9 @@ class _Header extends StatelessWidget {
 }
 
 class _Details extends StatelessWidget {
-  final Medication medication;
   const _Details({required this.medication});
+
+  final Medication medication;
 
   @override
   Widget build(BuildContext context) {
@@ -278,7 +280,7 @@ class _Details extends StatelessWidget {
             value: _t(context, 'common.available'),
           ),
         if (hasNotes) ...[
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xs),
           _LabeledRow(
             label: _t(context, 'medications.notes'),
             value: notes,
@@ -342,38 +344,34 @@ class _Details extends StatelessWidget {
 }
 
 class _LabeledRow extends StatelessWidget {
+  const _LabeledRow({required this.label, this.value, this.multiline = false});
+
   final String label;
   final String? value;
   final bool multiline;
 
-  const _LabeledRow({required this.label, this.value, this.multiline = false});
-
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
-    final labelStyle = GoogleFonts.inter(
-      fontSize: 15,
-      fontWeight: FontWeight.w500,
+    final labelStyle = theme.textTheme.labelMedium?.copyWith(
       color: cs.onSurface.withValues(alpha: 0.55),
-      height: 1.3,
     );
 
-    final valueStyle = GoogleFonts.inter(
-      fontSize: 14,
+    final valueStyle = theme.textTheme.bodyMedium?.copyWith(
       fontWeight: FontWeight.w600,
       color: cs.onSurface,
-      height: 1.35,
     );
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs + 2),
       child: multiline
           ? Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(label, style: labelStyle),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSpacing.xs),
                 Text(value ?? '', style: valueStyle),
               ],
             )
@@ -381,7 +379,7 @@ class _LabeledRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(label, style: labelStyle),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Align(
                     alignment: Alignment.centerRight,
@@ -401,39 +399,40 @@ class _LabeledRow extends StatelessWidget {
 }
 
 class _ConditionBadge extends StatelessWidget {
-  final String condition;
   const _ConditionBadge({required this.condition});
+
+  final String condition;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
-    final (label, color) = switch (condition.toLowerCase()) {
-      'hypertension' => (
-        AppLocalizations.getString(context, 'condition.hypertension'),
-        cs.primary,
+    final label = switch (condition.toLowerCase()) {
+      'hypertension' => AppLocalizations.getString(
+        context,
+        'condition.hypertension',
       ),
-      'diabetes' => (
-        AppLocalizations.getString(context, 'condition.diabetes'),
-        cs.primary,
-      ),
-      _ => (condition, cs.primary),
+      'diabetes' => AppLocalizations.getString(context, 'condition.diabetes'),
+      _ => condition,
     };
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm + 1,
+        vertical: AppSpacing.xs,
+      ),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.16)),
+        color: cs.primary.withValues(alpha: 0.08),
+        borderRadius: AppRadius.smAll,
+        border: Border.all(color: cs.primary.withValues(alpha: 0.16)),
       ),
       child: Text(
         label,
-        style: GoogleFonts.inter(
-          fontSize: 11,
+        style: theme.textTheme.labelSmall?.copyWith(
           fontWeight: FontWeight.w600,
           letterSpacing: 0.2,
-          color: color,
+          color: cs.primary,
         ),
       ),
     );
@@ -441,8 +440,9 @@ class _ConditionBadge extends StatelessWidget {
 }
 
 class _DeleteButton extends StatelessWidget {
-  final VoidCallback onTap;
   const _DeleteButton({required this.onTap});
+
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -453,7 +453,7 @@ class _DeleteButton extends StatelessWidget {
         onPressed: onTap,
         style: TextButton.styleFrom(
           foregroundColor: cs.error,
-          minimumSize: const Size(48, 48),
+          minimumSize: const Size(48, 44),
         ),
         icon: const Icon(Icons.delete_outline_rounded, size: 18),
         label: Text(AppLocalizations.getString(context, 'common.delete')),
@@ -463,21 +463,20 @@ class _DeleteButton extends StatelessWidget {
 }
 
 class _DismissBackground extends StatelessWidget {
-  final Color color;
   const _DismissBackground({required this.color});
+
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       alignment: Alignment.centerRight,
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: const Icon(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      margin: const EdgeInsets.only(bottom: AppSpacing.sm + 2),
+      decoration: BoxDecoration(color: color, borderRadius: AppRadius.lgAll),
+      child: Icon(
         Icons.delete_outline_rounded,
-        color: AppColors.background,
+        color: Theme.of(context).colorScheme.onError,
       ),
     );
   }

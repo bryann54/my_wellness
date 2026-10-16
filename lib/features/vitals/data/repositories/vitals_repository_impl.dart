@@ -22,7 +22,10 @@ class VitalsRepositoryImpl implements VitalsRepository {
   }) async {
     try {
       return Right(
-        await _remote.scanMedication(filePath: filePath, condition: condition),
+        (await _remote.scanMedication(
+          filePath: filePath,
+          condition: condition,
+        )).toEntity(),
       );
     } on Exception catch (e) {
       return Left(_map(e));
@@ -34,7 +37,11 @@ class VitalsRepositoryImpl implements VitalsRepository {
     String condition,
   ) async {
     try {
-      return Right(await _remote.getAppointmentsByCondition(condition));
+      return Right(
+        (await _remote.getAppointmentsByCondition(
+          condition,
+        )).map((model) => model.toEntity()).toList(growable: false),
+      );
     } on Exception catch (e) {
       return Left(_map(e));
     }
@@ -43,7 +50,11 @@ class VitalsRepositoryImpl implements VitalsRepository {
   @override
   Future<Either<Failure, List<Facility>>> searchFacilities(String query) async {
     try {
-      return Right(await _remote.searchFacilities(query));
+      return Right(
+        (await _remote.searchFacilities(
+          query,
+        )).map((model) => model.toEntity()).toList(growable: false),
+      );
     } on Exception catch (e) {
       return Left(_map(e));
     }
@@ -53,9 +64,16 @@ class VitalsRepositoryImpl implements VitalsRepository {
   Future<Either<Failure, ({List<Appointment> items, String? nextCursor})>>
   getAppointmentsPaged({String? cursor, String? query}) async {
     try {
-      return Right(
-        await _remote.getAppointmentsPaged(cursor: cursor, query: query),
+      final page = await _remote.getAppointmentsPaged(
+        cursor: cursor,
+        query: query,
       );
+      return Right((
+        items: page.items
+            .map((model) => model.toEntity())
+            .toList(growable: false),
+        nextCursor: page.nextCursor,
+      ));
     } on Exception catch (e) {
       return Left(_map(e));
     }
@@ -66,7 +84,7 @@ class VitalsRepositoryImpl implements VitalsRepository {
     Map<String, dynamic> data,
   ) async {
     try {
-      return Right(await _remote.createAppointment(data));
+      return Right((await _remote.createAppointment(data)).toEntity());
     } on Exception catch (e) {
       return Left(_map(e));
     }
@@ -78,7 +96,7 @@ class VitalsRepositoryImpl implements VitalsRepository {
     Map<String, dynamic> data,
   ) async {
     try {
-      return Right(await _remote.updateAppointment(id, data));
+      return Right((await _remote.updateAppointment(id, data)).toEntity());
     } on Exception catch (e) {
       return Left(_map(e));
     }
@@ -94,13 +112,16 @@ class VitalsRepositoryImpl implements VitalsRepository {
     }
   }
 
-  // ── Medications ─────────────────────────────────────────────────────────
   @override
   Future<Either<Failure, List<Medication>>> getMedicationsByCondition(
     String condition,
   ) async {
     try {
-      return Right(await _remote.getMedicationsByCondition(condition));
+      return Right(
+        (await _remote.getMedicationsByCondition(
+          condition,
+        )).map((model) => model.toEntity()).toList(growable: false),
+      );
     } on Exception catch (e) {
       return Left(_map(e));
     }
@@ -110,9 +131,16 @@ class VitalsRepositoryImpl implements VitalsRepository {
   Future<Either<Failure, ({List<Medication> items, String? nextCursor})>>
   getMedicationsPaged({String? cursor, String? query}) async {
     try {
-      return Right(
-        await _remote.getMedicationsPaged(cursor: cursor, query: query),
+      final page = await _remote.getMedicationsPaged(
+        cursor: cursor,
+        query: query,
       );
+      return Right((
+        items: page.items
+            .map((model) => model.toEntity())
+            .toList(growable: false),
+        nextCursor: page.nextCursor,
+      ));
     } on Exception catch (e) {
       return Left(_map(e));
     }
@@ -123,7 +151,7 @@ class VitalsRepositoryImpl implements VitalsRepository {
     Map<String, dynamic> data,
   ) async {
     try {
-      return Right(await _remote.createMedication(data));
+      return Right((await _remote.createMedication(data)).toEntity());
     } on Exception catch (e) {
       return Left(_map(e));
     }
@@ -135,7 +163,7 @@ class VitalsRepositoryImpl implements VitalsRepository {
     Map<String, dynamic> data,
   ) async {
     try {
-      return Right(await _remote.updateMedication(id, data));
+      return Right((await _remote.updateMedication(id, data)).toEntity());
     } on Exception catch (e) {
       return Left(_map(e));
     }
@@ -151,11 +179,14 @@ class VitalsRepositoryImpl implements VitalsRepository {
     }
   }
 
-  // ── Blood pressure ──────────────────────────────────────────────────────
   @override
   Future<Either<Failure, List<BpReading>>> getBloodPressureReadings() async {
     try {
-      return Right(await _remote.getBloodPressureReadings());
+      return Right(
+        (await _remote.getBloodPressureReadings())
+            .map((model) => model.toEntity())
+            .toList(growable: false),
+      );
     } on Exception catch (e) {
       return Left(_map(e));
     }
@@ -166,7 +197,7 @@ class VitalsRepositoryImpl implements VitalsRepository {
     Map<String, dynamic> data,
   ) async {
     try {
-      return Right(await _remote.createBloodPressureReading(data));
+      return Right((await _remote.createBloodPressureReading(data)).toEntity());
     } on Exception catch (e) {
       return Left(_map(e));
     }
@@ -182,11 +213,14 @@ class VitalsRepositoryImpl implements VitalsRepository {
     }
   }
 
-  // ── Blood sugar ─────────────────────────────────────────────────────────
   @override
   Future<Either<Failure, List<BsReading>>> getBloodSugarReadings() async {
     try {
-      return Right(await _remote.getBloodSugarReadings());
+      return Right(
+        (await _remote.getBloodSugarReadings())
+            .map((model) => model.toEntity())
+            .toList(growable: false),
+      );
     } on Exception catch (e) {
       return Left(_map(e));
     }
@@ -197,7 +231,7 @@ class VitalsRepositoryImpl implements VitalsRepository {
     Map<String, dynamic> data,
   ) async {
     try {
-      return Right(await _remote.createBloodSugarReading(data));
+      return Right((await _remote.createBloodSugarReading(data)).toEntity());
     } on Exception catch (e) {
       return Left(_map(e));
     }

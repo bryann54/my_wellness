@@ -3,29 +3,17 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 
-/// Thin wrapper around the OneSignal Flutter SDK.
-///
-/// Owns:
-///   - SDK initialization (idempotent)
-///   - external-ID login / logout
-///   - tag add / remove
-///   - permission requests
-///   - two broadcast streams: incoming notifications, permission changes
-///
-/// Does NOT own:
-///   - identity resolution (that's the bloc's job)
-///   - payload parsing / routing (that's the host's job)
-///   - snackbar or navigation presentation
 class NotificationService {
-  static const externalIdPrefix = 'user-';
-
   final String _appId;
   final StreamController<IncomingNotification> _notifications =
       StreamController<IncomingNotification>.broadcast();
   final StreamController<NotificationPermission> _permission =
       StreamController<NotificationPermission>.broadcast();
+  final StreamController<bool> _subscription =
+      StreamController<bool>.broadcast();
 
   bool _initialized = false;
+  Future<void>? _initFuture;
 
   NotificationService(this._appId);
 
@@ -33,47 +21,52 @@ class NotificationService {
 
   Stream<IncomingNotification> get onNotification => _notifications.stream;
   Stream<NotificationPermission> get onPermissionChange => _permission.stream;
+  Stream<bool> get onSubscriptionChange => _subscription.stream;
+  bool get isPushOptedIn =>
+      _initialized && (OneSignal.User.pushSubscription.optedIn ?? false);
 
-  NotificationPermission get permission =>
-      _mapPermission(OneSignal.Notifications.permission);
-
-  /// Safe to call multiple times. Returns immediately on web or when
-  /// [isConfigured] is false.
-  Future<void> initialize() async {
-    if (_initialized || kIsWeb) return;
-    if (!isConfigured) return;
-
-    if (kDebugMode) {
-      OneSignal.Debug.setLogLevel(OSLogLevel.warn);
-    }
-    await OneSignal.initialize(_appId.trim());
-
-    // Foreground arrival — snackbar, no forced navigation.
-    OneSignal.Notifications.addForegroundWillDisplayListener((event) {
-      _emit(event.notification, openedByUser: false);
-    });
-
-    // User tapped the notification (foreground or cold-start).
-    // This is the only path that should trigger navigation.
-    OneSignal.Notifications.addClickListener((event) {
-      _emit(event.notification, openedByUser: true);
-    });
-
-    OneSignal.Notifications.addPermissionObserver((granted) {
-      _permission.add(
-        granted
-            ? NotificationPermission.granted
-            : NotificationPermission.denied,
-      );
-    });
-
-    _initialized = true;
+  Future<void> initialize() {
+    if (kIsWeb || !isConfigured) return Future.value();
+    return _initFuture ??= _init();
   }
 
-  /// Associates this device with a user in OneSignal.
-  ///
-  /// Caller is responsible for resolving [userId] and [tags] from an
-  /// authenticated source. This method does not talk to your API.
+  Future<void> _init() async {
+    try {
+      if (kDebugMode) OneSignal.Debug.setLogLevel(OSLogLevel.warn);
+      await OneSignal.initialize(_appId.trim());
+
+      OneSignal.Notifications.addForegroundWillDisplayListener((event) {
+        _emit(event.notification, openedByUser: false);
+      });
+      OneSignal.Notifications.addClickListener((event) {
+        _emit(event.notification, openedByUser: true);
+      });
+      OneSignal.Notifications.addPermissionObserver((_) async {
+        if (!_permission.isClosed) _permission.add(await readPermission());
+      });
+      OneSignal.User.pushSubscription.addObserver((state) {
+        if (!_subscription.isClosed) _subscription.add(state.current.optedIn);
+      });
+
+      _initialized = true;
+    } catch (_) {
+      _initFuture = null;
+      rethrow;
+    }
+  }
+
+  Future<NotificationPermission> readPermission() async {
+    if (!isConfigured || kIsWeb) return NotificationPermission.unknown;
+    await initialize();
+    if (OneSignal.Notifications.permission) {
+      return NotificationPermission.granted;
+    }
+    final canPrompt = await OneSignal.Notifications.canRequest();
+    return canPrompt
+        ? NotificationPermission.unknown
+        : NotificationPermission.denied;
+  }
+
   Future<void> login({
     required String userId,
     required Map<String, String> tags,
@@ -81,15 +74,12 @@ class NotificationService {
     if (!isConfigured || kIsWeb) return;
     await initialize();
 
-    await OneSignal.login('$externalIdPrefix$userId');
+    await OneSignal.login(userId);
     if (tags.isNotEmpty) {
       await OneSignal.User.addTags(tags);
     }
   }
 
-  /// Removes this device's targeting from OneSignal.
-  ///
-  /// Best-effort. Failures are swallowed so logout never blocks.
   Future<void> logout({Iterable<String> tagKeys = const []}) async {
     if (!_initialized || kIsWeb) return;
     try {
@@ -102,11 +92,6 @@ class NotificationService {
     }
   }
 
-  /// Requests OS notification permission.
-  ///
-  /// [fallbackToSettings] should be false during automatic post-login setup
-  /// (do not surprise the user) and true when the user explicitly taps a
-  /// "Enable notifications" button in the app.
   Future<bool> requestPermission({bool fallbackToSettings = true}) async {
     if (!isConfigured || kIsWeb) return false;
     await initialize();
@@ -116,22 +101,24 @@ class NotificationService {
     );
     final effective = granted || OneSignal.Notifications.permission;
 
-    // Permission and subscription opt-in are separate OneSignal states.
-    if (effective) {
-      await OneSignal.User.pushSubscription.optIn();
-    }
-
-    _permission.add(
-      effective
-          ? NotificationPermission.granted
-          : NotificationPermission.denied,
-    );
+    if (!_permission.isClosed) _permission.add(await readPermission());
     return effective;
+  }
+
+  Future<void> setPushEnabled(bool enabled) async {
+    if (!isConfigured || kIsWeb) return;
+    await initialize();
+    if (enabled) {
+      await OneSignal.User.pushSubscription.optIn();
+    } else {
+      await OneSignal.User.pushSubscription.optOut();
+    }
   }
 
   Future<void> dispose() async {
     await _notifications.close();
     await _permission.close();
+    await _subscription.close();
   }
 
   void _emit(OSNotification n, {required bool openedByUser}) {
@@ -159,9 +146,6 @@ class NotificationService {
       ),
     );
   }
-
-  static NotificationPermission _mapPermission(bool granted) =>
-      granted ? NotificationPermission.granted : NotificationPermission.denied;
 }
 
 class IncomingNotification {
@@ -169,9 +153,6 @@ class IncomingNotification {
   final String title;
   final String body;
   final Map<String, dynamic> data;
-
-  /// True when the notification arrived because the user tapped it.
-  /// False when it arrived in the foreground while the app was already open.
   final bool openedByUser;
 
   const IncomingNotification({

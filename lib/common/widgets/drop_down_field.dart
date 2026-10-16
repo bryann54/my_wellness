@@ -128,7 +128,7 @@ class DropDownWidget<T> extends StatelessWidget {
                   theme.colorScheme.surface,
               contentPadding: EdgeInsets.symmetric(
                 horizontal: prefixIcon != null ? 12 : 16,
-                vertical: contentPadding ?? (isDense ? 12 : 16),
+                vertical: contentPadding ?? 16,
               ),
               prefixIcon: prefixIcon,
               prefixIconConstraints: const BoxConstraints(
@@ -174,9 +174,8 @@ class DropDownWidget<T> extends StatelessWidget {
             menuMaxHeight: 300,
             selectedItemBuilder: (context) {
               return items.map((item) {
-                return Container(
+                return Align(
                   alignment: Alignment.centerLeft,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: DefaultTextStyle.merge(
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
@@ -288,38 +287,54 @@ class SoftDropdown<T> extends StatelessWidget {
       initialValue: value,
       items: items,
       onChanged: onChanged,
+      isExpanded: true,
       style: GoogleFonts.inter(
-        fontSize: 14.5,
+        fontSize: 15,
         fontWeight: FontWeight.w500,
         color: cs.onSurface,
       ),
       decoration: InputDecoration(
         labelText: label,
+        floatingLabelBehavior: FloatingLabelBehavior.always,
         filled: true,
         fillColor: cs.surfaceContainerHighest,
         labelStyle: GoogleFonts.inter(
           fontSize: 13.5,
-          fontWeight: FontWeight.w500,
-          color: cs.onSurface.withValues(alpha: 0.6),
+          fontWeight: FontWeight.w600,
+          color: cs.onSurface.withValues(alpha: 0.7),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        floatingLabelStyle: GoogleFonts.inter(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: cs.primary,
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
         border: OutlineInputBorder(
           borderRadius: radius,
           borderSide: BorderSide(
-            color: cs.outlineVariant.withValues(alpha: 0.4),
+            color: cs.outlineVariant.withValues(alpha: 0.5),
           ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: radius,
           borderSide: BorderSide(
-            color: cs.outlineVariant.withValues(alpha: 0.4),
+            color: cs.outlineVariant.withValues(alpha: 0.5),
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: radius,
-          borderSide: BorderSide(color: cs.primary, width: 1.4),
+          borderSide: BorderSide(color: cs.primary, width: 1.6),
         ),
       ),
+      icon: Icon(
+        Icons.keyboard_arrow_down_rounded,
+        color: cs.onSurface.withValues(alpha: 0.6),
+      ),
+      dropdownColor: cs.surfaceContainerLow,
+      borderRadius: radius,
     );
   }
 }

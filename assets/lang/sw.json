@@ -68,8 +68,30 @@
 "vitals":"Vitali",
     "myVitals":"Vitali & Huduma za Kudumu"
   },
+"homeDashboard": {
+  "welcome": "Habari, {name}",
+  "welcomeFallback": "Karibu",
+  "recordReading": "Weka kipimo",
+  "healthOverview": "Muhtasari wa afya",
+  "quickActions": "Vitendo vya haraka",
+  "viewHistory": "Angalia historia",
+  "noReadingRecorded": "Bado hakuna kipimo kilichorekodiwa",
+  "readingsUnavailable": "Vipimo havikuweza kupakiwa. Gusa kujaribu tena.",
+  "screeningInProgress": "Uchunguzi unaendelea",
+  "continueScreening": "Endelea",
+  "screeningActivity": "Hali ya uchunguzi",
+  "startScreening": "Anza uchunguzi",
+  "notStarted": "Bado haujaanza",
+  "questionsAnswered": "Maswali {current} kati ya {total} yamejibiwa",
+  "seeAll": "Ona zote",
+  "pending": "Inasubiri",
+  "inProgress": "Inaendelea",
+  "dashboardUnavailable": "Dashibodi haipatikani kwa sasa.",
+  "progressPercent": "Imekamilika kwa asilimia {percent}"
+},
 "assessment": {
  "title": "Uchunguzi wa Afya",
+ "loadFailed": "Uchunguzi huu haukuweza kupakiwa. Tafadhali jaribu tena baadaye.",
     "titlebot": "Uchunguzi",
     "referenceLabel": "Marejeleo",
     "searchHint": "Tafuta uchunguzi",
@@ -82,7 +104,7 @@
 
     "searchResultCountOne": "Matokeo 1 kwa “{query}”",
     "searchResultCountMany": "Matokeo {count} kwa “{query}”",
-
+"consent": "Nimesoma na kuelewa taarifa hapo juu na nakubali kushiriki katika tathmini hii.",
     "emptySearchTitle": "Hakuna uchunguzi unaolingana na “{query}”",
     "emptySearchBody": "Jaribu neno lingine, au safisha utafutaji.",
     "emptySearchClear": "Safisha utafutaji",
@@ -236,7 +258,7 @@
     "unitDay": "Siku",
     "unitWeek": "Wiki",
     "unitMonth": "Mwezi",
-
+"emptyCondition": "Hakuna dawa zilizorekodiwa kwa hali hii bado.",
     "save": "Hifadhi dawa",
     "empty": "Hakuna dawa bado",
     "emptySub": "Ongeza dawa ili kufuatilia maagizo yako.",
@@ -281,16 +303,12 @@
   },
   "auth": {
     "title": "Usajili wa mywellness",
-    "subtitle": "Jibu maswali machache ili kuanza",
-    "inputHint": "Andika jibu lako",
-    "preferAi": "Unapendelea AI? Tumia usajili wetu wa mazungumzo",
-    "preferForm": "Unapendelea fomu? Tumia usajili wa kawaida",
-    "askFirstName": "Karibu my wellness! Kuanza, jina lako la kwanza na la mwisho ni nani?",
-    "askEmail": "Anwani yako ya barua pepe ni ipi?",
-    "askUsername": "Chagua jina la mtumiaji",
-    "askPhone": "Namba yako ya simu ni ipi?",
-    "askPassword": "Unda nenosiri (angalau herufi 8)",
-    "askState": "Uko jimbo gani la Marekani?",
+   "constituency": "Eneo la Uchaguzi",
+"selectConstituency": "Chagua eneo la uchaguzi",
+"selectConstituencyFirst": "Chagua eneo la uchaguzi kwanza",
+"ward": "Wadi",
+"selectWard": "Chagua wadi (hiari)",
+"whereAreYouSub": "Tunatumia hii kukuonyesha vituo vya afya na huduma muhimu.",
     "welcomeBack": "Karibu Tena",
     "signedIn": "Akaunti imeundwa kwa mafanikio!",
     "signIn": "Ingia kwenye akaunti yako",
@@ -444,7 +462,17 @@
   },
    "notifications": {
     "emptyTitle": "Hakuna arifa bado",
-    "emptyBody": "Tutakujulisha wakati kuna jambo linalohitaji uangalizi wako."
+    "emptyBody": "Tutakujulisha wakati kuna jambo linalohitaji uangalizi wako.",
+    "unreadCountLabel": "Arifa, {count} ambazo hazijasomwa",
+     
+  "emptySubtitle": "Vikumbusho vya miadi, arifa za dawa, na taarifa za afya zitaonekana hapa.",
+  "offTitle": "Arifa zimezimwa",
+  "offSubtitle": "Washa tena kwenye mipangilio ya kifaa chako ili kupokea vikumbusho vya miadi na arifa za dawa.",
+  "optInTitle": "Kaa katika mzunguko",
+  "optInSubtitle": "Washa arifa ili kupokea vikumbusho vya miadi, arifa za dawa, na taarifa za afya.",
+  "enable": "Washa arifa",
+  "openSettings": "Fungua mipangilio",
+  "manageTooltip": "Dhibiti arifa"
   },
   "settings": {
     

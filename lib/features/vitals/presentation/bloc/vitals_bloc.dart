@@ -46,6 +46,7 @@ class VitalsBloc extends Bloc<VitalsEvent, VitalsState> {
     this._scanMedication,
   ) : super(const VitalsState()) {
     on<LoadVitalsEvent>(_onLoad);
+    on<LoadVitalsSummaryEvent>(_onLoadSummary);
     on<LoadMoreAppointmentsEvent>(_onLoadMoreAppointments);
     on<LoadMoreMedicationsEvent>(_onLoadMoreMedications);
     on<AddBpReadingEvent>(_onAddBp);
@@ -61,7 +62,6 @@ class VitalsBloc extends Bloc<VitalsEvent, VitalsState> {
     );
     on<ClearToastEvent>((_, emit) => emit(state.copyWith(clearToast: true)));
   }
-  //helpers
   VitalsState _toast(
     VitalsState s, {
     required ToastType type,
@@ -80,7 +80,41 @@ class VitalsBloc extends Bloc<VitalsEvent, VitalsState> {
   VitalsState _toastSuccess(VitalsState s, String message) =>
       _toast(s, type: ToastType.success, message: message);
 
-  //load
+  Future<void> _onLoadSummary(
+    LoadVitalsSummaryEvent event,
+    Emitter<VitalsState> emit,
+  ) async {
+    if (state.status == VitalsStatus.loading ||
+        state.status == VitalsStatus.loaded) {
+      return;
+    }
+
+    emit(state.copyWith(status: VitalsStatus.loading, clearError: true));
+    final bp = await _getBp(NoParams());
+    final bs = await _getBs(NoParams());
+    final failure =
+        bp.fold<Failure?>((failure) => failure, (_) => null) ??
+        bs.fold<Failure?>((failure) => failure, (_) => null);
+
+    if (failure != null) {
+      emit(
+        state.copyWith(
+          status: VitalsStatus.error,
+          errorMessage: mapFailure(failure),
+        ),
+      );
+      return;
+    }
+
+    emit(
+      state.copyWith(
+        status: VitalsStatus.loaded,
+        bpReadings: bp.getOrElse(() => const []),
+        bsReadings: bs.getOrElse(() => const []),
+      ),
+    );
+  }
+
   Future<void> _onLoad(LoadVitalsEvent event, Emitter<VitalsState> emit) async {
     emit(state.copyWith(status: VitalsStatus.loading, clearError: true));
 
@@ -108,6 +142,7 @@ class VitalsBloc extends Bloc<VitalsEvent, VitalsState> {
     emit(
       state.copyWith(
         status: VitalsStatus.loaded,
+        collectionsLoaded: true,
         appointments: appts
             .getOrElse(() => (items: const [], nextCursor: null))
             .items,
@@ -177,7 +212,6 @@ class VitalsBloc extends Bloc<VitalsEvent, VitalsState> {
     );
   }
 
-  //add
   Future<void> _onAddBp(
     AddBpReadingEvent event,
     Emitter<VitalsState> emit,
@@ -278,7 +312,6 @@ class VitalsBloc extends Bloc<VitalsEvent, VitalsState> {
     );
   }
 
-  //delete
   Future<void> _onDeleteBp(
     DeleteBpReadingEvent event,
     Emitter<VitalsState> emit,

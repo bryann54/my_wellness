@@ -24,8 +24,7 @@ class MedicationModel {
   final DateTime? startDate;
 
   @JsonKey(name: 'duration_value')
-  final int? durationValue; // ← nullable
-
+  final int? durationValue;
   @JsonKey(name: 'duration_unit', defaultValue: '')
   final String durationUnit;
 

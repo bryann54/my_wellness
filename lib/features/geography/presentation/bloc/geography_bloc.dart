@@ -39,7 +39,7 @@ class GeographyBloc extends Bloc<GeographyEvent, GeographyState> {
     LoadCountiesEvent event,
     Emitter<GeographyState> emit,
   ) async {
-    if (state.counties.isNotEmpty) return; // already cached in state
+    if (state.counties.isNotEmpty) return;
     emit(state.copyWith(countiesStatus: LoadStatus.loading, clearError: true));
     final result = await _getCounties(NoParams());
     result.fold(
@@ -130,6 +130,7 @@ class GeographyBloc extends Bloc<GeographyEvent, GeographyState> {
   ) async {
     add(const LoadCountiesEvent());
     add(const LoadSubCountiesEvent());
-    // Constituencies and wards are loaded lazily — only if a form needs them.
+    add(const LoadConstituenciesEvent());
+    add(const LoadWardsEvent());
   }
 }

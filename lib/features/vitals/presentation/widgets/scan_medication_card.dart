@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:my_wellness/common/res/colors.dart';
+
+import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 
 class ScanMedicationCard extends StatelessWidget {
-  final bool scanning;
-  final VoidCallback onCamera;
-  final VoidCallback onUpload;
-
   const ScanMedicationCard({
     super.key,
     required this.scanning,
@@ -15,15 +11,20 @@ class ScanMedicationCard extends StatelessWidget {
     required this.onUpload,
   });
 
+  final bool scanning;
+  final VoidCallback onCamera;
+  final VoidCallback onUpload;
+
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
         color: cs.primary.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: AppRadius.lgAll,
         border: Border.all(color: cs.primary.withValues(alpha: 0.15)),
       ),
       child: Column(
@@ -36,29 +37,24 @@ class ScanMedicationCard extends StatelessWidget {
                 size: 20,
                 color: cs.primary,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
                   AppLocalizations.getString(context, 'medications.scanTitle'),
-                  style: GoogleFonts.inter(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: cs.onSurface,
-                  ),
+                  style: theme.textTheme.titleSmall,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: AppSpacing.xs + 2),
           Text(
             AppLocalizations.getString(context, 'medications.scanSubtitle'),
-            style: GoogleFonts.inter(
-              fontSize: 13,
-              height: 1.45,
+            style: theme.textTheme.bodySmall?.copyWith(
               color: cs.onSurface.withValues(alpha: 0.65),
+              height: 1.45,
             ),
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: AppSpacing.md),
           if (scanning)
             Row(
               children: [
@@ -67,11 +63,10 @@ class ScanMedicationCard extends StatelessWidget {
                   height: 18,
                   child: CircularProgressIndicator.adaptive(strokeWidth: 2),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: AppSpacing.md),
                 Text(
                   AppLocalizations.getString(context, 'medications.scanning'),
-                  style: GoogleFonts.inter(
-                    fontSize: 13,
+                  style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w500,
                     color: cs.onSurface.withValues(alpha: 0.7),
                   ),
@@ -88,32 +83,15 @@ class ScanMedicationCard extends StatelessWidget {
                     label: Text(
                       AppLocalizations.getString(context, 'medications.camera'),
                     ),
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      backgroundColor: AppColors.primaryColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: AppSpacing.sm + 2),
                 Expanded(
                   child: OutlinedButton.icon(
                     onPressed: onUpload,
                     icon: const Icon(Icons.upload_outlined, size: 18),
                     label: Text(
                       AppLocalizations.getString(context, 'medications.upload'),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      foregroundColor: cs.onSurface,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      side: BorderSide(
-                        color: cs.outlineVariant.withValues(alpha: 0.6),
-                      ),
                     ),
                   ),
                 ),

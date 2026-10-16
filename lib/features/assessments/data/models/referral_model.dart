@@ -178,12 +178,11 @@ class ReferralScoreBreakdownModel {
   ReferralScoreBreakdown toEntity() => ReferralScoreBreakdown(
     total: total,
     components: {
-      if (serviceMatch != null) 'service_match': serviceMatch!,
-      if (clinicalCapability != null)
-        'clinical_capability': clinicalCapability!,
-      if (escalationMatch != null) 'escalation_match': escalationMatch!,
-      if (shaAccreditation != null) 'sha_accreditation': shaAccreditation!,
-      if (facilityReadiness != null) 'facility_readiness': facilityReadiness!,
+      'service_match': ?serviceMatch,
+      'clinical_capability': ?clinicalCapability,
+      'escalation_match': ?escalationMatch,
+      'sha_accreditation': ?shaAccreditation,
+      'facility_readiness': ?facilityReadiness,
     },
   );
 }

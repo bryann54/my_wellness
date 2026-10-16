@@ -61,7 +61,7 @@ class AuthBottomBar extends StatelessWidget {
               Hero(
                 tag: heroTag,
                 flightShuttleBuilder:
-                    (_, __, direction, fromContext, toContext) {
+                    (_, _, direction, fromContext, toContext) {
                       return direction == HeroFlightDirection.push
                           ? toContext.widget
                           : fromContext.widget;

@@ -50,7 +50,7 @@ class _AssessmentResultBodyState extends State<_AssessmentResultBody> {
 
     return Scaffold(
       body: NestedScrollView(
-        headerSliverBuilder: (_, __) => [
+        headerSliverBuilder: (_, _) => [
           CustomAppBar(
             title: AppLocalizations.getString(
               context,

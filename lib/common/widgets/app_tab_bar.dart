@@ -5,8 +5,14 @@ import 'package:my_wellness/common/res/colors.dart';
 class AppTabBar extends StatelessWidget implements PreferredSizeWidget {
   final TabController controller;
   final List<String> tabs;
+  final List<String?> heroTags;
 
-  const AppTabBar({super.key, required this.controller, required this.tabs});
+  const AppTabBar({
+    super.key,
+    required this.controller,
+    required this.tabs,
+    this.heroTags = const <String?>[],
+  });
 
   @override
   Size get preferredSize => const Size.fromHeight(48);
@@ -27,7 +33,25 @@ class AppTabBar extends StatelessWidget implements PreferredSizeWidget {
       labelColor: AppColors.background,
       unselectedLabelColor: AppColors.background.withValues(alpha: 0.68),
       dividerColor: Colors.transparent,
-      tabs: tabs.map((t) => Tab(text: t)).toList(),
+      tabs: [
+        for (var index = 0; index < tabs.length; index++)
+          Tab(
+            child: heroTags.length != tabs.length || heroTags[index] == null
+                ? Text(tabs[index])
+                : Hero(
+                    tag: heroTags[index]!,
+                    flightShuttleBuilder:
+                        (
+                          context,
+                          animation,
+                          direction,
+                          fromHeroContext,
+                          toHeroContext,
+                        ) => (toHeroContext.widget as Hero).child,
+                    child: Text(tabs[index]),
+                  ),
+          ),
+      ],
     );
   }
 }

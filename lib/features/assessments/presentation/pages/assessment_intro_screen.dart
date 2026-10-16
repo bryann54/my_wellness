@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
@@ -11,6 +12,8 @@ import 'package:my_wellness/features/assessments/presentation/bloc/assessments_b
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_card.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_intro_skeleton.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_toast_listener.dart';
+
+const _consentRequiredSlugs = <String>{'ebola-screening'};
 
 @RoutePage()
 class AssessmentIntroScreen extends StatelessWidget {
@@ -35,6 +38,10 @@ class _AssessmentIntroBody extends StatefulWidget {
 }
 
 class _AssessmentIntroBodyState extends State<_AssessmentIntroBody> {
+  bool _consented = false;
+
+  bool get _requiresConsent => _consentRequiredSlugs.contains(widget.slug);
+
   @override
   void initState() {
     super.initState();
@@ -43,6 +50,14 @@ class _AssessmentIntroBodyState extends State<_AssessmentIntroBody> {
       context.read<AssessmentsBloc>().add(StartAssessmentsEvent(widget.slug));
     });
   }
+
+  void _toggleConsent(bool? value) {
+    if (value == null) return;
+    HapticFeedback.selectionClick();
+    setState(() => _consented = value);
+  }
+
+  bool get _canBegin => !_requiresConsent || _consented;
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +79,7 @@ class _AssessmentIntroBodyState extends State<_AssessmentIntroBody> {
 
     return Scaffold(
       body: NestedScrollView(
-        headerSliverBuilder: (_, __) => [
+        headerSliverBuilder: (_, _) => [
           CustomAppBar(title: def?.shortTitle ?? '', isHome: false),
         ],
         body: def == null
@@ -148,11 +163,20 @@ class _AssessmentIntroBodyState extends State<_AssessmentIntroBody> {
                           ),
                         ),
                       ),
+                    if (_requiresConsent) ...[
+                      const SizedBox(height: 24),
+                      _ConsentTile(
+                        value: _consented,
+                        onChanged: _toggleConsent,
+                      ),
+                    ],
                     const SizedBox(height: 36),
                     AppPrimaryButton(
-                      onPressed: () => context.router.push(
-                        AssessmentSessionRoute(slug: widget.slug),
-                      ),
+                      onPressed: _canBegin
+                          ? () => context.router.push(
+                              AssessmentSessionRoute(slug: widget.slug),
+                            )
+                          : null,
                       label: AppLocalizations.getString(
                         context,
                         'assessment.begin',
@@ -163,6 +187,54 @@ class _AssessmentIntroBodyState extends State<_AssessmentIntroBody> {
                   ],
                 ),
               ),
+      ),
+    );
+  }
+}
+
+class _ConsentTile extends StatelessWidget {
+  const _ConsentTile({required this.value, required this.onChanged});
+
+  final bool value;
+  final ValueChanged<bool?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return InkWell(
+      onTap: () => onChanged(!value),
+      borderRadius: BorderRadius.circular(10),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              width: 22,
+              height: 22,
+              child: Checkbox(
+                value: value,
+                onChanged: onChanged,
+                activeColor: cs.primary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                AppLocalizations.getString(context, 'assessment.consent'),
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  height: 1.45,
+                  color: cs.onSurface.withValues(alpha: 0.85),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

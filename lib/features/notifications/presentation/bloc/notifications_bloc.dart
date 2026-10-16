@@ -1,6 +1,3 @@
-
-// ignore_for_file: invalid_use_of_visible_for_testing_member
-
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
@@ -20,24 +17,40 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
 
   StreamSubscription<IncomingNotification>? _incomingSub;
   StreamSubscription<NotificationPermission>? _permissionSub;
+  StreamSubscription<bool>? _subscriptionSub;
 
   NotificationsBloc(this._service) : super(const NotificationsState()) {
     on<RegisterIdentityEvent>(_onRegister);
     on<ClearIdentityEvent>(_onClear);
-    on<RequestPermissionEvent>(_onRequestPermission);
+    on<RefreshPermissionEvent>(_onRefresh);
+    on<SetPushEnabledEvent>(_onSetPushEnabled);
+    on<PermissionChangedEvent>(
+      (e, emit) => emit(state.copyWith(permission: e.permission)),
+    );
+    on<SubscriptionChangedEvent>(
+      (e, emit) => emit(state.copyWith(pushOptedIn: e.optedIn)),
+    );
     on<IncomingNotificationEvent>(_onIncoming);
-    on<NotificationTappedEvent>(_onTapped);
+    on<NotificationTappedEvent>(
+      (e, emit) => emit(state.copyWith(clearPending: true)),
+    );
+    on<MarkAllReadEvent>((e, emit) {
+      if (state.unreadCount != 0) emit(state.copyWith(unreadCount: 0));
+    });
 
     _wireStreams();
   }
 
   void _wireStreams() {
-    _incomingSub = _service.onNotification.listen((n) {
-      add(IncomingNotificationEvent(n));
-    });
-    _permissionSub = _service.onPermissionChange.listen((p) {
-      if (!isClosed) emit(state.copyWith(permission: p));
-    });
+    _incomingSub = _service.onNotification.listen(
+      (n) => add(IncomingNotificationEvent(n)),
+    );
+    _permissionSub = _service.onPermissionChange.listen(
+      (p) => add(PermissionChangedEvent(p)),
+    );
+    _subscriptionSub = _service.onSubscriptionChange.listen(
+      (v) => add(SubscriptionChangedEvent(v)),
+    );
   }
 
   Future<void> _onRegister(
@@ -65,13 +78,15 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
       emit(
         state.copyWith(
           status: NotificationsStatus.connected,
-          permission: _service.permission,
+          permission: await _service.readPermission(),
+          pushOptedIn: _service.isPushOptedIn,
         ),
       );
     } catch (_) {
       emit(state.copyWith(status: NotificationsStatus.error));
     }
   }
+
   Future<void> _onClear(
     ClearIdentityEvent event,
     Emitter<NotificationsState> emit,
@@ -80,21 +95,67 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     emit(const NotificationsState());
   }
 
-  Future<void> _onRequestPermission(
-    RequestPermissionEvent event,
+  Future<void> _onRefresh(
+    RefreshPermissionEvent event,
     Emitter<NotificationsState> emit,
   ) async {
-    final granted = await _service.requestPermission(fallbackToSettings: true);
+    if (!_service.isConfigured) return;
     emit(
       state.copyWith(
-        permission: granted
-            ? NotificationPermission.granted
-            : NotificationPermission.denied,
-        status: granted
-            ? NotificationsStatus.connected
-            : NotificationsStatus.permissionDenied,
+        permission: await _service.readPermission(),
+        pushOptedIn: _service.isPushOptedIn,
       ),
     );
+  }
+
+  Future<void> _onSetPushEnabled(
+    SetPushEnabledEvent event,
+    Emitter<NotificationsState> emit,
+  ) async {
+    if (state.isUpdating || !_service.isConfigured) return;
+    emit(state.copyWith(isUpdating: true));
+
+    try {
+      if (event.enabled) {
+        var permission = await _service.readPermission();
+
+        if (permission != NotificationPermission.granted) {
+          final granted = await _service.requestPermission(
+            fallbackToSettings: true,
+          );
+          if (!granted) {
+            emit(
+              state.copyWith(
+                isUpdating: false,
+                permission: await _service.readPermission(),
+              ),
+            );
+            return;
+          }
+          permission = NotificationPermission.granted;
+        }
+
+        await _service.setPushEnabled(true);
+        emit(
+          state.copyWith(
+            isUpdating: false,
+            permission: permission,
+            pushOptedIn: true,
+          ),
+        );
+      } else {
+        await _service.setPushEnabled(false);
+        emit(state.copyWith(isUpdating: false, pushOptedIn: false));
+      }
+    } catch (_) {
+      emit(
+        state.copyWith(
+          isUpdating: false,
+          permission: await _service.readPermission(),
+          pushOptedIn: _service.isPushOptedIn,
+        ),
+      );
+    }
   }
 
   void _onIncoming(
@@ -119,17 +180,11 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     );
   }
 
-  void _onTapped(
-    NotificationTappedEvent event,
-    Emitter<NotificationsState> emit,
-  ) {
-    emit(state.copyWith(clearPending: true));
-  }
-
   @override
   Future<void> close() async {
     await _incomingSub?.cancel();
     await _permissionSub?.cancel();
+    await _subscriptionSub?.cancel();
     return super.close();
   }
 }

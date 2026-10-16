@@ -13,6 +13,7 @@ class VitalsState extends Equatable {
   final String? medicationsCursor;
   final String? appointmentsCursor;
   final String? errorMessage;
+  final bool collectionsLoaded;
   final bool isSubmitting;
   final ToastType? toastType;
   final String? toastMessage;
@@ -27,6 +28,7 @@ class VitalsState extends Equatable {
     this.medicationsCursor,
     this.appointmentsCursor,
     this.errorMessage,
+    this.collectionsLoaded = false,
     this.isSubmitting = false,
     this.toastType,
     this.toastMessage,
@@ -42,6 +44,7 @@ class VitalsState extends Equatable {
     String? medicationsCursor,
     String? appointmentsCursor,
     String? errorMessage,
+    bool? collectionsLoaded,
     bool? isSubmitting,
     ToastType? toastType,
     String? toastMessage,
@@ -58,6 +61,7 @@ class VitalsState extends Equatable {
       medicationsCursor: medicationsCursor ?? this.medicationsCursor,
       appointmentsCursor: appointmentsCursor ?? this.appointmentsCursor,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      collectionsLoaded: collectionsLoaded ?? this.collectionsLoaded,
       isSubmitting: isSubmitting ?? this.isSubmitting,
       toastType: clearToast ? null : (toastType ?? this.toastType),
       toastMessage: clearToast ? null : (toastMessage ?? this.toastMessage),
@@ -78,6 +82,7 @@ class VitalsState extends Equatable {
     medicationsCursor,
     appointmentsCursor,
     errorMessage,
+    collectionsLoaded,
     isSubmitting,
     toastType,
     toastMessage,

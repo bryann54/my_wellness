@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/res/l10n.dart';
+import 'package:my_wellness/common/utils/hex_color.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_score.dart';
 
 class CompleteFindings extends StatelessWidget {
   final AssessmentScore score;
   const CompleteFindings({super.key, required this.score});
 
-  Color get _bandColor {
+  /// Prefer the API palette; fall back to band-based colors for older
+  /// payloads.
+  Color get _accent {
+    final api = score.resultDisplay?.color?.accent;
+    if (api != null && api.isNotEmpty) return hexToColor(api);
     return switch (score.band.toLowerCase()) {
       'lower' || 'low' => const Color(0xFF10B981),
       'moderate' => const Color(0xFFF59E0B),
@@ -16,9 +21,18 @@ class CompleteFindings extends StatelessWidget {
     };
   }
 
+  /// Body copy shown next to the colored stripe. Prefers the API's
+  /// `immediate_recommendation`, then `body`, then `bandBlurb`.
+  String? get _summary {
+    final d = score.resultDisplay;
+    if (d == null) return score.bandBlurb;
+    return d.immediateRecommendation ?? d.body ?? score.bandBlurb;
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final accent = _accent;
 
     return Container(
       decoration: BoxDecoration(
@@ -36,38 +50,22 @@ class CompleteFindings extends StatelessWidget {
               children: [
                 Container(
                   width: 4,
-                  height: 44,
+                  height: 40,
                   margin: const EdgeInsets.only(top: 2, right: 14),
                   decoration: BoxDecoration(
-                    color: _bandColor,
+                    color: accent,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        score.bandLabel,
-                        style: GoogleFonts.inter(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          height: 1.25,
-                          color: cs.onSurface,
-                        ),
-                      ),
-                      if (score.bandBlurb != null) ...[
-                        const SizedBox(height: 6),
-                        Text(
-                          score.bandBlurb!,
-                          style: GoogleFonts.inter(
-                            fontSize: 13,
-                            height: 1.5,
-                            color: cs.onSurface.withValues(alpha: 0.65),
-                          ),
-                        ),
-                      ],
-                    ],
+                  child: Text(
+                    _summary ?? '',
+                    style: GoogleFonts.inter(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      height: 1.45,
+                      color: cs.onSurface,
+                    ),
                   ),
                 ),
               ],
@@ -86,7 +84,7 @@ class CompleteFindings extends StatelessWidget {
                       Icon(
                         Icons.priority_high_rounded,
                         size: 16,
-                        color: cs.error,
+                        color: accent,
                       ),
                       const SizedBox(width: 6),
                       Text(
@@ -98,7 +96,7 @@ class CompleteFindings extends StatelessWidget {
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.5,
-                          color: cs.error,
+                          color: accent,
                         ),
                       ),
                     ],
@@ -153,7 +151,7 @@ class CompleteFindings extends StatelessWidget {
                               width: 5,
                               height: 5,
                               decoration: BoxDecoration(
-                                color: cs.primary,
+                                color: accent,
                                 shape: BoxShape.circle,
                               ),
                             ),
