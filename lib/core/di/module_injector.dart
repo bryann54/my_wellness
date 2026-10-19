@@ -20,8 +20,6 @@ abstract class RegisterModules {
   NotificationService get notificationService =>
       NotificationService(dotenv.env['ONESIGNAL_APP_ID'] ?? '');
 
-       
   @lazySingleton
   LocalAuthentication get localAuthentication => LocalAuthentication();
-
 }
