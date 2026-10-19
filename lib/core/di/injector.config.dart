@@ -87,14 +87,24 @@ import '../../features/launch/presentation/bloc/launch_bloc.dart' as _i646;
 import '../../features/notifications/data/notification_service.dart' as _i597;
 import '../../features/notifications/presentation/bloc/notifications_bloc.dart'
     as _i1041;
+import '../../features/vitals/data/datasources/vitals_capture_remote_datasource.dart'
+    as _i941;
 import '../../features/vitals/data/datasources/vitals_remote_datasource.dart'
     as _i216;
+import '../../features/vitals/data/repositories/vitals_capture_repository_impl.dart'
+    as _i725;
 import '../../features/vitals/data/repositories/vitals_repository_impl.dart'
     as _i214;
+import '../../features/vitals/domain/repositories/vitals_capture_repository.dart'
+    as _i1013;
 import '../../features/vitals/domain/repositories/vitals_repository.dart'
     as _i515;
+import '../../features/vitals/domain/usecases/vitals_capture_usecases.dart'
+    as _i178;
 import '../../features/vitals/domain/usecases/vitals_usecases.dart' as _i425;
 import '../../features/vitals/presentation/bloc/vitals_bloc.dart' as _i902;
+import '../../features/vitals/presentation/bloc/vitals_capture_bloc.dart'
+    as _i863;
 import '../api_client/client/api_client.dart' as _i671;
 import '../api_client/interceptors/auth_interceptor.dart' as _i878;
 import '../services/biometric_service.dart' as _i374;
@@ -162,6 +172,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i302.AccountRemoteDataSource>(
       () => _i302.AccountRemoteDataSourceImpl(gh<_i671.ApiClient>()),
     );
+    gh.lazySingleton<_i941.VitalsCaptureRemoteDataSource>(
+      () => _i941.VitalsCaptureRemoteDataSourceImpl(gh<_i671.ApiClient>()),
+    );
     gh.lazySingleton<_i219.HomeDashboardRemoteDataSource>(
       () => _i219.HomeDashboardRemoteDataSourceImpl(gh<_i671.ApiClient>()),
     );
@@ -205,6 +218,11 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i682.GetProfileUsecase>(
       () => _i682.GetProfileUsecase(gh<_i1067.AccountRepository>()),
+    );
+    gh.lazySingleton<_i1013.VitalsCaptureRepository>(
+      () => _i725.VitalsCaptureRepositoryImpl(
+        gh<_i941.VitalsCaptureRemoteDataSource>(),
+      ),
     );
     gh.lazySingleton<_i474.GeographyRemoteDataSource>(
       () => _i474.GeographyRemoteDataSourceImpl(gh<_i671.ApiClient>()),
@@ -288,6 +306,27 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i636.HomeDashboardRepository>(
       () => _i730.HomeDashboardRepositoryImpl(
         gh<_i219.HomeDashboardRemoteDataSource>(),
+      ),
+    );
+    gh.lazySingleton<_i178.GetVitalsCaptureContentUseCase>(
+      () => _i178.GetVitalsCaptureContentUseCase(
+        gh<_i1013.VitalsCaptureRepository>(),
+      ),
+    );
+    gh.lazySingleton<_i178.CreateVitalsSessionUseCase>(
+      () => _i178.CreateVitalsSessionUseCase(
+        gh<_i1013.VitalsCaptureRepository>(),
+      ),
+    );
+    gh.lazySingleton<_i178.GetVitalsReferralUseCase>(
+      () =>
+          _i178.GetVitalsReferralUseCase(gh<_i1013.VitalsCaptureRepository>()),
+    );
+    gh.factory<_i863.VitalsCaptureBloc>(
+      () => _i863.VitalsCaptureBloc(
+        gh<_i178.GetVitalsCaptureContentUseCase>(),
+        gh<_i178.CreateVitalsSessionUseCase>(),
+        gh<_i178.GetVitalsReferralUseCase>(),
       ),
     );
     gh.lazySingleton<_i480.GeographyRepository>(

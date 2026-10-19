@@ -169,6 +169,8 @@
   "logFirstReading": "Log your first reading",
   "latestReading": "Latest reading",
   "history": "History",
+  "logBp": "Log blood pressure",
+  "logBs": "Log blood sugar",
   "addReading": "Add reading",
   "addReadingBp": "Log blood pressure",
   "addReadingBs": "Log blood sugar",

@@ -10,9 +10,11 @@ ReferralModel _$ReferralModelFromJson(Map<String, dynamic> json) =>
     ReferralModel(
       id: json['id'] as String,
       sourceType: json['source_type'] as String,
-      session: json['session'] as String,
       escalationCategory: json['escalation_category'] as String,
       status: json['status'] as String,
+      session: json['session'] as String?,
+      bpReading: json['bp_reading'] as String?,
+      bsReading: json['bs_reading'] as String?,
       escalationCategoryDisplay: json['escalation_category_display'] as String?,
       requiredServices:
           (json['required_services'] as List<dynamic>?)
@@ -40,6 +42,8 @@ Map<String, dynamic> _$ReferralModelToJson(ReferralModel instance) =>
       'id': instance.id,
       'source_type': instance.sourceType,
       'session': instance.session,
+      'bp_reading': instance.bpReading,
+      'bs_reading': instance.bsReading,
       'escalation_category': instance.escalationCategory,
       'escalation_category_display': instance.escalationCategoryDisplay,
       'required_services': instance.requiredServices

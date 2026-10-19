@@ -10,12 +10,8 @@ class VitalsStatusPill extends StatelessWidget {
     this.compact = false,
   });
 
-  /// Raw classification from the API (a clinical status like `elevated`, or a
-  /// colour band like `blue`). Drives the pill colour.
   final String? classification;
 
-  /// Optional human-readable text. When null it is derived from
-  /// [classification]; bare colour bands never leak to the UI as "Blue".
   final String? label;
   final bool compact;
 
@@ -25,36 +21,28 @@ class VitalsStatusPill extends StatelessWidget {
       (raw ?? '').toLowerCase().trim().replaceAll(RegExp(r'[\s\-]+'), '_');
 
   static VitalsTone toneFor(String? raw) {
-    switch (_key(raw)) {
+    final key = _key(raw);
+    if (key.startsWith('flagged')) return VitalsTone.attention;
+    final base = key.split('_').first;
+    switch (base) {
       case 'normal':
       case 'healthy':
       case 'optimal':
       case 'green':
         return VitalsTone.normal;
       case 'low':
-      case 'low_blood_pressure':
       case 'hypotension':
-      case 'hypoglycemia':
       case 'blue':
         return VitalsTone.low;
       case 'elevated':
-      case 'prehypertension':
-      case 'pre_hypertension':
-      case 'pre_diabetes':
-      case 'prediabetes':
       case 'borderline':
-      case 'flagged_for_clinical_interpretation':
       case 'yellow':
       case 'amber':
-      case 'orange':
         return VitalsTone.attention;
       case 'high':
-      case 'stage_1':
-      case 'stage_2':
-      case 'hypertension':
-      case 'diabetes':
       case 'critical':
       case 'red':
+      case 'orange':
         return VitalsTone.alert;
       default:
         return VitalsTone.neutral;
@@ -63,8 +51,9 @@ class VitalsStatusPill extends StatelessWidget {
 
   static String labelFor(String? raw) {
     if (raw == null || raw.trim().isEmpty) return '';
-    // A bare colour band is meaningless to a patient; show the meaning.
-    if (_bands.contains(_key(raw))) {
+    final key = _key(raw);
+    final base = key.split('_').first;
+    if (_bands.contains(base) || RegExp(r'^\w+_\d+$').hasMatch(key)) {
       return switch (toneFor(raw)) {
         VitalsTone.normal => 'Normal',
         VitalsTone.low => 'Low',
@@ -82,7 +71,6 @@ class VitalsStatusPill extends StatelessWidget {
         .join(' ');
   }
 
-  /// (foreground, background) for a tone.
   static (Color, Color) colorsFor(VitalsTone tone, ThemeData theme) {
     final isDark = theme.brightness == Brightness.dark;
     switch (tone) {
@@ -127,7 +115,6 @@ class VitalsStatusPill extends StatelessWidget {
       decoration: BoxDecoration(
         color: bg,
         borderRadius: BorderRadius.circular(100),
-        // Keeps the pill legible on top of the tinted vitals tiles.
         border: Border.all(color: fg.withValues(alpha: 0.22), width: 0.75),
       ),
       child: Row(

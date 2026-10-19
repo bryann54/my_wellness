@@ -8,16 +8,22 @@ import 'package:my_wellness/common/widgets/app_primary_button.dart';
 import 'package:my_wellness/common/widgets/soft_input.dart';
 import 'package:my_wellness/features/assessments/presentation/bloc/assessments_bloc.dart';
 
+typedef BmiContinueCallback =
+    void Function(double weightKg, double heightCm, double bmi);
+
 class AssessmentBmiStep extends StatefulWidget {
   final String? initialWeightKg;
   final String? initialHeightCm;
   final bool submitting;
+
+  final BmiContinueCallback? onContinue;
 
   const AssessmentBmiStep({
     super.key,
     this.initialWeightKg,
     this.initialHeightCm,
     this.submitting = false,
+    this.onContinue,
   });
 
   @override
@@ -36,11 +42,14 @@ class _AssessmentBmiStepState extends State<AssessmentBmiStep> {
   final _previewDebounce = Debouncer(milliseconds: 600);
   final _formKey = GlobalKey<FormState>();
 
+  bool get _standalone => widget.onContinue != null;
+
   @override
   void initState() {
     super.initState();
-    // Kick an initial preview if we resumed with values already filled.
-    WidgetsBinding.instance.addPostFrameCallback((_) => _triggerPreview());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _triggerPreview();
+    });
   }
 
   @override
@@ -60,6 +69,10 @@ class _AssessmentBmiStepState extends State<AssessmentBmiStep> {
   }
 
   void _triggerPreview() {
+    if (_standalone) {
+      setState(() {});
+      return;
+    }
     final w = _weightCtrl.text.trim();
     final h = _heightCtrl.text.trim();
     final weightKg = double.tryParse(w);
@@ -79,13 +92,31 @@ class _AssessmentBmiStepState extends State<AssessmentBmiStep> {
   }
 
   void _onChanged() {
-    context.read<AssessmentsBloc>().add(const ClearBmiPreviewEvent());
-    _previewDebounce.run(_triggerPreview);
+    if (!_standalone) {
+      context.read<AssessmentsBloc>().add(const ClearBmiPreviewEvent());
+    }
+    _previewDebounce.run(() {
+      if (_standalone) {
+        setState(() {});
+      } else {
+        _triggerPreview();
+      }
+    });
   }
 
   void _submit() {
     if (widget.submitting || _submissionPending) return;
     if (_formKey.currentState?.validate() != true) return;
+
+    if (_standalone) {
+      final w = double.tryParse(_weightCtrl.text.trim());
+      final h = double.tryParse(_heightCtrl.text.trim());
+      if (w == null || h == null || w <= 0 || h <= 0) return;
+      final bmi = w / ((h / 100) * (h / 100));
+      widget.onContinue!(w, h, bmi);
+      return;
+    }
+
     final bloc = context.read<AssessmentsBloc>();
     final inputKey = _currentInputKey;
     if (inputKey == null ||
@@ -120,15 +151,50 @@ class _AssessmentBmiStepState extends State<AssessmentBmiStep> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final bmiState = context.select<AssessmentsBloc, AssessmentsState>(
-      (bloc) => bloc.state,
-    );
     final isSubmitting = widget.submitting || _submissionPending;
-    final preview = bmiState.bmiPreview;
-    final isPreviewReady =
-        preview != null &&
-        bmiState.bmiPreviewInputKey == _currentInputKey &&
-        !bmiState.bmiPreviewLoading;
+
+    final localWeight = double.tryParse(_weightCtrl.text.trim());
+    final localHeight = double.tryParse(_heightCtrl.text.trim());
+    final localBmi =
+        (localWeight != null &&
+            localHeight != null &&
+            localWeight > 0 &&
+            localHeight > 0)
+        ? localWeight / ((localHeight / 100) * (localHeight / 100))
+        : null;
+    final localClassification = localBmi == null
+        ? null
+        : localBmi < 18.5
+        ? 'underweight'
+        : localBmi < 25
+        ? 'normal'
+        : localBmi < 30
+        ? 'overweight'
+        : 'obese';
+    final localDeficit = localBmi != null && localBmi >= 25
+        ? (localWeight! - 24.9 * ((localHeight! / 100) * (localHeight / 100)))
+        : 0.0;
+
+    final bmiState = _standalone
+        ? null
+        : context.select<AssessmentsBloc, AssessmentsState>(
+            (bloc) => bloc.state,
+          );
+
+    final previewBmi = _standalone ? localBmi : bmiState?.bmiPreview?.bmi;
+    final previewClassification = _standalone
+        ? localClassification
+        : bmiState?.bmiPreview?.classification;
+    final previewDeficit = _standalone
+        ? localDeficit
+        : bmiState?.bmiPreview?.deficitKg;
+
+    final isPreviewReady = _standalone
+        ? (localBmi != null && localClassification != null)
+        : (bmiState?.bmiPreview != null &&
+              bmiState!.bmiPreviewInputKey == _currentInputKey &&
+              !bmiState.bmiPreviewLoading);
+
     final canContinue = isPreviewReady && !isSubmitting;
 
     return Form(
@@ -205,11 +271,14 @@ class _AssessmentBmiStepState extends State<AssessmentBmiStep> {
           ),
 
           const SizedBox(height: 20),
-          if (isPreviewReady)
+          if (isPreviewReady &&
+              previewBmi != null &&
+              previewClassification != null &&
+              previewDeficit != null)
             _BmiPreviewCard(
-              bmi: preview.bmi,
-              classification: preview.classification,
-              deficitKg: preview.deficitKg,
+              bmi: previewBmi,
+              classification: previewClassification,
+              deficitKg: previewDeficit,
             ),
           const SizedBox(height: 28),
           AppPrimaryButton(
@@ -217,8 +286,12 @@ class _AssessmentBmiStepState extends State<AssessmentBmiStep> {
             label: AppLocalizations.getString(context, 'common.continue'),
             borderRadius: 12,
             color: cs.primary,
-            isLoading: isSubmitting || bmiState.bmiPreviewLoading,
-            disabled: !canContinue || bmiState.bmiPreviewLoading,
+            isLoading:
+                isSubmitting ||
+                (!_standalone && (bmiState?.bmiPreviewLoading ?? false)),
+            disabled:
+                !canContinue ||
+                (!_standalone && (bmiState?.bmiPreviewLoading ?? false)),
           ),
         ],
       ),

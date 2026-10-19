@@ -2,8 +2,7 @@ import 'package:equatable/equatable.dart';
 
 class BsReading extends Equatable {
   final String id;
-
-  /// Server stores the value as a string decimal, e.g. ".73", "-949".
+  final String? classificationLabel;
   final String value;
 
   /// 'mmol/L' | 'mg/dL'
@@ -27,6 +26,7 @@ class BsReading extends Equatable {
   const BsReading({
     required this.id,
     required this.value,
+    this.classificationLabel,
     required this.unit,
     required this.readingType,
     this.mealTiming,
@@ -42,6 +42,7 @@ class BsReading extends Equatable {
     id,
     value,
     unit,
+    classificationLabel,
     readingType,
     mealTiming,
     weightKg,

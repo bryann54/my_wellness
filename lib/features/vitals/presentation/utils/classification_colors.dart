@@ -8,14 +8,17 @@ abstract final class ClassificationColors {
   static const Color blue = Color(0xFF3B82F6);
   static const Color neutral = Color(0xFF94A3B8);
 
-  static Color forBand(String classification) => switch (classification) {
-    'green' => green,
-    'yellow' => yellow,
-    'orange' => orange,
-    'red' => red,
-    'blue' => blue,
-    _ => neutral,
-  };
+  static Color forBand(String classification) {
+    final base = classification.split('_').first.toLowerCase();
+    return switch (base) {
+      'green' => green,
+      'yellow' => yellow,
+      'orange' => orange,
+      'red' => red,
+      'blue' => blue,
+      _ => neutral,
+    };
+  }
 }
 
 Color classificationColor(String classification) =>

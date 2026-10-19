@@ -39,6 +39,7 @@ class LatestReadingCard extends StatelessWidget {
   final IconData? secondaryIcon;
   final String? primaryHeroTag;
   final String? timestampHeroTag;
+  final String? classificationLabel;
 
   const LatestReadingCard({
     super.key,
@@ -51,6 +52,7 @@ class LatestReadingCard extends StatelessWidget {
     this.secondaryIcon,
     this.primaryHeroTag,
     this.timestampHeroTag,
+    this.classificationLabel,
   });
 
   @override

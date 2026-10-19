@@ -1,18 +1,28 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_wellness/common/constants/hero.dart';
+import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_fab.dart';
 import 'package:my_wellness/common/widgets/shimmer_box.dart';
+import 'package:my_wellness/features/vitals/data/datasources/vitals_capture_remote_datasource.dart';
 import 'package:my_wellness/features/vitals/presentation/bloc/vitals_bloc.dart';
-import 'package:my_wellness/features/vitals/presentation/widgets/sheets/add_bp_sheet.dart';
+import 'package:my_wellness/features/vitals/presentation/bloc/vitals_capture_bloc.dart';
 import 'package:my_wellness/features/vitals/presentation/widgets/latest_reading_card.dart';
 import 'package:my_wellness/features/vitals/presentation/widgets/reading_history_list.dart';
 import 'package:my_wellness/features/vitals/presentation/widgets/vitals_empty_state.dart';
 
 class BpTab extends StatelessWidget {
   const BpTab({super.key});
+
+  static void _startCapture(BuildContext context) {
+    context.read<VitalsCaptureBloc>().add(
+      const StartVitalsCaptureEvent(VitalsCaptureKind.bp),
+    );
+    context.router.push(VitalsCaptureIntroRoute(kind: VitalsCaptureKind.bp));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +55,7 @@ class BpTab extends StatelessWidget {
               'vitals.noBpReadingsSub',
             ),
             ctaLabel: AppLocalizations.getString(context, 'vitals.addReading'),
-            onCta: () => AddBpSheet.show(context),
+            onCta: () => _startCapture(context),
           );
         }
 
@@ -56,7 +66,7 @@ class BpTab extends StatelessWidget {
           floatingActionButton: AppFab.compact(
             icon: const Icon(Icons.add),
             tooltip: AppLocalizations.getString(context, 'vitals.addReading'),
-            onPressed: () => AddBpSheet.show(context),
+            onPressed: () => _startCapture(context),
           ),
           body: RefreshIndicator.adaptive(
             onRefresh: () async =>
@@ -79,6 +89,7 @@ class BpTab extends StatelessWidget {
                         LatestReadingCard(
                           kind: ReadingKind.bp,
                           classification: latest.classification,
+                          classificationLabel: latest.classificationLabel,
                           primary: '${latest.systolic}/${latest.diastolic}',
                           unit: 'mmHg',
                           timestampIso: latest.takenAt,

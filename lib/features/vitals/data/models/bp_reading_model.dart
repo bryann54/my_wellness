@@ -12,7 +12,8 @@ class BpReadingModel {
 
   @JsonKey(name: 'pulse_classification')
   final String? pulseClassification;
-
+  @JsonKey(name: 'classification_label')
+  final String? classificationLabel;
   @JsonKey(name: 'weight_kg')
   final String? weightKg;
 
@@ -33,6 +34,7 @@ class BpReadingModel {
     required this.id,
     required this.systolic,
     required this.diastolic,
+    this.classificationLabel,
     this.pulse,
     this.pulseClassification,
     this.weightKg,
@@ -53,6 +55,7 @@ class BpReadingModel {
     systolic: systolic,
     diastolic: diastolic,
     pulse: pulse,
+    classificationLabel: classificationLabel,
     pulseClassification: pulseClassification,
     weightKg: weightKg,
     classification: classification,

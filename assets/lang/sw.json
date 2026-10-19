@@ -170,6 +170,8 @@
   "logFirstReading": "Weka kipimo chako cha kwanza",
   "latestReading": "Kipimo cha hivi karibuni",
   "history": "Historia",
+   "logBp": "weka shinikizo la damu",
+  "logBs": "weka sukari ya damu",
   "addReading": "Ongeza kipimo",
   "addReadingBp": "Weka shinikizo la damu",
   "addReadingBs": "Weka sukari ya damu",
