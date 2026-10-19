@@ -65,14 +65,11 @@ class MedicationsShimmerList extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
       itemCount: count,
-      itemBuilder: (_, __) => const MedicationTileShimmer(),
+      itemBuilder: (_, _) => const MedicationTileShimmer(),
     );
   }
 }
 
-/// A single skeleton block that inherits your app's shimmer.
-/// Uses `double.infinity` for width but constrains it with [widthFactor]
-/// so the block doesn't span the entire row.
 class _SkeletonBox extends StatelessWidget {
   final double width;
   final double height;

@@ -1,8 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
+
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
+import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/utils/functions.dart';
 import 'package:my_wellness/common/widgets/shimmer_box.dart';
@@ -11,8 +12,9 @@ import 'package:my_wellness/features/vitals/domain/usecases/vitals_usecases.dart
 import 'package:my_wellness/features/vitals/presentation/widgets/medication_tile.dart';
 
 class ConditionMedicationCapture extends StatefulWidget {
-  final String condition;
   const ConditionMedicationCapture({super.key, required this.condition});
+
+  final String condition;
 
   @override
   State<ConditionMedicationCapture> createState() =>
@@ -50,16 +52,23 @@ class _ConditionMedicationCaptureState
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
     if (_error != null) {
       return Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(_error!, style: TextStyle(color: cs.error)),
-            TextButton(onPressed: _load, child: const Text('Retry')),
+            Text(
+              _error!,
+              style: theme.textTheme.bodyMedium?.copyWith(color: cs.error),
+            ),
+            TextButton(
+              onPressed: _load,
+              child: Text(AppLocalizations.getString(context, 'common.retry')),
+            ),
           ],
         ),
       );
@@ -71,11 +80,10 @@ class _ConditionMedicationCaptureState
 
     if (_items!.isEmpty) {
       return Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Text(
-          'No medications logged for this condition yet.',
-          style: GoogleFonts.inter(
-            fontSize: 13,
+          AppLocalizations.getString(context, 'medications.emptyCondition'),
+          style: theme.textTheme.bodySmall?.copyWith(
             color: cs.onSurface.withValues(alpha: 0.6),
           ),
         ),

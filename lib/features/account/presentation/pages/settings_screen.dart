@@ -1,16 +1,18 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'package:my_wellness/common/notifiers/locale_provider.dart';
 import 'package:my_wellness/common/notifiers/theme_provider.dart';
+import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
+import 'package:my_wellness/common/widgets/account_section_card.dart';
 import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
 import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
 import 'package:my_wellness/features/account/presentation/widgets/dialogs/delete_account_dialog.dart';
 import 'package:my_wellness/features/account/presentation/widgets/dialogs/logout_dialog.dart';
 import 'package:my_wellness/features/account/presentation/widgets/menu_item_tile.dart';
-import 'package:provider/provider.dart';
+import 'package:my_wellness/features/notifications/presentation/widgets/notification_permission_sheet.dart';
 
 @RoutePage()
 class SettingsScreen extends StatelessWidget {
@@ -37,7 +39,7 @@ class SettingsScreen extends StatelessWidget {
                     'settings.sectionPreferences',
                   ),
                 ),
-                _Card(
+                AccountSectionCard(
                   children: [
                     MenuItemTile(
                       icon: Icons.translate_rounded,
@@ -51,9 +53,7 @@ class SettingsScreen extends StatelessWidget {
                       ),
                       onTap: () => _pickLanguage(context),
                     ),
-                    _divider(context),
-                    // Rebuilds when the theme changes so the subtitle
-                    // always reflects the currently active mode.
+                    const AccountSectionDivider(),
                     Consumer<ThemeProvider>(
                       builder: (context, theme, _) => MenuItemTile(
                         icon: Icons.dark_mode_outlined,
@@ -65,7 +65,7 @@ class SettingsScreen extends StatelessWidget {
                         onTap: () => _pickTheme(context),
                       ),
                     ),
-                    _divider(context),
+                    const AccountSectionDivider(),
                     MenuItemTile(
                       icon: Icons.notifications_none_rounded,
                       title: AppLocalizations.getString(
@@ -76,11 +76,9 @@ class SettingsScreen extends StatelessWidget {
                         context,
                         'settings.alertPreferencesSub',
                       ),
-                      onTap: () {
-                        // TODO: push NotificationPreferencesRoute()
-                      },
+                      onTap: () => NotificationPermissionSheet.show(context),
                     ),
-                    _divider(context),
+                    const AccountSectionDivider(),
                     MenuItemTile(
                       icon: Icons.lock_outline_rounded,
                       title: AppLocalizations.getString(
@@ -104,7 +102,7 @@ class SettingsScreen extends StatelessWidget {
                     'settings.sectionAccount',
                   ),
                 ),
-                _Card(
+                AccountSectionCard(
                   children: [
                     MenuItemTile(
                       icon: Icons.privacy_tip_outlined,
@@ -120,16 +118,13 @@ class SettingsScreen extends StatelessWidget {
                         // TODO: push PrivacySettingsRoute()
                       },
                     ),
-                    _divider(context),
+                    const AccountSectionDivider(),
                     MenuItemTile(
                       icon: Icons.logout_rounded,
-                      title: AppLocalizations.getString(
-                        context,
-                        'settings.logOut',
-                      ),
+                      title: AppLocalizations.getString(context, 'auth.logout'),
                       subtitle: AppLocalizations.getString(
                         context,
-                        'settings.logOutSub',
+                        'auth.logOutSub',
                       ),
                       onTap: () => LogoutDialog.show(context),
                     ),
@@ -142,7 +137,7 @@ class SettingsScreen extends StatelessWidget {
                     'settings.sectionSupport',
                   ),
                 ),
-                _Card(
+                AccountSectionCard(
                   children: [
                     MenuItemTile(
                       icon: Icons.info_outline_rounded,
@@ -158,7 +153,7 @@ class SettingsScreen extends StatelessWidget {
                         // TODO: push AboutRoute()
                       },
                     ),
-                    _divider(context),
+                    const AccountSectionDivider(),
                     MenuItemTile(
                       icon: Icons.delete_outline_rounded,
                       title: AppLocalizations.getString(
@@ -176,7 +171,7 @@ class SettingsScreen extends StatelessWidget {
                   ],
                 ),
 
-                const SizedBox(height: 40),
+                const SizedBox(height: AppSpacing.xxl),
               ],
             ),
           ),
@@ -184,12 +179,6 @@ class SettingsScreen extends StatelessWidget {
       ),
     );
   }
-
-  Widget _divider(BuildContext context) => Divider(
-    height: 1,
-    indent: 60,
-    color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
-  );
 
   String _themeLabel(BuildContext context, ThemeMode mode) => switch (mode) {
     ThemeMode.light => AppLocalizations.getString(
@@ -210,20 +199,18 @@ class SettingsScreen extends StatelessWidget {
     final picked = await showModalBottomSheet<String>(
       context: context,
       backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      shape: const RoundedRectangleBorder(borderRadius: AppRadius.lgAll),
       builder: (_) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             _sheetHandle(context),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             Text(
               AppLocalizations.getString(context, 'settings.language'),
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             RadioListTile<String>(
               value: 'en',
               groupValue: current,
@@ -240,7 +227,7 @@ class SettingsScreen extends StatelessWidget {
               ),
               onChanged: (v) => Navigator.of(context).pop(v),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
           ],
         ),
       ),
@@ -258,20 +245,18 @@ class SettingsScreen extends StatelessWidget {
     final picked = await showModalBottomSheet<ThemeMode>(
       context: context,
       backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+      shape: const RoundedRectangleBorder(borderRadius: AppRadius.lgAll),
       builder: (_) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             _sheetHandle(context),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             Text(
               AppLocalizations.getString(context, 'settings.theme'),
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             RadioListTile<ThemeMode>(
               value: ThemeMode.light,
               groupValue: current,
@@ -296,7 +281,7 @@ class SettingsScreen extends StatelessWidget {
               ),
               onChanged: (v) => Navigator.of(context).pop(v),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.md),
           ],
         ),
       ),
@@ -318,13 +303,19 @@ class SettingsScreen extends StatelessWidget {
 }
 
 class _SectionLabel extends StatelessWidget {
-  final String label;
   const _SectionLabel({required this.label});
+
+  final String label;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.sm,
+      ),
       child: Text(
         label,
         style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -332,25 +323,6 @@ class _SectionLabel extends StatelessWidget {
           color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
         ),
       ),
-    );
-  }
-}
-
-class _Card extends StatelessWidget {
-  final List<Widget> children;
-  const _Card({required this.children});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: theme.dividerColor.withValues(alpha: 0.1)),
-      ),
-      child: Column(children: children),
     );
   }
 }

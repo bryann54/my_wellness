@@ -55,6 +55,58 @@ class ScreeningRecommendation extends Equatable {
   List<Object?> get props => [status, title, message, bullets, ctaKeys];
 }
 
+class ResultDisplayColor extends Equatable {
+  final String accent;
+  final String background;
+  final String text;
+
+  const ResultDisplayColor({
+    required this.accent,
+    required this.background,
+    required this.text,
+  });
+
+  @override
+  List<Object?> get props => [accent, background, text];
+}
+
+class ResultDisplay extends Equatable {
+  final String? kind;
+  final String? severity;
+  final String? title;
+  final String? body;
+  final ResultDisplayColor? color;
+  final String? colourEmoji;
+  final String? colourLabel;
+  final String? immediateRecommendation;
+  final String? importantNote;
+
+  const ResultDisplay({
+    this.kind,
+    this.severity,
+    this.title,
+    this.body,
+    this.color,
+    this.colourEmoji,
+    this.colourLabel,
+    this.immediateRecommendation,
+    this.importantNote,
+  });
+
+  @override
+  List<Object?> get props => [
+    kind,
+    severity,
+    title,
+    body,
+    color,
+    colourEmoji,
+    colourLabel,
+    immediateRecommendation,
+    importantNote,
+  ];
+}
+
 class AssessmentScore extends Equatable {
   final String band;
   final String bandLabel;
@@ -70,6 +122,7 @@ class AssessmentScore extends Equatable {
   final ScreeningRecommendation? screeningRecommendation;
   final List<String> additionalCtaKeys;
   final bool needsNutritionConsultation;
+  final ResultDisplay? resultDisplay;
 
   const AssessmentScore({
     required this.band,
@@ -86,6 +139,7 @@ class AssessmentScore extends Equatable {
     this.screeningRecommendation,
     this.additionalCtaKeys = const [],
     this.needsNutritionConsultation = false,
+    this.resultDisplay,
   });
 
   @override
@@ -104,5 +158,6 @@ class AssessmentScore extends Equatable {
     screeningRecommendation,
     additionalCtaKeys,
     needsNutritionConsultation,
+    resultDisplay,
   ];
 }

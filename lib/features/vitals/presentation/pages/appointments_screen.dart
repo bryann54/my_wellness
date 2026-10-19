@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_wellness/common/constants/hero.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/widgets/app_fab.dart';
@@ -68,16 +69,17 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
               p.appointmentsCursor != c.appointmentsCursor,
           builder: (context, state) {
             final appts = state.appointments;
-            return RefreshIndicator(
+            return RefreshIndicator.adaptive(
               onRefresh: () async =>
                   context.read<VitalsBloc>().add(const LoadVitalsEvent()),
               child: NestedScrollView(
-                headerSliverBuilder: (_, __) => [
+                headerSliverBuilder: (_, _) => [
                   CustomAppBar(
                     title: AppLocalizations.getString(
                       context,
                       'common.appointments',
                     ),
+                    titleHeroTag: HeroTags.homeAppointments,
                     isHome: false,
                   ),
                 ],

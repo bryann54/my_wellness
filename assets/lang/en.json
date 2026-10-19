@@ -67,9 +67,31 @@
 "vitals":"Vitals",
     "myVitals":"Vitals & Chronic care"
   },
+  "homeDashboard": {
+    "welcome": "Hello, {name}",
+    "welcomeFallback": "Welcome",
+    "recordReading": "Record a reading",
+    "healthOverview": "Health overview",
+    "quickActions": "Quick actions",
+    "viewHistory": "View history",
+    "noReadingRecorded": "No reading recorded yet",
+    "readingsUnavailable": "Readings could not be loaded. Tap to retry.",
+    "screeningInProgress": "Screening in progress",
+    "continueScreening": "Continue",
+    "screeningActivity": "Screening activity",
+    "startScreening": "Start screening",
+    "notStarted": "Not started yet",
+    "questionsAnswered": "{current} of {total} questions answered",
+    "seeAll": "See all",
+    "pending": "Pending",
+    "inProgress": "In progress",
+    "dashboardUnavailable": "Dashboard is temporarily unavailable.",
+    "progressPercent": "{percent} percent complete"
+  },
   "assessment": {
     "title": "Health Assessments",
     "titlebot": "Screenings",
+    "loadFailed": "This screening could not be loaded. Please try again later.",
     "referenceLabel": "Reference",
     "searchHint": "Search screenings",
  "completedLabel": "Completed",
@@ -88,7 +110,7 @@
 
     "emptyNoResultsTitle": "No screenings available",
     "emptyNoResultsBody": "Pull down to refresh.",
-
+"consent": "I have read and understood the information above and consent to participate in this assessment.",
     "railSeeAll": "See all",
     "completeTitle":"completed",
   "understandingTitle": "Understanding this assessment",
@@ -147,6 +169,8 @@
   "logFirstReading": "Log your first reading",
   "latestReading": "Latest reading",
   "history": "History",
+  "logBp": "Log blood pressure",
+  "logBs": "Log blood sugar",
   "addReading": "Add reading",
   "addReadingBp": "Log blood pressure",
   "addReadingBs": "Log blood sugar",
@@ -239,7 +263,7 @@
     "unitDay": "Day",
     "unitWeek": "Week",
     "unitMonth": "Month",
-
+"emptyCondition": "No medications logged for this condition yet.",
     "save": "Save medication",
     "empty": "No medications yet",
     "emptySub": "Add a medication to keep track of your prescriptions.",
@@ -286,22 +310,18 @@
   },
   "auth": {
      "title": "mywellness Sign up",
-    "subtitle": "Answer a few questions to get started",
-    "inputHint": "Type your answer",
-    "preferAi": "Prefer AI? Use our conversational sign up",
-    "preferForm": "Prefer a form? Use the standard sign up",
-    "askFirstName": "Welcome to my wellness! To get started, what's your First and last name?",
-    "askEmail": "What's your email address?",
-    "askUsername": "Choose a username",
-    "askPhone": "What's your phone number?",
-    "askPassword": "Create a password (min 8 characters)",
-    "askState": "Which US state are you in?",
+    
     "welcomeBack": "Welcome Back",
     "signedIn":"Account created successfully!",
     "signIn": "Sign in to your account",
     "logIn": "Log In",
     "email": "Email",
-
+"constituency": "Constituency",
+"selectConstituency": "Select constituency",
+"selectConstituencyFirst": "Select a constituency first",
+"ward": "Ward",
+"selectWard": "Select ward (optional)",
+"whereAreYouSub": "We use this to show you relevant health facilities and services.",
     "emailOrPhone":"Email or Phone",
     "gender": "Gender",
     "surname": "Surname",
@@ -452,7 +472,17 @@
   },
  "notifications": {
     "emptyTitle": "No notifications yet",
-    "emptyBody": "We'll let you know when something needs your attention."
+    "emptyBody": "We'll let you know when something needs your attention.",
+    "unreadCountLabel": "Notifications, {count} unread",
+     
+  "emptySubtitle": "Appointment reminders, medication alerts, and health updates will appear here.",
+  "offTitle": "Notifications are off",
+  "offSubtitle": "Turn them back on in your device settings to receive appointment reminders and medication alerts.",
+  "optInTitle": "Stay in the loop",
+  "optInSubtitle": "Enable notifications to receive appointment reminders, medication alerts, and health updates.",
+  "enable": "Enable notifications",
+  "openSettings": "Open settings",
+  "manageTooltip": "Manage notifications"
   },
   "settings": {
     "title": "Settings",
@@ -485,7 +515,7 @@
     "sectionAccount": "Account",
     "sectionSupport": "Support",
 
-   
+   "logOutSub": "Sign out of your account",
     "languageSub": "App display language",
 
    

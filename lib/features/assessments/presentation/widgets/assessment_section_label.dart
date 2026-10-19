@@ -38,7 +38,7 @@ class AssessmentSectionLabel extends StatelessWidget {
               ),
             ),
           ),
-          if (trailing != null) trailing!,
+          ?trailing,
         ],
       ),
     );

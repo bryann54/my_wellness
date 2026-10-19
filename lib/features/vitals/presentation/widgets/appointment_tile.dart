@@ -1,11 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/res/app_spacing.dart';
-import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/utils/functions.dart';
 import 'package:my_wellness/common/widgets/custom_alert_dialog.dart';
 import 'package:my_wellness/features/vitals/domain/entities/appointment.dart';
+
+const _months = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
 
 class AppointmentTile extends StatefulWidget {
   final Appointment appointment;
@@ -29,11 +43,6 @@ class _AppointmentTileState extends State<AppointmentTile> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final accent = isDark ? AppColors.vitalBpDark : AppColors.vitalBp;
-    final tint = isDark
-        ? AppColors.vitalBpSurfaceDark
-        : AppColors.vitalBpSurface;
     final hasNotes = a.notes?.trim().isNotEmpty == true;
 
     return Dismissible(
@@ -43,8 +52,6 @@ class _AppointmentTileState extends State<AppointmentTile> {
       onDismissed: (_) => widget.onDelete(),
       background: _DismissBackground(color: cs.error),
       child: _Card(
-        accent: accent,
-        tint: tint,
         onTap: hasNotes ? () => setState(() => _expanded = !_expanded) : null,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,6 +110,7 @@ class _CollapsedRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final a = appointment;
     final dt = parseDateTime(a.appointmentDate, a.appointmentTime);
+    final isPast = dt != null && dt.isBefore(DateTime.now());
     final dayLabel = dt != null ? friendlyDay(dt) : a.appointmentDate;
     final timeLabel = dt != null ? friendlyTime(dt) : a.appointmentTime;
     final condition = a.condition?.trim();
@@ -110,97 +118,88 @@ class _CollapsedRow extends StatelessWidget {
         condition != null &&
         condition.isNotEmpty &&
         condition.toLowerCase() != 'other';
+    final facility = a.facility;
+    final hasFacilityLine =
+        facility != null &&
+        (facility.locality.isNotEmpty || facility.kephLevel != null);
 
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.md),
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: Text.rich(
-                  TextSpan(
-                    style: GoogleFonts.inter(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      height: 1.2,
-                      color: cs.onSurface,
-                    ),
-                    children: [
-                      TextSpan(text: dayLabel),
-                      TextSpan(
-                        text: '  ·  $timeLabel',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: cs.onSurface.withValues(alpha: 0.6),
-                        ),
-                      ),
-                    ],
-                  ),
-                  maxLines: 1,
+          _DateBadge(dateTime: dt, isPast: isPast, cs: cs),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  a.clinicName,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              if (showCondition) ...[
-                const SizedBox(width: AppSpacing.sm),
-                _ConditionPill(condition: condition),
-              ],
-              if (showChevron) ...[
-                const SizedBox(width: AppSpacing.xs),
-                AnimatedRotation(
-                  turns: expanded ? 0.5 : 0,
-                  duration: const Duration(milliseconds: 220),
-                  curve: Curves.easeOutCubic,
-                  child: Icon(
-                    Icons.keyboard_arrow_down_rounded,
-                    size: 22,
-                    color: cs.onSurface.withValues(alpha: 0.4),
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    height: 1.25,
+                    color: cs.onSurface.withValues(alpha: isPast ? 0.65 : 1),
                   ),
                 ),
-              ],
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                const SizedBox(height: 4),
+                Row(
                   children: [
-                    Text(
-                      a.clinicName,
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        height: 1.3,
-                        color: cs.onSurface.withValues(alpha: 0.8),
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                    Icon(
+                      Icons.schedule_rounded,
+                      size: 14,
+                      color: cs.onSurface.withValues(alpha: 0.55),
                     ),
-                    if (a.facility != null &&
-                        (a.facility!.locality.isNotEmpty ||
-                            a.facility!.kephLevel != null)) ...[
-                      const SizedBox(height: 2),
-                      Text(
-                        _facilitySubtitle(a.facility!),
-                        style: GoogleFonts.inter(
-                          fontSize: 12.5,
-                          height: 1.3,
-                          color: cs.onSurface.withValues(alpha: 0.5),
-                        ),
+                    const SizedBox(width: 5),
+                    Flexible(
+                      child: Text(
+                        '$dayLabel · $timeLabel',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.inter(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w500,
+                          color: cs.onSurface.withValues(alpha: 0.7),
+                        ),
                       ),
-                    ],
+                    ),
                   ],
                 ),
-              ),
-            ],
+                if (hasFacilityLine) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    _facilitySubtitle(facility),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.inter(
+                      fontSize: 12.5,
+                      color: cs.onSurface.withValues(alpha: 0.5),
+                    ),
+                  ),
+                ],
+                if (showCondition) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  _ConditionPill(condition: condition),
+                ],
+              ],
+            ),
           ),
+          if (showChevron) ...[
+            const SizedBox(width: AppSpacing.xs),
+            AnimatedRotation(
+              turns: expanded ? 0.5 : 0,
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOutCubic,
+              child: Icon(
+                Icons.keyboard_arrow_down_rounded,
+                size: 22,
+                color: cs.onSurface.withValues(alpha: 0.4),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -213,6 +212,58 @@ class _CollapsedRow extends StatelessWidget {
       if (f.coversSha) 'SHA',
     ];
     return parts.join(' · ');
+  }
+}
+
+class _DateBadge extends StatelessWidget {
+  final DateTime? dateTime;
+  final bool isPast;
+  final ColorScheme cs;
+
+  const _DateBadge({
+    required this.dateTime,
+    required this.isPast,
+    required this.cs,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final base = isPast ? cs.onSurface : cs.primary;
+    final dt = dateTime;
+
+    return Container(
+      width: 52,
+      height: 58,
+      decoration: BoxDecoration(
+        color: base.withValues(alpha: isPast ? 0.06 : 0.10),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: dt == null
+          ? Icon(Icons.event_outlined, size: 22, color: base)
+          : Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  _months[dt.month - 1].toUpperCase(),
+                  style: GoogleFonts.inter(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.8,
+                    color: base.withValues(alpha: isPast ? 0.55 : 1),
+                  ),
+                ),
+                Text(
+                  '${dt.day}',
+                  style: GoogleFonts.inter(
+                    fontSize: 21,
+                    fontWeight: FontWeight.w800,
+                    height: 1.1,
+                    color: isPast ? cs.onSurface.withValues(alpha: 0.6) : base,
+                  ),
+                ),
+              ],
+            ),
+    );
   }
 }
 
@@ -263,24 +314,21 @@ class _ConditionPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final (label, color) = switch (condition.toLowerCase()) {
-      'hypertension' => (
-        AppLocalizations.getString(context, 'condition.hypertension'),
-        cs.primary,
+    final label = switch (condition.toLowerCase()) {
+      'hypertension' => AppLocalizations.getString(
+        context,
+        'condition.hypertension',
       ),
-      'diabetes' => (
-        AppLocalizations.getString(context, 'condition.diabetes'),
-        cs.primary,
-      ),
-      _ => (condition.replaceAll('_', ' '), cs.primary),
+      'diabetes' => AppLocalizations.getString(context, 'condition.diabetes'),
+      _ => condition.replaceAll('_', ' '),
     };
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
+        color: cs.primary.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.16)),
+        border: Border.all(color: cs.primary.withValues(alpha: 0.16)),
       ),
       child: Text(
         label,
@@ -288,7 +336,7 @@ class _ConditionPill extends StatelessWidget {
           fontSize: 11,
           fontWeight: FontWeight.w600,
           letterSpacing: 0.1,
-          color: color,
+          color: cs.primary,
         ),
       ),
     );
@@ -298,22 +346,16 @@ class _ConditionPill extends StatelessWidget {
 class _Card extends StatelessWidget {
   final Widget child;
   final VoidCallback? onTap;
-  final Color accent;
-  final Color tint;
 
-  const _Card({
-    required this.child,
-    required this.accent,
-    required this.tint,
-    this.onTap,
-  });
+  const _Card({required this.child, this.onTap});
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 10),
       child: Material(
-        color: tint,
+        color: cs.surfaceContainerLow,
         borderRadius: AppRadius.lgAll,
         clipBehavior: Clip.antiAlias,
         child: InkWell(
@@ -321,7 +363,9 @@ class _Card extends StatelessWidget {
           child: DecoratedBox(
             decoration: BoxDecoration(
               borderRadius: AppRadius.lgAll,
-              border: Border.all(color: accent.withValues(alpha: 0.22)),
+              border: Border.all(
+                color: cs.outlineVariant.withValues(alpha: 0.5),
+              ),
             ),
             child: child,
           ),
@@ -340,6 +384,7 @@ class _DismissBackground extends StatelessWidget {
     return Container(
       alignment: Alignment.centerRight,
       padding: const EdgeInsets.symmetric(horizontal: 20),
+      margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(color: color, borderRadius: AppRadius.lgAll),
       child: const Icon(
         Icons.delete_outline_rounded,

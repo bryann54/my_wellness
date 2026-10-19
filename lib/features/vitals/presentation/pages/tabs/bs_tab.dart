@@ -1,18 +1,29 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_wellness/common/constants/hero.dart';
+import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_fab.dart';
 import 'package:my_wellness/common/widgets/shimmer_box.dart';
+import 'package:my_wellness/features/vitals/data/datasources/vitals_capture_remote_datasource.dart';
 import 'package:my_wellness/features/vitals/domain/entities/bs_reading.dart';
 import 'package:my_wellness/features/vitals/presentation/bloc/vitals_bloc.dart';
-import 'package:my_wellness/features/vitals/presentation/widgets/sheets/add_bs_sheet.dart';
+import 'package:my_wellness/features/vitals/presentation/bloc/vitals_capture_bloc.dart';
 import 'package:my_wellness/features/vitals/presentation/widgets/latest_reading_card.dart';
 import 'package:my_wellness/features/vitals/presentation/widgets/reading_history_list.dart';
 import 'package:my_wellness/features/vitals/presentation/widgets/vitals_empty_state.dart';
 
 class BsTab extends StatelessWidget {
   const BsTab({super.key});
+
+  static void _startCapture(BuildContext context) {
+    context.read<VitalsCaptureBloc>().add(
+      const StartVitalsCaptureEvent(VitalsCaptureKind.bs),
+    );
+    context.router.push(VitalsCaptureIntroRoute(kind: VitalsCaptureKind.bs));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,16 +56,18 @@ class BsTab extends StatelessWidget {
               'vitals.noBsReadingsSub',
             ),
             ctaLabel: AppLocalizations.getString(context, 'vitals.addReading'),
-            onCta: () => AddBsSheet.show(context),
+            onCta: () => _startCapture(context),
           );
         }
+
+        final latest = state.bsReadings.first;
 
         return Scaffold(
           backgroundColor: Colors.transparent,
           floatingActionButton: AppFab.compact(
             icon: const Icon(Icons.add),
             tooltip: AppLocalizations.getString(context, 'vitals.addReading'),
-            onPressed: () => AddBsSheet.show(context),
+            onPressed: () => _startCapture(context),
           ),
           body: RefreshIndicator.adaptive(
             onRefresh: () async {
@@ -76,19 +89,21 @@ class BsTab extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         LatestReadingCard(
-                          classification: state.bsReadings.first.classification,
-                          primary: state.bsReadings.first.value,
-                          unit: state.bsReadings.first.unit,
-                          timestampIso: state.bsReadings.first.takenAt,
-                          secondary: _readingContext(
-                            context,
-                            state.bsReadings.first,
-                          ),
+                          kind: ReadingKind.bs,
+                          classification: latest.classification,
+                          primary: latest.value,
+                          unit: latest.unit,
+                          timestampIso: latest.takenAt,
+                          primaryHeroTag: HeroTags.homeBloodSugarReading,
+                          timestampHeroTag: HeroTags.homeBloodSugarTimestamp,
+                          secondaryIcon: Icons.restaurant_outlined,
+                          secondary: _readingContext(context, latest),
                         ),
                         const SizedBox(height: AppSpacing.xl),
                         Text(
                           AppLocalizations.getString(context, 'vitals.history'),
-                          style: Theme.of(context).textTheme.titleMedium,
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w700),
                         ),
                         const SizedBox(height: AppSpacing.sm),
                         ReadingHistoryList(
@@ -152,7 +167,7 @@ class BsTab extends StatelessWidget {
     };
     return [
       _readingTypeLabel(context, reading.readingType),
-      if (timing != null) timing,
+      ?timing,
     ].join(' · ');
   }
 }

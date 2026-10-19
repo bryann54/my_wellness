@@ -101,7 +101,7 @@ class _ProviderIcon extends StatelessWidget {
         'assets/images/google.png',
         width: 22,
         height: 22,
-        errorBuilder: (_, __, ___) =>
+        errorBuilder: (_, _, _) =>
             const Icon(Icons.g_mobiledata, size: 18, color: Color(0xFF4285F4)),
       );
     }

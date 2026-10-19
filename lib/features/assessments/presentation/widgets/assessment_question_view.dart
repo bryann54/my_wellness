@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_question.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_choice_tile.dart';
+import 'package:my_wellness/features/assessments/presentation/widgets/assessment_multi_choice_tile.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_number_field.dart';
 
 class AssessmentQuestionView extends StatefulWidget {
@@ -29,13 +30,26 @@ class _AssessmentQuestionViewState extends State<AssessmentQuestionView> {
     text: widget.initialValue ?? '',
   );
   String? _selected;
+  final Set<String> _selectedMulti = {};
 
   @override
   void initState() {
     super.initState();
+
     if (widget.question.type == AssessmentQuestionType.radio &&
         widget.initialValue != null) {
       _selected = widget.initialValue;
+    }
+
+    if (widget.question.type == AssessmentQuestionType.multiSelect &&
+        widget.initialValue != null &&
+        widget.initialValue!.isNotEmpty) {
+      _selectedMulti.addAll(
+        widget.initialValue!
+            .split(',')
+            .map((v) => v.trim())
+            .where((v) => v.isNotEmpty),
+      );
     }
   }
 
@@ -43,6 +57,22 @@ class _AssessmentQuestionViewState extends State<AssessmentQuestionView> {
   void dispose() {
     _numberCtrl.dispose();
     super.dispose();
+  }
+
+  void _toggleMulti(String value) {
+    setState(() {
+      if (_selectedMulti.contains(value)) {
+        _selectedMulti.remove(value);
+      } else {
+        _selectedMulti.add(value);
+      }
+    });
+    final ordered = widget.question.options
+        .map((o) => o.value)
+        .where(_selectedMulti.contains)
+        .join(',');
+
+    widget.onChanged(ordered);
   }
 
   @override
@@ -133,6 +163,20 @@ class _AssessmentQuestionViewState extends State<AssessmentQuestionView> {
           ],
         );
 
+      case AssessmentQuestionType.multiSelect:
+        return Column(
+          children: [
+            for (final o in widget.question.options) ...[
+              AssessmentMultiChoiceTile(
+                option: o,
+                selected: _selectedMulti.contains(o.value),
+                onTap: () => _toggleMulti(o.value),
+              ),
+              const SizedBox(height: 10),
+            ],
+          ],
+        );
+
       case AssessmentQuestionType.number:
         return AssessmentNumberField(
           controller: _numberCtrl,
@@ -147,9 +191,6 @@ class _AssessmentQuestionViewState extends State<AssessmentQuestionView> {
           onChanged: widget.onChanged,
           validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
         );
-
-      case AssessmentQuestionType.multiSelect:
-        return const SizedBox.shrink(); // extend when API ships this
 
       case AssessmentQuestionType.bmi:
       case AssessmentQuestionType.unknown:

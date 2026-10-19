@@ -1,4 +1,3 @@
-// lib/common/widgets/soft_input.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -68,16 +67,9 @@ class SoftInput extends StatelessWidget {
         hintText: hint,
         suffixText: suffixText,
         prefixIcon: prefixIcon,
-
-        // ── The fix ─────────────────────────────────────────────────
-        // Always float the label so it sits on the border, never inside
-        // the fill. Makes it readable against surfaceContainerHighest
-        // and keeps the field height stable whether or not it has text.
         floatingLabelBehavior: FloatingLabelBehavior.always,
-
         filled: true,
         fillColor: cs.surfaceContainerHighest,
-
         labelStyle: GoogleFonts.inter(
           fontSize: 13.5,
           fontWeight: FontWeight.w600,
@@ -98,12 +90,10 @@ class SoftInput extends StatelessWidget {
           fontWeight: FontWeight.w500,
           color: cs.onSurface.withValues(alpha: 0.55),
         ),
-
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 16,
         ),
-
         border: _border(cs, cs.outlineVariant.withValues(alpha: 0.5)),
         enabledBorder: _border(cs, cs.outlineVariant.withValues(alpha: 0.5)),
         focusedBorder: _border(cs, cs.primary, width: 1.6),

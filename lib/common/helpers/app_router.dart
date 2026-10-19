@@ -22,14 +22,23 @@ class AppRouter extends RootStackRouter {
       ],
     ),
 
-    // Vitals / health
-    AutoRoute(page: NotificationsRoute.page),
-    // AutoRoute(page: SubscriptionsRoute.page),
-    AutoRoute(page: MedicationsRoute.page),
+    // Vitals / health — VitalsRouteRoute owns both VitalsBloc and
+    // VitalsCaptureBloc.
     AutoRoute(page: VitalsRoute.page),
+    AutoRoute(page: VitalsRouteRoute.page),
+    AutoRoute(page: NotificationsRoute.page),
+    AutoRoute(page: MedicationsRoute.page),
     AutoRoute(page: MyHealthRoute.page),
     AutoRoute(page: AppointmentsRoute.page),
     AutoRoute(page: AddMedicationRoute.page),
+
+    // Vitals capture flow — pushed on top of VitalsRouteRoute so they
+    // inherit the capture bloc from that subtree.
+    AutoRoute(page: VitalsCaptureIntroRoute.page),
+    AutoRoute(page: VitalsPathwayRoute.page),
+    AutoRoute(page: VitalsBmiRoute.page),
+    AutoRoute(page: VitalsReadingEntryRoute.page),
+    AutoRoute(page: VitalsResultRoute.page),
 
     // Assessments
     AutoRoute(page: AssessmentCompleteRoute.page),
@@ -39,7 +48,6 @@ class AppRouter extends RootStackRouter {
 
     // Account / auth-adjacent
     AutoRoute(page: VerificationRoute.page),
-    AutoRoute(page: ConversationalRegisterRoute.page),
     AutoRoute(page: SettingsRoute.page),
     AutoRoute(page: ProfileDetailsRoute.page),
 

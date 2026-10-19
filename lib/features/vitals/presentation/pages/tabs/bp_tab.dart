@@ -1,17 +1,28 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_wellness/common/constants/hero.dart';
+import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_fab.dart';
 import 'package:my_wellness/common/widgets/shimmer_box.dart';
+import 'package:my_wellness/features/vitals/data/datasources/vitals_capture_remote_datasource.dart';
 import 'package:my_wellness/features/vitals/presentation/bloc/vitals_bloc.dart';
-import 'package:my_wellness/features/vitals/presentation/widgets/sheets/add_bp_sheet.dart';
+import 'package:my_wellness/features/vitals/presentation/bloc/vitals_capture_bloc.dart';
 import 'package:my_wellness/features/vitals/presentation/widgets/latest_reading_card.dart';
 import 'package:my_wellness/features/vitals/presentation/widgets/reading_history_list.dart';
 import 'package:my_wellness/features/vitals/presentation/widgets/vitals_empty_state.dart';
 
 class BpTab extends StatelessWidget {
   const BpTab({super.key});
+
+  static void _startCapture(BuildContext context) {
+    context.read<VitalsCaptureBloc>().add(
+      const StartVitalsCaptureEvent(VitalsCaptureKind.bp),
+    );
+    context.router.push(VitalsCaptureIntroRoute(kind: VitalsCaptureKind.bp));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,23 +48,25 @@ class BpTab extends StatelessWidget {
         }
         if (state.bpReadings.isEmpty) {
           return VitalsEmptyState(
-            icon: Icons.favorite_outline,
+            icon: Icons.monitor_heart_outlined,
             title: AppLocalizations.getString(context, 'vitals.noBpReadings'),
             subtitle: AppLocalizations.getString(
               context,
               'vitals.noBpReadingsSub',
             ),
             ctaLabel: AppLocalizations.getString(context, 'vitals.addReading'),
-            onCta: () => AddBpSheet.show(context),
+            onCta: () => _startCapture(context),
           );
         }
+
+        final latest = state.bpReadings.first;
 
         return Scaffold(
           backgroundColor: Colors.transparent,
           floatingActionButton: AppFab.compact(
             icon: const Icon(Icons.add),
             tooltip: AppLocalizations.getString(context, 'vitals.addReading'),
-            onPressed: () => AddBpSheet.show(context),
+            onPressed: () => _startCapture(context),
           ),
           body: RefreshIndicator.adaptive(
             onRefresh: () async =>
@@ -74,23 +87,28 @@ class BpTab extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         LatestReadingCard(
-                          classification: state.bpReadings.first.classification,
-                          primary:
-                              '${state.bpReadings.first.systolic}/${state.bpReadings.first.diastolic}',
+                          kind: ReadingKind.bp,
+                          classification: latest.classification,
+                          classificationLabel: latest.classificationLabel,
+                          primary: '${latest.systolic}/${latest.diastolic}',
                           unit: 'mmHg',
-                          timestampIso: state.bpReadings.first.takenAt,
-                          secondary: state.bpReadings.first.pulse == null
+                          timestampIso: latest.takenAt,
+                          primaryHeroTag: HeroTags.homeBloodPressureReading,
+                          timestampHeroTag: HeroTags.homeBloodPressureTimestamp,
+                          secondaryIcon: Icons.favorite_rounded,
+                          secondary: latest.pulse == null
                               ? null
                               : AppLocalizations.t(
                                   context,
                                   'vitals.pulseReading',
-                                  {'value': '${state.bpReadings.first.pulse}'},
+                                  {'value': '${latest.pulse}'},
                                 ),
                         ),
                         const SizedBox(height: AppSpacing.xl),
                         Text(
                           AppLocalizations.getString(context, 'vitals.history'),
-                          style: Theme.of(context).textTheme.titleMedium,
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w700),
                         ),
                         const SizedBox(height: AppSpacing.sm),
                         ReadingHistoryList(

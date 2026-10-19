@@ -1,14 +1,15 @@
-// lib/features/assessments/presentation/pages/assessment_session_screen.dart
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
+import 'package:my_wellness/common/res/l10n.dart';
+import 'package:my_wellness/common/widgets/app_primary_button.dart';
 import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_question.dart';
 import 'package:my_wellness/features/assessments/presentation/bloc/assessments_bloc.dart';
 import 'package:my_wellness/features/assessments/presentation/pages/assessment_terminated_screen.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_bmi_step.dart';
+import 'package:my_wellness/features/assessments/presentation/widgets/assessment_intro_skeleton.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_progress_bar.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_question_view.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_session_bottom_bar.dart';
@@ -65,17 +66,46 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
       );
     }
 
-    if (state.status == AssessmentStatus.completed) {
-      _scheduleCompleteRedirect();
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator.adaptive()),
+    if (state.status == AssessmentStatus.error) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(AppLocalizations.getString(context, 'assessment.title')),
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  state.errorMessage ??
+                      AppLocalizations.getString(
+                        context,
+                        'assessment.loadFailed',
+                      ),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                const SizedBox(height: 16),
+                AppPrimaryButton(
+                  onPressed: () => context.router.maybePop(),
+                  label: AppLocalizations.getString(context, 'common.back'),
+                  height: 48,
+                ),
+              ],
+            ),
+          ),
+        ),
       );
     }
 
+    if (state.status == AssessmentStatus.completed) {
+      _scheduleCompleteRedirect();
+      return const Scaffold(body: SafeArea(child: AssessmentIntroSkeleton()));
+    }
+
     if (session == null || def == null) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator.adaptive()),
-      );
+      return const Scaffold(body: SafeArea(child: AssessmentIntroSkeleton()));
     }
 
     if (session.currentIndex != _lastIndex) {
@@ -92,9 +122,7 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
           bloc.add(const FetchScoreEvent());
         }
       });
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator.adaptive()),
-      );
+      return const Scaffold(body: SafeArea(child: AssessmentIntroSkeleton()));
     }
 
     final isBmi = q.type == AssessmentQuestionType.bmi;
@@ -117,7 +145,7 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
       },
       child: Scaffold(
         body: NestedScrollView(
-          headerSliverBuilder: (_, __) => [
+          headerSliverBuilder: (_, _) => [
             CustomAppBar(title: def.shortTitle, isHome: false),
           ],
           body: Column(

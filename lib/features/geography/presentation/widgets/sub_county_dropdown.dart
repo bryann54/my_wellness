@@ -6,18 +6,16 @@ import 'package:my_wellness/features/geography/domain/entities/sub_county.dart';
 import 'package:my_wellness/features/geography/presentation/bloc/geography_bloc.dart';
 
 class SubCountyDropdown extends StatelessWidget {
-  final int? countyId;
-  final int? selectedSubCountyId;
-  final ValueChanged<int?> onChanged;
-  final bool isLocked;
-
   const SubCountyDropdown({
     super.key,
     required this.countyId,
     required this.selectedSubCountyId,
     required this.onChanged,
-    this.isLocked = false,
   });
+
+  final int? countyId;
+  final int? selectedSubCountyId;
+  final ValueChanged<int?> onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +44,7 @@ class SubCountyDropdown extends StatelessWidget {
         return DropDownWidget<SubCounty>(
           label: AppLocalizations.getString(context, 'auth.subCounty'),
           isRequired: true,
-          isEnabled: !isLocked && !disabled,
+          isEnabled: !disabled,
           selectedItem: selected,
           hintText: countyId == null
               ? AppLocalizations.getString(context, 'auth.selectCountyFirst')
@@ -59,7 +57,7 @@ class SubCountyDropdown extends StatelessWidget {
                     DropdownMenuItem<SubCounty>(value: s, child: Text(s.name)),
               )
               .toList(),
-          onChanged: disabled || isLocked ? null : (sc) => onChanged(sc?.id),
+          onChanged: disabled ? null : (sc) => onChanged(sc?.id),
         );
       },
     );

@@ -6,9 +6,12 @@ import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/global_bloc_observer.dart';
 import 'package:my_wellness/core/di/injector.dart';
 import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
+import 'package:my_wellness/features/app_lock/presentation/bloc/app_lock_bloc.dart';
+import 'package:my_wellness/features/app_lock/presentation/widgets/app_lock_gate.dart';
 import 'package:my_wellness/features/assessments/presentation/bloc/assessments_bloc.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:my_wellness/features/auth/presentation/bloc/biometrics/biometrics_bloc.dart';
+import 'package:my_wellness/features/auth/presentation/bloc/auth_event.dart';
+import 'package:my_wellness/features/auth/presentation/bloc/auth_state.dart';
 import 'package:my_wellness/features/bookings/presentation/bloc/bookings_bloc.dart';
 import 'package:my_wellness/features/geography/presentation/bloc/geography_bloc.dart';
 import 'package:my_wellness/features/home/presentation/bloc/home_bloc.dart';
@@ -18,6 +21,7 @@ import 'package:my_wellness/features/notifications/data/notification_service.dar
 import 'package:my_wellness/features/notifications/presentation/bloc/notifications_bloc.dart';
 import 'package:my_wellness/features/notifications/presentation/notification_host.dart';
 import 'package:my_wellness/features/vitals/presentation/bloc/vitals_bloc.dart';
+import 'package:my_wellness/features/vitals/presentation/bloc/vitals_capture_bloc.dart';
 import 'package:my_wellness/features/wellness/presentation/bloc/wellness_bloc.dart';
 
 import 'package:flutter/foundation.dart';
@@ -54,14 +58,17 @@ void main() async {
         ChangeNotifierProvider.value(value: localeProvider),
         ChangeNotifierProvider.value(value: themeProvider),
         BlocProvider(create: (_) => getIt<AuthBloc>()),
-        BlocProvider(create: (_) => getIt<AccountBloc>()..add(FetchProfileEvent())),
-        BlocProvider(create: (_) => getIt<BiometricsBloc>()),
+        BlocProvider(
+          create: (_) => getIt<AccountBloc>()..add(FetchProfileEvent()),
+        ),
+        BlocProvider(create: (_) => getIt<AppLockBloc>()),
         BlocProvider(create: (_) => getIt<HomeBloc>()),
         BlocProvider(create: (_) => getIt<AssessmentsBloc>()),
         BlocProvider(create: (_) => getIt<BookingsBloc>()),
         BlocProvider(create: (_) => getIt<WellnessBloc>()),
         BlocProvider(create: (_) => getIt<GeographyBloc>()),
         BlocProvider(create: (_) => getIt<LaunchBloc>()),
+        BlocProvider(create: (_) => getIt<VitalsCaptureBloc>()),
         BlocProvider(create: (_) => getIt<VitalsBloc>()),
         BlocProvider(create: (_) => getIt<MedicationsBloc>()),
         BlocProvider(create: (_) => getIt<NotificationsBloc>()),
@@ -120,10 +127,22 @@ class _MyAppState extends State<MyApp> {
       value: overlay,
       child: MaterialApp.router(
         title: AppLocalizations.getString(context, 'appName'),
+        debugShowCheckedModeBanner: false,
         routerConfig: _appRouter.config(),
         builder: (context, child) {
           if (child == null) return const SizedBox.shrink();
-          return NotificationHost(child: child);
+          return BlocListener<AuthBloc, AuthState>(
+            listenWhen: (prev, curr) =>
+                prev.status != curr.status &&
+                curr.status == AuthStatus.unauthenticated,
+            listener: (context, _) =>
+                context.read<AppLockBloc>().add(const AppLockReset()),
+            child: AppLockGate(
+              onLogout: () =>
+                  context.read<AuthBloc>().add(const SignOutEvent()),
+              child: NotificationHost(child: child),
+            ),
+          );
         },
         localizationsDelegates: const [
           AppLocalizations.delegate,

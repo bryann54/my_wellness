@@ -12,7 +12,7 @@ class AssessmentTerminatedRouteView extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
       body: NestedScrollView(
-        headerSliverBuilder: (_, __) => [
+        headerSliverBuilder: (_, _) => [
           CustomAppBar(
             title: AppLocalizations.getString(
               context,

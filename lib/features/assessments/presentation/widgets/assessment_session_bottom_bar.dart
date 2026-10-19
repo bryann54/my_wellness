@@ -49,7 +49,7 @@ class AssessmentSessionBottomBar extends StatelessWidget {
               ),
             ),
             style: OutlinedButton.styleFrom(
-               minimumSize: const Size(0, 48),
+              minimumSize: const Size(0, 48),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -76,7 +76,7 @@ class AssessmentSessionBottomBar extends StatelessWidget {
               ),
             ),
             style: FilledButton.styleFrom(
-               minimumSize: const Size(0, 48),
+              minimumSize: const Size(0, 48),
               backgroundColor: cs.primary,
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
               shape: RoundedRectangleBorder(

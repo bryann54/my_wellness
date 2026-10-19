@@ -36,7 +36,7 @@ class ConversationBubble extends StatelessWidget {
                   child: Image.asset(
                     'assets/images/logo.png',
                     fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) =>
+                    errorBuilder: (_, _, _) =>
                         Icon(Icons.shield_rounded, size: 22, color: cs.primary),
                   ),
                 ),

@@ -6,8 +6,7 @@ class BpReading extends Equatable {
   final int diastolic;
   final int? pulse;
   final String? pulseClassification;
-
-  /// Server stores this as a string decimal, e.g. "-77.94".
+  final String? classificationLabel;
   final String? weightKg;
 
   /// 'blue' | 'green' | 'yellow' | 'orange' | 'red' — server-classified.
@@ -24,6 +23,7 @@ class BpReading extends Equatable {
     required this.id,
     required this.systolic,
     required this.diastolic,
+    this.classificationLabel,
     this.pulse,
     this.pulseClassification,
     this.weightKg,
@@ -40,6 +40,7 @@ class BpReading extends Equatable {
     systolic,
     diastolic,
     pulse,
+    classificationLabel,
     pulseClassification,
     weightKg,
     classification,

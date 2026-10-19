@@ -1,119 +1,150 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
-import 'package:my_wellness/features/notifications/data/notification_service.dart';
 import 'package:my_wellness/features/notifications/presentation/bloc/notifications_bloc.dart';
+import 'package:my_wellness/features/notifications/presentation/notifications_empty_state.dart';
 
 @RoutePage()
-class NotificationsScreen extends StatelessWidget {
+class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
 
   @override
+  State<NotificationsScreen> createState() => _NotificationsScreenState();
+}
+
+class _NotificationsScreenState extends State<NotificationsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<NotificationsBloc>().add(const MarkAllReadEvent());
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: BlocBuilder<NotificationsBloc, NotificationsState>(
-        builder: (context, state) {
-          return CustomScrollView(
-            slivers: [
-              CustomAppBar(
-                title: AppLocalizations.getString(
-                  context,
-                  'settings.notifications',
+    return BlocListener<NotificationsBloc, NotificationsState>(
+      listenWhen: (p, c) => c.unreadCount > p.unreadCount,
+      listener: (context, _) =>
+          context.read<NotificationsBloc>().add(const MarkAllReadEvent()),
+      child: Scaffold(
+        body: CustomScrollView(
+          slivers: [
+            CustomAppBar(
+              title: AppLocalizations.getString(
+                context,
+                'settings.notifications',
+              ),
+              isHome: false,
+              actions: [
+                IconButton(
+                  tooltip: AppLocalizations.getString(
+                    context,
+                    'notifications.manageTooltip',
+                  ),
+                  onPressed: () => context.router.push(const SettingsRoute()),
+                  icon: const Icon(Icons.tune_rounded),
                 ),
-                isHome: false,
+                const SizedBox(width: AppSpacing.sm),
+              ],
+            ),
+            SliverToBoxAdapter(
+              child: BlocBuilder<NotificationsBloc, NotificationsState>(
+                buildWhen: (p, c) =>
+                    p.pushEnabled != c.pushEnabled || p.status != c.status,
+                builder: (context, state) {
+                  final showBanner =
+                      state.status == NotificationsStatus.connected &&
+                      !state.pushEnabled;
+                  if (!showBanner) return const SizedBox.shrink();
+                  return const _PushOffBanner();
+                },
               ),
-              SliverFillRemaining(
-                hasScrollBody: false,
-                child: _PermissionBody(state: state),
+            ),
+            const SliverFillRemaining(
+              hasScrollBody: false,
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: EdgeInsets.all(AppSpacing.xl),
+                  child: Center(child: NotificationsEmptyState()),
+                ),
               ),
-            ],
-          );
-        },
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _PermissionBody extends StatelessWidget {
-  final NotificationsState state;
-  const _PermissionBody({required this.state});
+class _PushOffBanner extends StatelessWidget {
+  const _PushOffBanner();
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
-    // Three visible cases. `unknown` is the initial state before OneSignal
-    // has reported anything, so it reads as "ask the user".
-    final (
-      icon,
-      title,
-      subtitle,
-      ctaLabel,
-      ctaAction,
-    ) = switch (state.permission) {
-      NotificationPermission.granted => (
-        Icons.notifications_active_rounded,
-        'Notifications are on',
-        'You will receive alerts for appointments, medications, and '
-            'health updates.',
-        null,
-        null,
-      ),
-      NotificationPermission.denied => (
-        Icons.notifications_off_rounded,
-        'Notifications are off',
-        'Enable them in system settings to receive alerts about your '
-            'appointments and medications.',
-        'Open settings',
-        () => context.read<NotificationsBloc>().add(
-          const RequestPermissionEvent(),
-        ),
-      ),
-      _ => (
-        Icons.notifications_none_rounded,
-        'Stay in the loop',
-        'Enable notifications to receive appointment reminders, '
-            'medication alerts, and health updates.',
-        'Enable notifications',
-        () => context.read<NotificationsBloc>().add(
-          const RequestPermissionEvent(),
-        ),
-      ),
-    };
-
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.xl),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 64, color: cs.primary),
-          const SizedBox(height: AppSpacing.lg),
-          Text(
-            title,
-            style: theme.textTheme.headlineSmall,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            subtitle,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: cs.onSurface.withValues(alpha: 0.65),
-              height: 1.5,
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.sm,
+        AppSpacing.lg,
+        0,
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: cs.surfaceContainerLow,
+          borderRadius: AppRadius.mdAll,
+          border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.5)),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.notifications_off_outlined, color: cs.onSurfaceVariant),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    AppLocalizations.getString(
+                      context,
+                      'notifications.pushOffTitle',
+                    ),
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: cs.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    AppLocalizations.getString(
+                      context,
+                      'notifications.pushOffBody',
+                    ),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            textAlign: TextAlign.center,
-          ),
-          if (ctaLabel != null) ...[
-            const SizedBox(height: AppSpacing.xl),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(onPressed: ctaAction, child: Text(ctaLabel)),
+            TextButton(
+              onPressed: () => context.router.push(const SettingsRoute()),
+              child: Text(
+                AppLocalizations.getString(
+                  context,
+                  'notifications.manageInSettings',
+                ),
+              ),
             ),
           ],
-        ],
+        ),
       ),
     );
   }

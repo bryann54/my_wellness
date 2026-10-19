@@ -39,7 +39,8 @@ class AssessmentQuestion extends Equatable {
       case 'text':
         return AssessmentQuestionType.text;
       case 'multi_select':
-      case 'multiSelect':
+      case 'multiselect':
+      case 'checkbox':
         return AssessmentQuestionType.multiSelect;
       default:
         return AssessmentQuestionType.unknown;

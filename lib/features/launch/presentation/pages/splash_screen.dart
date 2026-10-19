@@ -4,11 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/res/app_spacing.dart';
-import 'package:my_wellness/core/services/pin_service.dart';
+import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
-import 'package:my_wellness/features/auth/presentation/bloc/biometrics/biometrics_bloc.dart';
-import 'package:my_wellness/features/auth/presentation/widgets/security_setup_sheet.dart';
-import 'package:my_wellness/features/auth/presentation/widgets/splash/splash_failure_sheet.dart';
+import 'package:my_wellness/features/app_lock/presentation/bloc/app_lock_bloc.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/splash/splash_offline_banner.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/splash_content.dart';
 import 'package:my_wellness/features/launch/presentation/bloc/launch_bloc.dart';
@@ -28,8 +26,7 @@ class _SplashScreenState extends State<SplashScreen> {
   final _startedAt = DateTime.now();
 
   bool _navigated = false;
-  bool _biometricsDispatched = false;
-  bool _sheetOpen = false;
+  bool _lockEvaluated = false;
 
   @override
   void initState() {
@@ -60,49 +57,20 @@ class _SplashScreenState extends State<SplashScreen> {
     context.router.replace(const MainRoute());
   }
 
-  Future<void> _dispatchBiometrics() async {
-    if (_biometricsDispatched || !mounted) return;
-    _biometricsDispatched = true;
-
-    final hasPin = await PinService().hasPin();
-    if (!mounted) return;
-
-    if (hasPin) {
-      context.read<BiometricsBloc>().add(CheckBiometrics());
-    } else {
-      await SecuritySetupSheet.show(context);
-      if (!mounted) return;
-      await _postAuthNavigation();
-    }
+  void _evaluateAppLock() {
+    if (_lockEvaluated || !mounted) return;
+    _lockEvaluated = true;
+    context.read<AppLockBloc>().add(
+      AppLockEvaluated(
+        reason: AppLocalizations.getString(context, 'appLock.unlockReason'),
+      ),
+    );
   }
 
   Future<void> _postAuthNavigation() async {
     if (!mounted) return;
     context.read<AccountBloc>().add(const FetchProfileEvent());
     await _navigateToMain();
-  }
-
-  Future<void> _showFailureSheet() async {
-    if (_sheetOpen || !mounted) return;
-    _sheetOpen = true;
-
-    await showModalBottomSheet<void>(
-      context: context,
-      isDismissible: false,
-      enableDrag: false,
-      isScrollControlled: true,
-      builder: (_) => BlocProvider.value(
-        value: context.read<BiometricsBloc>(),
-        child: const SplashFailureSheet(),
-      ),
-    );
-
-    _sheetOpen = false;
-
-    if (!mounted) return;
-    if (context.read<BiometricsBloc>().state.isAuthenticated) {
-      await _postAuthNavigation();
-    }
   }
 
   @override
@@ -116,24 +84,17 @@ class _SplashScreenState extends State<SplashScreen> {
             if (state is LaunchUnauthenticated) {
               _navigateToAuth();
             } else if (state is LaunchAuthenticated) {
-              _dispatchBiometrics();
+              _evaluateAppLock();
             } else if (state is LaunchError) {
               _navigateToAuth();
             }
           },
         ),
-        BlocListener<BiometricsBloc, BiometricsState>(
+        BlocListener<AppLockBloc, AppLockState>(
           listenWhen: (prev, curr) =>
-              prev.status != curr.status ||
-              prev.isAuthenticated != curr.isAuthenticated,
-          listener: (context, state) {
-            if (state.status == BiometricsStatus.pinFallback ||
-                state.status == BiometricsStatus.error) {
-              _showFailureSheet();
-            } else if (state.isAuthenticated && !_sheetOpen) {
-              _postAuthNavigation();
-            }
-          },
+              prev.phase == AppLockPhase.initial &&
+              curr.phase != AppLockPhase.initial,
+          listener: (context, _) => _postAuthNavigation(),
         ),
       ],
       child: Scaffold(

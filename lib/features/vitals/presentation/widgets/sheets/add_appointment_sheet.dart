@@ -124,7 +124,6 @@ class _AddAppointmentSheetState extends State<AddAppointmentSheet> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // ── Facility ─────────────────────────────────────────────
             _SectionLabel(
               label: AppLocalizations.getString(
                 context,
@@ -143,7 +142,6 @@ class _AddAppointmentSheetState extends State<AddAppointmentSheet> {
 
             const SizedBox(height: 20),
 
-            // ── Condition ────────────────────────────────────────────
             _SectionLabel(
               label: AppLocalizations.getString(
                 context,
@@ -185,7 +183,6 @@ class _AddAppointmentSheetState extends State<AddAppointmentSheet> {
 
             const SizedBox(height: 20),
 
-            // ── When ─────────────────────────────────────────────────
             _SectionLabel(
               label: AppLocalizations.getString(
                 context,
@@ -197,7 +194,6 @@ class _AddAppointmentSheetState extends State<AddAppointmentSheet> {
 
             const SizedBox(height: 20),
 
-            // ── Notes ────────────────────────────────────────────────
             _SectionLabel(
               label: AppLocalizations.getString(
                 context,
@@ -217,8 +213,6 @@ class _AddAppointmentSheetState extends State<AddAppointmentSheet> {
     );
   }
 }
-
-// ── Section label ────────────────────────────────────────────────────────────
 
 class _SectionLabel extends StatelessWidget {
   final String label;
@@ -241,8 +235,6 @@ class _SectionLabel extends StatelessWidget {
     );
   }
 }
-
-// ── When tile ────────────────────────────────────────────────────────────────
 
 class _WhenTile extends StatelessWidget {
   final DateTime when;

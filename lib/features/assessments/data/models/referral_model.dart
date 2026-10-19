@@ -4,13 +4,19 @@ import 'package:my_wellness/features/assessments/domain/entities/referral.dart';
 part 'referral_model.g.dart';
 
 @JsonSerializable(explicitToJson: true)
+@JsonSerializable(explicitToJson: true)
 class ReferralModel {
   final String id;
 
   @JsonKey(name: 'source_type')
   final String sourceType;
+  final String? session;
 
-  final String session;
+  @JsonKey(name: 'bp_reading')
+  final String? bpReading;
+
+  @JsonKey(name: 'bs_reading')
+  final String? bsReading;
 
   @JsonKey(name: 'escalation_category')
   final String escalationCategory;
@@ -37,9 +43,11 @@ class ReferralModel {
   const ReferralModel({
     required this.id,
     required this.sourceType,
-    required this.session,
     required this.escalationCategory,
     required this.status,
+    this.session,
+    this.bpReading,
+    this.bsReading,
     this.escalationCategoryDisplay,
     this.requiredServices = const [],
     this.reason,
@@ -56,7 +64,7 @@ class ReferralModel {
   Referral toEntity() => Referral(
     id: id,
     sourceType: sourceType,
-    sessionId: session,
+    sessionId: session ?? bpReading ?? bsReading ?? '',
     escalationCategory: escalationCategory,
     escalationCategoryDisplay: escalationCategoryDisplay,
     requiredServices: requiredServices
@@ -178,12 +186,11 @@ class ReferralScoreBreakdownModel {
   ReferralScoreBreakdown toEntity() => ReferralScoreBreakdown(
     total: total,
     components: {
-      if (serviceMatch != null) 'service_match': serviceMatch!,
-      if (clinicalCapability != null)
-        'clinical_capability': clinicalCapability!,
-      if (escalationMatch != null) 'escalation_match': escalationMatch!,
-      if (shaAccreditation != null) 'sha_accreditation': shaAccreditation!,
-      if (facilityReadiness != null) 'facility_readiness': facilityReadiness!,
+      'service_match': ?serviceMatch,
+      'clinical_capability': ?clinicalCapability,
+      'escalation_match': ?escalationMatch,
+      'sha_accreditation': ?shaAccreditation,
+      'facility_readiness': ?facilityReadiness,
     },
   );
 }

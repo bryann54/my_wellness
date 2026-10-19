@@ -15,4 +15,19 @@ abstract final class HeroTags {
 
   /// "Continue" CTA carried Verification → Login (after code confirm).
   static const String verificationCta = 'hero_verification_cta';
+
+  static const String homeNotifications = 'hero_home_notifications';
+  static const String homeMedication = 'hero_home_medication';
+  static const String homeMyHealth = 'hero_home_my_health';
+  static const String homeAppointments = 'hero_home_appointments';
+  static const String homeVitals = 'hero_home_vitals';
+  static const String homeBloodPressure = 'hero_home_blood_pressure';
+  static const String homeBloodSugar = 'hero_home_blood_sugar';
+  static const String homeBloodPressureReading =
+      'hero_home_blood_pressure_reading';
+  static const String homeBloodSugarReading = 'hero_home_blood_sugar_reading';
+  static const String homeBloodPressureTimestamp =
+      'hero_home_blood_pressure_timestamp';
+  static const String homeBloodSugarTimestamp =
+      'hero_home_blood_sugar_timestamp';
 }

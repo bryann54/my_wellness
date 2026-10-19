@@ -5,11 +5,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_snackbar.dart';
-import 'package:my_wellness/core/di/injector.dart';
-import 'package:my_wellness/core/services/pin_service.dart';
+import 'package:my_wellness/features/app_lock/presentation/bloc/app_lock_bloc.dart';
+import 'package:my_wellness/features/app_lock/presentation/widgets/app_lock_setup_sheet.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_state.dart';
-import 'package:my_wellness/features/auth/presentation/widgets/security_setup_sheet.dart';
 
 class AuthStateListener extends StatelessWidget {
   const AuthStateListener({
@@ -25,10 +24,19 @@ class AuthStateListener extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<AuthBloc, AuthState>(
-      listenWhen: (prev, curr) =>
-          prev.status != curr.status || prev.errorMessage != curr.errorMessage,
-      listener: (context, state) => _handleAuthState(context, state),
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<AuthBloc, AuthState>(
+          listenWhen: (prev, curr) =>
+              prev.status != curr.status ||
+              prev.errorMessage != curr.errorMessage,
+          listener: _handleAuthState,
+        ),
+        BlocListener<AppLockBloc, AppLockState>(
+          listenWhen: (prev, curr) => prev.signIn != curr.signIn,
+          listener: _handleSignIn,
+        ),
+      ],
       child: child,
     );
   }
@@ -40,7 +48,7 @@ class AuthStateListener extends StatelessWidget {
     switch (state.status) {
       case AuthStatus.authenticated:
         _showSuccess(context);
-        await _postAuthNavigation(context);
+        context.read<AppLockBloc>().add(const AppLockSignedIn());
 
       case AuthStatus.awaitingSignupConfirmation:
         if (state.pendingSignup == null) return;
@@ -66,16 +74,23 @@ class AuthStateListener extends StatelessWidget {
     }
   }
 
-  Future<void> _postAuthNavigation(BuildContext context) async {
-    final hasPin = await getIt<PinService>().hasPin();
-    if (!context.mounted) return;
+  Future<void> _handleSignIn(BuildContext context, AppLockState state) async {
+    final route = ModalRoute.of(context);
+    if (route != null && !route.isCurrent) return;
 
-    if (!hasPin) {
-      await SecuritySetupSheet.show(context);
+    switch (state.signIn) {
+      case AppLockSignIn.setupRequired:
+        await AppLockSetupSheet.show(context, security: state.security);
+        if (context.mounted) {
+          context.read<AppLockBloc>().add(const AppLockSetupDismissed());
+        }
+
+      case AppLockSignIn.ready:
+        context.router.replace(const MainRoute());
+
+      case AppLockSignIn.idle:
+        break;
     }
-
-    if (!context.mounted) return;
-    context.router.replace(const MainRoute());
   }
 
   void _showSuccess(BuildContext context) {

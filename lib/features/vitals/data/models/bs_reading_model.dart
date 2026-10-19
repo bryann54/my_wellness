@@ -11,7 +11,8 @@ class BsReadingModel {
 
   @JsonKey(name: 'reading_type')
   final String readingType;
-
+  @JsonKey(name: 'classification_label')
+  final String? classificationLabel;
   @JsonKey(name: 'meal_timing')
   final String? mealTiming;
 
@@ -32,6 +33,7 @@ class BsReadingModel {
     required this.id,
     required this.value,
     required this.unit,
+    this.classificationLabel,
     required this.readingType,
     this.mealTiming,
     this.weightKg,
@@ -50,6 +52,7 @@ class BsReadingModel {
     id: id,
     value: value,
     unit: unit,
+    classificationLabel: classificationLabel,
     readingType: readingType,
     mealTiming: mealTiming,
     weightKg: weightKg,

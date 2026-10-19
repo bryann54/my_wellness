@@ -12,7 +12,7 @@ class SplashContent extends StatelessWidget {
       child: Center(
         child: Hero(
           tag: HeroTags.authLogo,
-          flightShuttleBuilder: (_, __, direction, fromContext, toContext) {
+          flightShuttleBuilder: (_, _, direction, fromContext, toContext) {
             return direction == HeroFlightDirection.push
                 ? toContext.widget
                 : fromContext.widget;
