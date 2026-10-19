@@ -1,6 +1,7 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:injectable/injectable.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:my_wellness/features/notifications/data/notification_service.dart';
 
@@ -18,4 +19,9 @@ abstract class RegisterModules {
   @lazySingleton
   NotificationService get notificationService =>
       NotificationService(dotenv.env['ONESIGNAL_APP_ID'] ?? '');
+
+       
+  @lazySingleton
+  LocalAuthentication get localAuthentication => LocalAuthentication();
+
 }

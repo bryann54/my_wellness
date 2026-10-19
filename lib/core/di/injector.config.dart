@@ -13,6 +13,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
+import 'package:local_auth/local_auth.dart' as _i152;
 import 'package:shared_preferences/shared_preferences.dart' as _i460;
 
 import '../../features/account/data/datasources/account_local_datasource.dart'
@@ -36,6 +37,15 @@ import '../../features/account/domain/usecases/get_profile_usecase.dart'
 import '../../features/account/domain/usecases/update_profile_usecase.dart'
     as _i23;
 import '../../features/account/presentation/bloc/account_bloc.dart' as _i708;
+import '../../features/app_lock/data/datasources/app_lock_datasource.dart'
+    as _i101;
+import '../../features/app_lock/data/repositories/app_lock_repository_impl.dart'
+    as _i731;
+import '../../features/app_lock/domain/repositories/app_lock_repository.dart'
+    as _i98;
+import '../../features/app_lock/domain/usecases/app_lock_usecases.dart'
+    as _i1045;
+import '../../features/app_lock/presentation/bloc/app_lock_bloc.dart' as _i766;
 import '../../features/assessments/data/datasources/assessments_remote_datasource.dart'
     as _i470;
 import '../../features/assessments/data/repositories/assessments_repository_impl.dart'
@@ -55,8 +65,6 @@ import '../../features/auth/data/repositories/auth_repository_impl.dart'
 import '../../features/auth/domain/repositories/auth_repository.dart' as _i787;
 import '../../features/auth/domain/usecases/auth_usecases.dart' as _i46;
 import '../../features/auth/presentation/bloc/auth_bloc.dart' as _i797;
-import '../../features/auth/presentation/bloc/biometrics/biometrics_bloc.dart'
-    as _i347;
 import '../../features/geography/data/datasources/geography_remote_datasource.dart'
     as _i474;
 import '../../features/geography/data/repositories/geography_repository_impl.dart'
@@ -107,8 +115,6 @@ import '../../features/vitals/presentation/bloc/vitals_capture_bloc.dart'
     as _i863;
 import '../api_client/client/api_client.dart' as _i671;
 import '../api_client/interceptors/auth_interceptor.dart' as _i878;
-import '../services/biometric_service.dart' as _i374;
-import '../services/pin_service.dart' as _i845;
 import '../storage/storage_preference_manager.dart' as _i934;
 import 'module_injector.dart' as _i759;
 
@@ -130,17 +136,27 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i597.NotificationService>(
       () => registerModules.notificationService,
     );
-    gh.lazySingleton<_i374.BiometricService>(() => _i374.BiometricService());
-    gh.lazySingleton<_i845.PinService>(() => _i845.PinService());
+    gh.lazySingleton<_i152.LocalAuthentication>(
+      () => registerModules.localAuthentication,
+    );
     gh.lazySingleton<_i656.CheckConnectivityUsecase>(
       () => _i656.CheckConnectivityUsecase(),
     );
     gh.factory<String>(() => registerModules.baseUrl, instanceName: 'BaseUrl');
+    gh.lazySingleton<_i101.AppLockDataSource>(
+      () => _i101.AppLockDataSourceImpl(
+        gh<_i558.FlutterSecureStorage>(),
+        gh<_i152.LocalAuthentication>(),
+      ),
+    );
     gh.factory<_i1041.NotificationsBloc>(
       () => _i1041.NotificationsBloc(gh<_i597.NotificationService>()),
     );
     gh.lazySingleton<_i992.AuthLocalDataSource>(
       () => _i992.AuthLocalDataSourceImpl(gh<_i558.FlutterSecureStorage>()),
+    );
+    gh.lazySingleton<_i98.AppLockRepository>(
+      () => _i731.AppLockRepositoryImpl(gh<_i101.AppLockDataSource>()),
     );
     gh.lazySingleton<_i878.AuthInterceptor>(
       () => _i878.AuthInterceptor(
@@ -151,16 +167,34 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i934.SharedPreferencesManager>(
       () => _i934.SharedPreferencesManager(gh<_i460.SharedPreferences>()),
     );
-    gh.factory<_i347.BiometricsBloc>(
-      () => _i347.BiometricsBloc(
-        gh<_i374.BiometricService>(),
-        gh<_i845.PinService>(),
-      ),
+    gh.lazySingleton<_i1045.GetAppLockStatusUseCase>(
+      () => _i1045.GetAppLockStatusUseCase(gh<_i98.AppLockRepository>()),
+    );
+    gh.lazySingleton<_i1045.AuthenticateAppLockUseCase>(
+      () => _i1045.AuthenticateAppLockUseCase(gh<_i98.AppLockRepository>()),
+    );
+    gh.lazySingleton<_i1045.SetAppLockEnabledUseCase>(
+      () => _i1045.SetAppLockEnabledUseCase(gh<_i98.AppLockRepository>()),
+    );
+    gh.lazySingleton<_i1045.MarkAppLockPromptedUseCase>(
+      () => _i1045.MarkAppLockPromptedUseCase(gh<_i98.AppLockRepository>()),
+    );
+    gh.lazySingleton<_i1045.ClearAppLockUseCase>(
+      () => _i1045.ClearAppLockUseCase(gh<_i98.AppLockRepository>()),
     );
     gh.lazySingleton<_i671.ApiClient>(
       () => _i671.ApiClient(
         gh<String>(instanceName: 'BaseUrl'),
         gh<_i878.AuthInterceptor>(),
+      ),
+    );
+    gh.factory<_i766.AppLockBloc>(
+      () => _i766.AppLockBloc(
+        getStatus: gh<_i1045.GetAppLockStatusUseCase>(),
+        authenticate: gh<_i1045.AuthenticateAppLockUseCase>(),
+        setEnabled: gh<_i1045.SetAppLockEnabledUseCase>(),
+        markPrompted: gh<_i1045.MarkAppLockPromptedUseCase>(),
+        clear: gh<_i1045.ClearAppLockUseCase>(),
       ),
     );
     gh.lazySingleton<_i161.AuthRemoteDataSource>(
