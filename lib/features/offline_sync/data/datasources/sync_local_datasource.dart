@@ -22,6 +22,7 @@ class SyncLocalDataSource {
 
   Future<List<PendingSyncAction>> getPending() => _db.getPendingActions();
   Future<void> delete(int id) => _db.deleteAction(id);
+  Future<void> deleteMany(List<int> ids) => _db.deleteActions(ids);
   Future<void> incrementRetry(int id) => _db.incrementRetry(id);
   Future<void> markFailed(int id) => _db.markFailed(id);
   Future<int> getPendingCount() => _db.getPendingCount();

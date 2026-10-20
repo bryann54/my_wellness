@@ -67,61 +67,72 @@ class SyncBanner extends StatelessWidget {
             child,
             Positioned(
               top: 0,
-              left: 16,
-              right: 16,
+              left: 0,
+              right: 0,
               child: SafeArea(
                 bottom: false,
                 child: Padding(
                   padding: const EdgeInsets.only(top: 6),
-                  child: Material(
-                    elevation: 8,
-                    color: background,
-                    shadowColor: Colors.black.withValues(alpha: 0.14),
-                    borderRadius: BorderRadius.circular(16),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 10,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(icon, size: 18, color: foreground),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              message,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                color: foreground,
-                                fontWeight: FontWeight.w600,
-                              ),
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: FractionallySizedBox(
+                      widthFactor: 0.76,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 420),
+                        child: Material(
+                          elevation: 8,
+                          color: background,
+                          shadowColor: Colors.black.withValues(alpha: 0.14),
+                          borderRadius: BorderRadius.circular(16),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 10,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(icon, size: 18, color: foreground),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    message,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.textTheme.labelMedium
+                                        ?.copyWith(
+                                          color: foreground,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                  ),
+                                ),
+                                if (state.status == SyncStatus.error) ...[
+                                  const SizedBox(width: 8),
+                                  TextButton(
+                                    onPressed: () => context
+                                        .read<SyncBloc>()
+                                        .add(const TriggerSyncEvent()),
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: foreground,
+                                      minimumSize: const Size(0, 32),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                      ),
+                                      tapTargetSize:
+                                          MaterialTapTargetSize.shrinkWrap,
+                                    ),
+                                    child: Text(
+                                      AppLocalizations.getString(
+                                        context,
+                                        'common.retry',
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
                           ),
-                          if (state.status == SyncStatus.error) ...[
-                            const SizedBox(width: 8),
-                            TextButton(
-                              onPressed: () => context.read<SyncBloc>().add(
-                                const TriggerSyncEvent(),
-                              ),
-                              style: TextButton.styleFrom(
-                                foregroundColor: foreground,
-                                minimumSize: const Size(0, 32),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                ),
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              ),
-                              child: Text(
-                                AppLocalizations.getString(
-                                  context,
-                                  'common.retry',
-                                ),
-                              ),
-                            ),
-                          ],
-                        ],
+                        ),
                       ),
                     ),
                   ),

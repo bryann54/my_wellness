@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
+import 'package:uuid/uuid.dart';
 import 'package:my_wellness/core/api_client/endpoints/api_endpoints.dart';
 import 'package:my_wellness/core/errors/exceptions.dart';
 import 'package:my_wellness/core/errors/failures.dart';
@@ -203,10 +204,12 @@ class VitalsRepositoryImpl implements VitalsRepository {
     try {
       return Right((await _remote.createBloodPressureReading(data)).toEntity());
     } on NetworkException {
+      final offlinePayload = Map<String, dynamic>.from(data)
+        ..putIfAbsent('client_request_id', () => const Uuid().v4());
       final enqueued = await _sync.enqueueAction(
         actionType: 'create_bp',
         endpoint: ApiEndpoints.vitalsOfflineBp,
-        payload: data,
+        payload: offlinePayload,
       );
       return enqueued.fold((f) => Left(f), (_) => Right(BpReading.local(data)));
     } on Exception catch (e) {
@@ -244,10 +247,12 @@ class VitalsRepositoryImpl implements VitalsRepository {
     try {
       return Right((await _remote.createBloodSugarReading(data)).toEntity());
     } on NetworkException {
+      final offlinePayload = Map<String, dynamic>.from(data)
+        ..putIfAbsent('client_request_id', () => const Uuid().v4());
       final enqueued = await _sync.enqueueAction(
         actionType: 'create_bs',
         endpoint: ApiEndpoints.vitalsOfflineBs,
-        payload: data,
+        payload: offlinePayload,
       );
       return enqueued.fold((f) => Left(f), (_) => Right(BsReading.local(data)));
     } on Exception catch (e) {

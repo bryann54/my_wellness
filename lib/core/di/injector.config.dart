@@ -220,6 +220,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i302.AccountRemoteDataSource>(
       () => _i302.AccountRemoteDataSourceImpl(gh<_i671.ApiClient>()),
     );
+    gh.lazySingleton<_i219.HomeDashboardRemoteDataSource>(
+      () => _i219.HomeDashboardRemoteDataSourceImpl(
+        gh<_i671.ApiClient>(),
+        gh<_i669.AppDatabase>(),
+      ),
+    );
     gh.lazySingleton<_i941.VitalsCaptureRemoteDataSource>(
       () => _i941.VitalsCaptureRemoteDataSourceImpl(gh<_i671.ApiClient>()),
     );
@@ -229,20 +235,8 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i671.ApiClient>(),
       ),
     );
-    gh.lazySingleton<_i219.HomeDashboardRemoteDataSource>(
-      () => _i219.HomeDashboardRemoteDataSourceImpl(
-        gh<_i671.ApiClient>(),
-        gh<_i669.AppDatabase>(),
-      ),
-    );
     gh.lazySingleton<_i216.VitalsRemoteDataSource>(
       () => _i216.VitalsRemoteDataSourceImpl(gh<_i671.ApiClient>()),
-    );
-    gh.lazySingleton<_i470.AssessmentsRemoteDataSource>(
-      () => _i470.AssessmentsRemoteDataSourceImpl(
-        gh<_i671.ApiClient>(),
-        gh<_i669.AppDatabase>(),
-      ),
     );
     gh.lazySingleton<_i787.AuthRepository>(
       () => _i153.AuthRepositoryImpl(
@@ -281,6 +275,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i474.GeographyRemoteDataSource>(
       () => _i474.GeographyRemoteDataSourceImpl(gh<_i671.ApiClient>()),
+    );
+    gh.lazySingleton<_i470.AssessmentsRemoteDataSource>(
+      () => _i470.AssessmentsRemoteDataSourceImpl(
+        gh<_i671.ApiClient>(),
+        gh<_i669.AppDatabase>(),
+      ),
     );
     gh.factory<_i708.AccountBloc>(
       () => _i708.AccountBloc(

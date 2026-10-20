@@ -113,16 +113,33 @@ class AssessmentsRemoteDataSourceImpl implements AssessmentsRemoteDataSource {
   @override
   Future<AssessmentDefinition> getDefinition(String slug) async {
     late final Map<String, dynamic> res;
+    var loadedRemotely = false;
     try {
       res = await _api.get<Map<String, dynamic>>(
-        url: ApiEndpoints.assessmentOffline(slug),
+        url: ApiEndpoints.assessmentDetail(slug),
         options: ApiClient.protected,
       );
+      loadedRemotely = true;
       await _database.cacheAssessment(slug, jsonEncode(res));
     } on NetworkException {
       final cached = await _database.getCachedAssessment(slug);
       if (cached == null) rethrow;
       res = jsonDecode(cached) as Map<String, dynamic>;
+    }
+
+    // Preserve the regular online response above. The offline endpoint adds
+    // navigation rules needed by an offline session, so cache its richer
+    // catalog separately as the latest definition payload when available.
+    if (loadedRemotely) {
+      try {
+        final offlineDefinition = await _api.get<Map<String, dynamic>>(
+          url: ApiEndpoints.assessmentOffline(slug),
+          options: ApiClient.protected,
+        );
+        await _database.cacheAssessment(slug, jsonEncode(offlineDefinition));
+      } on Exception {
+        // The normal assessment endpoint remains authoritative for online use.
+      }
     }
     return AssessmentDefinitionModel.fromJson(res).toEntity();
   }

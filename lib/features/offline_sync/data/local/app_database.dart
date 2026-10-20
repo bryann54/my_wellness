@@ -1,4 +1,3 @@
-
 import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
@@ -27,7 +26,6 @@ class SyncMetadata extends Table {
   Set<Column> get primaryKey => {key};
 }
 
-
 class CachedAssessments extends Table {
   TextColumn get slug => text()();
   TextColumn get json => text()();
@@ -42,7 +40,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 2; 
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -73,12 +71,20 @@ class AppDatabase extends _$AppDatabase {
   Future<List<PendingSyncAction>> getPendingActions() {
     return (select(pendingSyncActions)
           ..where((t) => t.status.equals('pending'))
-          ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]))
+          ..orderBy([
+            (t) => OrderingTerm.asc(t.createdAt),
+            (t) => OrderingTerm.asc(t.id),
+          ]))
         .get();
   }
 
   Future<void> deleteAction(int id) {
     return (delete(pendingSyncActions)..where((t) => t.id.equals(id))).go();
+  }
+
+  Future<void> deleteActions(List<int> ids) async {
+    if (ids.isEmpty) return;
+    await (delete(pendingSyncActions)..where((t) => t.id.isIn(ids))).go();
   }
 
   Future<void> incrementRetry(int id) {
@@ -103,8 +109,6 @@ class AppDatabase extends _$AppDatabase {
     final result = await query.getSingle();
     return result.read(countExp) ?? 0;
   }
-
-
 
   Future<void> cacheAssessment(String slug, String jsonString) {
     return into(cachedAssessments).insertOnConflictUpdate(

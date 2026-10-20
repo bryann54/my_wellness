@@ -71,6 +71,18 @@ class AssessmentQuestionModel {
   final int? min;
   final int? max;
 
+  @JsonKey(name: 'terminate_on')
+  final String? terminateOn;
+
+  @JsonKey(name: 'skip_next_on')
+  final String? skipNextOn;
+
+  @JsonKey(name: 'skip_if')
+  final String? skipIf;
+
+  @JsonKey(name: 'auto_answer_if')
+  final String? autoAnswerIf;
+
   const AssessmentQuestionModel({
     required this.key,
     required this.index,
@@ -82,6 +94,10 @@ class AssessmentQuestionModel {
     this.description,
     this.min,
     this.max,
+    this.terminateOn,
+    this.skipNextOn,
+    this.skipIf,
+    this.autoAnswerIf,
   });
 
   factory AssessmentQuestionModel.fromJson(Map<String, dynamic> json) =>
@@ -100,6 +116,10 @@ class AssessmentQuestionModel {
     description: description,
     min: min,
     max: max,
+    terminateOn: terminateOn,
+    skipNextOn: skipNextOn,
+    skipIf: skipIf,
+    autoAnswerIf: autoAnswerIf,
   );
 }
 
