@@ -648,6 +648,13 @@
   "ready": "Almost ready…",
   "noConnection": "You're offline. Some features may not be available."
 },
+ "offline": {
+  "youAreOffline": "You're offline",
+  "connectionRestored": "Connection restored",
+  "syncing": "Syncing {count} pending changes",
+  "syncFailed": "Some changes couldn't sync",
+  "pendingSync": "{count} changes waiting to sync"
+},
  "onboarding": {
   "title": "Welcome",
   "skip": "Skip",

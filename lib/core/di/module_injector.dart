@@ -1,9 +1,11 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:injectable/injectable.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:my_wellness/features/notifications/data/notification_service.dart';
+import 'package:my_wellness/features/offline_sync/data/local/app_database.dart';
 
 @module
 abstract class RegisterModules {
@@ -22,4 +24,10 @@ abstract class RegisterModules {
 
   @lazySingleton
   LocalAuthentication get localAuthentication => LocalAuthentication();
+
+  @lazySingleton
+  AppDatabase get appDatabase => AppDatabase();
+
+  @lazySingleton
+  Connectivity get connectivity => Connectivity();
 }

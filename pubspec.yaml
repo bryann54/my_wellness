@@ -60,6 +60,9 @@ dependencies:
   phosphor_icons: ^3.0.1
   flutter_tts: ^4.2.5
   bloc: ^9.2.1
+  drift: ^2.20.0
+  sqlite3_flutter_libs: ^0.5.24
+  uuid: ^4.4.2
   # purchases_flutter: ^9.15.1
 
 dev_dependencies:
@@ -67,7 +70,8 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.4
-  
+  drift_dev: ^2.20.0
+
   
   # Code Generators (dev_dependencies)
   build_runner: ^2.4.9

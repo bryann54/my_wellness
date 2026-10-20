@@ -1,5 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
+import 'package:my_wellness/core/api_client/endpoints/api_endpoints.dart';
 import 'package:my_wellness/core/errors/exceptions.dart';
 import 'package:my_wellness/core/errors/failures.dart';
 import 'package:my_wellness/features/assessments/data/datasources/assessments_remote_datasource.dart';
@@ -12,11 +13,14 @@ import 'package:my_wellness/features/assessments/domain/entities/bmi_preview.dar
 import 'package:my_wellness/features/assessments/domain/entities/referral.dart';
 import 'package:my_wellness/features/assessments/domain/entities/vitals_access.dart';
 import 'package:my_wellness/features/assessments/domain/repositories/assessments_repository.dart';
+import 'package:my_wellness/features/offline_sync/domain/repositories/sync_repository.dart';
 
 @LazySingleton(as: AssessmentsRepository)
 class AssessmentRepositoryImpl implements AssessmentsRepository {
   final AssessmentsRemoteDataSource _remote;
-  AssessmentRepositoryImpl(this._remote);
+  final SyncRepository _sync;
+
+  AssessmentRepositoryImpl(this._remote, this._sync);
 
   @override
   Future<Either<Failure, VitalsAccess>> getVitalsAccess() async {
@@ -95,6 +99,31 @@ class AssessmentRepositoryImpl implements AssessmentsRepository {
           answer: answer,
         ),
       );
+    } on NetworkException {
+      final enqueued = await _sync.enqueueAction(
+        actionType: 'assessment_answer',
+        endpoint: ApiEndpoints.assessmentOfflineBatch(slug, sessionId),
+        payload: {
+          'answers': [
+            {
+              'question_key': questionKey,
+              'question_index': questionIndex,
+              'answer': answer,
+            },
+          ],
+        },
+      );
+      return enqueued.fold(
+        (f) => Left(f),
+        // Optimistic: advance locally so the user can keep going offline.
+        (_) => Right(
+          SubmitAnswerResult(
+            nextIndex: questionIndex + 1,
+            terminate: false,
+            completed: false,
+          ),
+        ),
+      );
     } on Exception catch (e) {
       return Left(_map(e));
     }
@@ -126,15 +155,6 @@ class AssessmentRepositoryImpl implements AssessmentsRepository {
     }
   }
 
-  Failure _map(Exception e) {
-    if (e is UnauthorizedException) return const UnauthorizedFailure();
-    if (e is ValidationException) return ValidationFailure(error: e.message);
-    if (e is NotFoundException) return NotFoundFailure(error: e.message);
-    if (e is NetworkException) return const NetworkFailure();
-    if (e is ServerException) return const ServerFailure();
-    return GeneralFailure(error: e.toString());
-  }
-
   @override
   Future<Either<Failure, Referral?>> getReferralForSession(
     String sessionId,
@@ -144,5 +164,14 @@ class AssessmentRepositoryImpl implements AssessmentsRepository {
     } on Exception {
       return const Right(null);
     }
+  }
+
+  Failure _map(Exception e) {
+    if (e is UnauthorizedException) return const UnauthorizedFailure();
+    if (e is ValidationException) return ValidationFailure(error: e.message);
+    if (e is NotFoundException) return NotFoundFailure(error: e.message);
+    if (e is NetworkException) return const NetworkFailure();
+    if (e is ServerException) return const ServerFailure();
+    return GeneralFailure(error: e.toString());
   }
 }

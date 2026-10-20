@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:injectable/injectable.dart';
 import 'package:my_wellness/core/api_client/client/api_client.dart';
 import 'package:my_wellness/core/api_client/endpoints/api_endpoints.dart';
@@ -19,6 +20,7 @@ import 'package:my_wellness/features/assessments/domain/entities/bmi_preview.dar
 import 'package:my_wellness/features/assessments/domain/entities/referral.dart';
 import 'package:my_wellness/features/assessments/domain/entities/vitals_access.dart';
 import 'package:my_wellness/features/assessments/domain/repositories/assessments_repository.dart';
+import 'package:my_wellness/features/offline_sync/data/local/app_database.dart';
 
 abstract class AssessmentsRemoteDataSource {
   Future<VitalsAccess> getVitalsAccess();
@@ -45,7 +47,8 @@ abstract class AssessmentsRemoteDataSource {
 @LazySingleton(as: AssessmentsRemoteDataSource)
 class AssessmentsRemoteDataSourceImpl implements AssessmentsRemoteDataSource {
   final ApiClient _api;
-  AssessmentsRemoteDataSourceImpl(this._api);
+  final AppDatabase _database;
+  AssessmentsRemoteDataSourceImpl(this._api, this._database);
 
   @override
   Future<VitalsAccess> getVitalsAccess() async {
@@ -73,10 +76,18 @@ class AssessmentsRemoteDataSourceImpl implements AssessmentsRemoteDataSource {
 
   @override
   Future<List<AssessmentSummary>> listAssessments() async {
-    final res = await _api.get<List<dynamic>>(
-      url: ApiEndpoints.assessments,
-      options: ApiClient.protected,
-    );
+    late final List<dynamic> res;
+    try {
+      res = await _api.get<List<dynamic>>(
+        url: ApiEndpoints.assessments,
+        options: ApiClient.protected,
+      );
+      await _database.cachePayload('assessment_list', jsonEncode(res));
+    } on NetworkException {
+      final cached = await _database.getCachedPayload('assessment_list');
+      if (cached == null) rethrow;
+      res = jsonDecode(cached) as List<dynamic>;
+    }
     return res
         .map(
           (e) => AssessmentSummaryModel.fromJson(
@@ -101,10 +112,18 @@ class AssessmentsRemoteDataSourceImpl implements AssessmentsRemoteDataSource {
 
   @override
   Future<AssessmentDefinition> getDefinition(String slug) async {
-    final res = await _api.get<Map<String, dynamic>>(
-      url: ApiEndpoints.assessmentDetail(slug),
-      options: ApiClient.protected,
-    );
+    late final Map<String, dynamic> res;
+    try {
+      res = await _api.get<Map<String, dynamic>>(
+        url: ApiEndpoints.assessmentOffline(slug),
+        options: ApiClient.protected,
+      );
+      await _database.cacheAssessment(slug, jsonEncode(res));
+    } on NetworkException {
+      final cached = await _database.getCachedAssessment(slug);
+      if (cached == null) rethrow;
+      res = jsonDecode(cached) as Map<String, dynamic>;
+    }
     return AssessmentDefinitionModel.fromJson(res).toEntity();
   }
 

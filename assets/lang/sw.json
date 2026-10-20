@@ -644,7 +644,14 @@
   "loadingProfile": "Inapakia wasifu wako…",
   "ready": "Karibu kumaliza…",
   "noConnection": "Haupo mtandaoni. Baadhi ya vipengele huenda visipatikane."
-},
+  },
+  "offline": {
+    "youAreOffline": "Haupo mtandaoni",
+    "connectionRestored": "Muunganisho umerejeshwa",
+    "syncing": "Inasawazisha mabadiliko {count} yanayosubiri",
+    "syncFailed": "Baadhi ya mabadiliko hayakusawazishwa",
+    "pendingSync": "Mabadiliko {count} yanasubiri kusawazishwa"
+  },
   "onboarding": {
     "title": "Karibu",
     "skip": "Ruka",
