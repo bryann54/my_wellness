@@ -12,10 +12,10 @@ import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
 import 'package:my_wellness/common/widgets/drop_down_field.dart';
 import 'package:my_wellness/common/widgets/soft_input.dart';
 import 'package:my_wellness/features/vitals/domain/entities/medication_scan.dart';
-import 'package:my_wellness/features/vitals/presentation/bloc/vitals_bloc.dart';
-import 'package:my_wellness/features/vitals/presentation/widgets/medication_candidate_picker.dart';
-import 'package:my_wellness/features/vitals/presentation/widgets/scan_medication_card.dart';
-import 'package:my_wellness/features/vitals/presentation/widgets/vitals_toast_listener.dart';
+import 'package:my_wellness/features/medications/presentation/bloc/medications_bloc.dart';
+import 'package:my_wellness/features/medications/presentation/widgets/medication_candidate_picker.dart';
+import 'package:my_wellness/features/medications/presentation/widgets/scan_medication_card.dart';
+import 'package:my_wellness/features/medications/presentation/widgets/medications_toast_listener.dart';
 
 @RoutePage()
 class AddMedicationScreen extends StatelessWidget {
@@ -25,9 +25,9 @@ class AddMedicationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return VitalsToastListener(
+    return MedicationsToastListener(
       child: BlocProvider.value(
-        value: context.read<VitalsBloc>(),
+        value: context.read<MedicationsBloc>(),
         child: _AddMedicationBody(condition: condition),
       ),
     );
@@ -97,7 +97,7 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
       _pickedCandidate = null;
     });
 
-    final result = await context.read<VitalsBloc>().scanMedication(
+    final result = await context.read<MedicationsBloc>().scanMedication(
       filePath: file.path,
       condition: _condition,
     );
@@ -160,6 +160,7 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
   Future<void> _pickStart() async {
     final picked = await showDatePicker(
       context: context,
+      locale: Localizations.localeOf(context),
       initialDate: _startDate,
       firstDate: DateTime.now().subtract(const Duration(days: 365)),
       lastDate: DateTime.now().add(const Duration(days: 365)),
@@ -183,14 +184,14 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
       'duration_unit': _durationUnit,
     };
 
-    context.read<VitalsBloc>().add(AddMedicationEvent(payload));
+    context.read<MedicationsBloc>().add(AddMedicationEvent(payload));
     context.router.maybePop();
   }
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final isSubmitting = context.select<VitalsBloc, bool>(
+    final isSubmitting = context.select<MedicationsBloc, bool>(
       (b) => b.state.isSubmitting,
     );
 

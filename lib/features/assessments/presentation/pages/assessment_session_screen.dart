@@ -12,6 +12,7 @@ import 'package:my_wellness/features/assessments/presentation/widgets/assessment
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_intro_skeleton.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_progress_bar.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_question_view.dart';
+import 'package:my_wellness/features/assessments/presentation/widgets/assessment_card.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_session_bottom_bar.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_toast_listener.dart';
 import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
@@ -146,7 +147,11 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
       child: Scaffold(
         body: NestedScrollView(
           headerSliverBuilder: (_, _) => [
-            CustomAppBar(title: def.shortTitle, isHome: false),
+            CustomAppBar(
+              title: def.shortTitle,
+              titleHeroTag: assessmentTitleTag(widget.slug),
+              isHome: false,
+            ),
           ],
           body: Column(
             children: [

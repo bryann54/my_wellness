@@ -9,7 +9,7 @@ import 'package:my_wellness/common/utils/functions.dart';
 import 'package:my_wellness/common/widgets/shimmer_box.dart';
 import 'package:my_wellness/features/vitals/domain/entities/medication.dart';
 import 'package:my_wellness/features/vitals/domain/usecases/vitals_usecases.dart';
-import 'package:my_wellness/features/vitals/presentation/widgets/medication_tile.dart';
+import 'package:my_wellness/features/medications/presentation/widgets/medication_tile.dart';
 
 class ConditionMedicationCapture extends StatefulWidget {
   const ConditionMedicationCapture({super.key, required this.condition});

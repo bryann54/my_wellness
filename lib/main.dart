@@ -6,6 +6,7 @@ import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/global_bloc_observer.dart';
 import 'package:my_wellness/core/di/injector.dart';
 import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
+import 'package:my_wellness/features/appointments/presentation/bloc/appointments_bloc.dart';
 import 'package:my_wellness/features/app_lock/presentation/bloc/app_lock_bloc.dart';
 import 'package:my_wellness/features/app_lock/presentation/widgets/app_lock_gate.dart';
 import 'package:my_wellness/features/assessments/presentation/bloc/assessments_bloc.dart';
@@ -70,6 +71,7 @@ void main() async {
         BlocProvider(create: (_) => getIt<LaunchBloc>()),
         BlocProvider(create: (_) => getIt<VitalsCaptureBloc>()),
         BlocProvider(create: (_) => getIt<VitalsBloc>()),
+        BlocProvider(create: (_) => getIt<AppointmentsBloc>()),
         BlocProvider(create: (_) => getIt<MedicationsBloc>()),
         BlocProvider(create: (_) => getIt<NotificationsBloc>()),
       ],

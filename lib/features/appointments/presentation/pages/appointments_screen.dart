@@ -6,11 +6,11 @@ import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/widgets/app_fab.dart';
 import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
-import 'package:my_wellness/features/vitals/presentation/bloc/vitals_bloc.dart';
-import 'package:my_wellness/features/vitals/presentation/widgets/sheets/add_appointment_sheet.dart';
-import 'package:my_wellness/features/vitals/presentation/widgets/appointment_tile.dart';
+import 'package:my_wellness/features/appointments/presentation/bloc/appointments_bloc.dart';
+import 'package:my_wellness/features/appointments/presentation/widgets/appointments_toast_listener.dart';
+import 'package:my_wellness/features/appointments/presentation/widgets/add_appointment_sheet.dart';
+import 'package:my_wellness/features/appointments/presentation/widgets/appointment_tile.dart';
 import 'package:my_wellness/features/vitals/presentation/widgets/vitals_empty_state.dart';
-import 'package:my_wellness/features/vitals/presentation/widgets/vitals_toast_listener.dart';
 
 @RoutePage()
 class AppointmentsScreen extends StatefulWidget {
@@ -27,9 +27,9 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
   void initState() {
     super.initState();
     _scroll.addListener(_onScroll);
-    final bloc = context.read<VitalsBloc>();
-    if (bloc.state.status == VitalsStatus.initial) {
-      bloc.add(const LoadVitalsEvent());
+    final bloc = context.read<AppointmentsBloc>();
+    if (bloc.state.status == CollectionStatus.initial) {
+      bloc.add(const LoadAppointmentsEvent());
     }
   }
 
@@ -41,15 +41,15 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
 
   void _onScroll() {
     if (_scroll.position.pixels >= _scroll.position.maxScrollExtent - 200) {
-      context.read<VitalsBloc>().add(const LoadMoreAppointmentsEvent());
+      context.read<AppointmentsBloc>().add(const LoadMoreAppointmentsEvent());
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return VitalsToastListener(
+    return AppointmentsToastListener(
       child: Scaffold(
-        floatingActionButton: BlocBuilder<VitalsBloc, VitalsState>(
+        floatingActionButton: BlocBuilder<AppointmentsBloc, AppointmentsState>(
           buildWhen: (p, c) => p.appointments.isEmpty != c.appointments.isEmpty,
           builder: (context, state) {
             return AppFabSlot(
@@ -62,16 +62,17 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
             );
           },
         ),
-        body: BlocBuilder<VitalsBloc, VitalsState>(
+        body: BlocBuilder<AppointmentsBloc, AppointmentsState>(
           buildWhen: (p, c) =>
               p.status != c.status ||
               p.appointments != c.appointments ||
-              p.appointmentsCursor != c.appointmentsCursor,
+              p.cursor != c.cursor,
           builder: (context, state) {
             final appts = state.appointments;
             return RefreshIndicator.adaptive(
-              onRefresh: () async =>
-                  context.read<VitalsBloc>().add(const LoadVitalsEvent()),
+              onRefresh: () async => context.read<AppointmentsBloc>().add(
+                const LoadAppointmentsEvent(),
+              ),
               child: NestedScrollView(
                 headerSliverBuilder: (_, _) => [
                   CustomAppBar(
@@ -131,8 +132,7 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                           112,
                         ),
                         itemCount:
-                            appts.length +
-                            (state.appointmentsCursor != null ? 1 : 0),
+                            appts.length + (state.cursor != null ? 1 : 0),
                         itemBuilder: (context, i) {
                           if (i >= appts.length) {
                             return const Padding(
@@ -148,9 +148,9 @@ class _AppointmentsScreenState extends State<AppointmentsScreen> {
                               constraints: const BoxConstraints(maxWidth: 680),
                               child: AppointmentTile(
                                 appointment: a,
-                                onDelete: () => context.read<VitalsBloc>().add(
-                                  DeleteAppointmentEvent(a.id),
-                                ),
+                                onDelete: () => context
+                                    .read<AppointmentsBloc>()
+                                    .add(DeleteAppointmentEvent(a.id)),
                               ),
                             ),
                           );

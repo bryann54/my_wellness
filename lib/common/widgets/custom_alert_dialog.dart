@@ -61,7 +61,7 @@ class CustomAlertDialog extends StatelessWidget {
                   cancelText ??
                       AppLocalizations.getString(context, 'common.cancel'),
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.outline,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
               ),

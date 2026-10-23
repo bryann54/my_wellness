@@ -36,6 +36,8 @@ class AppRouter extends RootStackRouter {
     // inherit the capture bloc from that subtree.
     AutoRoute(page: VitalsCaptureIntroRoute.page),
     AutoRoute(page: VitalsPathwayRoute.page),
+    AutoRoute(page: VitalsPathwayFollowupRoute.page),
+    AutoRoute(page: VitalsPathwayTipsRoute.page),
     AutoRoute(page: VitalsBmiRoute.page),
     AutoRoute(page: VitalsReadingEntryRoute.page),
     AutoRoute(page: VitalsResultRoute.page),

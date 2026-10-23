@@ -161,6 +161,8 @@
 },
   "vitals": {
   "title": "Vipimo vya Afya",
+  "deleteConfirmTitle": "Futa kipimo?",
+  "deleteConfirmMessage": "Kipimo hiki kitaondolewa kabisa kwenye historia yako.",
   "subtitle": "Shinikizo la damu na sukari ya damu",
   "bloodPressure": "Shinikizo la Damu",
   "bloodSugar": "Sukari ya Damu",

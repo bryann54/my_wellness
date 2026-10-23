@@ -100,12 +100,13 @@ class VitalsCaptureState extends Equatable {
   bool get needsDialysisDays => pathwayValue == 'kidney_dialysis';
 
   bool get pathwayCanContinue {
-    if (pathwayValue == null) return false;
-    if (needsProviderPlan && providerPlanValue == null) return false;
-    if (needsTreatmentGap && treatmentGapValues.isEmpty) return false;
-    if (needsDialysisDays && dialysisDays.isEmpty) return false;
-    return true;
+    return pathwayValue != null;
   }
+
+  bool get followupCanContinue =>
+      (!needsProviderPlan || providerPlanValue != null) &&
+      (!needsTreatmentGap || treatmentGapValues.isNotEmpty) &&
+      (!needsDialysisDays || dialysisDays.isNotEmpty);
 
   @override
   List<Object?> get props => [
