@@ -47,6 +47,8 @@ import '../../features/app_lock/domain/repositories/app_lock_repository.dart'
 import '../../features/app_lock/domain/usecases/app_lock_usecases.dart'
     as _i1045;
 import '../../features/app_lock/presentation/bloc/app_lock_bloc.dart' as _i766;
+import '../../features/appointments/presentation/bloc/appointments_bloc.dart'
+    as _i767;
 import '../../features/assessments/data/datasources/assessments_remote_datasource.dart'
     as _i470;
 import '../../features/assessments/data/repositories/assessments_repository_impl.dart'
@@ -93,6 +95,8 @@ import '../../features/home/presentation/bloc/home_bloc.dart' as _i202;
 import '../../features/launch/domain/usecases/check_connectivity_usecase.dart'
     as _i656;
 import '../../features/launch/presentation/bloc/launch_bloc.dart' as _i646;
+import '../../features/medications/presentation/bloc/medications_bloc.dart'
+    as _i734;
 import '../../features/notifications/data/notification_service.dart' as _i597;
 import '../../features/notifications/presentation/bloc/notifications_bloc.dart'
     as _i1041;
@@ -503,19 +507,19 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i902.VitalsBloc>(
       () => _i902.VitalsBloc(
-        gh<_i425.GetAppointmentsPagedUseCase>(),
-        gh<_i425.GetMedicationsPagedUseCase>(),
         gh<_i425.GetBloodPressureReadingsUseCase>(),
         gh<_i425.GetBloodSugarReadingsUseCase>(),
         gh<_i425.CreateBloodPressureReadingUseCase>(),
         gh<_i425.CreateBloodSugarReadingUseCase>(),
-        gh<_i425.CreateMedicationUseCase>(),
-        gh<_i425.CreateAppointmentUseCase>(),
         gh<_i425.DeleteBloodPressureReadingUseCase>(),
         gh<_i425.DeleteBloodSugarReadingUseCase>(),
-        gh<_i425.DeleteMedicationUseCase>(),
+      ),
+    );
+    gh.factory<_i767.AppointmentsBloc>(
+      () => _i767.AppointmentsBloc(
+        gh<_i425.GetAppointmentsPagedUseCase>(),
+        gh<_i425.CreateAppointmentUseCase>(),
         gh<_i425.DeleteAppointmentUseCase>(),
-        gh<_i425.ScanMedicationUseCase>(),
       ),
     );
     gh.factory<_i1022.AssessmentsBloc>(
@@ -531,6 +535,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i6.GetAssessmentScoreUseCase>(),
         gh<_i6.PreviewBmiUseCase>(),
         gh<_i23.UpdateProfileUseCase>(),
+      ),
+    );
+    gh.factory<_i734.MedicationsBloc>(
+      () => _i734.MedicationsBloc(
+        gh<_i425.GetMedicationsPagedUseCase>(),
+        gh<_i425.CreateMedicationUseCase>(),
+        gh<_i425.DeleteMedicationUseCase>(),
+        gh<_i425.ScanMedicationUseCase>(),
       ),
     );
     return this;

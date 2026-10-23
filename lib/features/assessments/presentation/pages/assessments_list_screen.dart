@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_wellness/common/constants/hero.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/utils/debouncer.dart';
 import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
@@ -113,6 +114,7 @@ class _AssessmentsListBodyState extends State<_AssessmentsListBody> {
           headerSliverBuilder: (_, _) => [
             CustomAppBar(
               title: AppLocalizations.getString(context, 'assessment.title'),
+              titleHeroTag: HeroTags.homeScreeningActivity,
               isHome: false,
               isTabRoot: true,
               bottom: AssessmentSearchBarBottom(

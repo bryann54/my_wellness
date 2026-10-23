@@ -9,8 +9,8 @@ import 'package:my_wellness/common/widgets/app_bottom_sheet.dart';
 import 'package:my_wellness/common/widgets/app_snackbar.dart';
 import 'package:my_wellness/common/widgets/drop_down_field.dart';
 import 'package:my_wellness/common/widgets/soft_input.dart';
-import 'package:my_wellness/features/vitals/presentation/bloc/vitals_bloc.dart';
-import 'package:my_wellness/features/vitals/presentation/widgets/facility_search_field.dart';
+import 'package:my_wellness/features/appointments/presentation/bloc/appointments_bloc.dart';
+import 'package:my_wellness/features/appointments/presentation/widgets/facility_search_field.dart';
 
 class AddAppointmentSheet extends StatefulWidget {
   const AddAppointmentSheet({super.key});
@@ -19,7 +19,7 @@ class AddAppointmentSheet extends StatefulWidget {
     return AppBottomSheet.show(
       context: context,
       builder: (_) => BlocProvider.value(
-        value: context.read<VitalsBloc>(),
+        value: context.read<AppointmentsBloc>(),
         child: const AddAppointmentSheet(),
       ),
     );
@@ -40,12 +40,14 @@ class _AddAppointmentSheetState extends State<AddAppointmentSheet> {
   /// Populated by [FacilitySearchField].
   String? _clinicName;
   String? _facilityId;
-  StreamSubscription<VitalsState>? _submissionSubscription;
+  StreamSubscription<AppointmentsState>? _submissionSubscription;
 
   @override
   void initState() {
     super.initState();
-    _submissionSubscription = context.read<VitalsBloc>().stream.listen((state) {
+    _submissionSubscription = context.read<AppointmentsBloc>().stream.listen((
+      state,
+    ) {
       if (state.toastType == ToastType.success && mounted) {
         Navigator.of(context).pop();
       }
@@ -62,13 +64,22 @@ class _AddAppointmentSheetState extends State<AddAppointmentSheet> {
   Future<void> _pickWhen() async {
     final date = await showDatePicker(
       context: context,
+      locale: Localizations.localeOf(context),
       initialDate: _when,
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
     if (date == null || !mounted) return;
 
-    final time = await showTimePicker(context: context, initialTime: _time);
+    final time = await showTimePicker(
+      context: context,
+      initialTime: _time,
+      builder: (context, child) => Localizations.override(
+        context: context,
+        locale: Localizations.localeOf(context),
+        child: child!,
+      ),
+    );
     if (time == null) return;
 
     setState(() {
@@ -97,7 +108,7 @@ class _AddAppointmentSheetState extends State<AddAppointmentSheet> {
       if (_notesCtrl.text.trim().isNotEmpty) 'notes': _notesCtrl.text.trim(),
     };
 
-    context.read<VitalsBloc>().add(AddAppointmentEvent(payload));
+    context.read<AppointmentsBloc>().add(AddAppointmentEvent(payload));
   }
 
   static String _formatTimeHm(TimeOfDay t) =>
@@ -107,7 +118,7 @@ class _AddAppointmentSheetState extends State<AddAppointmentSheet> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final isSubmitting = context.select<VitalsBloc, bool>(
+    final isSubmitting = context.select<AppointmentsBloc, bool>(
       (b) => b.state.isSubmitting,
     );
 

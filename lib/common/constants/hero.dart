@@ -30,4 +30,5 @@ abstract final class HeroTags {
       'hero_home_blood_pressure_timestamp';
   static const String homeBloodSugarTimestamp =
       'hero_home_blood_sugar_timestamp';
+  static const String homeScreeningActivity = 'hero_home_screening_activity';
 }

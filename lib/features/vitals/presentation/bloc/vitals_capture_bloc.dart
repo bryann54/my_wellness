@@ -16,6 +16,8 @@ class VitalsCaptureBloc extends Bloc<VitalsCaptureEvent, VitalsCaptureState> {
   final GetVitalsCaptureContentUseCase _getContent;
   final CreateVitalsSessionUseCase _createSession;
   final GetVitalsReferralUseCase _getReferral;
+  final Map<VitalsCaptureKind, VitalsCaptureContent> _contentCache = {};
+  final Set<VitalsCaptureKind> _loadingKinds = {};
 
   VitalsCaptureBloc(this._getContent, this._createSession, this._getReferral)
     : super(const VitalsCaptureState()) {
@@ -36,6 +38,19 @@ class VitalsCaptureBloc extends Bloc<VitalsCaptureEvent, VitalsCaptureState> {
     StartVitalsCaptureEvent event,
     Emitter<VitalsCaptureState> emit,
   ) async {
+    final cached = _contentCache[event.kind];
+    if (cached != null) {
+      emit(
+        VitalsCaptureState(
+          kind: event.kind,
+          step: VitalsCaptureStep.intro,
+          content: cached,
+        ),
+      );
+      return;
+    }
+    if (!_loadingKinds.add(event.kind)) return;
+
     emit(
       VitalsCaptureState(
         kind: event.kind,
@@ -43,17 +58,31 @@ class VitalsCaptureBloc extends Bloc<VitalsCaptureEvent, VitalsCaptureState> {
       ),
     );
 
-    final res = await _getContent(event.kind);
-    res.fold(
-      (f) => emit(
-        state.copyWith(
-          step: VitalsCaptureStep.error,
-          errorMessage: mapFailure(f),
-        ),
-      ),
-      (content) =>
-          emit(state.copyWith(step: VitalsCaptureStep.intro, content: content)),
-    );
+    try {
+      final res = await _getContent(event.kind);
+      res.fold(
+        (f) {
+          if (state.kind == event.kind) {
+            emit(
+              state.copyWith(
+                step: VitalsCaptureStep.error,
+                errorMessage: mapFailure(f),
+              ),
+            );
+          }
+        },
+        (content) {
+          _contentCache[event.kind] = content;
+          if (state.kind == event.kind) {
+            emit(
+              state.copyWith(step: VitalsCaptureStep.intro, content: content),
+            );
+          }
+        },
+      );
+    } finally {
+      _loadingKinds.remove(event.kind);
+    }
   }
 
   void _onContinueIntro(_, Emitter<VitalsCaptureState> emit) {

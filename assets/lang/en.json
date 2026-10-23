@@ -160,6 +160,8 @@
   }},
   "vitals": {
   "title": "Vitals",
+  "deleteConfirmTitle": "Delete reading?",
+  "deleteConfirmMessage": "This will permanently remove this reading from your history.",
   "subtitle": "Your blood pressure and blood sugar",
   "bloodPressure": "Blood Pressure",
   "bloodSugar": "Blood Sugar",

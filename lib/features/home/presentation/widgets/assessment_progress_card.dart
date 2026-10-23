@@ -5,11 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
+import 'package:my_wellness/common/constants/hero.dart';
 import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/shimmer.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_summary.dart';
 import 'package:my_wellness/features/assessments/presentation/bloc/assessments_bloc.dart';
+import 'package:my_wellness/features/assessments/presentation/widgets/assessment_card.dart';
 import 'package:my_wellness/features/home/domain/entities/dashboard_session.dart';
 import 'package:my_wellness/features/home/presentation/bloc/home_bloc.dart';
 
@@ -25,7 +27,9 @@ class AssessmentProgressCard extends StatelessWidget {
                 homeState.status == HomeDashboardStatus.loading)) {
           return const _AssessmentProgressShimmer();
         }
-        if (homeState.sessions.isEmpty) {
+
+        if (homeState.sessions.isEmpty &&
+            homeState.status != HomeDashboardStatus.error) {
           return const SizedBox.shrink();
         }
 
@@ -38,15 +42,21 @@ class AssessmentProgressCard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: Text(
-                    AppLocalizations.getString(
-                      context,
-                      'homeDashboard.screeningActivity',
-                    ),
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: colors.onSurfaceVariant,
+                  child: Hero(
+                    tag: HeroTags.homeScreeningActivity,
+                    child: Material(
+                      color: Colors.transparent,
+                      child: Text(
+                        AppLocalizations.getString(
+                          context,
+                          'homeDashboard.screeningActivity',
+                        ),
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: colors.onSurfaceVariant,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -75,12 +85,19 @@ class AssessmentProgressCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: AppSpacing.xs),
-            BlocBuilder<AssessmentsBloc, AssessmentsState>(
-              builder: (context, assessmentState) => _SessionList(
-                sessions: homeState.sessions.take(2).toList(),
-                assessments: assessmentState.assessments,
+            if (homeState.sessions.isEmpty)
+              _DashboardError(
+                onRetry: () => context.read<HomeBloc>().add(
+                  const LoadHomeDashboardEvent(),
+                ),
+              )
+            else
+              BlocBuilder<AssessmentsBloc, AssessmentsState>(
+                builder: (context, assessmentState) => _SessionList(
+                  sessions: homeState.sessions,
+                  assessments: assessmentState.assessments,
+                ),
               ),
-            ),
             const SizedBox(height: AppSpacing.xl),
           ],
         );
@@ -104,14 +121,20 @@ class _AssessmentProgressShimmer extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Text(
-                  AppLocalizations.getString(
-                    context,
-                    'homeDashboard.screeningActivity',
-                  ),
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: colors.onSurfaceVariant,
+                child: Hero(
+                  tag: HeroTags.homeScreeningActivity,
+                  child: Material(
+                    color: Colors.transparent,
+                    child: Text(
+                      AppLocalizations.getString(
+                        context,
+                        'homeDashboard.screeningActivity',
+                      ),
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: colors.onSurfaceVariant,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -218,36 +241,112 @@ class _SessionList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sorted = [...sessions]
-      ..sort((a, b) {
-        final ai = _pinnedSlugs.indexOf(a.assessmentSlug);
-        final bi = _pinnedSlugs.indexOf(b.assessmentSlug);
-        if (ai != -1 && bi != -1) return ai.compareTo(bi);
-        if (ai != -1) return -1;
-        if (bi != -1) return 1;
-        final aInProgress = a.status == DashboardSessionStatus.inProgress;
-        final bInProgress = b.status == DashboardSessionStatus.inProgress;
-        if (aInProgress != bInProgress) return aInProgress ? -1 : 1;
-        return a.assessmentSlug.compareTo(b.assessmentSlug);
-      });
+    final sorted =
+        sessions
+            .where(
+              (session) =>
+                  session.status == DashboardSessionStatus.inProgress &&
+                  !_isWellbeingSession(session, assessments),
+            )
+            .toList()
+          ..sort((a, b) {
+            final ai = _pinnedSlugs.indexOf(a.assessmentSlug);
+            final bi = _pinnedSlugs.indexOf(b.assessmentSlug);
+            if (ai != -1 && bi != -1) return ai.compareTo(bi);
+            if (ai != -1) return -1;
+            if (bi != -1) return 1;
+            final aInProgress = a.status == DashboardSessionStatus.inProgress;
+            final bInProgress = b.status == DashboardSessionStatus.inProgress;
+            if (aInProgress != bInProgress) return aInProgress ? -1 : 1;
+            return a.assessmentSlug.compareTo(b.assessmentSlug);
+          });
 
-    final featured = sorted.firstOrNull;
-    final rest = sorted.skip(1).toList();
-
-    return Column(
-      children: [
-        if (featured != null)
-          _FeaturedSession(
-            session: featured,
-            title: _titleFor(featured, assessments),
-          ),
-        for (var i = 0; i < rest.length; i++) ...[
-          if (featured != null || i > 0) const SizedBox(height: AppSpacing.sm),
-          _SessionRow(session: rest[i], title: _titleFor(rest[i], assessments)),
-        ],
-      ],
-    );
+    final items = sorted.take(4).toList(growable: false);
+    if (items.isEmpty) return const SizedBox.shrink();
+    return _SessionCarousel(sessions: items, assessments: assessments);
   }
+}
+
+bool _isWellbeingSession(
+  DashboardSession session,
+  List<AssessmentSummary> assessments,
+) {
+  final summary = assessments.where((a) => a.slug == session.assessmentSlug);
+  final title = summary.isEmpty ? '' : summary.first.shortTitle;
+  final searchable = '${session.assessmentSlug} $title'.toLowerCase();
+  return searchable.contains('wellbeing') || searchable.contains('well-being');
+}
+
+class _SessionCarousel extends StatefulWidget {
+  const _SessionCarousel({required this.sessions, required this.assessments});
+
+  final List<DashboardSession> sessions;
+  final List<AssessmentSummary> assessments;
+
+  @override
+  State<_SessionCarousel> createState() => _SessionCarouselState();
+}
+
+class _SessionCarouselState extends State<_SessionCarousel> {
+  late final PageController _controller;
+  int _index = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = PageController(viewportFraction: 0.94);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Column(
+    children: [
+      SizedBox(
+        height: 202,
+        child: PageView.builder(
+          controller: _controller,
+          itemCount: widget.sessions.length,
+          onPageChanged: (index) => setState(() => _index = index),
+          itemBuilder: (context, index) {
+            final session = widget.sessions[index];
+            return Padding(
+              padding: const EdgeInsets.only(right: AppSpacing.sm),
+              child: _FeaturedSession(
+                session: session,
+                title: _titleFor(session, widget.assessments),
+              ),
+            );
+          },
+        ),
+      ),
+      if (widget.sessions.length > 1) ...[
+        const SizedBox(height: AppSpacing.sm),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            for (var i = 0; i < widget.sessions.length; i++)
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 180),
+                margin: const EdgeInsets.symmetric(horizontal: 3),
+                width: i == _index ? 18 : 6,
+                height: 6,
+                decoration: BoxDecoration(
+                  color: i == _index
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.outlineVariant,
+                  borderRadius: BorderRadius.circular(99),
+                ),
+              ),
+          ],
+        ),
+      ],
+    ],
+  );
 }
 
 class _FeaturedSession extends StatelessWidget {
@@ -287,15 +386,22 @@ class _FeaturedSession extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                        height: 1.25,
-                        color: fg,
+                    Hero(
+                      tag: assessmentTitleTag(session.assessmentSlug),
+                      flightShuttleBuilder: textShuttleBuilder,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: Text(
+                          title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w700,
+                            height: 1.25,
+                            color: fg,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -391,85 +497,43 @@ class _ProgressRing extends StatelessWidget {
   }
 }
 
-class _SessionRow extends StatelessWidget {
-  const _SessionRow({required this.session, required this.title});
+class _DashboardError extends StatelessWidget {
+  const _DashboardError({required this.onRetry});
 
-  final DashboardSession session;
-  final String title;
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-    final isPending = session.status == DashboardSessionStatus.pending;
 
-    return Material(
-      color: colors.surfaceContainerLow,
-      borderRadius: AppRadius.mdAll,
-      child: InkWell(
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: colors.surfaceContainerLow,
         borderRadius: AppRadius.mdAll,
-        onTap: isPending ? null : () => _openSession(context, session),
-        child: Container(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          decoration: BoxDecoration(
-            borderRadius: AppRadius.mdAll,
-            border: Border.all(
-              color: colors.outlineVariant.withValues(alpha: 0.5),
+        border: Border.all(color: colors.outlineVariant.withValues(alpha: 0.5)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            AppLocalizations.getString(
+              context,
+              'homeDashboard.dashboardUnavailable',
+            ),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: colors.onSurfaceVariant,
             ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: colors.onSurface,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Text(
-                    isPending
-                        ? AppLocalizations.getString(
-                            context,
-                            'homeDashboard.pending',
-                          )
-                        : '${session.completionPercent}%',
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: colors.onSurfaceVariant,
-                    ),
-                  ),
-                  if (!isPending)
-                    Icon(
-                      Icons.chevron_right_rounded,
-                      size: 20,
-                      color: colors.onSurfaceVariant,
-                    ),
-                ],
-              ),
-              if (!isPending) ...[
-                const SizedBox(height: AppSpacing.sm),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(100),
-                  child: LinearProgressIndicator(
-                    value: session.completionPercent / 100,
-                    minHeight: 4,
-                    backgroundColor: colors.primary.withValues(alpha: 0.12),
-                    valueColor: AlwaysStoppedAnimation(colors.primary),
-                  ),
-                ),
-              ],
-            ],
+          const SizedBox(height: AppSpacing.sm),
+          TextButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh_rounded, size: 16),
+            label: Text(AppLocalizations.getString(context, 'common.retry')),
           ),
-        ),
+        ],
       ),
     );
   }
