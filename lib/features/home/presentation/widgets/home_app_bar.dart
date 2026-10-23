@@ -6,6 +6,7 @@ import 'package:my_wellness/common/constants/hero.dart';
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
+import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/features/notifications/presentation/bloc/notifications_bloc.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 
@@ -36,23 +37,58 @@ class HomeAppBar extends StatelessWidget {
               previous.unreadCount != current.unreadCount,
           builder: (context, state) {
             final unreadCount = state.unreadCount;
-            const icon = Hero(
-              tag: HeroTags.homeNotifications,
-              child: Icon(PhosphorIconsRegular.bell, size: 30),
-            );
+            final unreadLabel = unreadCount > 99 ? '99+' : '$unreadCount';
             return IconButton(
               tooltip: AppLocalizations.getString(
                 context,
                 'settings.notifications',
               ),
               onPressed: () => context.router.push(const NotificationsRoute()),
-              icon: unreadCount > 0
-                  ? Badge(
-                      label: Text(unreadCount > 9 ? '9+' : '$unreadCount'),
-                      backgroundColor: colors.error,
-                      child: icon,
-                    )
-                  : icon,
+              icon: Semantics(
+                label: unreadCount > 0
+                    ? 'Notifications, $unreadCount unread'
+                    : 'Notifications',
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Hero(
+                      tag: HeroTags.homeNotifications,
+                      child: Icon(
+                        PhosphorIconsRegular.bell,
+                        size: 28,
+                        color: colors.onSurface,
+                      ),
+                    ),
+                    if (unreadCount > 0)
+                      Positioned(
+                        top: -7,
+                        right: -9,
+                        child: Container(
+                          constraints: const BoxConstraints(
+                            minWidth: 19,
+                            minHeight: 19,
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 5),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: AppColors.actionColor,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: colors.surface, width: 2),
+                          ),
+                          child: Text(
+                            unreadLabel,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              height: 1,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             );
           },
         ),

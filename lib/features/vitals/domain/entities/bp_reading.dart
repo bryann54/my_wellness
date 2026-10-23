@@ -8,14 +8,10 @@ class BpReading extends Equatable {
   final String? pulseClassification;
   final String? classificationLabel;
   final String? weightKg;
-
-  /// 'blue' | 'green' | 'yellow' | 'orange' | 'red' — server-classified.
   final String classification;
-
-  /// 'pre' | 'intra' | 'post' — dialysis context, optional.
   final String? dialysisPhase;
 
-  final String takenAt; // ISO timestamp
+  final String takenAt;
   final String? notes;
   final String createdAt;
 
@@ -33,6 +29,19 @@ class BpReading extends Equatable {
     this.notes,
     required this.createdAt,
   });
+
+  /// Optimistic local construct for offline queue writes.
+  factory BpReading.local(Map<String, dynamic> data) {
+    return BpReading(
+      id: 'local_${DateTime.now().microsecondsSinceEpoch}',
+      systolic: int.tryParse('${data['systolic']}') ?? 0,
+      diastolic: int.tryParse('${data['diastolic']}') ?? 0,
+      pulse: int.tryParse('${data['pulse']}'),
+      classification: 'neutral',
+      takenAt: DateTime.now().toIso8601String(),
+      createdAt: DateTime.now().toIso8601String(),
+    );
+  }
 
   @override
   List<Object?> get props => [

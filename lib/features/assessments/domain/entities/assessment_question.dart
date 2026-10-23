@@ -14,6 +14,10 @@ class AssessmentQuestion extends Equatable {
   final String? description;
   final int? min;
   final int? max;
+  final String? terminateOn;
+  final String? skipNextOn;
+  final String? skipIf;
+  final String? autoAnswerIf;
 
   const AssessmentQuestion({
     required this.key,
@@ -26,6 +30,10 @@ class AssessmentQuestion extends Equatable {
     this.description,
     this.min,
     this.max,
+    this.terminateOn,
+    this.skipNextOn,
+    this.skipIf,
+    this.autoAnswerIf,
   });
 
   static AssessmentQuestionType parseType(String raw) {
@@ -59,5 +67,9 @@ class AssessmentQuestion extends Equatable {
     description,
     min,
     max,
+    terminateOn,
+    skipNextOn,
+    skipIf,
+    autoAnswerIf,
   ];
 }

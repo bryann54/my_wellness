@@ -12,6 +12,8 @@ class GetHomeDashboardUseCase
 
   final HomeDashboardRepository _repository;
 
+  bool get lastLoadWasFromCache => _repository.lastLoadWasFromCache;
+
   @override
   Future<Either<Failure, List<DashboardSession>>> call(NoParams params) =>
       _repository.loadRelevantSessions();

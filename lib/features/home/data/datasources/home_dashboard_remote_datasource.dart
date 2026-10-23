@@ -1,26 +1,43 @@
+import 'dart:convert';
 import 'package:injectable/injectable.dart';
 import 'package:my_wellness/core/api_client/client/api_client.dart';
 import 'package:my_wellness/core/api_client/endpoints/api_endpoints.dart';
+import 'package:my_wellness/core/errors/exceptions.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_session.dart';
 import 'package:my_wellness/features/home/domain/entities/dashboard_session.dart';
+import 'package:my_wellness/features/offline_sync/data/local/app_database.dart';
 
 abstract class HomeDashboardRemoteDataSource {
+  bool get lastLoadWasFromCache;
   Future<List<DashboardSession>> loadRelevantSessions();
 }
 
 @LazySingleton(as: HomeDashboardRemoteDataSource)
 class HomeDashboardRemoteDataSourceImpl
     implements HomeDashboardRemoteDataSource {
-  HomeDashboardRemoteDataSourceImpl(this._apiClient);
+  HomeDashboardRemoteDataSourceImpl(this._apiClient, this._database);
 
   final ApiClient _apiClient;
+  final AppDatabase _database;
+  @override
+  bool lastLoadWasFromCache = false;
 
   @override
   Future<List<DashboardSession>> loadRelevantSessions() async {
-    final response = await _apiClient.get<Map<String, dynamic>>(
-      url: ApiEndpoints.dashboard,
-      options: ApiClient.protected,
-    );
+    late final Map<String, dynamic> response;
+    try {
+      lastLoadWasFromCache = false;
+      response = await _apiClient.get<Map<String, dynamic>>(
+        url: ApiEndpoints.dashboard,
+        options: ApiClient.protected,
+      );
+      await _database.cachePayload('dashboard', jsonEncode(response));
+    } on NetworkException {
+      final cached = await _database.getCachedPayload('dashboard');
+      if (cached == null) rethrow;
+      response = jsonDecode(cached) as Map<String, dynamic>;
+      lastLoadWasFromCache = true;
+    }
     final assessments = response['assessments'];
     if (assessments is! List) {
       throw const FormatException('Dashboard assessments are missing');

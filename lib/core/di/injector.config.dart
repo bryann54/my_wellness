@@ -10,6 +10,7 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 
+import 'package:connectivity_plus/connectivity_plus.dart' as _i895;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
@@ -99,6 +100,14 @@ import '../../features/medications/presentation/bloc/medications_bloc.dart'
 import '../../features/notifications/data/notification_service.dart' as _i597;
 import '../../features/notifications/presentation/bloc/notifications_bloc.dart'
     as _i1041;
+import '../../features/offline_sync/data/datasources/sync_local_datasource.dart'
+    as _i997;
+import '../../features/offline_sync/data/local/app_database.dart' as _i669;
+import '../../features/offline_sync/data/repositories/sync_repository_impl.dart'
+    as _i353;
+import '../../features/offline_sync/domain/repositories/sync_repository.dart'
+    as _i441;
+import '../../features/offline_sync/presentation/bloc/sync_bloc.dart' as _i30;
 import '../../features/vitals/data/datasources/vitals_capture_remote_datasource.dart'
     as _i941;
 import '../../features/vitals/data/datasources/vitals_remote_datasource.dart'
@@ -143,6 +152,8 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i152.LocalAuthentication>(
       () => registerModules.localAuthentication,
     );
+    gh.lazySingleton<_i669.AppDatabase>(() => registerModules.appDatabase);
+    gh.lazySingleton<_i895.Connectivity>(() => registerModules.connectivity);
     gh.lazySingleton<_i656.CheckConnectivityUsecase>(
       () => _i656.CheckConnectivityUsecase(),
     );
@@ -158,6 +169,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i992.AuthLocalDataSource>(
       () => _i992.AuthLocalDataSourceImpl(gh<_i558.FlutterSecureStorage>()),
+    );
+    gh.lazySingleton<_i997.SyncLocalDataSource>(
+      () => _i997.SyncLocalDataSource(gh<_i669.AppDatabase>()),
     );
     gh.lazySingleton<_i98.AppLockRepository>(
       () => _i731.AppLockRepositoryImpl(gh<_i101.AppLockDataSource>()),
@@ -210,17 +224,23 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i302.AccountRemoteDataSource>(
       () => _i302.AccountRemoteDataSourceImpl(gh<_i671.ApiClient>()),
     );
+    gh.lazySingleton<_i219.HomeDashboardRemoteDataSource>(
+      () => _i219.HomeDashboardRemoteDataSourceImpl(
+        gh<_i671.ApiClient>(),
+        gh<_i669.AppDatabase>(),
+      ),
+    );
     gh.lazySingleton<_i941.VitalsCaptureRemoteDataSource>(
       () => _i941.VitalsCaptureRemoteDataSourceImpl(gh<_i671.ApiClient>()),
     );
-    gh.lazySingleton<_i219.HomeDashboardRemoteDataSource>(
-      () => _i219.HomeDashboardRemoteDataSourceImpl(gh<_i671.ApiClient>()),
+    gh.lazySingleton<_i441.SyncRepository>(
+      () => _i353.SyncRepositoryImpl(
+        gh<_i997.SyncLocalDataSource>(),
+        gh<_i671.ApiClient>(),
+      ),
     );
     gh.lazySingleton<_i216.VitalsRemoteDataSource>(
       () => _i216.VitalsRemoteDataSourceImpl(gh<_i671.ApiClient>()),
-    );
-    gh.lazySingleton<_i470.AssessmentsRemoteDataSource>(
-      () => _i470.AssessmentsRemoteDataSourceImpl(gh<_i671.ApiClient>()),
     );
     gh.lazySingleton<_i787.AuthRepository>(
       () => _i153.AuthRepositoryImpl(
@@ -232,11 +252,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i857.AccountRepositoryImpl(
         gh<_i302.AccountRemoteDataSource>(),
         gh<_i29.AccountLocalDatasource>(),
-      ),
-    );
-    gh.lazySingleton<_i544.AssessmentsRepository>(
-      () => _i958.AssessmentRepositoryImpl(
-        gh<_i470.AssessmentsRemoteDataSource>(),
       ),
     );
     gh.factory<_i1033.CancelAccountDeletionUseCase>(
@@ -264,6 +279,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i474.GeographyRemoteDataSource>(
       () => _i474.GeographyRemoteDataSourceImpl(gh<_i671.ApiClient>()),
+    );
+    gh.lazySingleton<_i470.AssessmentsRemoteDataSource>(
+      () => _i470.AssessmentsRemoteDataSourceImpl(
+        gh<_i671.ApiClient>(),
+        gh<_i669.AppDatabase>(),
+      ),
     );
     gh.factory<_i708.AccountBloc>(
       () => _i708.AccountBloc(
@@ -308,38 +329,8 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i46.GetCurrentUserUseCase>(
       () => _i46.GetCurrentUserUseCase(gh<_i787.AuthRepository>()),
     );
-    gh.lazySingleton<_i6.GetVitalsAccessUseCase>(
-      () => _i6.GetVitalsAccessUseCase(gh<_i544.AssessmentsRepository>()),
-    );
-    gh.lazySingleton<_i6.ListAssessmentsUseCase>(
-      () => _i6.ListAssessmentsUseCase(gh<_i544.AssessmentsRepository>()),
-    );
-    gh.lazySingleton<_i6.CanStartAssessmentUseCase>(
-      () => _i6.CanStartAssessmentUseCase(gh<_i544.AssessmentsRepository>()),
-    );
-    gh.lazySingleton<_i6.GetAssessmentDefinitionUseCase>(
-      () =>
-          _i6.GetAssessmentDefinitionUseCase(gh<_i544.AssessmentsRepository>()),
-    );
-    gh.lazySingleton<_i6.StartAssessmentSessionUseCase>(
-      () =>
-          _i6.StartAssessmentSessionUseCase(gh<_i544.AssessmentsRepository>()),
-    );
-    gh.lazySingleton<_i6.GetReferralForSessionUseCase>(
-      () => _i6.GetReferralForSessionUseCase(gh<_i544.AssessmentsRepository>()),
-    );
-    gh.lazySingleton<_i6.GetAssessmentAnswersUseCase>(
-      () => _i6.GetAssessmentAnswersUseCase(gh<_i544.AssessmentsRepository>()),
-    );
-    gh.lazySingleton<_i6.SubmitAssessmentAnswerUseCase>(
-      () =>
-          _i6.SubmitAssessmentAnswerUseCase(gh<_i544.AssessmentsRepository>()),
-    );
-    gh.lazySingleton<_i6.GetAssessmentScoreUseCase>(
-      () => _i6.GetAssessmentScoreUseCase(gh<_i544.AssessmentsRepository>()),
-    );
-    gh.lazySingleton<_i6.PreviewBmiUseCase>(
-      () => _i6.PreviewBmiUseCase(gh<_i544.AssessmentsRepository>()),
+    gh.factory<_i30.SyncBloc>(
+      () => _i30.SyncBloc(gh<_i441.SyncRepository>(), gh<_i895.Connectivity>()),
     );
     gh.lazySingleton<_i636.HomeDashboardRepository>(
       () => _i730.HomeDashboardRepositoryImpl(
@@ -371,22 +362,16 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i771.GeographyRepositoryImpl(gh<_i474.GeographyRemoteDataSource>()),
     );
-    gh.lazySingleton<_i515.VitalsRepository>(
-      () => _i214.VitalsRepositoryImpl(gh<_i216.VitalsRemoteDataSource>()),
+    gh.lazySingleton<_i544.AssessmentsRepository>(
+      () => _i958.AssessmentRepositoryImpl(
+        gh<_i470.AssessmentsRemoteDataSource>(),
+        gh<_i441.SyncRepository>(),
+      ),
     );
-    gh.factory<_i1022.AssessmentsBloc>(
-      () => _i1022.AssessmentsBloc(
-        gh<_i6.GetVitalsAccessUseCase>(),
-        gh<_i6.ListAssessmentsUseCase>(),
-        gh<_i6.CanStartAssessmentUseCase>(),
-        gh<_i6.GetAssessmentDefinitionUseCase>(),
-        gh<_i6.StartAssessmentSessionUseCase>(),
-        gh<_i6.GetAssessmentAnswersUseCase>(),
-        gh<_i6.SubmitAssessmentAnswerUseCase>(),
-        gh<_i6.GetReferralForSessionUseCase>(),
-        gh<_i6.GetAssessmentScoreUseCase>(),
-        gh<_i6.PreviewBmiUseCase>(),
-        gh<_i23.UpdateProfileUseCase>(),
+    gh.lazySingleton<_i515.VitalsRepository>(
+      () => _i214.VitalsRepositoryImpl(
+        gh<_i216.VitalsRemoteDataSource>(),
+        gh<_i441.SyncRepository>(),
       ),
     );
     gh.lazySingleton<_i275.GetConstituenciesUseCase>(
@@ -487,6 +472,39 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i202.HomeBloc>(
       () => _i202.HomeBloc(gh<_i493.GetHomeDashboardUseCase>()),
     );
+    gh.lazySingleton<_i6.GetVitalsAccessUseCase>(
+      () => _i6.GetVitalsAccessUseCase(gh<_i544.AssessmentsRepository>()),
+    );
+    gh.lazySingleton<_i6.ListAssessmentsUseCase>(
+      () => _i6.ListAssessmentsUseCase(gh<_i544.AssessmentsRepository>()),
+    );
+    gh.lazySingleton<_i6.CanStartAssessmentUseCase>(
+      () => _i6.CanStartAssessmentUseCase(gh<_i544.AssessmentsRepository>()),
+    );
+    gh.lazySingleton<_i6.GetAssessmentDefinitionUseCase>(
+      () =>
+          _i6.GetAssessmentDefinitionUseCase(gh<_i544.AssessmentsRepository>()),
+    );
+    gh.lazySingleton<_i6.StartAssessmentSessionUseCase>(
+      () =>
+          _i6.StartAssessmentSessionUseCase(gh<_i544.AssessmentsRepository>()),
+    );
+    gh.lazySingleton<_i6.GetReferralForSessionUseCase>(
+      () => _i6.GetReferralForSessionUseCase(gh<_i544.AssessmentsRepository>()),
+    );
+    gh.lazySingleton<_i6.GetAssessmentAnswersUseCase>(
+      () => _i6.GetAssessmentAnswersUseCase(gh<_i544.AssessmentsRepository>()),
+    );
+    gh.lazySingleton<_i6.SubmitAssessmentAnswerUseCase>(
+      () =>
+          _i6.SubmitAssessmentAnswerUseCase(gh<_i544.AssessmentsRepository>()),
+    );
+    gh.lazySingleton<_i6.GetAssessmentScoreUseCase>(
+      () => _i6.GetAssessmentScoreUseCase(gh<_i544.AssessmentsRepository>()),
+    );
+    gh.lazySingleton<_i6.PreviewBmiUseCase>(
+      () => _i6.PreviewBmiUseCase(gh<_i544.AssessmentsRepository>()),
+    );
     gh.factory<_i902.VitalsBloc>(
       () => _i902.VitalsBloc(
         gh<_i425.GetBloodPressureReadingsUseCase>(),
@@ -502,6 +520,21 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i425.GetAppointmentsPagedUseCase>(),
         gh<_i425.CreateAppointmentUseCase>(),
         gh<_i425.DeleteAppointmentUseCase>(),
+      ),
+    );
+    gh.factory<_i1022.AssessmentsBloc>(
+      () => _i1022.AssessmentsBloc(
+        gh<_i6.GetVitalsAccessUseCase>(),
+        gh<_i6.ListAssessmentsUseCase>(),
+        gh<_i6.CanStartAssessmentUseCase>(),
+        gh<_i6.GetAssessmentDefinitionUseCase>(),
+        gh<_i6.StartAssessmentSessionUseCase>(),
+        gh<_i6.GetAssessmentAnswersUseCase>(),
+        gh<_i6.SubmitAssessmentAnswerUseCase>(),
+        gh<_i6.GetReferralForSessionUseCase>(),
+        gh<_i6.GetAssessmentScoreUseCase>(),
+        gh<_i6.PreviewBmiUseCase>(),
+        gh<_i23.UpdateProfileUseCase>(),
       ),
     );
     gh.factory<_i734.MedicationsBloc>(

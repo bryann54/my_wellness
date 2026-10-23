@@ -224,7 +224,6 @@ class VitalsTile extends StatelessWidget {
     child: Material(color: Colors.transparent, child: child),
   );
 }
-
 class _EmptyState extends StatelessWidget {
   const _EmptyState({
     required this.isLoading,
@@ -259,15 +258,17 @@ class _EmptyState extends StatelessWidget {
       );
     }
 
+    if (hasError) {
+      return const SizedBox.shrink();
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           AppLocalizations.getString(
             context,
-            hasError
-                ? 'homeDashboard.readingsUnavailable'
-                : 'homeDashboard.noReadingRecorded',
+            'homeDashboard.noReadingRecorded',
           ),
           style: theme.textTheme.bodyMedium?.copyWith(
             color: colors.onSurfaceVariant,
@@ -277,17 +278,10 @@ class _EmptyState extends StatelessWidget {
         const SizedBox(height: AppSpacing.sm),
         Row(
           children: [
-            Icon(
-              hasError ? Icons.refresh_rounded : Icons.add_rounded,
-              size: 16,
-              color: accent,
-            ),
+            Icon(Icons.add_rounded, size: 16, color: accent),
             const SizedBox(width: AppSpacing.xs),
             Text(
-              AppLocalizations.getString(
-                context,
-                hasError ? 'common.retry' : 'vitals.addReading',
-              ),
+              AppLocalizations.getString(context, 'vitals.addReading'),
               style: theme.textTheme.labelSmall?.copyWith(
                 color: accent,
                 fontWeight: FontWeight.w600,
