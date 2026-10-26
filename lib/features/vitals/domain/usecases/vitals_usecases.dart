@@ -125,9 +125,15 @@ class GetBloodPressureReadingsUseCase
     implements UseCase<List<BpReading>, NoParams> {
   final VitalsRepository _repo;
   GetBloodPressureReadingsUseCase(this._repo);
+
+  bool lastLoadWasFromCache = false;
+
   @override
-  Future<Either<Failure, List<BpReading>>> call(NoParams params) =>
-      _repo.getBloodPressureReadings();
+  Future<Either<Failure, List<BpReading>>> call(NoParams params) async {
+    final result = await _repo.getBloodPressureReadings();
+    lastLoadWasFromCache = _repo.bloodPressureReadingsFromCache;
+    return result;
+  }
 }
 
 @lazySingleton
@@ -154,9 +160,15 @@ class GetBloodSugarReadingsUseCase
     implements UseCase<List<BsReading>, NoParams> {
   final VitalsRepository _repo;
   GetBloodSugarReadingsUseCase(this._repo);
+
+  bool lastLoadWasFromCache = false;
+
   @override
-  Future<Either<Failure, List<BsReading>>> call(NoParams params) =>
-      _repo.getBloodSugarReadings();
+  Future<Either<Failure, List<BsReading>>> call(NoParams params) async {
+    final result = await _repo.getBloodSugarReadings();
+    lastLoadWasFromCache = _repo.bloodSugarReadingsFromCache;
+    return result;
+  }
 }
 
 @lazySingleton

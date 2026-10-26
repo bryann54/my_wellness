@@ -13,6 +13,9 @@ class HomeDashboardRepositoryImpl implements HomeDashboardRepository {
   final HomeDashboardRemoteDataSource _remoteDataSource;
 
   @override
+  bool get lastLoadWasFromCache => _remoteDataSource.lastLoadWasFromCache;
+
+  @override
   Future<Either<Failure, List<DashboardSession>>> loadRelevantSessions() async {
     try {
       return Right(await _remoteDataSource.loadRelevantSessions());

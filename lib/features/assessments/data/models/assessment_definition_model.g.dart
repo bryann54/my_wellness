@@ -59,6 +59,10 @@ AssessmentQuestionModel _$AssessmentQuestionModelFromJson(
   description: json['description'] as String?,
   min: (json['min'] as num?)?.toInt(),
   max: (json['max'] as num?)?.toInt(),
+  terminateOn: json['terminate_on'] as String?,
+  skipNextOn: json['skip_next_on'] as String?,
+  skipIf: json['skip_if'] as String?,
+  autoAnswerIf: json['auto_answer_if'] as String?,
 );
 
 Map<String, dynamic> _$AssessmentQuestionModelToJson(
@@ -74,6 +78,10 @@ Map<String, dynamic> _$AssessmentQuestionModelToJson(
   'description': instance.description,
   'min': instance.min,
   'max': instance.max,
+  'terminate_on': instance.terminateOn,
+  'skip_next_on': instance.skipNextOn,
+  'skip_if': instance.skipIf,
+  'auto_answer_if': instance.autoAnswerIf,
 };
 
 AssessmentOptionModel _$AssessmentOptionModelFromJson(

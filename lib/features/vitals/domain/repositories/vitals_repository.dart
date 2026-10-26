@@ -7,6 +7,9 @@ import 'package:my_wellness/features/vitals/domain/entities/medication.dart';
 import 'package:my_wellness/features/vitals/domain/entities/medication_scan.dart';
 
 abstract class VitalsRepository {
+  bool get bloodPressureReadingsFromCache;
+  bool get bloodSugarReadingsFromCache;
+
   Future<Either<Failure, List<Appointment>>> getAppointmentsByCondition(
     String condition,
   );

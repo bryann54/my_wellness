@@ -106,6 +106,8 @@ class ApiEndpoints {
   static const String assessments = '/api/assessments/';
   static const String dashboard = '/api/dashboard/';
   static String assessmentDetail(String slug) => '/api/assessments/$slug/';
+  static String assessmentOffline(String slug) =>
+      '/api/assessments/$slug/offline/';
   static String assessmentCanStart(String slug) =>
       '/api/assessments/$slug/can-start/';
   static String assessmentStartSession(String slug) =>
@@ -188,7 +190,12 @@ class ApiEndpoints {
   static const String geographyCounties = '/api/geography/counties/';
   static const String geographySubCounties = '/api/geography/sub-counties/';
   static const String geographyWards = '/api/geography/wards/';
+  // ─── Offline Sync (batch endpoints)
+  static String assessmentOfflineBatch(String slug, String sessionId) =>
+      '/api/assessments/$slug/session/$sessionId/answers/batch/';
 
+  static const String vitalsOfflineBp = '/api/vitals/blood-pressure/';
+  static const String vitalsOfflineBs = '/api/vitals/blood-sugar/';
   // ─── Notifications (Push) ─────────────────────────────────────────────
   static const String pushSubscribe = '/api/push/subscribe/';
   static const String pushVapidPublicKey = '/api/push/vapid-public-key/';

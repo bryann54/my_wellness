@@ -11,32 +11,45 @@ part 'home_state.dart';
 
 @injectable
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
+  final GetHomeDashboardUseCase _getHomeDashboard;
+
   HomeBloc(this._getHomeDashboard) : super(const HomeState()) {
     on<LoadHomeDashboardEvent>(_onLoad);
   }
-
-  final GetHomeDashboardUseCase _getHomeDashboard;
 
   Future<void> _onLoad(
     LoadHomeDashboardEvent event,
     Emitter<HomeState> emit,
   ) async {
     emit(state.copyWith(status: HomeDashboardStatus.loading));
+
     final result = await _getHomeDashboard(NoParams());
+
     result.fold(
-      (failure) => emit(
-        state.copyWith(
-          status: HomeDashboardStatus.error,
-          errorMessage: mapFailure(failure),
-        ),
-      ),
-      (sessions) => emit(
-        state.copyWith(
-          status: HomeDashboardStatus.ready,
-          sessions: sessions,
-          clearError: true,
-        ),
-      ),
+      (failure) {
+        if (state.sessions.isNotEmpty) {
+          emit(
+            state.copyWith(status: HomeDashboardStatus.ready, clearError: true),
+          );
+          return;
+        }
+        emit(
+          state.copyWith(
+            status: HomeDashboardStatus.error,
+            errorMessage: mapFailure(failure),
+          ),
+        );
+      },
+      (sessions) {
+        emit(
+          state.copyWith(
+            status: HomeDashboardStatus.ready,
+            sessions: sessions,
+            isFromCache: _getHomeDashboard.lastLoadWasFromCache,
+            clearError: true,
+          ),
+        );
+      },
     );
   }
 }

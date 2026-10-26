@@ -37,6 +37,20 @@ class BsReading extends Equatable {
     required this.createdAt,
   });
 
+  /// Optimistic local construct for offline queue writes.
+  factory BsReading.local(Map<String, dynamic> data) {
+    return BsReading(
+      id: 'local_${DateTime.now().microsecondsSinceEpoch}',
+      value: '${data['value'] ?? '0'}',
+      unit: '${data['unit'] ?? 'mmol/L'}',
+      readingType: '${data['reading_type'] ?? 'random'}',
+      mealTiming: data['meal_timing'] as String?,
+      classification: 'neutral',
+      takenAt: DateTime.now().toIso8601String(),
+      createdAt: DateTime.now().toIso8601String(),
+    );
+  }
+
   @override
   List<Object?> get props => [
     id,

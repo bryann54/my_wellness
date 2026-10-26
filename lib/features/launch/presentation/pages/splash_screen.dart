@@ -109,7 +109,6 @@ class _SplashScreenState extends State<SplashScreen> {
             fit: StackFit.expand,
             children: [
               const SplashContent(),
-
               Positioned(
                 left: 0,
                 right: 0,

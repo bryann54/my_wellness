@@ -67,15 +67,25 @@ class VitalsBloc extends Bloc<VitalsEvent, VitalsState> {
 
     emit(state.copyWith(status: VitalsStatus.loading, clearError: true));
     final bp = await _getBp(NoParams());
+    final bpFromCache = _getBp.lastLoadWasFromCache;
     final bs = await _getBs(NoParams());
+    final bsFromCache = _getBs.lastLoadWasFromCache;
     final failure =
         bp.fold<Failure?>((failure) => failure, (_) => null) ??
         bs.fold<Failure?>((failure) => failure, (_) => null);
 
     if (failure != null) {
+      final bpReadings = bp.getOrElse(() => state.bpReadings);
+      final bsReadings = bs.getOrElse(() => state.bsReadings);
       emit(
         state.copyWith(
           status: VitalsStatus.error,
+          bpReadings: bpReadings,
+          bsReadings: bsReadings,
+          isFromCache:
+              state.isFromCache ||
+              (bp.isRight() && bpFromCache) ||
+              (bs.isRight() && bsFromCache),
           errorMessage: mapFailure(failure),
         ),
       );
@@ -87,6 +97,7 @@ class VitalsBloc extends Bloc<VitalsEvent, VitalsState> {
         status: VitalsStatus.loaded,
         bpReadings: bp.getOrElse(() => const []),
         bsReadings: bs.getOrElse(() => const []),
+        isFromCache: bpFromCache || bsFromCache,
       ),
     );
   }
@@ -95,16 +106,26 @@ class VitalsBloc extends Bloc<VitalsEvent, VitalsState> {
     emit(state.copyWith(status: VitalsStatus.loading, clearError: true));
 
     final bp = await _getBp(NoParams());
+    final bpFromCache = _getBp.lastLoadWasFromCache;
     final bs = await _getBs(NoParams());
+    final bsFromCache = _getBs.lastLoadWasFromCache;
 
     final failure =
         bp.fold<Failure?>((f) => f, (_) => null) ??
         bs.fold<Failure?>((f) => f, (_) => null);
 
     if (failure != null) {
+      final bpReadings = bp.getOrElse(() => state.bpReadings);
+      final bsReadings = bs.getOrElse(() => state.bsReadings);
       emit(
         state.copyWith(
           status: VitalsStatus.error,
+          bpReadings: bpReadings,
+          bsReadings: bsReadings,
+          isFromCache:
+              state.isFromCache ||
+              (bp.isRight() && bpFromCache) ||
+              (bs.isRight() && bsFromCache),
           errorMessage: mapFailure(failure),
         ),
       );
@@ -116,6 +137,7 @@ class VitalsBloc extends Bloc<VitalsEvent, VitalsState> {
         status: VitalsStatus.loaded,
         bpReadings: bp.getOrElse(() => const []),
         bsReadings: bs.getOrElse(() => const []),
+        isFromCache: bpFromCache || bsFromCache,
       ),
     );
   }
