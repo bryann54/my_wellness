@@ -28,8 +28,7 @@ class AssessmentProgressCard extends StatelessWidget {
           return const _AssessmentProgressShimmer();
         }
 
-        if (homeState.sessions.isEmpty &&
-            homeState.status != HomeDashboardStatus.error) {
+        if (homeState.sessions.isEmpty) {
           return const SizedBox.shrink();
         }
 
@@ -85,19 +84,12 @@ class AssessmentProgressCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: AppSpacing.xs),
-            if (homeState.sessions.isEmpty)
-              _DashboardError(
-                onRetry: () => context.read<HomeBloc>().add(
-                  const LoadHomeDashboardEvent(),
-                ),
-              )
-            else
-              BlocBuilder<AssessmentsBloc, AssessmentsState>(
-                builder: (context, assessmentState) => _SessionList(
-                  sessions: homeState.sessions,
-                  assessments: assessmentState.assessments,
-                ),
+            BlocBuilder<AssessmentsBloc, AssessmentsState>(
+              builder: (context, assessmentState) => _SessionList(
+                sessions: homeState.sessions,
+                assessments: assessmentState.assessments,
               ),
+            ),
             const SizedBox(height: AppSpacing.xl),
           ],
         );
@@ -492,48 +484,6 @@ class _ProgressRing extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _DashboardError extends StatelessWidget {
-  const _DashboardError({required this.onRetry});
-
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: colors.surfaceContainerLow,
-        borderRadius: AppRadius.mdAll,
-        border: Border.all(color: colors.outlineVariant.withValues(alpha: 0.5)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            AppLocalizations.getString(
-              context,
-              'homeDashboard.dashboardUnavailable',
-            ),
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: colors.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          TextButton.icon(
-            onPressed: onRetry,
-            icon: const Icon(Icons.refresh_rounded, size: 16),
-            label: Text(AppLocalizations.getString(context, 'common.retry')),
-          ),
-        ],
       ),
     );
   }

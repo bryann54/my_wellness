@@ -21,6 +21,13 @@ class VitalsRepositoryImpl implements VitalsRepository {
   VitalsRepositoryImpl(this._remote, this._sync);
 
   @override
+  bool get bloodPressureReadingsFromCache =>
+      _remote.bloodPressureReadingsFromCache;
+
+  @override
+  bool get bloodSugarReadingsFromCache => _remote.bloodSugarReadingsFromCache;
+
+  @override
   Future<Either<Failure, MedicationScanResult>> scanMedication({
     required String filePath,
     required String condition,

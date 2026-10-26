@@ -29,11 +29,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       (failure) {
         if (state.sessions.isNotEmpty) {
           emit(
-            state.copyWith(
-              status: HomeDashboardStatus.ready,
-              isFromCache: true,
-              clearError: true,
-            ),
+            state.copyWith(status: HomeDashboardStatus.ready, clearError: true),
           );
           return;
         }

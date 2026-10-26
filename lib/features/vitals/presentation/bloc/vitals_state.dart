@@ -9,6 +9,7 @@ class VitalsState extends Equatable {
     this.status = VitalsStatus.initial,
     this.bpReadings = const [],
     this.bsReadings = const [],
+    this.isFromCache = false,
     this.errorMessage,
     this.isSubmitting = false,
     this.toastType,
@@ -19,6 +20,7 @@ class VitalsState extends Equatable {
   final VitalsStatus status;
   final List<BpReading> bpReadings;
   final List<BsReading> bsReadings;
+  final bool isFromCache;
   final String? errorMessage;
   final bool isSubmitting;
   final ToastType? toastType;
@@ -29,6 +31,7 @@ class VitalsState extends Equatable {
     VitalsStatus? status,
     List<BpReading>? bpReadings,
     List<BsReading>? bsReadings,
+    bool? isFromCache,
     String? errorMessage,
     bool? isSubmitting,
     ToastType? toastType,
@@ -40,6 +43,7 @@ class VitalsState extends Equatable {
     status: status ?? this.status,
     bpReadings: bpReadings ?? this.bpReadings,
     bsReadings: bsReadings ?? this.bsReadings,
+    isFromCache: isFromCache ?? this.isFromCache,
     errorMessage: clearError ? null : errorMessage ?? this.errorMessage,
     isSubmitting: isSubmitting ?? this.isSubmitting,
     toastType: clearToast ? null : toastType ?? this.toastType,
@@ -55,6 +59,7 @@ class VitalsState extends Equatable {
     status,
     bpReadings,
     bsReadings,
+    isFromCache,
     errorMessage,
     isSubmitting,
     toastType,

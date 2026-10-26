@@ -221,6 +221,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i29.AccountLocalDatasource>(
       () => _i29.AccountLocalDatasource(gh<_i934.SharedPreferencesManager>()),
     );
+    gh.lazySingleton<_i216.VitalsRemoteDataSource>(
+      () => _i216.VitalsRemoteDataSourceImpl(
+        gh<_i671.ApiClient>(),
+        gh<_i669.AppDatabase>(),
+      ),
+    );
     gh.lazySingleton<_i302.AccountRemoteDataSource>(
       () => _i302.AccountRemoteDataSourceImpl(gh<_i671.ApiClient>()),
     );
@@ -239,14 +245,69 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i671.ApiClient>(),
       ),
     );
-    gh.lazySingleton<_i216.VitalsRemoteDataSource>(
-      () => _i216.VitalsRemoteDataSourceImpl(gh<_i671.ApiClient>()),
+    gh.lazySingleton<_i515.VitalsRepository>(
+      () => _i214.VitalsRepositoryImpl(
+        gh<_i216.VitalsRemoteDataSource>(),
+        gh<_i441.SyncRepository>(),
+      ),
     );
     gh.lazySingleton<_i787.AuthRepository>(
       () => _i153.AuthRepositoryImpl(
         gh<_i161.AuthRemoteDataSource>(),
         gh<_i992.AuthLocalDataSource>(),
       ),
+    );
+    gh.lazySingleton<_i425.GetAppointmentsByConditionUseCase>(
+      () =>
+          _i425.GetAppointmentsByConditionUseCase(gh<_i515.VitalsRepository>()),
+    );
+    gh.lazySingleton<_i425.GetAppointmentsPagedUseCase>(
+      () => _i425.GetAppointmentsPagedUseCase(gh<_i515.VitalsRepository>()),
+    );
+    gh.lazySingleton<_i425.CreateAppointmentUseCase>(
+      () => _i425.CreateAppointmentUseCase(gh<_i515.VitalsRepository>()),
+    );
+    gh.lazySingleton<_i425.DeleteAppointmentUseCase>(
+      () => _i425.DeleteAppointmentUseCase(gh<_i515.VitalsRepository>()),
+    );
+    gh.lazySingleton<_i425.ScanMedicationUseCase>(
+      () => _i425.ScanMedicationUseCase(gh<_i515.VitalsRepository>()),
+    );
+    gh.lazySingleton<_i425.GetMedicationsByConditionUseCase>(
+      () =>
+          _i425.GetMedicationsByConditionUseCase(gh<_i515.VitalsRepository>()),
+    );
+    gh.lazySingleton<_i425.SearchFacilitiesUseCase>(
+      () => _i425.SearchFacilitiesUseCase(gh<_i515.VitalsRepository>()),
+    );
+    gh.lazySingleton<_i425.GetMedicationsPagedUseCase>(
+      () => _i425.GetMedicationsPagedUseCase(gh<_i515.VitalsRepository>()),
+    );
+    gh.lazySingleton<_i425.CreateMedicationUseCase>(
+      () => _i425.CreateMedicationUseCase(gh<_i515.VitalsRepository>()),
+    );
+    gh.lazySingleton<_i425.DeleteMedicationUseCase>(
+      () => _i425.DeleteMedicationUseCase(gh<_i515.VitalsRepository>()),
+    );
+    gh.lazySingleton<_i425.GetBloodPressureReadingsUseCase>(
+      () => _i425.GetBloodPressureReadingsUseCase(gh<_i515.VitalsRepository>()),
+    );
+    gh.lazySingleton<_i425.CreateBloodPressureReadingUseCase>(
+      () =>
+          _i425.CreateBloodPressureReadingUseCase(gh<_i515.VitalsRepository>()),
+    );
+    gh.lazySingleton<_i425.DeleteBloodPressureReadingUseCase>(
+      () =>
+          _i425.DeleteBloodPressureReadingUseCase(gh<_i515.VitalsRepository>()),
+    );
+    gh.lazySingleton<_i425.GetBloodSugarReadingsUseCase>(
+      () => _i425.GetBloodSugarReadingsUseCase(gh<_i515.VitalsRepository>()),
+    );
+    gh.lazySingleton<_i425.CreateBloodSugarReadingUseCase>(
+      () => _i425.CreateBloodSugarReadingUseCase(gh<_i515.VitalsRepository>()),
+    );
+    gh.lazySingleton<_i425.DeleteBloodSugarReadingUseCase>(
+      () => _i425.DeleteBloodSugarReadingUseCase(gh<_i515.VitalsRepository>()),
     );
     gh.lazySingleton<_i1067.AccountRepository>(
       () => _i857.AccountRepositoryImpl(
@@ -337,6 +398,23 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i219.HomeDashboardRemoteDataSource>(),
       ),
     );
+    gh.factory<_i902.VitalsBloc>(
+      () => _i902.VitalsBloc(
+        gh<_i425.GetBloodPressureReadingsUseCase>(),
+        gh<_i425.GetBloodSugarReadingsUseCase>(),
+        gh<_i425.CreateBloodPressureReadingUseCase>(),
+        gh<_i425.CreateBloodSugarReadingUseCase>(),
+        gh<_i425.DeleteBloodPressureReadingUseCase>(),
+        gh<_i425.DeleteBloodSugarReadingUseCase>(),
+      ),
+    );
+    gh.factory<_i767.AppointmentsBloc>(
+      () => _i767.AppointmentsBloc(
+        gh<_i425.GetAppointmentsPagedUseCase>(),
+        gh<_i425.CreateAppointmentUseCase>(),
+        gh<_i425.DeleteAppointmentUseCase>(),
+      ),
+    );
     gh.lazySingleton<_i178.GetVitalsCaptureContentUseCase>(
       () => _i178.GetVitalsCaptureContentUseCase(
         gh<_i1013.VitalsCaptureRepository>(),
@@ -368,10 +446,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i441.SyncRepository>(),
       ),
     );
-    gh.lazySingleton<_i515.VitalsRepository>(
-      () => _i214.VitalsRepositoryImpl(
-        gh<_i216.VitalsRemoteDataSource>(),
-        gh<_i441.SyncRepository>(),
+    gh.factory<_i734.MedicationsBloc>(
+      () => _i734.MedicationsBloc(
+        gh<_i425.GetMedicationsPagedUseCase>(),
+        gh<_i425.CreateMedicationUseCase>(),
+        gh<_i425.DeleteMedicationUseCase>(),
+        gh<_i425.ScanMedicationUseCase>(),
       ),
     );
     gh.lazySingleton<_i275.GetConstituenciesUseCase>(
@@ -407,58 +487,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i275.GetConstituenciesUseCase>(),
         gh<_i903.GetWardsUseCase>(),
       ),
-    );
-    gh.lazySingleton<_i425.GetAppointmentsByConditionUseCase>(
-      () =>
-          _i425.GetAppointmentsByConditionUseCase(gh<_i515.VitalsRepository>()),
-    );
-    gh.lazySingleton<_i425.GetAppointmentsPagedUseCase>(
-      () => _i425.GetAppointmentsPagedUseCase(gh<_i515.VitalsRepository>()),
-    );
-    gh.lazySingleton<_i425.CreateAppointmentUseCase>(
-      () => _i425.CreateAppointmentUseCase(gh<_i515.VitalsRepository>()),
-    );
-    gh.lazySingleton<_i425.DeleteAppointmentUseCase>(
-      () => _i425.DeleteAppointmentUseCase(gh<_i515.VitalsRepository>()),
-    );
-    gh.lazySingleton<_i425.ScanMedicationUseCase>(
-      () => _i425.ScanMedicationUseCase(gh<_i515.VitalsRepository>()),
-    );
-    gh.lazySingleton<_i425.GetMedicationsByConditionUseCase>(
-      () =>
-          _i425.GetMedicationsByConditionUseCase(gh<_i515.VitalsRepository>()),
-    );
-    gh.lazySingleton<_i425.SearchFacilitiesUseCase>(
-      () => _i425.SearchFacilitiesUseCase(gh<_i515.VitalsRepository>()),
-    );
-    gh.lazySingleton<_i425.GetMedicationsPagedUseCase>(
-      () => _i425.GetMedicationsPagedUseCase(gh<_i515.VitalsRepository>()),
-    );
-    gh.lazySingleton<_i425.CreateMedicationUseCase>(
-      () => _i425.CreateMedicationUseCase(gh<_i515.VitalsRepository>()),
-    );
-    gh.lazySingleton<_i425.DeleteMedicationUseCase>(
-      () => _i425.DeleteMedicationUseCase(gh<_i515.VitalsRepository>()),
-    );
-    gh.lazySingleton<_i425.GetBloodPressureReadingsUseCase>(
-      () => _i425.GetBloodPressureReadingsUseCase(gh<_i515.VitalsRepository>()),
-    );
-    gh.lazySingleton<_i425.CreateBloodPressureReadingUseCase>(
-      () =>
-          _i425.CreateBloodPressureReadingUseCase(gh<_i515.VitalsRepository>()),
-    );
-    gh.lazySingleton<_i425.DeleteBloodPressureReadingUseCase>(
-      () =>
-          _i425.DeleteBloodPressureReadingUseCase(gh<_i515.VitalsRepository>()),
-    );
-    gh.lazySingleton<_i425.GetBloodSugarReadingsUseCase>(
-      () => _i425.GetBloodSugarReadingsUseCase(gh<_i515.VitalsRepository>()),
-    );
-    gh.lazySingleton<_i425.CreateBloodSugarReadingUseCase>(
-      () => _i425.CreateBloodSugarReadingUseCase(gh<_i515.VitalsRepository>()),
-    );
-    gh.lazySingleton<_i425.DeleteBloodSugarReadingUseCase>(
-      () => _i425.DeleteBloodSugarReadingUseCase(gh<_i515.VitalsRepository>()),
     );
     gh.factory<_i646.LaunchBloc>(
       () => _i646.LaunchBloc(
@@ -505,23 +533,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i6.PreviewBmiUseCase>(
       () => _i6.PreviewBmiUseCase(gh<_i544.AssessmentsRepository>()),
     );
-    gh.factory<_i902.VitalsBloc>(
-      () => _i902.VitalsBloc(
-        gh<_i425.GetBloodPressureReadingsUseCase>(),
-        gh<_i425.GetBloodSugarReadingsUseCase>(),
-        gh<_i425.CreateBloodPressureReadingUseCase>(),
-        gh<_i425.CreateBloodSugarReadingUseCase>(),
-        gh<_i425.DeleteBloodPressureReadingUseCase>(),
-        gh<_i425.DeleteBloodSugarReadingUseCase>(),
-      ),
-    );
-    gh.factory<_i767.AppointmentsBloc>(
-      () => _i767.AppointmentsBloc(
-        gh<_i425.GetAppointmentsPagedUseCase>(),
-        gh<_i425.CreateAppointmentUseCase>(),
-        gh<_i425.DeleteAppointmentUseCase>(),
-      ),
-    );
     gh.factory<_i1022.AssessmentsBloc>(
       () => _i1022.AssessmentsBloc(
         gh<_i6.GetVitalsAccessUseCase>(),
@@ -535,14 +546,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i6.GetAssessmentScoreUseCase>(),
         gh<_i6.PreviewBmiUseCase>(),
         gh<_i23.UpdateProfileUseCase>(),
-      ),
-    );
-    gh.factory<_i734.MedicationsBloc>(
-      () => _i734.MedicationsBloc(
-        gh<_i425.GetMedicationsPagedUseCase>(),
-        gh<_i425.CreateMedicationUseCase>(),
-        gh<_i425.DeleteMedicationUseCase>(),
-        gh<_i425.ScanMedicationUseCase>(),
       ),
     );
     return this;

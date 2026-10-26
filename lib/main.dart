@@ -1,4 +1,5 @@
 import 'package:my_wellness/common/helpers/app_router.dart';
+import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/notifiers/locale_provider.dart';
 import 'package:my_wellness/common/notifiers/theme_provider.dart';
 import 'package:my_wellness/common/res/app_theme.dart';
@@ -149,13 +150,17 @@ class _MyAppState extends State<MyApp> {
               onLogout: () =>
                   context.read<AuthBloc>().add(const SignOutEvent()),
               child: BlocBuilder<LaunchBloc, LaunchState>(
-                builder: (context, launchState) => SyncBanner(
-                  showBanner:
-                      launchState is! LaunchInitial &&
-                      launchState is! LaunchLoading &&
-                      launchState is! LaunchOffline,
-                  child: NotificationHost(child: child),
-                ),
+                builder: (context, launchState) {
+                  final isSplash = _appRouter.current.name == SplashRoute.name;
+                  return SyncBanner(
+                    showBanner:
+                        !isSplash &&
+                        launchState is! LaunchInitial &&
+                        launchState is! LaunchLoading &&
+                        launchState is! LaunchOffline,
+                    child: NotificationHost(child: child),
+                  );
+                },
               ),
             ),
           );

@@ -1,5 +1,3 @@
-
-
 part of 'home_bloc.dart';
 
 enum HomeDashboardStatus { initial, loading, ready, error }

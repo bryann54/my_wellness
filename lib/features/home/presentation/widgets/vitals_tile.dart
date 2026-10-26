@@ -224,6 +224,7 @@ class VitalsTile extends StatelessWidget {
     child: Material(color: Colors.transparent, child: child),
   );
 }
+
 class _EmptyState extends StatelessWidget {
   const _EmptyState({
     required this.isLoading,
