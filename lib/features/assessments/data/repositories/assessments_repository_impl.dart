@@ -105,7 +105,11 @@ class AssessmentRepositoryImpl implements AssessmentsRepository {
         endpoint: ApiEndpoints.assessmentOfflineBatch(slug, sessionId),
         payload: {
           'answers': [
-            {'question_index': questionIndex, 'answer': answer},
+            {
+              'question_key': questionKey,
+              'question_index': questionIndex,
+              'answer': answer,
+            },
           ],
         },
       );

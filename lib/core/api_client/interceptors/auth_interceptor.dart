@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:injectable/injectable.dart';
 import 'package:my_wellness/core/api_client/endpoints/api_endpoints.dart';
 import 'package:my_wellness/features/auth/data/datasources/auth_local_datasource.dart';
@@ -21,6 +22,16 @@ class AuthInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
+    final clientKey = dotenv.env['PUBLIC_CLIENT_KEY'];
+    final clientToken = dotenv.env['PUBLIC_TOKEN'];
+
+    if (clientKey != null && clientKey.isNotEmpty) {
+      options.headers['X-Client-Key'] = clientKey;
+    }
+    if (clientToken != null && clientToken.isNotEmpty) {
+      options.headers['X-Client-Token'] = clientToken;
+    }
+
     final bool requiresToken = options.headers['requiresToken'] ?? true;
 
     if (!requiresToken) {
@@ -31,11 +42,9 @@ class AuthInterceptor extends Interceptor {
     final accessToken = await _localDataSource.getAccessToken();
 
     if (accessToken != null) {
-      if (kDebugMode) {
+        if (kDebugMode) {
         debugPrint('Access Token: $accessToken');
       }
-
-      options.headers['Authorization'] = 'Bearer $accessToken';
     }
 
     options.headers.remove('requiresToken');

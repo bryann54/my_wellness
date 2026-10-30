@@ -491,7 +491,15 @@ class _ProgressRing extends StatelessWidget {
 
 void _openSession(BuildContext context, DashboardSession session) {
   if (session.completionPercent == 0) {
-    context.router.push(AssessmentIntroRoute(slug: session.assessmentSlug));
+    context.router.push(
+      AssessmentIntroRoute(
+        slug: session.assessmentSlug,
+        sessionId: session.id,
+        currentIndex: session.currentIndex,
+        totalQuestions: session.totalQuestions,
+        completionPercent: session.completionPercent,
+      ),
+    );
     return;
   }
 

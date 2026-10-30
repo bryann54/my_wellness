@@ -18,20 +18,51 @@ const _consentRequiredSlugs = <String>{'ebola-screening'};
 @RoutePage()
 class AssessmentIntroScreen extends StatelessWidget {
   final String slug;
-  const AssessmentIntroScreen({super.key, required this.slug});
+  final String? sessionId;
+  final int? currentIndex;
+  final int? totalQuestions;
+  final int? completionPercent;
+
+  const AssessmentIntroScreen({
+    super.key,
+    required this.slug,
+    this.sessionId,
+    this.currentIndex,
+    this.totalQuestions,
+    this.completionPercent,
+  });
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: context.read<AssessmentsBloc>(),
-      child: AssessmentToastListener(child: _AssessmentIntroBody(slug: slug)),
+      child: AssessmentToastListener(
+        child: _AssessmentIntroBody(
+          slug: slug,
+          sessionId: sessionId,
+          currentIndex: currentIndex,
+          totalQuestions: totalQuestions,
+          completionPercent: completionPercent,
+        ),
+      ),
     );
   }
 }
 
 class _AssessmentIntroBody extends StatefulWidget {
   final String slug;
-  const _AssessmentIntroBody({required this.slug});
+  final String? sessionId;
+  final int? currentIndex;
+  final int? totalQuestions;
+  final int? completionPercent;
+
+  const _AssessmentIntroBody({
+    required this.slug,
+    this.sessionId,
+    this.currentIndex,
+    this.totalQuestions,
+    this.completionPercent,
+  });
 
   @override
   State<_AssessmentIntroBody> createState() => _AssessmentIntroBodyState();
@@ -47,7 +78,21 @@ class _AssessmentIntroBodyState extends State<_AssessmentIntroBody> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      context.read<AssessmentsBloc>().add(StartAssessmentsEvent(widget.slug));
+      final bloc = context.read<AssessmentsBloc>();
+      final sessionId = widget.sessionId;
+      if (sessionId != null) {
+        bloc.add(
+          ResumeAssessmentsEvent(
+            slug: widget.slug,
+            sessionId: sessionId,
+            currentIndex: widget.currentIndex ?? 0,
+            totalQuestions: widget.totalQuestions ?? 1,
+            completionPercent: widget.completionPercent ?? 0,
+          ),
+        );
+      } else {
+        bloc.add(StartAssessmentsEvent(widget.slug));
+      }
     });
   }
 

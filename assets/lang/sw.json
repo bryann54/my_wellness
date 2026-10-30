@@ -647,6 +647,18 @@
   "ready": "Karibu kumaliza…",
   "noConnection": "Haupo mtandaoni. Baadhi ya vipengele huenda visipatikane."
   },
+  "pricing": {
+    "viewPlans": "Angalia mipango",
+    "title": "Mipango inayopatikana",
+    "subtitle": "Chagua kifurushi kinacholingana na huduma za afya unazotaka kutumia.",
+    "loadError": "Mipango haikuweza kupakiwa. Angalia muunganisho wako kisha ujaribu tena.",
+    "empty": "Hakuna mipango inayopatikana kwa sasa.",
+    "allAges": "Umri wote",
+    "ageRange": "Umri {min}–{max}",
+    "ageFrom": "Umri {min}+",
+    "ageTo": "Hadi umri wa {max}",
+    "vitalsIncluded": "Kurekodi vipimo vya afya kumejumuishwa"
+  },
   "offline": {
     "youAreOffline": "Haupo mtandaoni",
     "connectionRestored": "Muunganisho umerejeshwa",

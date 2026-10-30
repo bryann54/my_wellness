@@ -108,6 +108,15 @@ import '../../features/offline_sync/data/repositories/sync_repository_impl.dart'
 import '../../features/offline_sync/domain/repositories/sync_repository.dart'
     as _i441;
 import '../../features/offline_sync/presentation/bloc/sync_bloc.dart' as _i30;
+import '../../features/pricing/data/datasources/pricing_remote_data_source.dart'
+    as _i863;
+import '../../features/pricing/data/repositories/pricing_repository_impl.dart'
+    as _i622;
+import '../../features/pricing/domain/repositories/pricing_repository.dart'
+    as _i102;
+import '../../features/pricing/domain/usecases/get_pricing_packages.dart'
+    as _i181;
+import '../../features/pricing/presentation/bloc/pricing_bloc.dart' as _i20;
 import '../../features/vitals/data/datasources/vitals_capture_remote_datasource.dart'
     as _i941;
 import '../../features/vitals/data/datasources/vitals_remote_datasource.dart'
@@ -125,7 +134,7 @@ import '../../features/vitals/domain/usecases/vitals_capture_usecases.dart'
 import '../../features/vitals/domain/usecases/vitals_usecases.dart' as _i425;
 import '../../features/vitals/presentation/bloc/vitals_bloc.dart' as _i902;
 import '../../features/vitals/presentation/bloc/vitals_capture_bloc.dart'
-    as _i863;
+    as _i864;
 import '../api_client/client/api_client.dart' as _i671;
 import '../api_client/interceptors/auth_interceptor.dart' as _i878;
 import '../storage/storage_preference_manager.dart' as _i934;
@@ -226,6 +235,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i671.ApiClient>(),
         gh<_i669.AppDatabase>(),
       ),
+    );
+    gh.lazySingleton<_i863.PricingRemoteDataSource>(
+      () => _i863.PricingRemoteDataSourceImpl(gh<_i671.ApiClient>()),
     );
     gh.lazySingleton<_i302.AccountRemoteDataSource>(
       () => _i302.AccountRemoteDataSourceImpl(gh<_i671.ApiClient>()),
@@ -333,6 +345,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i682.GetProfileUsecase>(
       () => _i682.GetProfileUsecase(gh<_i1067.AccountRepository>()),
     );
+    gh.lazySingleton<_i102.PricingRepository>(
+      () => _i622.PricingRepositoryImpl(gh<_i863.PricingRemoteDataSource>()),
+    );
     gh.lazySingleton<_i1013.VitalsCaptureRepository>(
       () => _i725.VitalsCaptureRepositoryImpl(
         gh<_i941.VitalsCaptureRemoteDataSource>(),
@@ -429,8 +444,8 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i178.GetVitalsReferralUseCase(gh<_i1013.VitalsCaptureRepository>()),
     );
-    gh.factory<_i863.VitalsCaptureBloc>(
-      () => _i863.VitalsCaptureBloc(
+    gh.factory<_i864.VitalsCaptureBloc>(
+      () => _i864.VitalsCaptureBloc(
         gh<_i178.GetVitalsCaptureContentUseCase>(),
         gh<_i178.CreateVitalsSessionUseCase>(),
         gh<_i178.GetVitalsReferralUseCase>(),
@@ -453,6 +468,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i425.DeleteMedicationUseCase>(),
         gh<_i425.ScanMedicationUseCase>(),
       ),
+    );
+    gh.lazySingleton<_i181.GetPricingPackagesUseCase>(
+      () => _i181.GetPricingPackagesUseCase(gh<_i102.PricingRepository>()),
     );
     gh.lazySingleton<_i275.GetConstituenciesUseCase>(
       () => _i275.GetConstituenciesUseCase(gh<_i480.GeographyRepository>()),
@@ -547,6 +565,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i6.PreviewBmiUseCase>(),
         gh<_i23.UpdateProfileUseCase>(),
       ),
+    );
+    gh.factory<_i20.PricingBloc>(
+      () => _i20.PricingBloc(gh<_i181.GetPricingPackagesUseCase>()),
     );
     return this;
   }

@@ -284,11 +284,12 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
       sessionId: event.sessionId,
     ));
 
-    final failure =
-        defRes.fold<Failure?>((f) => f, (_) => null) ??
-        answersRes.fold<Failure?>((f) => f, (_) => null);
+    final definitionFailure = defRes.fold<Failure?>((f) => f, (_) => null);
+    final answersFailure = answersRes.fold<Failure?>((f) => f, (_) => null);
 
-    if (failure != null) {
+    if (definitionFailure != null ||
+        (answersFailure != null && answersFailure is! NetworkFailure)) {
+      final failure = definitionFailure ?? answersFailure!;
       emit(
         state.copyWith(
           status: AssessmentStatus.error,
@@ -298,6 +299,16 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
       return;
     }
 
+    final definition = defRes.getOrElse(
+      () => throw StateError('definition missing'),
+    );
+    final answers = answersRes.getOrElse(() => const <AssessmentAnswer>[]);
+    final firstUnanswered = _firstUnansweredQuestion(definition, answers);
+    final currentIndex =
+        firstUnanswered != null && firstUnanswered.index > event.currentIndex
+        ? firstUnanswered.index
+        : event.currentIndex;
+
     emit(
       state.copyWith(
         status: AssessmentStatus.ready,
@@ -305,14 +316,17 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
           id: event.sessionId,
           assessmentSlug: event.slug,
           status: AssessmentSessionStatus.inProgress,
-          currentIndex: event.currentIndex,
+          currentIndex: currentIndex,
           totalQuestions: event.totalQuestions,
-          completionPct: event.completionPercent,
+          completionPct: event.totalQuestions == 0
+              ? event.completionPercent
+              : ((currentIndex / event.totalQuestions) * 100)
+                    .round()
+                    .clamp(0, 100)
+                    .toInt(),
         ),
-        definition: defRes.getOrElse(
-          () => throw StateError('definition missing'),
-        ),
-        answers: answersRes.getOrElse(() => const <AssessmentAnswer>[]),
+        definition: definition,
+        answers: answers,
       ),
     );
   }

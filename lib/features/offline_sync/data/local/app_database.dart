@@ -4,7 +4,6 @@ import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
-
 part 'app_database.g.dart';
 
 class PendingSyncActions extends Table {
@@ -38,6 +37,9 @@ class CachedAssessments extends Table {
 @DriftDatabase(tables: [PendingSyncActions, SyncMetadata, CachedAssessments])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
+
+  static String assessmentAnswersCacheKey(String slug, String sessionId) =>
+      'assessment_answers:$slug:$sessionId';
 
   @override
   int get schemaVersion => 2;

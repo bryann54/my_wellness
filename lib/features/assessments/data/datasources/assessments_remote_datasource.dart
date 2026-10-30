@@ -83,6 +83,7 @@ class AssessmentsRemoteDataSourceImpl implements AssessmentsRemoteDataSource {
         options: ApiClient.protected,
       );
       await _database.cachePayload('assessment_list', jsonEncode(res));
+      await _precacheOfflineDefinitions(res);
     } on NetworkException {
       final cached = await _database.getCachedPayload('assessment_list');
       if (cached == null) rethrow;
@@ -95,6 +96,32 @@ class AssessmentsRemoteDataSourceImpl implements AssessmentsRemoteDataSource {
           ).toEntity(),
         )
         .toList(growable: false);
+  }
+
+  Future<void> _precacheOfflineDefinitions(List<dynamic> summaries) async {
+    final slugs = summaries
+        .whereType<Map<String, dynamic>>()
+        .map((summary) => summary['slug'])
+        .whereType<String>()
+        .where((slug) => slug.isNotEmpty)
+        .toList(growable: false);
+
+    for (var i = 0; i < slugs.length; i += 3) {
+      final batch = slugs.skip(i).take(3);
+      await Future.wait(
+        batch.map((slug) async {
+          try {
+            final definition = await _api.get<Map<String, dynamic>>(
+              url: ApiEndpoints.assessmentOffline(slug),
+              options: ApiClient.protected,
+            );
+            await _database.cacheAssessment(slug, jsonEncode(definition));
+          } on Exception {
+            // A partial catalog warm-up must not block the online catalog.
+          }
+        }),
+      );
+    }
   }
 
   @override
@@ -159,16 +186,53 @@ class AssessmentsRemoteDataSourceImpl implements AssessmentsRemoteDataSource {
     String slug,
     String sessionId,
   ) async {
-    final res = await _api.get<List<dynamic>>(
-      url: ApiEndpoints.assessmentAnswers(slug, sessionId),
-      options: ApiClient.protected,
-    );
-    return res
-        .map(
-          (e) => AssessmentAnswerModel.fromJson(
-            e as Map<String, dynamic>,
-          ).toEntity(),
-        )
+    late final List<dynamic> res;
+    final cacheKey = AppDatabase.assessmentAnswersCacheKey(slug, sessionId);
+    try {
+      res = await _api.get<List<dynamic>>(
+        url: ApiEndpoints.assessmentAnswers(slug, sessionId),
+        options: ApiClient.protected,
+      );
+      await _database.cachePayload(cacheKey, jsonEncode(res));
+    } on NetworkException {
+      final cached = await _database.getCachedPayload(cacheKey);
+      if (cached == null) rethrow;
+      res = jsonDecode(cached) as List<dynamic>;
+    }
+
+    final answersByIndex = <int, Map<String, dynamic>>{
+      for (final item in res.whereType<Map<String, dynamic>>())
+        if (item['question_index'] is int) item['question_index'] as int: item,
+    };
+    final endpoint = ApiEndpoints.assessmentOfflineBatch(slug, sessionId);
+    try {
+      final pendingActions = await _database.getPendingActions();
+      for (final action in pendingActions) {
+        if (action.actionType != 'assessment_answer' ||
+            action.endpoint != endpoint ||
+            action.method != 'POST') {
+          continue;
+        }
+        final payload = jsonDecode(action.payload) as Map<String, dynamic>;
+        final queuedAnswers = payload['answers'];
+        if (queuedAnswers is! List) continue;
+        for (final queued in queuedAnswers.whereType<Map>()) {
+          final answer = Map<String, dynamic>.from(queued);
+          final index = answer['question_index'];
+          if (index is! int || answer['answer'] == null) continue;
+          answersByIndex[index] = {
+            'question_key': answer['question_key']?.toString() ?? '',
+            'question_index': index,
+            'answer': answer['answer'].toString(),
+          };
+        }
+      }
+    } on Exception {
+      // Cached/server answers remain usable if the pending queue cannot be read.
+    }
+
+    return answersByIndex.values
+        .map((e) => AssessmentAnswerModel.fromJson(e).toEntity())
         .toList(growable: false);
   }
 
