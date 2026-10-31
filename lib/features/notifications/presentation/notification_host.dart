@@ -2,7 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
-import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
+import 'package:my_wellness/common/widgets/app_snackbar.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_state.dart';
 import 'package:my_wellness/features/notifications/domain/entities/app_notification.dart';
@@ -47,14 +47,7 @@ class _NotificationHostState extends State<NotificationHost>
         if (state.status == AuthStatus.authenticated) {
           final userId = state.user?.id;
           if (userId == null || userId.isEmpty) return;
-          final memberCode = context
-              .read<AccountBloc>()
-              .state
-              .profile
-              ?.memberCode;
-          bloc.add(
-            RegisterIdentityEvent(userId: userId, memberCode: memberCode),
-          );
+          bloc.add(RegisterIdentityEvent(userId: userId));
         } else if (state.status == AuthStatus.unauthenticated) {
           bloc.add(const ClearIdentityEvent());
         }
@@ -74,28 +67,15 @@ class _NotificationHostState extends State<NotificationHost>
   void _present(BuildContext context, AppNotification n) {
     final bloc = context.read<NotificationsBloc>();
 
-    if (n.openedByUser) {
+    if (n.openedByUser && n.route is! NotificationRouteNone) {
       _route(context, n.route);
     } else {
-      final messenger = ScaffoldMessenger.maybeOf(context);
-      messenger
-        ?..hideCurrentSnackBar()
-        ..showSnackBar(
-          SnackBar(
-            content: Text(
-              n.body.isEmpty ? n.title : '${n.title}\n${n.body}',
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-            ),
-            behavior: SnackBarBehavior.floating,
-            action: n.route is NotificationRouteNone
-                ? null
-                : SnackBarAction(
-                    label: 'Open',
-                    onPressed: () => _route(context, n.route),
-                  ),
-          ),
-        );
+      AppSnackbar.show(
+        context,
+        message: n.body.isEmpty ? n.title : '${n.title}\n${n.body}',
+        actionLabel: n.route is NotificationRouteNone ? null : 'Open',
+        onAction: () => _route(context, n.route),
+      );
     }
 
     bloc.add(const NotificationTappedEvent());
@@ -110,6 +90,9 @@ class _NotificationHostState extends State<NotificationHost>
 
       case NotificationRouteAppointments():
         router.push(const AppointmentsRoute());
+
+      case NotificationRouteBookings():
+        router.push(const BookingsRoute());
 
       case NotificationRouteAppointment():
         router.push(const AppointmentsRoute());

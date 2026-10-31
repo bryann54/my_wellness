@@ -40,6 +40,10 @@ class NotificationRouteAppointments extends NotificationRoute {
   const NotificationRouteAppointments();
 }
 
+class NotificationRouteBookings extends NotificationRoute {
+  const NotificationRouteBookings();
+}
+
 class NotificationRouteAppointment extends NotificationRoute {
   final String id;
   const NotificationRouteAppointment(this.id);
@@ -80,42 +84,39 @@ class NotificationRouteAccount extends NotificationRoute {
   const NotificationRouteAccount();
 }
 
-/// Parses the `additional_data` map sent by the backend into a route.
-///
-/// Free function, not a factory method, so the sealed hierarchy has no
-/// name collision. Returns [NotificationRouteNone] for unknown or missing
-/// targets — the host treats that as "show the snackbar, don't navigate".
+/// Parses OneSignal's additional data using the backend's `data.type` contract.
 NotificationRoute parseNotificationRoute(Map<String, dynamic> data) {
-  final target = (data['target'] as String?)?.trim();
-  if (target == null || target.isEmpty) return const NotificationRouteNone();
+  final type = data['type']?.toString().trim();
+  final assessmentSlug = data['assessment_slug']?.toString().trim();
 
-  final id = (data['target_id'] as String?)?.trim();
-  final slug = (data['slug'] as String?)?.trim();
-
-  switch (target) {
+  switch (type) {
     case 'appointment':
-      return id == null || id.isEmpty
-          ? const NotificationRouteAppointments()
-          : NotificationRouteAppointment(id);
+      return const NotificationRouteAppointments();
+
+    case 'booking':
+      return const NotificationRouteBookings();
 
     case 'medication':
+    case 'medication_dose':
+    case 'medication_refill':
       return const NotificationRouteMedications();
 
-    case 'assessment':
-      return slug == null || slug.isEmpty
+    case 'screening_expiry':
+      return const NotificationRouteAssessments();
+    case 'screening_eligible':
+    case 'corporate_wellbeing_chapter_ready':
+      return assessmentSlug == null || assessmentSlug.isEmpty
           ? const NotificationRouteAssessments()
-          : NotificationRouteAssessment(slug);
-
-    case 'assessment_result':
-      return slug == null || slug.isEmpty
-          ? const NotificationRouteAssessments()
-          : NotificationRouteAssessmentResult(slug);
+          : NotificationRouteAssessment(assessmentSlug);
 
     case 'vitals':
+    case 'dialysis_reminder':
+    case 'vitals_reminder':
       return const NotificationRouteVitals();
 
-    case 'account':
-      return const NotificationRouteAccount();
+    case 'post_visit_followup':
+    case 'post_visit_attendance_check':
+      return const NotificationRouteAppointments();
 
     default:
       return const NotificationRouteNone();

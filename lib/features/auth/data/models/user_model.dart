@@ -31,6 +31,9 @@ class UserModel {
   @JsonKey(name: 'is_phone_verified')
   final bool? isPhoneVerified;
 
+  @JsonKey(name: 'health_profile_completed')
+  final bool? healthProfileCompleted;
+
   const UserModel({
     this.id,
     this.email,
@@ -42,6 +45,7 @@ class UserModel {
     this.nationalIdNumber,
     this.isEmailVerified,
     this.isPhoneVerified,
+    this.healthProfileCompleted,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) =>
@@ -60,5 +64,6 @@ class UserModel {
     nationalIdNumber: nationalIdNumber,
     isEmailVerified: isEmailVerified ?? false,
     isPhoneVerified: isPhoneVerified ?? false,
+    healthProfileCompleted: healthProfileCompleted ?? false,
   );
 }

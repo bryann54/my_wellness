@@ -28,6 +28,24 @@ class StartAssessmentsEvent extends AssessmentsEvent {
   List<Object?> get props => [slug];
 }
 
+class SubmitCancerPreScreeningEvent extends AssessmentsEvent {
+  final String priorCancerHistory;
+  final String priorCancerType;
+  final int? priorCancerYear;
+  const SubmitCancerPreScreeningEvent({
+    required this.priorCancerHistory,
+    required this.priorCancerType,
+    this.priorCancerYear,
+  });
+
+  @override
+  List<Object?> get props => [
+    priorCancerHistory,
+    priorCancerType,
+    priorCancerYear,
+  ];
+}
+
 class ResumeAssessmentsEvent extends AssessmentsEvent {
   final String slug;
   final String sessionId;

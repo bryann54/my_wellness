@@ -4,9 +4,10 @@ import 'package:my_wellness/core/errors/exceptions.dart';
 import 'package:my_wellness/core/errors/failures.dart';
 import 'package:my_wellness/features/auth/data/datasources/auth_local_datasource.dart';
 import 'package:my_wellness/features/auth/data/datasources/auth_remote_datasource.dart';
+import 'package:my_wellness/features/auth/data/models/auth_session_model.dart';
 import 'package:my_wellness/features/auth/data/models/signup_request_model.dart';
 import 'package:my_wellness/features/auth/domain/entities/auth_session_entity.dart';
-import 'package:my_wellness/features/auth/domain/entities/signup_pending_entity.dart';
+import 'package:my_wellness/features/auth/domain/entities/signup_result_entity.dart';
 import 'package:my_wellness/features/auth/domain/entities/user_entity.dart';
 import 'package:my_wellness/features/auth/domain/entities/verified_identity.dart';
 import 'package:my_wellness/features/auth/domain/repositories/auth_repository.dart';
@@ -70,11 +71,22 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, SignupPendingEntity>> signUp(
+  Future<Either<Failure, SignupResultEntity>> signUp(
     SignupRequestModel req,
   ) async {
     try {
       final pendingModel = await _remote.signup(req);
+      if (pendingModel.hasSession) {
+        final session = pendingModel.toSessionModel();
+        await _saveSession(session);
+        await _local.clearPendingSignup();
+        return Right(SignupResultEntity(session: session.toEntity()));
+      }
+      if (pendingModel.channel == null) {
+        return const Left(
+          GeneralFailure(error: 'Signup response was incomplete'),
+        );
+      }
       final fallbackDestination = req.email ?? req.phone ?? '';
       final pendingEntity = pendingModel.toEntity(
         fallbackDestination: fallbackDestination,
@@ -82,7 +94,7 @@ class AuthRepositoryImpl implements AuthRepository {
 
       await _local.savePendingSignup(pendingEntity);
 
-      return Right(pendingEntity);
+      return Right(SignupResultEntity(pending: pendingEntity));
     } on ValidationException catch (e) {
       return Left(ValidationFailure(error: e.message));
     } on NetworkException catch (e) {
@@ -95,14 +107,18 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, void>> confirmSignupEmail({
+  Future<Either<Failure, AuthSessionEntity>> confirmSignupEmail({
     required String email,
     required String code,
   }) async {
     try {
-      await _remote.confirmSignupEmail(email: email, code: code);
+      final session = await _remote.confirmSignupEmail(
+        email: email,
+        code: code,
+      );
+      await _saveSession(session);
       await _local.clearPendingSignup();
-      return const Right(null);
+      return Right(session.toEntity());
     } on ValidationException catch (e) {
       return Left(ValidationFailure(error: e.message));
     } catch (e) {
@@ -111,19 +127,29 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, void>> confirmSignupPhone({
+  Future<Either<Failure, AuthSessionEntity>> confirmSignupPhone({
     required String phone,
     required String code,
   }) async {
     try {
-      await _remote.confirmSignupPhone(phone: phone, code: code);
+      final session = await _remote.confirmSignupPhone(
+        phone: phone,
+        code: code,
+      );
+      await _saveSession(session);
       await _local.clearPendingSignup();
-      return const Right(null);
+      return Right(session.toEntity());
     } on ValidationException catch (e) {
       return Left(ValidationFailure(error: e.message));
     } catch (e) {
       return Left(GeneralFailure(error: e.toString()));
     }
+  }
+
+  Future<void> _saveSession(AuthSessionModel session) async {
+    await _local.saveTokens(access: session.access, refresh: session.refresh);
+    final user = session.user;
+    if (user != null) await _local.saveUser(user);
   }
 
   @override

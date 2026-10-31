@@ -112,8 +112,12 @@ class ApiEndpoints {
       '/api/assessments/$slug/can-start/';
   static String assessmentStartSession(String slug) =>
       '/api/assessments/$slug/session/';
+  static String assessmentPreScreening(String slug, String sessionId) =>
+      '/api/assessments/$slug/session/$sessionId/pre-screening/';
   static String assessmentAnswers(String slug, String sessionId) =>
       '/api/assessments/$slug/session/$sessionId/answers/';
+  static String assessmentBmiMetrics(String slug, String sessionId) =>
+      '/api/assessments/$slug/session/$sessionId/bmi-metrics/';
   static String assessmentReport(String slug, String sessionId) =>
       '/api/assessments/$slug/session/$sessionId/report/';
   static String assessmentReportEmail(String slug, String sessionId) =>
@@ -165,6 +169,11 @@ class ApiEndpoints {
   static const String paymentsMine = '/api/payments/mine/';
   static const String paymentsModuleAccess = '/api/payments/module-access/';
   static const String paymentsPackages = '/api/payments/packages/';
+  static const String paymentsServiceCatalog = '/api/payments/service-catalog/';
+  static const String paymentsCustomQuote = '/api/payments/custom-quote/';
+  static const String paymentsCustomQuoteCheckout =
+      '/api/payments/custom-quote/checkout/';
+  static const String paymentsStkPush = '/api/payments/stk-push/';
   static const String paymentsC2bConfirmation =
       '/api/payments/c2b/confirmation/';
   static const String paymentsC2bValidation = '/api/payments/c2b/validation/';
@@ -199,6 +208,7 @@ class ApiEndpoints {
   // ─── Notifications (Push) ─────────────────────────────────────────────
   static const String pushSubscribe = '/api/push/subscribe/';
   static const String pushVapidPublicKey = '/api/push/vapid-public-key/';
+  static const String pushPreferences = '/api/push/preferences/';
   static const String pushPartnerNotifications =
       '/api/push/partner-notifications/';
   static const String pushPartnerNotificationsMine =

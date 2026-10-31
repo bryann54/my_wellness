@@ -2,7 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:my_wellness/core/errors/failures.dart';
 import 'package:my_wellness/features/auth/data/models/signup_request_model.dart';
 import 'package:my_wellness/features/auth/domain/entities/auth_session_entity.dart';
-import 'package:my_wellness/features/auth/domain/entities/signup_pending_entity.dart';
+import 'package:my_wellness/features/auth/domain/entities/signup_result_entity.dart';
 import 'package:my_wellness/features/auth/domain/entities/user_entity.dart';
 import 'package:my_wellness/features/auth/domain/entities/verified_identity.dart';
 
@@ -12,9 +12,9 @@ abstract class AuthRepository {
     required String password,
   });
 
-  Future<Either<Failure, SignupPendingEntity>> signUp(SignupRequestModel req);
+  Future<Either<Failure, SignupResultEntity>> signUp(SignupRequestModel req);
 
-  Future<Either<Failure, void>> confirmSignupEmail({
+  Future<Either<Failure, AuthSessionEntity>> confirmSignupEmail({
     required String email,
     required String code,
   });
@@ -22,7 +22,7 @@ abstract class AuthRepository {
     required String idType,
     required String idNumber,
   });
-  Future<Either<Failure, void>> confirmSignupPhone({
+  Future<Either<Failure, AuthSessionEntity>> confirmSignupPhone({
     required String phone,
     required String code,
   });

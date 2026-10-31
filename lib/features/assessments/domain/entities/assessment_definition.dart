@@ -11,6 +11,9 @@ class AssessmentDefinition extends Equatable {
   final String? disclaimer;
   final String? referencePrefix;
   final String? understandingCopy;
+  final String? beforeYouBegin;
+  final String? cancerHistoryTypeCode;
+  final String? encouragingFact;
   final List<AssessmentQuestion> questions;
   final List<AssessmentCta> ctas;
 
@@ -25,6 +28,9 @@ class AssessmentDefinition extends Equatable {
     this.disclaimer,
     this.referencePrefix,
     this.understandingCopy,
+    this.beforeYouBegin,
+    this.cancerHistoryTypeCode,
+    this.encouragingFact,
   });
 
   AssessmentQuestion? questionByIndex(int index) {
@@ -51,6 +57,9 @@ class AssessmentDefinition extends Equatable {
     disclaimer,
     referencePrefix,
     understandingCopy,
+    beforeYouBegin,
+    cancerHistoryTypeCode,
+    encouragingFact,
     questions,
     ctas,
   ];

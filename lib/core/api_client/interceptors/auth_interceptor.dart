@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:my_wellness/core/api_client/endpoints/api_endpoints.dart';
 import 'package:my_wellness/features/auth/data/datasources/auth_local_datasource.dart';
@@ -30,11 +29,7 @@ class AuthInterceptor extends Interceptor {
 
     final accessToken = await _localDataSource.getAccessToken();
 
-    if (accessToken != null) {
-      if (kDebugMode) {
-        debugPrint('Access Token: $accessToken');
-      }
-
+    if (accessToken != null && accessToken.isNotEmpty) {
       options.headers['Authorization'] = 'Bearer $accessToken';
     }
 

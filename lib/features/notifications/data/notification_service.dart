@@ -36,6 +36,7 @@ class NotificationService {
       await OneSignal.initialize(_appId.trim());
 
       OneSignal.Notifications.addForegroundWillDisplayListener((event) {
+        event.preventDefault();
         _emit(event.notification, openedByUser: false);
       });
       OneSignal.Notifications.addClickListener((event) {
@@ -67,25 +68,16 @@ class NotificationService {
         : NotificationPermission.denied;
   }
 
-  Future<void> login({
-    required String userId,
-    required Map<String, String> tags,
-  }) async {
+  Future<void> login({required String userId}) async {
     if (!isConfigured || kIsWeb) return;
     await initialize();
 
     await OneSignal.login(userId);
-    if (tags.isNotEmpty) {
-      await OneSignal.User.addTags(tags);
-    }
   }
 
-  Future<void> logout({Iterable<String> tagKeys = const []}) async {
+  Future<void> logout() async {
     if (!_initialized || kIsWeb) return;
     try {
-      if (tagKeys.isNotEmpty) {
-        await OneSignal.User.removeTags(tagKeys.toList());
-      }
       await OneSignal.logout();
     } catch (e) {
       if (kDebugMode) debugPrint('[OneSignal] logout failed: $e');
@@ -132,7 +124,7 @@ class NotificationService {
     }
 
     final data = Map<String, dynamic>.from(n.additionalData ?? const {});
-    final id = (data['notification_id'] as String?)?.trim();
+    final id = data['notification_id']?.toString().trim();
 
     _notifications.add(
       IncomingNotification(

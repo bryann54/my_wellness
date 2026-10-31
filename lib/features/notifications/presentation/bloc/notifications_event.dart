@@ -9,12 +9,11 @@ abstract class NotificationsEvent extends Equatable {
 
 class RegisterIdentityEvent extends NotificationsEvent {
   final String userId;
-  final String? memberCode;
 
-  const RegisterIdentityEvent({required this.userId, this.memberCode});
+  const RegisterIdentityEvent({required this.userId});
 
   @override
-  List<Object?> get props => [userId, memberCode];
+  List<Object?> get props => [userId];
 }
 
 class ClearIdentityEvent extends NotificationsEvent {
@@ -63,4 +62,29 @@ class NotificationTappedEvent extends NotificationsEvent {
 
 class MarkAllReadEvent extends NotificationsEvent {
   const MarkAllReadEvent();
+}
+
+enum NotificationChannel { push, email, sms }
+
+class LoadNotificationPreferencesEvent extends NotificationsEvent {
+  const LoadNotificationPreferencesEvent();
+}
+
+class SetNotificationPreferenceChannelEvent extends NotificationsEvent {
+  final String category;
+  final NotificationChannel channel;
+  final bool enabled;
+
+  const SetNotificationPreferenceChannelEvent({
+    required this.category,
+    required this.channel,
+    required this.enabled,
+  });
+
+  @override
+  List<Object?> get props => [category, channel, enabled];
+}
+
+class SaveNotificationPreferencesEvent extends NotificationsEvent {
+  const SaveNotificationPreferencesEvent();
 }

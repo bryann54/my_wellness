@@ -39,6 +39,13 @@ abstract class AssessmentsRepository {
   Future<Either<Failure, CanStartResult>> canStart(String slug);
   Future<Either<Failure, AssessmentDefinition>> getDefinition(String slug);
   Future<Either<Failure, AssessmentSession>> startSession(String slug);
+  Future<Either<Failure, AssessmentSession>> submitCancerPreScreening(
+    String slug,
+    String sessionId, {
+    required String priorCancerHistory,
+    required String priorCancerType,
+    int? priorCancerYear,
+  });
   Future<Either<Failure, List<AssessmentAnswer>>> getAnswers(
     String slug,
     String sessionId,
@@ -57,6 +64,12 @@ abstract class AssessmentsRepository {
   Future<Either<Failure, BmiPreview>> previewBmi({
     required String weightKg,
     required String heightCm,
+  });
+  Future<Either<Failure, void>> submitBmiMetrics(
+    String slug,
+    String sessionId, {
+    required double weightKg,
+    required double heightCm,
   });
 
   /// Optional — returns null if the backend has no referral for this session.

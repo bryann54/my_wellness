@@ -2,7 +2,9 @@ import 'package:equatable/equatable.dart';
 import 'package:my_wellness/features/assessments/domain/repositories/assessments_repository.dart';
 
 enum AssessmentSessionStatus {
+  needsPreScreening,
   awaitingPayment,
+  awaitingCall,
   inProgress,
   completed,
   terminated,
@@ -38,8 +40,12 @@ class AssessmentSession extends Equatable {
 
   static AssessmentSessionStatus parseStatus(String raw) {
     switch (raw.toLowerCase()) {
+      case 'needs_pre_screening':
+        return AssessmentSessionStatus.needsPreScreening;
       case 'awaiting_payment':
         return AssessmentSessionStatus.awaitingPayment;
+      case 'awaiting_call':
+        return AssessmentSessionStatus.awaitingCall;
       case 'in_progress':
         return AssessmentSessionStatus.inProgress;
       case 'completed':

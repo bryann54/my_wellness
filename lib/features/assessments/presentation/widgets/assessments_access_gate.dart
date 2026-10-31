@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/res/l10n.dart';
+import 'package:my_wellness/common/widgets/app_primary_button.dart';
 
 class AssessmentsAccessGate extends StatelessWidget {
   final Widget child;
@@ -42,6 +45,11 @@ class AssessmentsBlockedView extends StatelessWidget {
                 height: 1.5,
                 color: cs.onSurface.withValues(alpha: 0.65),
               ),
+            ),
+            const SizedBox(height: 10),
+            AppPrimaryButton(
+              onPressed: () => context.router.push(const PricingRoute()),
+              label: AppLocalizations.getString(context, 'pricing.viewPlans'),
             ),
           ],
         ),

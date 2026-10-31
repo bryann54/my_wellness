@@ -234,6 +234,7 @@ class SettingsScreen extends StatelessWidget {
     );
 
     if (picked != null && context.mounted) {
+      provider.setLocale(Locale(picked));
       context.read<AccountBloc>().add(ChangeLanguageEvent(langCode: picked));
     }
   }

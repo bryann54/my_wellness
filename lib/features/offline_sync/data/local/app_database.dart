@@ -4,7 +4,6 @@ import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
-
 part 'app_database.g.dart';
 
 class PendingSyncActions extends Table {
@@ -39,8 +38,11 @@ class CachedAssessments extends Table {
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
+  static String assessmentAnswersCacheKey(String slug, String sessionId) =>
+      'assessment_answers:$slug:$sessionId';
+
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -48,6 +50,12 @@ class AppDatabase extends _$AppDatabase {
     onUpgrade: (m, from, to) async {
       if (from < 2) {
         await m.createTable(cachedAssessments);
+      }
+      if (from < 3) {
+        await customStatement('DELETE FROM cached_assessments');
+        await customStatement(
+          "DELETE FROM pending_sync_actions WHERE action_type = 'assessment_answer'",
+        );
       }
     },
   );

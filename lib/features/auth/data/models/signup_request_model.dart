@@ -10,20 +10,11 @@ class SignupRequestModel {
   final String? phone;
   final String password;
 
-  @JsonKey(name: 'first_name')
-  final String firstName;
-
-  final String surname;
-  final String? gender;
-
-  @JsonKey(name: 'date_of_birth')
-  final String? dateOfBirth;
-
   @JsonKey(name: 'national_id_number')
   final String? nationalIdNumber;
 
   @JsonKey(name: 'county')
-  final int? countyId;
+  final String? county;
 
   @JsonKey(name: 'sub_county')
   final int? subCountyId;
@@ -37,6 +28,11 @@ class SignupRequestModel {
   @JsonKey(name: 'identity_verification_id')
   final String? identityVerificationId;
 
+  @JsonKey(name: 'invite_token')
+  final String? inviteToken;
+
+  final String? subdomain;
+
   @JsonKey(includeFromJson: false, includeToJson: false)
   final IdType? idType;
 
@@ -44,16 +40,14 @@ class SignupRequestModel {
     this.email,
     this.phone,
     required this.password,
-    required this.firstName,
-    required this.surname,
-    this.gender,
-    this.dateOfBirth,
     this.nationalIdNumber,
-    this.countyId,
+    this.county,
     this.subCountyId,
     this.constituencyId,
     this.wardId,
     this.identityVerificationId,
+    this.inviteToken,
+    this.subdomain,
     this.idType,
   }) : assert(
          email != null || phone != null,

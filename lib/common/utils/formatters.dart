@@ -1,5 +1,9 @@
 import 'package:intl/intl.dart';
 
+/// Formats a numeric price with comma group separators, e.g. `KSh 12,500`.
+String formatPrice(num amount, {String currency = 'KSh'}) =>
+    '$currency ${NumberFormat('#,##0.##', 'en_US').format(amount)}';
+
 String isoDate(DateTime d) => DateFormat('yyyy-MM-dd').format(d);
 
 String isoTimestampUtc(DateTime d) => d.toUtc().toIso8601String();

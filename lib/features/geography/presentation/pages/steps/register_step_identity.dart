@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_primary_button.dart';
+import 'package:my_wellness/common/widgets/app_snackbar.dart';
 import 'package:my_wellness/features/auth/data/models/signup_request_model.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_event.dart';
@@ -219,9 +220,7 @@ class _RegisterStepIdentityState extends State<RegisterStepIdentity> {
           });
         }
         if (state.kycStatus == KycStatus.error && state.kycError != null) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.kycError!)));
+          AppSnackbar.error(context, state.kycError!);
         }
       },
       builder: (context, state) {

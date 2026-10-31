@@ -23,6 +23,9 @@ AssessmentDefinitionModel _$AssessmentDefinitionModelFromJson(
   disclaimer: json['disclaimer'] as String?,
   referencePrefix: json['reference_prefix'] as String?,
   understandingCopy: json['understanding_copy'] as String?,
+  beforeYouBegin: json['before_you_begin'] as String?,
+  cancerHistoryTypeCode: json['cancer_history_type_code'] as String?,
+  encouragingFact: json['encouraging_fact'] as String?,
 );
 
 Map<String, dynamic> _$AssessmentDefinitionModelToJson(
@@ -36,6 +39,9 @@ Map<String, dynamic> _$AssessmentDefinitionModelToJson(
   'disclaimer': instance.disclaimer,
   'reference_prefix': instance.referencePrefix,
   'understanding_copy': instance.understandingCopy,
+  'before_you_begin': instance.beforeYouBegin,
+  'cancer_history_type_code': instance.cancerHistoryTypeCode,
+  'encouraging_fact': instance.encouragingFact,
   'questions': instance.questions.map((e) => e.toJson()).toList(),
   'ctas': instance.ctas.map((e) => e.toJson()).toList(),
 };

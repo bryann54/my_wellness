@@ -89,13 +89,27 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           errorMessage: mapFailureToMessage(failure),
         ),
       ),
-      (pending) => emit(
-        state.copyWith(
-          status: AuthStatus.awaitingSignupConfirmation,
-          pendingSignup: pending,
-          clearError: true,
-        ),
-      ),
+      (result) {
+        final session = result.session;
+        if (session != null) {
+          emit(
+            state.copyWith(
+              status: AuthStatus.authenticated,
+              user: session.user,
+              clearPending: true,
+              clearError: true,
+            ),
+          );
+        } else if (result.pending != null) {
+          emit(
+            state.copyWith(
+              status: AuthStatus.awaitingSignupConfirmation,
+              pendingSignup: result.pending,
+              clearError: true,
+            ),
+          );
+        }
+      },
     );
   }
 
@@ -115,8 +129,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           errorMessage: mapFailureToMessage(failure),
         ),
       ),
-      (_) => emit(
-        state.copyWith(status: AuthStatus.unauthenticated, clearPending: true),
+      (session) => emit(
+        state.copyWith(
+          status: AuthStatus.authenticated,
+          user: session.user,
+          clearPending: true,
+          clearError: true,
+        ),
       ),
     );
   }
@@ -137,8 +156,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           errorMessage: mapFailureToMessage(failure),
         ),
       ),
-      (_) => emit(
-        state.copyWith(status: AuthStatus.unauthenticated, clearPending: true),
+      (session) => emit(
+        state.copyWith(
+          status: AuthStatus.authenticated,
+          user: session.user,
+          clearPending: true,
+          clearError: true,
+        ),
       ),
     );
   }

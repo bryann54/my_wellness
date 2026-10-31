@@ -46,6 +46,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String? _email;
   String? _phone;
   String? _password;
+  String? _inviteToken;
   County? _county;
   SubCounty? _subCounty;
   Constituency? _constituency;
@@ -87,11 +88,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
-  static String _isoDate(DateTime d) =>
-      '${d.year.toString().padLeft(4, '0')}-'
-      '${d.month.toString().padLeft(2, '0')}-'
-      '${d.day.toString().padLeft(2, '0')}';
-
   void _submit() {
     final identity = _identity;
     if (identity == null) return;
@@ -100,16 +96,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
       email: (_email ?? '').trim().isEmpty ? null : _email!.trim(),
       phone: (_phone ?? '').trim().isEmpty ? null : _phone!.trim(),
       password: _password ?? '',
-      firstName: identity.firstName,
-      surname: identity.surname,
-      gender: identity.gender,
-      dateOfBirth: identity.dateOfBirth == null
-          ? null
-          : _isoDate(identity.dateOfBirth!),
       nationalIdNumber: identity.idNumber,
       idType: identity.idType,
       identityVerificationId: identity.verificationId,
-      countyId: _county?.id,
+      county: _county?.name,
+      inviteToken: (_inviteToken ?? '').trim().isEmpty
+          ? null
+          : _inviteToken!.trim(),
       subCountyId: _subCounty?.id,
       constituencyId: _constituency?.id,
       wardId: _ward?.id,
@@ -226,11 +219,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               required email,
                               required phone,
                               required password,
+                              required inviteToken,
                             }) {
                               setState(() {
                                 _email = email;
                                 _phone = phone;
                                 _password = password;
+                                _inviteToken = inviteToken;
                               });
                               _next();
                             },

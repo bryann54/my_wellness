@@ -538,7 +538,18 @@
     "deleteAccount": "Delete account",
     "deleteAccountSub": "Permanently remove your account"
   },
-
+"pricing":{
+  "viewPlans":"View plans",
+  "title":"Available plans",
+  "subtitle":"Choose a package that fits the health services you want to access.",
+  "loadError":"Plans could not be loaded. Check your connection and try again.",
+  "empty":"There are no plans available right now.",
+  "allAges":"All ages",
+  "ageRange":"Ages {min}–{max}",
+  "ageFrom":"Ages {min}+",
+  "ageTo":"Up to age {max}",
+  "vitalsIncluded":"Vitals logging included"
+},
   "profile": {
     "title": "Profile",
     "welcome": "Welcome",

@@ -48,7 +48,16 @@ class CustomAlertDialog extends StatelessWidget {
         textAlign: TextAlign.center,
         style: const TextStyle(fontWeight: FontWeight.bold),
       ),
-      content: message != null
+      content: message != null && content != null
+          ? Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(message!, textAlign: TextAlign.center),
+                const SizedBox(height: 16),
+                content!,
+              ],
+            )
+          : message != null
           ? Text(message!, textAlign: TextAlign.center)
           : content,
       actions:

@@ -132,7 +132,13 @@ class SyncRepositoryImpl implements SyncRepository {
     if (answers is List) {
       return answers
           .whereType<Map>()
-          .map((answer) => Map<String, dynamic>.from(answer))
+          .map((answer) {
+            final value = Map<String, dynamic>.from(answer);
+            return {
+              'question_index': value['question_index'],
+              'answer': value['answer'],
+            };
+          })
           .toList(growable: false);
     }
     // Migrate actions queued by the earlier single-answer payload format.

@@ -9,6 +9,7 @@ import 'package:my_wellness/common/notifiers/locale_provider.dart';
 import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_version_footer.dart';
+import 'package:my_wellness/common/widgets/app_snackbar.dart';
 import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
 import 'package:my_wellness/features/account/presentation/widgets/account_header.dart';
 import 'package:my_wellness/features/account/presentation/widgets/account_menu_section.dart';
@@ -131,26 +132,18 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   void _showSuccessMessage(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        duration: const Duration(seconds: 2),
-      ),
-    );
+    AppSnackbar.success(context, message, duration: const Duration(seconds: 2));
   }
 
   void _showErrorMessage(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        action: SnackBarAction(
-          label: 'Retry',
-          onPressed: () =>
-              context.read<AccountBloc>().add(const FetchProfileEvent()),
-        ),
-        duration: const Duration(seconds: 4),
-      ),
+    AppSnackbar.show(
+      context,
+      message: message,
+      type: AppSnackType.error,
+      duration: const Duration(seconds: 4),
+      actionLabel: 'Retry',
+      onAction: () =>
+          context.read<AccountBloc>().add(const FetchProfileEvent()),
     );
   }
 }

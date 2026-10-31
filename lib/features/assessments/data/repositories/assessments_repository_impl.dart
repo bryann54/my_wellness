@@ -1,6 +1,5 @@
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
-import 'package:my_wellness/core/api_client/endpoints/api_endpoints.dart';
 import 'package:my_wellness/core/errors/exceptions.dart';
 import 'package:my_wellness/core/errors/failures.dart';
 import 'package:my_wellness/features/assessments/data/datasources/assessments_remote_datasource.dart';
@@ -13,14 +12,12 @@ import 'package:my_wellness/features/assessments/domain/entities/bmi_preview.dar
 import 'package:my_wellness/features/assessments/domain/entities/referral.dart';
 import 'package:my_wellness/features/assessments/domain/entities/vitals_access.dart';
 import 'package:my_wellness/features/assessments/domain/repositories/assessments_repository.dart';
-import 'package:my_wellness/features/offline_sync/domain/repositories/sync_repository.dart';
 
 @LazySingleton(as: AssessmentsRepository)
 class AssessmentRepositoryImpl implements AssessmentsRepository {
   final AssessmentsRemoteDataSource _remote;
-  final SyncRepository _sync;
 
-  AssessmentRepositoryImpl(this._remote, this._sync);
+  AssessmentRepositoryImpl(this._remote);
 
   @override
   Future<Either<Failure, VitalsAccess>> getVitalsAccess() async {
@@ -70,6 +67,29 @@ class AssessmentRepositoryImpl implements AssessmentsRepository {
   }
 
   @override
+  Future<Either<Failure, AssessmentSession>> submitCancerPreScreening(
+    String slug,
+    String sessionId, {
+    required String priorCancerHistory,
+    required String priorCancerType,
+    int? priorCancerYear,
+  }) async {
+    try {
+      return Right(
+        await _remote.submitCancerPreScreening(
+          slug,
+          sessionId,
+          priorCancerHistory: priorCancerHistory,
+          priorCancerType: priorCancerType,
+          priorCancerYear: priorCancerYear,
+        ),
+      );
+    } on Exception catch (e) {
+      return Left(_map(e));
+    }
+  }
+
+  @override
   Future<Either<Failure, List<AssessmentAnswer>>> getAnswers(
     String slug,
     String sessionId,
@@ -99,27 +119,6 @@ class AssessmentRepositoryImpl implements AssessmentsRepository {
           answer: answer,
         ),
       );
-    } on NetworkException {
-      final enqueued = await _sync.enqueueAction(
-        actionType: 'assessment_answer',
-        endpoint: ApiEndpoints.assessmentOfflineBatch(slug, sessionId),
-        payload: {
-          'answers': [
-            {'question_index': questionIndex, 'answer': answer},
-          ],
-        },
-      );
-      return enqueued.fold(
-        (f) => Left(f),
-        // Optimistic: advance locally so the user can keep going offline.
-        (_) => Right(
-          SubmitAnswerResult(
-            nextIndex: questionIndex + 1,
-            terminate: false,
-            completed: false,
-          ),
-        ),
-      );
     } on Exception catch (e) {
       return Left(_map(e));
     }
@@ -146,6 +145,26 @@ class AssessmentRepositoryImpl implements AssessmentsRepository {
       return Right(
         await _remote.previewBmi(weightKg: weightKg, heightCm: heightCm),
       );
+    } on Exception catch (e) {
+      return Left(_map(e));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> submitBmiMetrics(
+    String slug,
+    String sessionId, {
+    required double weightKg,
+    required double heightCm,
+  }) async {
+    try {
+      await _remote.submitBmiMetrics(
+        slug,
+        sessionId,
+        weightKg: weightKg,
+        heightCm: heightCm,
+      );
+      return const Right(null);
     } on Exception catch (e) {
       return Left(_map(e));
     }

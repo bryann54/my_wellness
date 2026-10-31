@@ -19,16 +19,15 @@ class AppSnackbar {
     final overlay = Overlay.maybeOf(context);
     if (overlay == null) return;
 
-    final entry = OverlayEntry(
+    late final OverlayEntry entry;
+    entry = OverlayEntry(
       builder: (_) => _AppSnackbarHost(
         message: message,
         type: type,
         duration: duration ?? _duration,
         actionLabel: actionLabel,
         onAction: onAction,
-        onDismissed: () {
-          // The host removes itself.
-        },
+        onDismissed: entry.remove,
       ),
     );
 
@@ -72,7 +71,9 @@ class _AppSnackbarHost extends StatefulWidget {
 class _AppSnackbarHostState extends State<_AppSnackbarHost>
     with SingleTickerProviderStateMixin {
   late final AnimationController _ctrl;
+  late final AnimationController _exitCtrl;
   late final Animation<Offset> _slideIn;
+  late final Animation<Offset> _slideOut;
   late final Animation<double> _fade;
 
   bool _leaving = false;
@@ -82,19 +83,22 @@ class _AppSnackbarHostState extends State<_AppSnackbarHost>
     super.initState();
     _ctrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 320),
-      reverseDuration: const Duration(milliseconds: 260),
+      duration: const Duration(milliseconds: 220),
+    );
+    _exitCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 220),
     );
 
     // Entrance: from above → in place (drop).
-    _slideIn = Tween<Offset>(begin: const Offset(0, -0.6), end: Offset.zero)
-        .animate(
-          CurvedAnimation(
-            parent: _ctrl,
-            curve: Curves.easeOutBack,
-            reverseCurve: Curves.easeInCubic,
-          ),
-        );
+    _slideIn = Tween<Offset>(
+      begin: const Offset(0, -0.6),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic));
+    _slideOut = Tween<Offset>(
+      begin: Offset.zero,
+      end: const Offset(-1.1, 0),
+    ).animate(CurvedAnimation(parent: _exitCtrl, curve: Curves.easeInCubic));
 
     _fade = CurvedAnimation(parent: _ctrl, curve: Curves.easeOut);
 
@@ -109,27 +113,17 @@ class _AppSnackbarHostState extends State<_AppSnackbarHost>
     _leaving = true;
 
     // Exit: slide to the left.
-    await _ctrl.animateTo(
-      0,
-      duration: const Duration(milliseconds: 260),
-      curve: Curves.easeInCubic,
-    );
+    await _exitCtrl.forward();
 
     if (mounted) {
       widget.onDismissed();
-      // Remove the overlay entry from the tree.
-      final overlay = Overlay.maybeOf(context);
-      if (overlay != null) {
-        // We can't call remove() from here directly; use a callback from
-        // the caller instead. For simplicity, the entry removes itself
-        // when the widget unmounts (see AppSnackbar.show override below).
-      }
     }
   }
 
   @override
   void dispose() {
     _ctrl.dispose();
+    _exitCtrl.dispose();
     super.dispose();
   }
 
@@ -145,15 +139,21 @@ class _AppSnackbarHostState extends State<_AppSnackbarHost>
       right: 16,
       child: SlideTransition(
         position: _slideIn,
-        child: FadeTransition(
-          opacity: _fade,
-          child: _Bubble(
-            message: widget.message,
-            type: widget.type,
-            actionLabel: widget.actionLabel,
-            onAction: widget.onAction,
-            onClose: _exit,
-            colorScheme: cs,
+        child: SlideTransition(
+          position: _slideOut,
+          child: FadeTransition(
+            opacity: ReverseAnimation(_exitCtrl),
+            child: FadeTransition(
+              opacity: _fade,
+              child: _Bubble(
+                message: widget.message,
+                type: widget.type,
+                actionLabel: widget.actionLabel,
+                onAction: widget.onAction,
+                onClose: _exit,
+                colorScheme: cs,
+              ),
+            ),
           ),
         ),
       ),

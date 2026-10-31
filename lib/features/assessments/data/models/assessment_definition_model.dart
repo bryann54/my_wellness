@@ -23,6 +23,15 @@ class AssessmentDefinitionModel {
   @JsonKey(name: 'understanding_copy')
   final String? understandingCopy;
 
+  @JsonKey(name: 'before_you_begin')
+  final String? beforeYouBegin;
+
+  @JsonKey(name: 'cancer_history_type_code')
+  final String? cancerHistoryTypeCode;
+
+  @JsonKey(name: 'encouraging_fact')
+  final String? encouragingFact;
+
   final List<AssessmentQuestionModel> questions;
   final List<AssessmentCtaModel> ctas;
 
@@ -37,6 +46,9 @@ class AssessmentDefinitionModel {
     this.disclaimer,
     this.referencePrefix,
     this.understandingCopy,
+    this.beforeYouBegin,
+    this.cancerHistoryTypeCode,
+    this.encouragingFact,
   });
 
   factory AssessmentDefinitionModel.fromJson(Map<String, dynamic> json) =>
@@ -53,6 +65,9 @@ class AssessmentDefinitionModel {
     disclaimer: disclaimer,
     referencePrefix: referencePrefix,
     understandingCopy: understandingCopy,
+    beforeYouBegin: beforeYouBegin,
+    cancerHistoryTypeCode: cancerHistoryTypeCode,
+    encouragingFact: encouragingFact,
     questions: questions.map((q) => q.toEntity()).toList(growable: false),
     ctas: ctas.map((c) => c.toEntity()).toList(growable: false),
   );
