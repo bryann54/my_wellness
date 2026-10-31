@@ -3,7 +3,7 @@ import 'package:injectable/injectable.dart';
 import 'package:my_wellness/core/errors/failures.dart';
 import 'package:my_wellness/features/auth/data/models/signup_request_model.dart';
 import 'package:my_wellness/features/auth/domain/entities/auth_session_entity.dart';
-import 'package:my_wellness/features/auth/domain/entities/signup_pending_entity.dart';
+import 'package:my_wellness/features/auth/domain/entities/signup_result_entity.dart';
 import 'package:my_wellness/features/auth/domain/entities/user_entity.dart';
 import 'package:my_wellness/features/auth/domain/entities/verified_identity.dart';
 import 'package:my_wellness/features/auth/domain/repositories/auth_repository.dart';
@@ -24,7 +24,7 @@ class SignUpUseCase {
   final AuthRepository repository;
   SignUpUseCase(this.repository);
 
-  Future<Either<Failure, SignupPendingEntity>> call(SignupRequestModel req) =>
+  Future<Either<Failure, SignupResultEntity>> call(SignupRequestModel req) =>
       repository.signUp(req);
 }
 
@@ -44,7 +44,7 @@ class ConfirmSignupEmailUseCase {
   final AuthRepository repository;
   ConfirmSignupEmailUseCase(this.repository);
 
-  Future<Either<Failure, void>> call({
+  Future<Either<Failure, AuthSessionEntity>> call({
     required String email,
     required String code,
   }) => repository.confirmSignupEmail(email: email, code: code);
@@ -55,7 +55,7 @@ class ConfirmSignupPhoneUseCase {
   final AuthRepository repository;
   ConfirmSignupPhoneUseCase(this.repository);
 
-  Future<Either<Failure, void>> call({
+  Future<Either<Failure, AuthSessionEntity>> call({
     required String phone,
     required String code,
   }) => repository.confirmSignupPhone(phone: phone, code: code);

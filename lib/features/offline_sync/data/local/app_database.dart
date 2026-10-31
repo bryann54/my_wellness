@@ -42,7 +42,7 @@ class AppDatabase extends _$AppDatabase {
       'assessment_answers:$slug:$sessionId';
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -50,6 +50,12 @@ class AppDatabase extends _$AppDatabase {
     onUpgrade: (m, from, to) async {
       if (from < 2) {
         await m.createTable(cachedAssessments);
+      }
+      if (from < 3) {
+        await customStatement('DELETE FROM cached_assessments');
+        await customStatement(
+          "DELETE FROM pending_sync_actions WHERE action_type = 'assessment_answer'",
+        );
       }
     },
   );

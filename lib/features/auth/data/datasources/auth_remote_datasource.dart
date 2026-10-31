@@ -14,11 +14,11 @@ abstract class AuthRemoteDataSource {
 
   Future<SignupPendingModel> signup(SignupRequestModel req);
 
-  Future<void> confirmSignupEmail({
+  Future<AuthSessionModel> confirmSignupEmail({
     required String email,
     required String code,
   });
-  Future<void> confirmSignupPhone({
+  Future<AuthSessionModel> confirmSignupPhone({
     required String phone,
     required String code,
   });
@@ -83,25 +83,27 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<void> confirmSignupEmail({
+  Future<AuthSessionModel> confirmSignupEmail({
     required String email,
     required String code,
   }) async {
-    await _client.post(
+    final response = await _client.post<Map<String, dynamic>>(
       url: ApiEndpoints.authSignupConfirm,
       payload: {'email': email, 'code': code},
     );
+    return AuthSessionModel.fromJson(response);
   }
 
   @override
-  Future<void> confirmSignupPhone({
+  Future<AuthSessionModel> confirmSignupPhone({
     required String phone,
     required String code,
   }) async {
-    await _client.post(
+    final response = await _client.post<Map<String, dynamic>>(
       url: ApiEndpoints.authSignupPhoneConfirm,
       payload: {'phone': phone, 'code': code},
     );
+    return AuthSessionModel.fromJson(response);
   }
 
   @override

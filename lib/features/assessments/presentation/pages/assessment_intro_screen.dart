@@ -188,6 +188,28 @@ class _AssessmentIntroBodyState extends State<_AssessmentIntroBody> {
                           color: cs.onSurface.withValues(alpha: 0.75),
                         ),
                       ),
+                    if (def.beforeYouBegin != null) ...[
+                      const SizedBox(height: 14),
+                      Text(
+                        def.beforeYouBegin!,
+                        style: GoogleFonts.inter(
+                          fontSize: 13.5,
+                          height: 1.55,
+                          color: cs.onSurface.withValues(alpha: 0.75),
+                        ),
+                      ),
+                    ],
+                    if (def.encouragingFact != null) ...[
+                      const SizedBox(height: 14),
+                      Text(
+                        def.encouragingFact!,
+                        style: GoogleFonts.inter(
+                          fontSize: 13.5,
+                          height: 1.55,
+                          color: cs.primary,
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 28),
                     if (def.disclaimer != null)
                       Container(

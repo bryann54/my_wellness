@@ -51,8 +51,13 @@ void main() async {
   await _configureGoogleMaps();
   await configureDependencies();
   await PackageInfo.fromPlatform();
+  await AppLocalizations.preloadSupportedLocales();
 
-  await getIt<NotificationService>().initialize();
+  try {
+    await getIt<NotificationService>().initialize();
+  } catch (_) {
+    // Push setup must never prevent the app itself from opening.
+  }
 
   final localeProvider = LocaleProvider()..loadLocale();
   final themeProvider = ThemeProvider()..load();

@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class AppLocalizations {
+  static final Map<String, AppLocalizations> _cache = {};
   final Locale locale;
   Map<String, dynamic> _localizedStrings = {};
 
@@ -31,6 +33,20 @@ class AppLocalizations {
 
   static const LocalizationsDelegate<AppLocalizations> delegate =
       _AppLocalizationsDelegate();
+
+  static Future<void> preloadSupportedLocales() async {
+    await Future.wait([
+      for (final locale in const [Locale('en'), Locale('sw')])
+        _loadAndCache(locale),
+    ]);
+  }
+
+  static Future<AppLocalizations> _loadAndCache(Locale locale) async {
+    final localizations = AppLocalizations(locale);
+    await localizations.load();
+    _cache[locale.languageCode] = localizations;
+    return localizations;
+  }
 
   Future<bool> load() async {
     try {
@@ -81,9 +97,9 @@ class _AppLocalizationsDelegate
 
   @override
   Future<AppLocalizations> load(Locale locale) async {
-    AppLocalizations localizations = AppLocalizations(locale);
-    await localizations.load();
-    return localizations;
+    final cached = AppLocalizations._cache[locale.languageCode];
+    if (cached != null) return SynchronousFuture(cached);
+    return AppLocalizations._loadAndCache(locale);
   }
 
   @override

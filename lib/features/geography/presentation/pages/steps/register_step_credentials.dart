@@ -11,6 +11,7 @@ typedef CredentialsCallback =
       required String email,
       required String phone,
       required String password,
+      required String inviteToken,
     });
 
 class RegisterStepCredentials extends StatefulWidget {
@@ -38,6 +39,7 @@ class _RegisterStepCredentialsState extends State<RegisterStepCredentials> {
   late final TextEditingController _phoneCtrl;
   late final TextEditingController _passwordCtrl;
   late final TextEditingController _confirmCtrl;
+  late final TextEditingController _inviteCtrl;
 
   bool _passwordVisible = false;
   bool _confirmVisible = false;
@@ -50,6 +52,7 @@ class _RegisterStepCredentialsState extends State<RegisterStepCredentials> {
     _phoneCtrl = TextEditingController(text: widget.initialPhone ?? '');
     _passwordCtrl = TextEditingController();
     _confirmCtrl = TextEditingController();
+    _inviteCtrl = TextEditingController();
 
     for (final c in [_emailCtrl, _phoneCtrl, _passwordCtrl, _confirmCtrl]) {
       c.addListener(_recheck);
@@ -63,6 +66,7 @@ class _RegisterStepCredentialsState extends State<RegisterStepCredentials> {
     _phoneCtrl.dispose();
     _passwordCtrl.dispose();
     _confirmCtrl.dispose();
+    _inviteCtrl.dispose();
     super.dispose();
   }
 
@@ -79,13 +83,14 @@ class _RegisterStepCredentialsState extends State<RegisterStepCredentials> {
     final email = _emailCtrl.text.trim();
     final phone = _phoneCtrl.text.trim();
 
-    final emailOk = email.isNotEmpty && AuthValidators.isValidEmail(email);
+    final emailOk = email.isEmpty || AuthValidators.isValidEmail(email);
     final phoneOk = phone.isEmpty || AuthValidators.isValidPhone(phone);
+    final contactOk = email.isNotEmpty || phone.isNotEmpty;
     final passwordOk = AuthValidators.isValidPassword(_passwordCtrl.text);
     final matchOk =
         _confirmCtrl.text.isNotEmpty && _confirmCtrl.text == _passwordCtrl.text;
 
-    final ok = emailOk && phoneOk && passwordOk && matchOk;
+    final ok = emailOk && phoneOk && contactOk && passwordOk && matchOk;
     if (ok != _isValid) setState(() => _isValid = ok);
   }
 
@@ -95,6 +100,7 @@ class _RegisterStepCredentialsState extends State<RegisterStepCredentials> {
       email: _emailCtrl.text.trim(),
       phone: _phoneCtrl.text.trim(),
       password: _passwordCtrl.text,
+      inviteToken: _inviteCtrl.text.trim(),
     );
   }
 
@@ -125,7 +131,7 @@ class _RegisterStepCredentialsState extends State<RegisterStepCredentials> {
               icon: Icons.email_outlined,
               keyboardType: TextInputType.emailAddress,
               validator: (v) =>
-                  AuthValidators.validateEmail(context, v, isRequired: true),
+                  AuthValidators.validateEmail(context, v, isRequired: false),
             ),
             const SizedBox(height: 16),
             AuthTextField(
@@ -134,8 +140,11 @@ class _RegisterStepCredentialsState extends State<RegisterStepCredentials> {
               icon: Icons.phone_outlined,
               keyboardType: TextInputType.phone,
               enabled: !widget.phoneIsVerified,
-              validator: (v) =>
-                  AuthValidators.validatePhone(context, v, isRequired: false),
+              validator: (v) => AuthValidators.validatePhone(
+                context,
+                v,
+                isRequired: _emailCtrl.text.trim().isEmpty,
+              ),
             ),
             const SizedBox(height: 16),
             AuthTextField(
@@ -166,6 +175,12 @@ class _RegisterStepCredentialsState extends State<RegisterStepCredentials> {
                 v,
                 _passwordCtrl.text,
               ),
+            ),
+            const SizedBox(height: 16),
+            AuthTextField(
+              controller: _inviteCtrl,
+              label: AppLocalizations.getString(context, 'auth.referralCode'),
+              icon: Icons.card_giftcard_outlined,
             ),
             const SizedBox(height: 32),
             AppPrimaryButton(

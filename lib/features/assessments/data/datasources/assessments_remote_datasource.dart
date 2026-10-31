@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:injectable/injectable.dart';
 import 'package:my_wellness/core/api_client/client/api_client.dart';
 import 'package:my_wellness/core/api_client/endpoints/api_endpoints.dart';
@@ -20,7 +19,6 @@ import 'package:my_wellness/features/assessments/domain/entities/bmi_preview.dar
 import 'package:my_wellness/features/assessments/domain/entities/referral.dart';
 import 'package:my_wellness/features/assessments/domain/entities/vitals_access.dart';
 import 'package:my_wellness/features/assessments/domain/repositories/assessments_repository.dart';
-import 'package:my_wellness/features/offline_sync/data/local/app_database.dart';
 
 abstract class AssessmentsRemoteDataSource {
   Future<VitalsAccess> getVitalsAccess();
@@ -28,6 +26,13 @@ abstract class AssessmentsRemoteDataSource {
   Future<CanStartResult> canStart(String slug);
   Future<AssessmentDefinition> getDefinition(String slug);
   Future<AssessmentSession> startSession(String slug);
+  Future<AssessmentSession> submitCancerPreScreening(
+    String slug,
+    String sessionId, {
+    required String priorCancerHistory,
+    required String priorCancerType,
+    int? priorCancerYear,
+  });
   Future<List<AssessmentAnswer>> getAnswers(String slug, String sessionId);
   Future<Referral?> getReferralForSession(String sessionId);
   Future<SubmitAnswerResult> submitAnswer(
@@ -42,13 +47,18 @@ abstract class AssessmentsRemoteDataSource {
     required String weightKg,
     required String heightCm,
   });
+  Future<void> submitBmiMetrics(
+    String slug,
+    String sessionId, {
+    required double weightKg,
+    required double heightCm,
+  });
 }
 
 @LazySingleton(as: AssessmentsRemoteDataSource)
 class AssessmentsRemoteDataSourceImpl implements AssessmentsRemoteDataSource {
   final ApiClient _api;
-  final AppDatabase _database;
-  AssessmentsRemoteDataSourceImpl(this._api, this._database);
+  AssessmentsRemoteDataSourceImpl(this._api);
 
   @override
   Future<VitalsAccess> getVitalsAccess() async {
@@ -76,19 +86,10 @@ class AssessmentsRemoteDataSourceImpl implements AssessmentsRemoteDataSource {
 
   @override
   Future<List<AssessmentSummary>> listAssessments() async {
-    late final List<dynamic> res;
-    try {
-      res = await _api.get<List<dynamic>>(
-        url: ApiEndpoints.assessments,
-        options: ApiClient.protected,
-      );
-      await _database.cachePayload('assessment_list', jsonEncode(res));
-      await _precacheOfflineDefinitions(res);
-    } on NetworkException {
-      final cached = await _database.getCachedPayload('assessment_list');
-      if (cached == null) rethrow;
-      res = jsonDecode(cached) as List<dynamic>;
-    }
+    final res = await _api.get<List<dynamic>>(
+      url: ApiEndpoints.assessments,
+      options: ApiClient.protected,
+    );
     return res
         .map(
           (e) => AssessmentSummaryModel.fromJson(
@@ -96,32 +97,6 @@ class AssessmentsRemoteDataSourceImpl implements AssessmentsRemoteDataSource {
           ).toEntity(),
         )
         .toList(growable: false);
-  }
-
-  Future<void> _precacheOfflineDefinitions(List<dynamic> summaries) async {
-    final slugs = summaries
-        .whereType<Map<String, dynamic>>()
-        .map((summary) => summary['slug'])
-        .whereType<String>()
-        .where((slug) => slug.isNotEmpty)
-        .toList(growable: false);
-
-    for (var i = 0; i < slugs.length; i += 3) {
-      final batch = slugs.skip(i).take(3);
-      await Future.wait(
-        batch.map((slug) async {
-          try {
-            final definition = await _api.get<Map<String, dynamic>>(
-              url: ApiEndpoints.assessmentOffline(slug),
-              options: ApiClient.protected,
-            );
-            await _database.cacheAssessment(slug, jsonEncode(definition));
-          } on Exception {
-            // A partial catalog warm-up must not block the online catalog.
-          }
-        }),
-      );
-    }
   }
 
   @override
@@ -139,35 +114,10 @@ class AssessmentsRemoteDataSourceImpl implements AssessmentsRemoteDataSource {
 
   @override
   Future<AssessmentDefinition> getDefinition(String slug) async {
-    late final Map<String, dynamic> res;
-    var loadedRemotely = false;
-    try {
-      res = await _api.get<Map<String, dynamic>>(
-        url: ApiEndpoints.assessmentDetail(slug),
-        options: ApiClient.protected,
-      );
-      loadedRemotely = true;
-      await _database.cacheAssessment(slug, jsonEncode(res));
-    } on NetworkException {
-      final cached = await _database.getCachedAssessment(slug);
-      if (cached == null) rethrow;
-      res = jsonDecode(cached) as Map<String, dynamic>;
-    }
-
-    // Preserve the regular online response above. The offline endpoint adds
-    // navigation rules needed by an offline session, so cache its richer
-    // catalog separately as the latest definition payload when available.
-    if (loadedRemotely) {
-      try {
-        final offlineDefinition = await _api.get<Map<String, dynamic>>(
-          url: ApiEndpoints.assessmentOffline(slug),
-          options: ApiClient.protected,
-        );
-        await _database.cacheAssessment(slug, jsonEncode(offlineDefinition));
-      } on Exception {
-        // The normal assessment endpoint remains authoritative for online use.
-      }
-    }
+    final res = await _api.get<Map<String, dynamic>>(
+      url: ApiEndpoints.assessmentOffline(slug),
+      options: ApiClient.mobileProtected,
+    );
     return AssessmentDefinitionModel.fromJson(res).toEntity();
   }
 
@@ -182,55 +132,39 @@ class AssessmentsRemoteDataSourceImpl implements AssessmentsRemoteDataSource {
   }
 
   @override
+  Future<AssessmentSession> submitCancerPreScreening(
+    String slug,
+    String sessionId, {
+    required String priorCancerHistory,
+    required String priorCancerType,
+    int? priorCancerYear,
+  }) async {
+    final res = await _api.post<Map<String, dynamic>>(
+      url: ApiEndpoints.assessmentPreScreening(slug, sessionId),
+      payload: {
+        'prior_cancer_history': priorCancerHistory,
+        'prior_cancer_type': priorCancerType,
+        'prior_cancer_year': priorCancerYear,
+      },
+      options: ApiClient.protected,
+    );
+    return AssessmentSessionModel.fromJson(res).toEntity();
+  }
+
+  @override
   Future<List<AssessmentAnswer>> getAnswers(
     String slug,
     String sessionId,
   ) async {
-    late final List<dynamic> res;
-    final cacheKey = AppDatabase.assessmentAnswersCacheKey(slug, sessionId);
-    try {
-      res = await _api.get<List<dynamic>>(
-        url: ApiEndpoints.assessmentAnswers(slug, sessionId),
-        options: ApiClient.protected,
-      );
-      await _database.cachePayload(cacheKey, jsonEncode(res));
-    } on NetworkException {
-      final cached = await _database.getCachedPayload(cacheKey);
-      if (cached == null) rethrow;
-      res = jsonDecode(cached) as List<dynamic>;
-    }
+    final res = await _api.get<List<dynamic>>(
+      url: ApiEndpoints.assessmentAnswers(slug, sessionId),
+      options: ApiClient.protected,
+    );
 
     final answersByIndex = <int, Map<String, dynamic>>{
       for (final item in res.whereType<Map<String, dynamic>>())
         if (item['question_index'] is int) item['question_index'] as int: item,
     };
-    final endpoint = ApiEndpoints.assessmentOfflineBatch(slug, sessionId);
-    try {
-      final pendingActions = await _database.getPendingActions();
-      for (final action in pendingActions) {
-        if (action.actionType != 'assessment_answer' ||
-            action.endpoint != endpoint ||
-            action.method != 'POST') {
-          continue;
-        }
-        final payload = jsonDecode(action.payload) as Map<String, dynamic>;
-        final queuedAnswers = payload['answers'];
-        if (queuedAnswers is! List) continue;
-        for (final queued in queuedAnswers.whereType<Map>()) {
-          final answer = Map<String, dynamic>.from(queued);
-          final index = answer['question_index'];
-          if (index is! int || answer['answer'] == null) continue;
-          answersByIndex[index] = {
-            'question_key': answer['question_key']?.toString() ?? '',
-            'question_index': index,
-            'answer': answer['answer'].toString(),
-          };
-        }
-      }
-    } on Exception {
-      // Cached/server answers remain usable if the pending queue cannot be read.
-    }
-
     return answersByIndex.values
         .map((e) => AssessmentAnswerModel.fromJson(e).toEntity())
         .toList(growable: false);
@@ -246,11 +180,7 @@ class AssessmentsRemoteDataSourceImpl implements AssessmentsRemoteDataSource {
   }) async {
     final res = await _api.post<Map<String, dynamic>>(
       url: ApiEndpoints.assessmentAnswers(slug, sessionId),
-      payload: {
-        'question_key': questionKey,
-        'question_index': questionIndex,
-        'answer': answer,
-      },
+      payload: {'question_index': questionIndex, 'answer': answer},
       options: ApiClient.protected,
     );
     return SubmitAnswerResult(
@@ -281,5 +211,19 @@ class AssessmentsRemoteDataSourceImpl implements AssessmentsRemoteDataSource {
       options: ApiClient.protected,
     );
     return BmiPreviewModel.fromJson(res).toEntity();
+  }
+
+  @override
+  Future<void> submitBmiMetrics(
+    String slug,
+    String sessionId, {
+    required double weightKg,
+    required double heightCm,
+  }) async {
+    await _api.post<Map<String, dynamic>>(
+      url: ApiEndpoints.assessmentBmiMetrics(slug, sessionId),
+      payload: {'weight_kg': weightKg, 'height_cm': heightCm},
+      options: ApiClient.protected,
+    );
   }
 }

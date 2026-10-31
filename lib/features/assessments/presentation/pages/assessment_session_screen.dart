@@ -6,6 +6,7 @@ import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_primary_button.dart';
 import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_question.dart';
+import 'package:my_wellness/features/assessments/domain/entities/assessment_session.dart';
 import 'package:my_wellness/features/assessments/presentation/bloc/assessments_bloc.dart';
 import 'package:my_wellness/features/assessments/presentation/pages/assessment_terminated_screen.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_bmi_step.dart';
@@ -43,8 +44,17 @@ class _AssessmentSessionBody extends StatefulWidget {
 
 class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
   String? _pendingAnswer;
+  bool? _priorCancerHistory;
+  String? _priorCancerType;
+  final TextEditingController _priorCancerYear = TextEditingController();
   int _lastIndex = -1;
   bool _navigated = false;
+
+  @override
+  void dispose() {
+    _priorCancerYear.dispose();
+    super.dispose();
+  }
 
   void _scheduleCompleteRedirect() {
     if (_navigated) return;
@@ -107,6 +117,146 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
 
     if (session == null || def == null) {
       return const Scaffold(body: SafeArea(child: AssessmentIntroSkeleton()));
+    }
+
+    if (session.status != AssessmentSessionStatus.inProgress) {
+      if (session.status == AssessmentSessionStatus.needsPreScreening) {
+        final submitting = state.status == AssessmentStatus.submitting;
+        final hasHistory = _priorCancerHistory;
+        final year = int.tryParse(_priorCancerYear.text.trim());
+        final valid =
+            hasHistory != null &&
+            (hasHistory == false || _priorCancerType != null) &&
+            (_priorCancerYear.text.trim().isEmpty || year != null);
+        return Scaffold(
+          appBar: AppBar(title: Text(def.shortTitle)),
+          body: SafeArea(
+            child: ListView(
+              padding: const EdgeInsets.all(24),
+              children: [
+                Text(
+                  'Have you previously been diagnosed with this cancer?',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 12),
+                RadioListTile<bool>(
+                  value: true,
+                  groupValue: _priorCancerHistory,
+                  title: const Text('Yes'),
+                  onChanged: submitting
+                      ? null
+                      : (value) => setState(() => _priorCancerHistory = value),
+                ),
+                RadioListTile<bool>(
+                  value: false,
+                  groupValue: _priorCancerHistory,
+                  title: const Text('No'),
+                  onChanged: submitting
+                      ? null
+                      : (value) => setState(() {
+                          _priorCancerHistory = value;
+                          _priorCancerType = null;
+                          _priorCancerYear.clear();
+                        }),
+                ),
+                if (hasHistory == true) ...[
+                  const SizedBox(height: 12),
+                  DropdownButtonFormField<String>(
+                    initialValue: _priorCancerType,
+                    decoration: const InputDecoration(
+                      labelText: 'Cancer type',
+                      border: OutlineInputBorder(),
+                    ),
+                    items:
+                        const [
+                              'breast',
+                              'cervical',
+                              'prostate',
+                              'esophageal',
+                              'colorectal',
+                              'other',
+                            ]
+                            .map(
+                              (type) => DropdownMenuItem(
+                                value: type,
+                                child: Text(
+                                  type[0].toUpperCase() + type.substring(1),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                    onChanged: submitting
+                        ? null
+                        : (value) => setState(() => _priorCancerType = value),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _priorCancerYear,
+                    enabled: !submitting,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Year diagnosed (optional)',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 24),
+                AppPrimaryButton(
+                  onPressed: !valid || submitting
+                      ? null
+                      : () => context.read<AssessmentsBloc>().add(
+                          SubmitCancerPreScreeningEvent(
+                            priorCancerHistory: hasHistory ? 'yes' : 'no',
+                            priorCancerType: hasHistory
+                                ? _priorCancerType!
+                                : '',
+                            priorCancerYear: hasHistory ? year : null,
+                          ),
+                        ),
+                  label: submitting ? 'Submitting…' : 'Continue',
+                  height: 52,
+                ),
+                const SizedBox(height: 12),
+                TextButton(
+                  onPressed: submitting
+                      ? null
+                      : () => context.router.maybePop(),
+                  child: Text(
+                    AppLocalizations.getString(context, 'common.back'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+      final message = switch (session.status) {
+        AssessmentSessionStatus.awaitingPayment =>
+          'This assessment is waiting for access to be unlocked.',
+        AssessmentSessionStatus.awaitingCall =>
+          'A care team member will contact you to complete this assessment.',
+        _ => 'This assessment is not ready to continue yet.',
+      };
+      return Scaffold(
+        appBar: AppBar(title: Text(def.shortTitle)),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(message, textAlign: TextAlign.center),
+                const SizedBox(height: 16),
+                AppPrimaryButton(
+                  onPressed: () => context.router.maybePop(),
+                  label: AppLocalizations.getString(context, 'common.back'),
+                  height: 48,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
     }
 
     if (session.currentIndex != _lastIndex) {

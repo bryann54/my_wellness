@@ -97,7 +97,15 @@ import '../../features/launch/domain/usecases/check_connectivity_usecase.dart'
 import '../../features/launch/presentation/bloc/launch_bloc.dart' as _i646;
 import '../../features/medications/presentation/bloc/medications_bloc.dart'
     as _i734;
+import '../../features/notifications/data/datasources/notification_preferences_remote_datasource.dart'
+    as _i220;
 import '../../features/notifications/data/notification_service.dart' as _i597;
+import '../../features/notifications/data/repositories/notification_preferences_repository_impl.dart'
+    as _i159;
+import '../../features/notifications/domain/repositories/notification_preferences_repository.dart'
+    as _i578;
+import '../../features/notifications/domain/usecases/notification_preferences_usecases.dart'
+    as _i644;
 import '../../features/notifications/presentation/bloc/notifications_bloc.dart'
     as _i1041;
 import '../../features/offline_sync/data/datasources/sync_local_datasource.dart'
@@ -173,9 +181,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i152.LocalAuthentication>(),
       ),
     );
-    gh.factory<_i1041.NotificationsBloc>(
-      () => _i1041.NotificationsBloc(gh<_i597.NotificationService>()),
-    );
     gh.lazySingleton<_i992.AuthLocalDataSource>(
       () => _i992.AuthLocalDataSourceImpl(gh<_i558.FlutterSecureStorage>()),
     );
@@ -242,10 +247,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i302.AccountRemoteDataSource>(
       () => _i302.AccountRemoteDataSourceImpl(gh<_i671.ApiClient>()),
     );
-    gh.lazySingleton<_i219.HomeDashboardRemoteDataSource>(
-      () => _i219.HomeDashboardRemoteDataSourceImpl(
+    gh.lazySingleton<_i220.NotificationPreferencesRemoteDataSource>(
+      () => _i220.NotificationPreferencesRemoteDataSourceImpl(
         gh<_i671.ApiClient>(),
-        gh<_i669.AppDatabase>(),
       ),
     );
     gh.lazySingleton<_i941.VitalsCaptureRemoteDataSource>(
@@ -257,11 +261,17 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i671.ApiClient>(),
       ),
     );
+    gh.lazySingleton<_i219.HomeDashboardRemoteDataSource>(
+      () => _i219.HomeDashboardRemoteDataSourceImpl(gh<_i671.ApiClient>()),
+    );
     gh.lazySingleton<_i515.VitalsRepository>(
       () => _i214.VitalsRepositoryImpl(
         gh<_i216.VitalsRemoteDataSource>(),
         gh<_i441.SyncRepository>(),
       ),
+    );
+    gh.lazySingleton<_i470.AssessmentsRemoteDataSource>(
+      () => _i470.AssessmentsRemoteDataSourceImpl(gh<_i671.ApiClient>()),
     );
     gh.lazySingleton<_i787.AuthRepository>(
       () => _i153.AuthRepositoryImpl(
@@ -327,6 +337,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i29.AccountLocalDatasource>(),
       ),
     );
+    gh.lazySingleton<_i544.AssessmentsRepository>(
+      () => _i958.AssessmentRepositoryImpl(
+        gh<_i470.AssessmentsRemoteDataSource>(),
+      ),
+    );
     gh.factory<_i1033.CancelAccountDeletionUseCase>(
       () => _i1033.CancelAccountDeletionUseCase(gh<_i1067.AccountRepository>()),
     );
@@ -355,12 +370,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i474.GeographyRemoteDataSource>(
       () => _i474.GeographyRemoteDataSourceImpl(gh<_i671.ApiClient>()),
-    );
-    gh.lazySingleton<_i470.AssessmentsRemoteDataSource>(
-      () => _i470.AssessmentsRemoteDataSourceImpl(
-        gh<_i671.ApiClient>(),
-        gh<_i669.AppDatabase>(),
-      ),
     );
     gh.factory<_i708.AccountBloc>(
       () => _i708.AccountBloc(
@@ -405,8 +414,54 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i46.GetCurrentUserUseCase>(
       () => _i46.GetCurrentUserUseCase(gh<_i787.AuthRepository>()),
     );
+    gh.lazySingleton<_i578.NotificationPreferencesRepository>(
+      () => _i159.NotificationPreferencesRepositoryImpl(
+        gh<_i220.NotificationPreferencesRemoteDataSource>(),
+      ),
+    );
     gh.factory<_i30.SyncBloc>(
       () => _i30.SyncBloc(gh<_i441.SyncRepository>(), gh<_i895.Connectivity>()),
+    );
+    gh.lazySingleton<_i6.GetVitalsAccessUseCase>(
+      () => _i6.GetVitalsAccessUseCase(gh<_i544.AssessmentsRepository>()),
+    );
+    gh.lazySingleton<_i6.ListAssessmentsUseCase>(
+      () => _i6.ListAssessmentsUseCase(gh<_i544.AssessmentsRepository>()),
+    );
+    gh.lazySingleton<_i6.CanStartAssessmentUseCase>(
+      () => _i6.CanStartAssessmentUseCase(gh<_i544.AssessmentsRepository>()),
+    );
+    gh.lazySingleton<_i6.GetAssessmentDefinitionUseCase>(
+      () =>
+          _i6.GetAssessmentDefinitionUseCase(gh<_i544.AssessmentsRepository>()),
+    );
+    gh.lazySingleton<_i6.StartAssessmentSessionUseCase>(
+      () =>
+          _i6.StartAssessmentSessionUseCase(gh<_i544.AssessmentsRepository>()),
+    );
+    gh.lazySingleton<_i6.SubmitCancerPreScreeningUseCase>(
+      () => _i6.SubmitCancerPreScreeningUseCase(
+        gh<_i544.AssessmentsRepository>(),
+      ),
+    );
+    gh.lazySingleton<_i6.GetReferralForSessionUseCase>(
+      () => _i6.GetReferralForSessionUseCase(gh<_i544.AssessmentsRepository>()),
+    );
+    gh.lazySingleton<_i6.GetAssessmentAnswersUseCase>(
+      () => _i6.GetAssessmentAnswersUseCase(gh<_i544.AssessmentsRepository>()),
+    );
+    gh.lazySingleton<_i6.SubmitAssessmentAnswerUseCase>(
+      () =>
+          _i6.SubmitAssessmentAnswerUseCase(gh<_i544.AssessmentsRepository>()),
+    );
+    gh.lazySingleton<_i6.GetAssessmentScoreUseCase>(
+      () => _i6.GetAssessmentScoreUseCase(gh<_i544.AssessmentsRepository>()),
+    );
+    gh.lazySingleton<_i6.PreviewBmiUseCase>(
+      () => _i6.PreviewBmiUseCase(gh<_i544.AssessmentsRepository>()),
+    );
+    gh.lazySingleton<_i6.SubmitBmiMetricsUseCase>(
+      () => _i6.SubmitBmiMetricsUseCase(gh<_i544.AssessmentsRepository>()),
     );
     gh.lazySingleton<_i636.HomeDashboardRepository>(
       () => _i730.HomeDashboardRepositoryImpl(
@@ -455,12 +510,6 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i771.GeographyRepositoryImpl(gh<_i474.GeographyRemoteDataSource>()),
     );
-    gh.lazySingleton<_i544.AssessmentsRepository>(
-      () => _i958.AssessmentRepositoryImpl(
-        gh<_i470.AssessmentsRemoteDataSource>(),
-        gh<_i441.SyncRepository>(),
-      ),
-    );
     gh.factory<_i734.MedicationsBloc>(
       () => _i734.MedicationsBloc(
         gh<_i425.GetMedicationsPagedUseCase>(),
@@ -471,6 +520,16 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i181.GetPricingPackagesUseCase>(
       () => _i181.GetPricingPackagesUseCase(gh<_i102.PricingRepository>()),
+    );
+    gh.lazySingleton<_i181.GetPricingCatalogUseCase>(
+      () => _i181.GetPricingCatalogUseCase(gh<_i102.PricingRepository>()),
+    );
+    gh.lazySingleton<_i181.GetPricingQuoteUseCase>(
+      () => _i181.GetPricingQuoteUseCase(gh<_i102.PricingRepository>()),
+    );
+    gh.lazySingleton<_i181.CheckoutPricingSelectionUseCase>(
+      () =>
+          _i181.CheckoutPricingSelectionUseCase(gh<_i102.PricingRepository>()),
     );
     gh.lazySingleton<_i275.GetConstituenciesUseCase>(
       () => _i275.GetConstituenciesUseCase(gh<_i480.GeographyRepository>()),
@@ -483,6 +542,34 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i903.GetWardsUseCase>(
       () => _i903.GetWardsUseCase(gh<_i480.GeographyRepository>()),
+    );
+    gh.lazySingleton<_i644.NotificationPreferencesUseCases>(
+      () => _i644.NotificationPreferencesUseCases(
+        gh<_i578.NotificationPreferencesRepository>(),
+      ),
+    );
+    gh.factory<_i20.PricingBloc>(
+      () => _i20.PricingBloc(
+        gh<_i181.GetPricingCatalogUseCase>(),
+        gh<_i181.GetPricingQuoteUseCase>(),
+        gh<_i181.CheckoutPricingSelectionUseCase>(),
+      ),
+    );
+    gh.factory<_i1022.AssessmentsBloc>(
+      () => _i1022.AssessmentsBloc(
+        gh<_i6.GetVitalsAccessUseCase>(),
+        gh<_i6.ListAssessmentsUseCase>(),
+        gh<_i6.CanStartAssessmentUseCase>(),
+        gh<_i6.GetAssessmentDefinitionUseCase>(),
+        gh<_i6.StartAssessmentSessionUseCase>(),
+        gh<_i6.SubmitCancerPreScreeningUseCase>(),
+        gh<_i6.GetAssessmentAnswersUseCase>(),
+        gh<_i6.SubmitAssessmentAnswerUseCase>(),
+        gh<_i6.GetReferralForSessionUseCase>(),
+        gh<_i6.GetAssessmentScoreUseCase>(),
+        gh<_i6.PreviewBmiUseCase>(),
+        gh<_i6.SubmitBmiMetricsUseCase>(),
+      ),
     );
     gh.factory<_i797.AuthBloc>(
       () => _i797.AuthBloc(
@@ -518,56 +605,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i202.HomeBloc>(
       () => _i202.HomeBloc(gh<_i493.GetHomeDashboardUseCase>()),
     );
-    gh.lazySingleton<_i6.GetVitalsAccessUseCase>(
-      () => _i6.GetVitalsAccessUseCase(gh<_i544.AssessmentsRepository>()),
-    );
-    gh.lazySingleton<_i6.ListAssessmentsUseCase>(
-      () => _i6.ListAssessmentsUseCase(gh<_i544.AssessmentsRepository>()),
-    );
-    gh.lazySingleton<_i6.CanStartAssessmentUseCase>(
-      () => _i6.CanStartAssessmentUseCase(gh<_i544.AssessmentsRepository>()),
-    );
-    gh.lazySingleton<_i6.GetAssessmentDefinitionUseCase>(
-      () =>
-          _i6.GetAssessmentDefinitionUseCase(gh<_i544.AssessmentsRepository>()),
-    );
-    gh.lazySingleton<_i6.StartAssessmentSessionUseCase>(
-      () =>
-          _i6.StartAssessmentSessionUseCase(gh<_i544.AssessmentsRepository>()),
-    );
-    gh.lazySingleton<_i6.GetReferralForSessionUseCase>(
-      () => _i6.GetReferralForSessionUseCase(gh<_i544.AssessmentsRepository>()),
-    );
-    gh.lazySingleton<_i6.GetAssessmentAnswersUseCase>(
-      () => _i6.GetAssessmentAnswersUseCase(gh<_i544.AssessmentsRepository>()),
-    );
-    gh.lazySingleton<_i6.SubmitAssessmentAnswerUseCase>(
-      () =>
-          _i6.SubmitAssessmentAnswerUseCase(gh<_i544.AssessmentsRepository>()),
-    );
-    gh.lazySingleton<_i6.GetAssessmentScoreUseCase>(
-      () => _i6.GetAssessmentScoreUseCase(gh<_i544.AssessmentsRepository>()),
-    );
-    gh.lazySingleton<_i6.PreviewBmiUseCase>(
-      () => _i6.PreviewBmiUseCase(gh<_i544.AssessmentsRepository>()),
-    );
-    gh.factory<_i1022.AssessmentsBloc>(
-      () => _i1022.AssessmentsBloc(
-        gh<_i6.GetVitalsAccessUseCase>(),
-        gh<_i6.ListAssessmentsUseCase>(),
-        gh<_i6.CanStartAssessmentUseCase>(),
-        gh<_i6.GetAssessmentDefinitionUseCase>(),
-        gh<_i6.StartAssessmentSessionUseCase>(),
-        gh<_i6.GetAssessmentAnswersUseCase>(),
-        gh<_i6.SubmitAssessmentAnswerUseCase>(),
-        gh<_i6.GetReferralForSessionUseCase>(),
-        gh<_i6.GetAssessmentScoreUseCase>(),
-        gh<_i6.PreviewBmiUseCase>(),
-        gh<_i23.UpdateProfileUseCase>(),
+    gh.factory<_i1041.NotificationsBloc>(
+      () => _i1041.NotificationsBloc(
+        gh<_i597.NotificationService>(),
+        gh<_i644.NotificationPreferencesUseCases>(),
       ),
-    );
-    gh.factory<_i20.PricingBloc>(
-      () => _i20.PricingBloc(gh<_i181.GetPricingPackagesUseCase>()),
     );
     return this;
   }

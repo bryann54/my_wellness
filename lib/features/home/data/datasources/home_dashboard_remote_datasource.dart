@@ -1,11 +1,8 @@
-import 'dart:convert';
 import 'package:injectable/injectable.dart';
 import 'package:my_wellness/core/api_client/client/api_client.dart';
 import 'package:my_wellness/core/api_client/endpoints/api_endpoints.dart';
-import 'package:my_wellness/core/errors/exceptions.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_session.dart';
 import 'package:my_wellness/features/home/domain/entities/dashboard_session.dart';
-import 'package:my_wellness/features/offline_sync/data/local/app_database.dart';
 
 abstract class HomeDashboardRemoteDataSource {
   bool get lastLoadWasFromCache;
@@ -15,30 +12,19 @@ abstract class HomeDashboardRemoteDataSource {
 @LazySingleton(as: HomeDashboardRemoteDataSource)
 class HomeDashboardRemoteDataSourceImpl
     implements HomeDashboardRemoteDataSource {
-  HomeDashboardRemoteDataSourceImpl(this._apiClient, this._database);
+  HomeDashboardRemoteDataSourceImpl(this._apiClient);
 
   final ApiClient _apiClient;
-  final AppDatabase _database;
   @override
   bool lastLoadWasFromCache = false;
 
   @override
   Future<List<DashboardSession>> loadRelevantSessions() async {
-    late final Map<String, dynamic> response;
-    try {
-      lastLoadWasFromCache = false;
-      response = await _apiClient.get<Map<String, dynamic>>(
-        url: ApiEndpoints.dashboard,
-        options: ApiClient.protected,
-      );
-      await _database.cachePayload('dashboard', jsonEncode(response));
-      await _precacheActiveAssessmentData(response);
-    } on NetworkException {
-      final cached = await _database.getCachedPayload('dashboard');
-      if (cached == null) rethrow;
-      response = jsonDecode(cached) as Map<String, dynamic>;
-      lastLoadWasFromCache = true;
-    }
+    lastLoadWasFromCache = false;
+    final response = await _apiClient.get<Map<String, dynamic>>(
+      url: ApiEndpoints.dashboard,
+      options: ApiClient.protected,
+    );
     final assessments = response['assessments'];
     if (assessments is! List) {
       throw const FormatException('Dashboard assessments are missing');
@@ -96,59 +82,5 @@ class HomeDashboardRemoteDataSourceImpl
         })
         .whereType<DashboardSession>()
         .toList(growable: false);
-  }
-
-  Future<void> _precacheActiveAssessmentData(
-    Map<String, dynamic> response,
-  ) async {
-    final rawSessions = response['assessments'];
-    if (rawSessions is! List) return;
-
-    final sessions = rawSessions.whereType<Map<String, dynamic>>().where((
-      item,
-    ) {
-      return AssessmentSession.parseStatus(item['status']?.toString() ?? '') ==
-              AssessmentSessionStatus.inProgress &&
-          item['id'] != null &&
-          item['assessment_slug'] is String;
-    });
-
-    final sessionList = sessions.toList(growable: false);
-    for (var i = 0; i < sessionList.length; i += 3) {
-      final batch = sessionList.skip(i).take(3);
-      await Future.wait(
-        batch.map((session) async {
-          final slug = session['assessment_slug'] as String;
-          final sessionId = session['id'].toString();
-          await Future.wait([
-            () async {
-              try {
-                final definition = await _apiClient.get<Map<String, dynamic>>(
-                  url: ApiEndpoints.assessmentOffline(slug),
-                  options: ApiClient.protected,
-                );
-                await _database.cacheAssessment(slug, jsonEncode(definition));
-              } on Exception {
-                // Keep the dashboard available if an assessment cannot be warmed.
-              }
-            }(),
-            () async {
-              try {
-                final answers = await _apiClient.get<List<dynamic>>(
-                  url: ApiEndpoints.assessmentAnswers(slug, sessionId),
-                  options: ApiClient.protected,
-                );
-                await _database.cachePayload(
-                  AppDatabase.assessmentAnswersCacheKey(slug, sessionId),
-                  jsonEncode(answers),
-                );
-              } on Exception {
-                // Keep the dashboard available if answers cannot be warmed.
-              }
-            }(),
-          ]);
-        }),
-      );
-    }
   }
 }

@@ -61,6 +61,26 @@ class StartAssessmentSessionUseCase
 }
 
 @lazySingleton
+class SubmitCancerPreScreeningUseCase {
+  final AssessmentsRepository _r;
+  SubmitCancerPreScreeningUseCase(this._r);
+
+  Future<Either<Failure, AssessmentSession>> call({
+    required String slug,
+    required String sessionId,
+    required String priorCancerHistory,
+    required String priorCancerType,
+    int? priorCancerYear,
+  }) => _r.submitCancerPreScreening(
+    slug,
+    sessionId,
+    priorCancerHistory: priorCancerHistory,
+    priorCancerType: priorCancerType,
+    priorCancerYear: priorCancerYear,
+  );
+}
+
+@lazySingleton
 class GetReferralForSessionUseCase implements UseCase<Referral?, String> {
   final AssessmentsRepository _r;
   GetReferralForSessionUseCase(this._r);
@@ -136,4 +156,22 @@ class PreviewBmiUseCase
   Future<Either<Failure, BmiPreview>> call(
     ({String weightKg, String heightCm}) p,
   ) => _r.previewBmi(weightKg: p.weightKg, heightCm: p.heightCm);
+}
+
+@lazySingleton
+class SubmitBmiMetricsUseCase {
+  final AssessmentsRepository _r;
+  SubmitBmiMetricsUseCase(this._r);
+
+  Future<Either<Failure, void>> call({
+    required String slug,
+    required String sessionId,
+    required double weightKg,
+    required double heightCm,
+  }) => _r.submitBmiMetrics(
+    slug,
+    sessionId,
+    weightKg: weightKg,
+    heightCm: heightCm,
+  );
 }

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:injectable/injectable.dart';
 import 'package:my_wellness/core/api_client/interceptors/auth_interceptor.dart';
 import 'package:my_wellness/core/api_client/interceptors/logging_interceptor.dart';
@@ -10,6 +11,13 @@ class ApiClient {
   final Dio _dio;
 
   static Options get protected => Options(headers: {'requiresToken': true});
+
+  static Options get mobileProtected => Options(
+    headers: {
+      'requiresToken': true,
+      'X-Mobile-Client-Secret': dotenv.env['MOBILE_CLIENT_SECRET'] ?? '',
+    },
+  );
 
   static Options get open => Options(headers: {'requiresToken': false});
 

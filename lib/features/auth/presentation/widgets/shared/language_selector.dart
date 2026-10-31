@@ -3,7 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
+import 'package:my_wellness/common/notifiers/locale_provider.dart';
 import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
+import 'package:provider/provider.dart';
 
 class LanguageSelector extends StatelessWidget {
   const LanguageSelector({super.key, this.mode = LanguageSelectorMode.compact});
@@ -188,6 +190,7 @@ void _setLang(BuildContext context, Locale locale) {
   if (locale.languageCode == Localizations.localeOf(context).languageCode) {
     return;
   }
+  Provider.of<LocaleProvider>(context, listen: false).setLocale(locale);
   context.read<AccountBloc>().add(
     ChangeLanguageEvent(langCode: locale.languageCode),
   );

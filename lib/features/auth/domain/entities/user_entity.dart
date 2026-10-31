@@ -13,6 +13,7 @@ class UserEntity extends Equatable {
   final String? nationalIdNumber;
   final bool isEmailVerified;
   final bool isPhoneVerified;
+  final bool healthProfileCompleted;
 
   const UserEntity({
     required this.id,
@@ -25,6 +26,7 @@ class UserEntity extends Equatable {
     this.nationalIdNumber,
     this.isEmailVerified = false,
     this.isPhoneVerified = false,
+    this.healthProfileCompleted = false,
   });
 
   String get fullName =>
@@ -48,6 +50,7 @@ class UserEntity extends Equatable {
     nationalIdNumber,
     isEmailVerified,
     isPhoneVerified,
+    healthProfileCompleted,
   ];
 
   UserEntity copyWith({
@@ -61,6 +64,7 @@ class UserEntity extends Equatable {
     String? nationalIdNumber,
     bool? isEmailVerified,
     bool? isPhoneVerified,
+    bool? healthProfileCompleted,
   }) {
     return UserEntity(
       id: id ?? this.id,
@@ -73,6 +77,8 @@ class UserEntity extends Equatable {
       nationalIdNumber: nationalIdNumber ?? this.nationalIdNumber,
       isEmailVerified: isEmailVerified ?? this.isEmailVerified,
       isPhoneVerified: isPhoneVerified ?? this.isPhoneVerified,
+      healthProfileCompleted:
+          healthProfileCompleted ?? this.healthProfileCompleted,
     );
   }
 }

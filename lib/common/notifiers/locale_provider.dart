@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:my_wellness/core/di/injector.dart';
@@ -20,7 +21,14 @@ class LocaleProvider with ChangeNotifier {
   }
 
   void setLocale(Locale locale) {
+    if (locale.languageCode == _locale.languageCode) return;
     _locale = locale;
     notifyListeners();
+    unawaited(
+      getIt<SharedPreferencesManager>().putString(
+        SharedPreferencesManager.language,
+        locale.languageCode,
+      ),
+    );
   }
 }
