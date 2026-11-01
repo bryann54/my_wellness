@@ -659,7 +659,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i46.GetCurrentUserUseCase>(),
       ),
     );
-    gh.factory<_i382.BookingsBloc>(
+    gh.lazySingleton<_i382.BookingsBloc>(
       () => _i382.BookingsBloc(
         getMyBookings: gh<_i612.GetMyBookingsUseCase>(),
         getTimeline: gh<_i612.GetBookingTimelineUseCase>(),

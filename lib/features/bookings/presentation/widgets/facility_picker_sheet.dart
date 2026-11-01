@@ -3,6 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/utils/debouncer.dart';
+import 'package:my_wellness/common/widgets/app_primary_button.dart';
+import 'package:my_wellness/common/widgets/app_search_bar.dart';
+import 'package:my_wellness/common/widgets/shimmer_box.dart';
+import 'package:my_wellness/common/widgets/soft_input.dart';
 import 'package:my_wellness/features/bookings/domain/entities/facility.dart';
 import 'package:my_wellness/features/bookings/domain/entities/service_booking.dart';
 import 'package:my_wellness/features/bookings/domain/repositories/bookings_repository.dart';
@@ -31,6 +35,7 @@ class FacilityPickerSheet extends StatefulWidget {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
+      showDragHandle: true,
       builder: (_) => BlocProvider.value(
         value: bloc,
         child: FractionallySizedBox(
@@ -50,12 +55,12 @@ class FacilityPickerSheet extends StatefulWidget {
 }
 
 class _FacilityPickerSheetState extends State<FacilityPickerSheet> {
+  final _debouncer = Debouncer(milliseconds: 300);
   final _search = TextEditingController();
   final _name = TextEditingController();
   final _town = TextEditingController();
   final _county = TextEditingController();
   final _addKey = GlobalKey<FormState>();
-  final _searchDebouncer = Debouncer(milliseconds: 350);
   bool _adding = false;
 
   @override
@@ -66,7 +71,7 @@ class _FacilityPickerSheetState extends State<FacilityPickerSheet> {
 
   @override
   void dispose() {
-    _searchDebouncer.cancel();
+    _debouncer.cancel();
     _search.dispose();
     _name.dispose();
     _town.dispose();
@@ -83,7 +88,7 @@ class _FacilityPickerSheetState extends State<FacilityPickerSheet> {
   );
 
   void _onQueryChanged(String value) {
-    _searchDebouncer.run(() {
+    _debouncer.run(() {
       if (!mounted) return;
       final q = value.trim();
       if (q.length < 2) {
@@ -95,7 +100,8 @@ class _FacilityPickerSheetState extends State<FacilityPickerSheet> {
   }
 
   void _submitNew() {
-    if (!_addKey.currentState!.validate()) return;
+    FocusScope.of(context).unfocus();
+    if (_addKey.currentState?.validate() != true) return;
     context.read<BookingsBloc>().add(
       CreateFacilityEvent(
         CreateFacilityParams(
@@ -113,7 +119,6 @@ class _FacilityPickerSheetState extends State<FacilityPickerSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final insets = MediaQuery.of(context).viewInsets.bottom;
     return BlocConsumer<BookingsBloc, BookingsState>(
       listenWhen: (p, c) =>
           p.createdFacility != c.createdFacility && c.createdFacility != null,
@@ -122,191 +127,158 @@ class _FacilityPickerSheetState extends State<FacilityPickerSheet> {
       builder: (context, state) {
         return Padding(
           padding: EdgeInsets.fromLTRB(
-            AppSpacing.md,
-            AppSpacing.md,
-            AppSpacing.md,
-            insets + AppSpacing.md,
+            20,
+            0,
+            20,
+            MediaQuery.viewInsetsOf(context).bottom + AppSpacing.md,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _Header(
-                title: _adding
-                    ? AppLocalizations.getString(context, 'facility.addTitle')
-                    : AppLocalizations.getString(
-                        context,
-                        'facility.chooseTitle',
-                      ),
-                onAdd: _adding ? null : () => setState(() => _adding = true),
-                onBack: _adding ? () => setState(() => _adding = false) : null,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              Expanded(
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 220),
-                  switchInCurve: Curves.easeOut,
-                  switchOutCurve: Curves.easeIn,
-                  child: _adding ? _buildAddForm(state) : _buildList(state),
-                ),
-              ),
-            ],
-          ),
+          child: _adding ? _buildAddForm(state) : _buildList(state),
         );
       },
     );
   }
 
   Widget _buildList(BookingsState state) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    Widget content;
+    if (state.facilitiesLoading) {
+      content = ListView(
+        physics: const NeverScrollableScrollPhysics(),
+        children: const [
+          ShimmerBox(width: double.infinity, height: 64, radius: 12),
+          SizedBox(height: AppSpacing.sm),
+          ShimmerBox(width: double.infinity, height: 64, radius: 12),
+          SizedBox(height: AppSpacing.sm),
+          ShimmerBox(width: double.infinity, height: 64, radius: 12),
+        ],
+      );
+    } else if (state.facilitiesError != null) {
+      content = Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              state.facilitiesError!,
+              textAlign: TextAlign.center,
+              style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
+            ),
+            TextButton(
+              onPressed: _match,
+              child: Text(AppLocalizations.getString(context, 'common.retry')),
+            ),
+          ],
+        ),
+      );
+    } else if (state.facilities.isEmpty) {
+      content = Center(
+        child: Text(
+          AppLocalizations.getString(context, 'bookings.picker.empty'),
+          style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
+        ),
+      );
+    } else {
+      content = ListView.separated(
+        itemCount: state.facilities.length,
+        separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
+        itemBuilder: (_, i) => _FacilityTile(
+          facility: state.facilities[i],
+          onTap: () => Navigator.of(context).pop(state.facilities[i]),
+        ),
+      );
+    }
+
     return Column(
-      key: const ValueKey('list'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        TextField(
-          controller: _search,
-          onChanged: _onQueryChanged,
-          decoration: InputDecoration(
-            prefixIcon: const Icon(Icons.search),
-            suffixIcon: _search.text.isEmpty
-                ? null
-                : IconButton(
-                    icon: const Icon(Icons.close_rounded, size: 18),
-                    onPressed: () {
-                      _search.clear();
-                      _onQueryChanged('');
-                    },
-                  ),
-            hintText: AppLocalizations.getString(
-              context,
-              'facility.searchHint',
-            ),
-          ),
+        Text(
+          AppLocalizations.getString(context, 'bookings.picker.title'),
+          style: tt.titleLarge?.copyWith(color: cs.onSurface),
         ),
-        const SizedBox(height: AppSpacing.sm),
-        Expanded(
-          child: state.facilitiesLoading
-              ? const Center(child: CircularProgressIndicator())
-              : state.facilitiesError != null
-              ? Center(
-                  child: Text(
-                    state.facilitiesError!,
-                    style: theme.textTheme.bodyMedium,
-                  ),
-                )
-              : state.facilities.isEmpty
-              ? Center(
-                  child: Text(
-                    AppLocalizations.getString(context, 'facility.empty'),
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: cs.onSurface.withValues(alpha: 0.6),
-                    ),
-                  ),
-                )
-              : ListView.separated(
-                  itemCount: state.facilities.length,
-                  separatorBuilder: (_, _) => Divider(
-                    height: 1,
-                    color: cs.outlineVariant.withValues(alpha: 0.4),
-                  ),
-                  itemBuilder: (_, i) {
-                    final f = state.facilities[i];
-                    final sub = [
-                      if (f.town.isNotEmpty) f.town,
-                      if (f.county.isNotEmpty) f.county,
-                      if (f.distanceKm != null)
-                        '${f.distanceKm!.toStringAsFixed(1)} km',
-                    ].join(' · ');
-                    return ListTile(
-                      title: Text(f.name, style: theme.textTheme.titleSmall),
-                      subtitle: sub.isEmpty
-                          ? null
-                          : Text(sub, style: theme.textTheme.bodySmall),
-                      trailing: f.coversSha
-                          ? const Icon(Icons.verified_outlined, size: 20)
-                          : null,
-                      onTap: () => Navigator.of(context).pop(f),
-                    );
-                  },
-                ),
+        const SizedBox(height: AppSpacing.md - 4),
+        AppSearchBar(
+          controller: _search,
+          hintText: AppLocalizations.getString(
+            context,
+            'bookings.picker.searchHint',
+          ),
+          onChanged: _onQueryChanged,
+          padding: EdgeInsets.zero,
+        ),
+        const SizedBox(height: AppSpacing.md - 4),
+        Expanded(child: content),
+        TextButton.icon(
+          onPressed: () => setState(() => _adding = true),
+          icon: const Icon(Icons.add_rounded),
+          label: Text(
+            AppLocalizations.getString(context, 'bookings.picker.add'),
+          ),
         ),
       ],
     );
   }
 
   Widget _buildAddForm(BookingsState state) {
-    final theme = Theme.of(context);
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
     return Form(
       key: _addKey,
       child: SingleChildScrollView(
-        key: const ValueKey('form'),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextFormField(
+            Text(
+              AppLocalizations.getString(context, 'bookings.picker.addTitle'),
+              style: tt.titleLarge?.copyWith(color: cs.onSurface),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            SoftInput(
               controller: _name,
-              validator: _required,
-              decoration: InputDecoration(
-                labelText: AppLocalizations.getString(context, 'facility.name'),
+              label: AppLocalizations.getString(
+                context,
+                'bookings.picker.name',
               ),
+              validator: _required,
             ),
             const SizedBox(height: AppSpacing.md),
-            TextFormField(
+            SoftInput(
               controller: _town,
-              validator: _required,
-              decoration: InputDecoration(
-                labelText: AppLocalizations.getString(context, 'facility.town'),
+              label: AppLocalizations.getString(
+                context,
+                'bookings.picker.town',
               ),
+              validator: _required,
             ),
             const SizedBox(height: AppSpacing.md),
-            TextFormField(
+            SoftInput(
               controller: _county,
-              validator: _required,
-              decoration: InputDecoration(
-                labelText: AppLocalizations.getString(
-                  context,
-                  'facility.county',
-                ),
+              label: AppLocalizations.getString(
+                context,
+                'bookings.picker.county',
               ),
+              validator: _required,
             ),
             if (state.facilitiesError != null) ...[
               const SizedBox(height: AppSpacing.sm),
               Text(
                 state.facilitiesError!,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.error,
-                ),
+                style: tt.bodySmall?.copyWith(color: cs.error),
               ),
             ],
             const SizedBox(height: AppSpacing.lg),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: state.creatingFacility
-                        ? null
-                        : () => setState(() => _adding = false),
-                    child: Text(
-                      AppLocalizations.getString(context, 'common.cancel'),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: FilledButton(
-                    onPressed: state.creatingFacility ? null : _submitNew,
-                    child: state.creatingFacility
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Text(
-                            AppLocalizations.getString(context, 'common.save'),
-                          ),
-                  ),
-                ),
-              ],
+            AppPrimaryButton(
+              onPressed: state.creatingFacility ? null : _submitNew,
+              label: AppLocalizations.getString(context, 'common.save'),
+              isLoading: state.creatingFacility,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Center(
+              child: TextButton(
+                onPressed: () => setState(() => _adding = false),
+                child: Text(AppLocalizations.getString(context, 'common.back')),
+              ),
             ),
           ],
         ),
@@ -315,42 +287,67 @@ class _FacilityPickerSheetState extends State<FacilityPickerSheet> {
   }
 }
 
-class _Header extends StatelessWidget {
-  final String title;
-  final VoidCallback? onAdd;
-  final VoidCallback? onBack;
+class _FacilityTile extends StatelessWidget {
+  final Facility facility;
+  final VoidCallback onTap;
 
-  const _Header({required this.title, this.onAdd, this.onBack});
+  const _FacilityTile({required this.facility, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Row(
-      children: [
-        if (onBack != null)
-          IconButton(
-            icon: const Icon(Icons.chevron_left_rounded),
-            onPressed: onBack,
-            color: cs.onSurface.withValues(alpha: 0.7),
-            visualDensity: VisualDensity.compact,
+    final tt = Theme.of(context).textTheme;
+    final sub = [
+      if (facility.town.isNotEmpty) facility.town,
+      if (facility.county.isNotEmpty) facility.county,
+      if (facility.distanceKm != null)
+        AppLocalizations.t(context, 'bookings.referral.distanceKm', {
+          'km': facility.distanceKm!.toStringAsFixed(1),
+        }),
+    ].join(' · ');
+
+    return Material(
+      color: cs.surfaceContainerLow,
+      borderRadius: AppRadius.mdAll,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.md - 2),
+          decoration: BoxDecoration(
+            borderRadius: AppRadius.mdAll,
+            border: Border.all(
+              color: cs.outlineVariant.withValues(alpha: 0.55),
+            ),
           ),
-        Expanded(
-          child: Text(title, style: Theme.of(context).textTheme.titleLarge),
-        ),
-        if (onAdd != null)
-          IconButton(
-            icon: const Icon(Icons.add_rounded),
-            onPressed: onAdd,
-            color: cs.primary,
-            tooltip: AppLocalizations.getString(context, 'facility.addCta'),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      facility.name,
+                      style: tt.titleSmall?.copyWith(color: cs.onSurface),
+                    ),
+                    if (sub.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        sub,
+                        style: tt.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              if (facility.coversSha)
+                Icon(Icons.verified_outlined, size: 20, color: cs.primary),
+            ],
           ),
-        IconButton(
-          icon: const Icon(Icons.close_rounded),
-          onPressed: () => Navigator.of(context).maybePop(),
-          color: cs.onSurface.withValues(alpha: 0.5),
-          visualDensity: VisualDensity.compact,
         ),
-      ],
+      ),
     );
   }
 }

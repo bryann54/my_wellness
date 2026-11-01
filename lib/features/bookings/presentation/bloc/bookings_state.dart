@@ -14,26 +14,25 @@ enum CreateBookingStatus {
   error,
 }
 
-enum ToastType { success, error, warning, info }
+enum BookingToastType { success, error, warning, info }
 
 class BookingsState extends Equatable {
   final BookingsListStatus listStatus;
   final List<ServiceBooking> bookings;
   final String? nextCursor;
   final String? listError;
+  final String searchQuery;
 
   final BookingDetailStatus detailStatus;
   final BookingTimeline? timeline;
   final String? detailError;
   final bool completing;
-  final String? completeError;
 
   final CreateBookingStatus createStatus;
   final ServiceBooking? createdBooking;
   final bool stkLoading;
   final String? stkError;
   final Map<String, dynamic>? stkResult;
-  final String? createError;
 
   final bool facilitiesLoading;
   final List<Facility> facilities;
@@ -49,8 +48,9 @@ class BookingsState extends Equatable {
   final Referral? referralDetail;
   final String? referralDetailError;
 
-  final ToastType? toastType;
+  final BookingToastType? toastType;
   final String? toastMessage;
+  final bool toastIsKey;
   final int toastNonce;
 
   const BookingsState({
@@ -58,17 +58,16 @@ class BookingsState extends Equatable {
     this.bookings = const [],
     this.nextCursor,
     this.listError,
+    this.searchQuery = '',
     this.detailStatus = BookingDetailStatus.idle,
     this.timeline,
     this.detailError,
     this.completing = false,
-    this.completeError,
     this.createStatus = CreateBookingStatus.idle,
     this.createdBooking,
     this.stkLoading = false,
     this.stkError,
     this.stkResult,
-    this.createError,
     this.facilitiesLoading = false,
     this.facilities = const [],
     this.facilitiesError,
@@ -82,10 +81,25 @@ class BookingsState extends Equatable {
     this.referralDetailError,
     this.toastType,
     this.toastMessage,
+    this.toastIsKey = false,
     this.toastNonce = 0,
   });
 
   bool get hasMore => nextCursor != null;
+
+  List<ServiceBooking> get filteredBookings {
+    final q = searchQuery.trim().toLowerCase();
+    if (q.isEmpty) return bookings;
+    return bookings
+        .where(
+          (b) =>
+              b.serviceLabel.toLowerCase().contains(q) ||
+              b.preferredFacility.toLowerCase().contains(q) ||
+              (b.facility?.name.toLowerCase().contains(q) ?? false) ||
+              bookingStatusToWire(b.status).contains(q),
+        )
+        .toList(growable: false);
+  }
 
   BookingsState copyWith({
     BookingsListStatus? listStatus,
@@ -94,14 +108,13 @@ class BookingsState extends Equatable {
     bool clearNextCursor = false,
     String? listError,
     bool clearListError = false,
+    String? searchQuery,
     BookingDetailStatus? detailStatus,
     BookingTimeline? timeline,
     String? detailError,
     bool clearTimeline = false,
     bool clearDetailError = false,
     bool? completing,
-    String? completeError,
-    bool clearCompleteError = false,
     CreateBookingStatus? createStatus,
     ServiceBooking? createdBooking,
     bool clearCreatedBooking = false,
@@ -110,8 +123,6 @@ class BookingsState extends Equatable {
     Map<String, dynamic>? stkResult,
     bool clearStkError = false,
     bool clearStkResult = false,
-    String? createError,
-    bool clearCreateError = false,
     bool? facilitiesLoading,
     List<Facility>? facilities,
     String? facilitiesError,
@@ -128,23 +139,21 @@ class BookingsState extends Equatable {
     bool clearReferralDetail = false,
     String? referralDetailError,
     bool clearReferralDetailError = false,
-    ToastType? toastType,
+    BookingToastType? toastType,
     String? toastMessage,
+    bool? toastIsKey,
     int? toastNonce,
-    bool clearToast = false,
   }) {
     return BookingsState(
       listStatus: listStatus ?? this.listStatus,
       bookings: bookings ?? this.bookings,
       nextCursor: clearNextCursor ? null : (nextCursor ?? this.nextCursor),
       listError: clearListError ? null : (listError ?? this.listError),
+      searchQuery: searchQuery ?? this.searchQuery,
       detailStatus: detailStatus ?? this.detailStatus,
       timeline: clearTimeline ? null : (timeline ?? this.timeline),
       detailError: clearDetailError ? null : (detailError ?? this.detailError),
       completing: completing ?? this.completing,
-      completeError: clearCompleteError
-          ? null
-          : (completeError ?? this.completeError),
       createStatus: createStatus ?? this.createStatus,
       createdBooking: clearCreatedBooking
           ? null
@@ -152,7 +161,6 @@ class BookingsState extends Equatable {
       stkLoading: stkLoading ?? this.stkLoading,
       stkError: clearStkError ? null : (stkError ?? this.stkError),
       stkResult: clearStkResult ? null : (stkResult ?? this.stkResult),
-      createError: clearCreateError ? null : (createError ?? this.createError),
       facilitiesLoading: facilitiesLoading ?? this.facilitiesLoading,
       facilities: facilities ?? this.facilities,
       facilitiesError: clearFacilitiesError
@@ -175,9 +183,10 @@ class BookingsState extends Equatable {
       referralDetailError: clearReferralDetailError
           ? null
           : (referralDetailError ?? this.referralDetailError),
-      toastType: clearToast ? null : (toastType ?? this.toastType),
-      toastMessage: clearToast ? null : (toastMessage ?? this.toastMessage),
-      toastNonce: clearToast ? 0 : (toastNonce ?? this.toastNonce),
+      toastType: toastType ?? this.toastType,
+      toastMessage: toastMessage ?? this.toastMessage,
+      toastIsKey: toastIsKey ?? this.toastIsKey,
+      toastNonce: toastNonce ?? this.toastNonce,
     );
   }
 
@@ -187,17 +196,16 @@ class BookingsState extends Equatable {
     bookings,
     nextCursor,
     listError,
+    searchQuery,
     detailStatus,
     timeline,
     detailError,
     completing,
-    completeError,
     createStatus,
     createdBooking,
     stkLoading,
     stkError,
     stkResult,
-    createError,
     facilitiesLoading,
     facilities,
     facilitiesError,
@@ -211,6 +219,7 @@ class BookingsState extends Equatable {
     referralDetailError,
     toastType,
     toastMessage,
+    toastIsKey,
     toastNonce,
   ];
 }

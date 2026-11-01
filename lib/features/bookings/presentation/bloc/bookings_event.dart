@@ -19,6 +19,14 @@ class LoadMoreMyBookingsEvent extends BookingsEvent {
   const LoadMoreMyBookingsEvent();
 }
 
+class SearchBookingsEvent extends BookingsEvent {
+  final String query;
+  const SearchBookingsEvent(this.query);
+
+  @override
+  List<Object?> get props => [query];
+}
+
 class LoadBookingTimelineEvent extends BookingsEvent {
   final String bookingId;
   const LoadBookingTimelineEvent(this.bookingId);
@@ -67,6 +75,10 @@ class FinishBookingFlowEvent extends BookingsEvent {
 
 class ResetCreateBookingEvent extends BookingsEvent {
   const ResetCreateBookingEvent();
+}
+
+class ResetBookingsEvent extends BookingsEvent {
+  const ResetBookingsEvent();
 }
 
 class MatchFacilitiesEvent extends BookingsEvent {

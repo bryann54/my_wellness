@@ -14,7 +14,7 @@ import 'package:my_wellness/features/bookings/domain/usecases/bookings_usecases.
 part 'bookings_event.dart';
 part 'bookings_state.dart';
 
-@injectable
+@lazySingleton
 class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
   final GetMyBookingsUseCase _getMyBookings;
   final GetBookingTimelineUseCase _getTimeline;
@@ -60,6 +60,7 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
        super(const BookingsState()) {
     on<LoadMyBookingsEvent>(_onLoadMyBookings, transformer: restartable());
     on<LoadMoreMyBookingsEvent>(_onLoadMore, transformer: droppable());
+    on<SearchBookingsEvent>(_onSearch);
     on<LoadBookingTimelineEvent>(_onLoadTimeline, transformer: restartable());
     on<CompleteBookingEvent>(_onComplete, transformer: droppable());
     on<CreateBookingEvent>(_onCreate, transformer: droppable());
@@ -67,6 +68,7 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
     on<AwaitBookingConsentEvent>(_onAwaitConsent);
     on<FinishBookingFlowEvent>(_onFinishFlow);
     on<ResetCreateBookingEvent>(_onResetCreate);
+    on<ResetBookingsEvent>((_, emit) => emit(const BookingsState()));
     on<MatchFacilitiesEvent>(_onMatchFacilities, transformer: restartable());
     on<SearchFacilitiesEvent>(_onSearchFacilities, transformer: restartable());
     on<CreateFacilityEvent>(_onCreateFacility, transformer: droppable());
@@ -86,18 +88,17 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
     );
   }
 
-  BookingsState _withToast(
-    BookingsState s, {
-    required ToastType type,
-    required String message,
-  }) {
-    return s.copyWith(
-      toastType: type,
-      toastMessage: message,
-      toastNonce: s.toastNonce + 1,
-    );
-  }
-
+  BookingsState _toasted(
+    BookingsState base,
+    BookingToastType type,
+    String message, {
+    bool isKey = false,
+  }) => base.copyWith(
+    toastType: type,
+    toastMessage: message,
+    toastIsKey: isKey,
+    toastNonce: base.toastNonce + 1,
+  );
   Future<void> _onLoadMyBookings(
     LoadMyBookingsEvent event,
     Emitter<BookingsState> emit,
@@ -105,6 +106,8 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
     if (state.listStatus == BookingsListStatus.loaded && !event.refresh) {
       return;
     }
+    if (state.listStatus == BookingsListStatus.loading) return;
+
     emit(
       state.copyWith(
         listStatus: BookingsListStatus.loading,
@@ -125,35 +128,6 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
           bookings: page.items,
           nextCursor: page.nextCursor,
           clearNextCursor: page.nextCursor == null,
-        ),
-      ),
-    );
-  }
-
-  Future<void> _onLoadMore(
-    LoadMoreMyBookingsEvent event,
-    Emitter<BookingsState> emit,
-  ) async {
-    if (state.nextCursor == null ||
-        state.listStatus != BookingsListStatus.loaded) {
-      return;
-    }
-    emit(state.copyWith(listStatus: BookingsListStatus.loadingMore));
-    final result = await _getMyBookings(cursor: state.nextCursor);
-    result.fold(
-      (failure) => emit(
-        state.copyWith(
-          listStatus: BookingsListStatus.loaded,
-          listError: mapFailure(failure),
-        ),
-      ),
-      (page) => emit(
-        state.copyWith(
-          listStatus: BookingsListStatus.loaded,
-          bookings: [...state.bookings, ...page.items],
-          nextCursor: page.nextCursor,
-          clearNextCursor: page.nextCursor == null,
-          clearListError: true,
         ),
       ),
     );
@@ -196,34 +170,28 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
     Emitter<BookingsState> emit,
   ) async {
     if (state.completing) return;
-    emit(state.copyWith(completing: true, clearCompleteError: true));
+    emit(state.copyWith(completing: true));
     final result = await _completeBooking(event.bookingId);
     result.fold(
-      (failure) {
-        final message = mapFailure(failure);
-        emit(
-          _withToast(
-            state.copyWith(completing: false, completeError: message),
-            type: ToastType.error,
-            message: message,
-          ),
-        );
-      },
+      (failure) => emit(
+        _toasted(
+          state.copyWith(completing: false),
+          BookingToastType.error,
+          mapFailure(failure),
+        ),
+      ),
       (updated) {
         final next = state.bookings
             .map((b) => b.id == updated.id ? updated : b)
             .toList(growable: false);
         emit(
-          _withToast(
+          _toasted(
             state.copyWith(completing: false, bookings: next),
-            type: ToastType.success,
-            message: 'Booking marked as completed.',
+            BookingToastType.success,
+            'bookings.toast.completed',
+            isKey: true,
           ),
         );
-        final current = state.timeline;
-        if (current != null && current.booking.id == updated.id) {
-          add(LoadBookingTimelineEvent(updated.id));
-        }
         final referral = state.referralDetail;
         if (referral != null && referral.booking?.id == updated.id) {
           add(LoadReferralEvent(referral.id, silent: true));
@@ -235,6 +203,39 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
     );
   }
 
+  Future<void> _onLoadMore(
+    LoadMoreMyBookingsEvent event,
+    Emitter<BookingsState> emit,
+  ) async {
+    if (state.nextCursor == null ||
+        state.listStatus != BookingsListStatus.loaded) {
+      return;
+    }
+    emit(state.copyWith(listStatus: BookingsListStatus.loadingMore));
+    final result = await _getMyBookings(cursor: state.nextCursor);
+    result.fold(
+      (failure) => emit(
+        _toasted(
+          state.copyWith(listStatus: BookingsListStatus.loaded),
+          BookingToastType.error,
+          mapFailure(failure),
+        ),
+      ),
+      (page) => emit(
+        state.copyWith(
+          listStatus: BookingsListStatus.loaded,
+          bookings: [...state.bookings, ...page.items],
+          nextCursor: page.nextCursor,
+          clearNextCursor: page.nextCursor == null,
+        ),
+      ),
+    );
+  }
+
+  void _onSearch(SearchBookingsEvent event, Emitter<BookingsState> emit) {
+    emit(state.copyWith(searchQuery: event.query.trim()));
+  }
+
   Future<void> _onCreate(
     CreateBookingEvent event,
     Emitter<BookingsState> emit,
@@ -243,7 +244,6 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
     emit(
       state.copyWith(
         createStatus: CreateBookingStatus.creating,
-        clearCreateError: true,
         clearCreatedBooking: true,
         clearStkError: true,
         clearStkResult: true,
@@ -251,19 +251,13 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
     );
     final result = await _createBooking(event.params);
     result.fold(
-      (failure) {
-        final message = mapFailure(failure);
-        emit(
-          _withToast(
-            state.copyWith(
-              createStatus: CreateBookingStatus.error,
-              createError: message,
-            ),
-            type: ToastType.error,
-            message: message,
-          ),
-        );
-      },
+      (failure) => emit(
+        _toasted(
+          state.copyWith(createStatus: CreateBookingStatus.error),
+          BookingToastType.error,
+          mapFailure(failure),
+        ),
+      ),
       (booking) {
         emit(
           state.copyWith(
@@ -278,6 +272,9 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
         if (state.listStatus == BookingsListStatus.loaded) {
           add(const LoadMyBookingsEvent(refresh: true));
         }
+        if (state.referrals.isNotEmpty) {
+          add(const LoadMyReferralsEvent(refresh: true));
+        }
       },
     );
   }
@@ -290,16 +287,9 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
     emit(state.copyWith(stkLoading: true, clearStkError: true));
     final result = await _pushStk(event.params);
     result.fold(
-      (failure) {
-        final message = mapFailure(failure);
-        emit(
-          _withToast(
-            state.copyWith(stkLoading: false, stkError: message),
-            type: ToastType.error,
-            message: message,
-          ),
-        );
-      },
+      (failure) => emit(
+        state.copyWith(stkLoading: false, stkError: mapFailure(failure)),
+      ),
       (payload) => emit(
         state.copyWith(
           stkLoading: false,
@@ -328,9 +318,9 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
       state.copyWith(
         createStatus: CreateBookingStatus.idle,
         clearCreatedBooking: true,
-        clearCreateError: true,
         clearStkError: true,
         clearStkResult: true,
+        stkLoading: false,
       ),
     );
   }
@@ -369,13 +359,7 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
     SearchFacilitiesEvent event,
     Emitter<BookingsState> emit,
   ) async {
-    emit(
-      state.copyWith(
-        facilitiesLoading: true,
-        facilities: const [],
-        clearFacilitiesError: true,
-      ),
-    );
+    emit(state.copyWith(facilitiesLoading: true, clearFacilitiesError: true));
     final result = await _searchFacilities(event.query);
     result.fold(
       (failure) => emit(
@@ -423,7 +407,6 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
     LoadMyReferralsEvent event,
     Emitter<BookingsState> emit,
   ) async {
-    if (state.referralsLoading) return;
     if (!event.refresh && state.referrals.isNotEmpty) return;
     emit(state.copyWith(referralsLoading: true, clearReferralsError: true));
     final result = await _getMyReferrals();
@@ -442,12 +425,6 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
     LoadReferralEvent event,
     Emitter<BookingsState> emit,
   ) async {
-    if (!event.silent &&
-        state.referralDetail?.id == event.referralId &&
-        state.referralDetailLoading == false &&
-        state.referralDetailError == null) {
-      return;
-    }
     if (!event.silent) {
       emit(
         state.copyWith(

@@ -288,131 +288,146 @@
     "title":"Ustawi",
     "subtitle":" Rasilimali zako za afya na ustawi"
   },
-    "bookings": {
-    "title": "Miadi",
-    "subtitle": "Miadi na nafasi zako",
-    "noBookings": "Hakuna miadi iliyopo kwa sasa. Tafadhali angalia tena baadaye.",
-
-    "emptyTitle": "Hakuna miadi bado",
-    "newBooking": "Weka miadi mpya",
-    "priceKes": "KES {amount}",
-    "detailTitle": "Miadi",
-    "preferredDate": "Tarehe inayopendekezwa: {date}",
-    "checkedInAt": "Umeingia: {time}",
-    "hieManagedNote": "Ziara hii inasimamiwa na kituo. Kuingia na kukamilisha kunasasishwa kiotomatiki.",
-    "markCompleted": "Weka kama imekamilika",
-    "timelineTitle": "Historia",
-    "timelineEmpty": "Bado hakuna shughuli",
-
-    "completeConfirmTitle": "Weka kama imekamilika?",
-    "completeConfirmBody": "Thibitisha kwamba ziara hii imefanyika.",
-
-    "service": {
-      "navigator": "Mratibu wa huduma",
-      "screening": "Uchunguzi",
-      "dnaTest": "Kipimo cha DNA",
-      "secondOpinion": "Maoni ya pili"
-    },
-
-    "status": {
-      "pending": "Inasubiri",
-      "confirmed": "Imethibitishwa",
-      "paid": "Imelipwa",
-      "cancelled": "Imeghairiwa",
-      "completed": "Imekamilika",
-      "unknown": "Haijulikani"
-    },
-
-    "timeline": {
-      "created": "Miadi imeundwa",
-      "checkedIn": "Umeingia",
-      "statusChanged": "Hali imebadilika",
-      "followUpScheduled": "Ufuatiliaji umepangwa",
-      "note": "Kidokezo",
-      "diagnosis": "Utambuzi",
-      "allergy": "Mzio",
-      "prescription": "Cheti",
-      "referral": "Rufaa",
-      "update": "Sasisho"
-    },
-
-    "create": {
-      "referralVisit": "Ziara ya rufaa",
-      "followUpLabel": "Ufuatiliaji — {category}",
-      "secondOpinionGp": "Maoni ya pili — ukaguzi wa GP",
-      "secondOpinionConsultant": "Maoni ya pili — ukaguzi wa mtaalamu",
-      "dnaTest": "Kipimo cha DNA",
-      "navigator": "Mratibu",
-      "screening": "Uchunguzi",
-      "booking": "Miadi",
-
-      "priceLabel": "Bei: {price}",
-      "clinician": "Daktari",
-      "gp": "GP",
-      "consultant": "Mtaalamu",
-      "testType": "Aina ya kipimo",
-      "healthRisk": "Hatari ya kiafya",
-      "paternity": "Ubaba",
-      "legal": "Kisheria",
-      "lawFirm": "Kampuni ya wakili inayopendekezwa (si lazima)",
-      "facility": "Kituo",
-      "facilityOptional": "Kituo (si lazima)",
-      "facilityNotSelected": "Hakijachaguliwa",
-      "preferredDate": "Tarehe inayopendekezwa (si lazima)",
-      "selectDate": "Chagua tarehe",
-      "phone": "Simu (M-Pesa)",
-      "phoneHint": "07XX XXX XXX",
-      "phoneInvalid": "Weka namba sahihi ya simu",
-      "notes": "Maelezo (si lazima)",
-      "submit": "Weka miadi",
-
-      "sendingPrompt": "Inatuma ombi la M-Pesa…",
-      "creating": "Inaunda miadi…",
-      "paymentFailedTitle": "Miadi yako imeundwa, lakini ombi la malipo limeshindikana.",
-      "retryPayment": "Jaribu malipo tena",
-      "payLater": "Lipa baadaye",
-
-      "doneTitle": "Ombi limepokelewa",
-      "donePaidBody": "Idhinisha ombi la M-Pesa kwenye simu yako. Miadi hii itaonekana kama imelipwa mara tu itakapothibitishwa.",
-      "doneUnpaidBody": "Hakuna malipo kwa sasa. Mratibu atathibitisha maelezo kwa simu.",
-      "done": "Sawa"
-    }
+  "bookings": {
+  "title": "Miadi",
+  "subtitle": "Panga miadi yako ya afya",
+  "noBookings": "Hakuna miadi iliyopo kwa sasa. Tafadhali angalia tena baadaye.",
+  "searchHint": "Tafuta miadi",
+  "newBooking": "Miadi mpya",
+  "newBookingTitle": "Ungependa kuweka miadi ya nini?",
+  "yourBookings": "Miadi yako",
+  "searchResultCountOne": "Matokeo 1 kwa “{query}”",
+  "searchResultCountMany": "Matokeo {count} kwa “{query}”",
+  "emptySearchTitle": "Hakuna miadi inayolingana na “{query}”",
+  "emptySearchBody": "Jaribu neno lingine, au safisha utafutaji.",
+  "emptySearchClear": "Safisha utafutaji",
+  "emptyTitle": "Hakuna miadi bado",
+  "emptyBody": "Weka miadi ya uchunguzi, simu ya mwongozo au ushauri ili kuanza.",
+  "loadFailed": "Miadi yako haikuweza kupakiwa. Tafadhali jaribu tena.",
+  "priceKes": "KES {amount}",
+  "creating": "Inaunda miadi yako…",
+  "status": {
+    "pending": "Inasubiri",
+    "confirmed": "Imethibitishwa",
+    "paid": "Imelipwa",
+    "cancelled": "Imeghairiwa",
+    "completed": "Imekamilika",
+    "unknown": "Haijulikani"
   },
-
-  "referral": {
-    "title": "Rufaa",
-    "noFacility": "Hakuna kituo kinacholingana kilichopatikana.",
-    "bookConsultation": "Weka nafasi ya ushauri",
-    "navigate": "Elekeza",
-    "viewVisitDetails": "Tazama maelezo ya ziara",
-    "bookFollowUp": "Weka ufuatiliaji",
-
-    "sha": {
-      "accredited": "Imeidhinishwa na SHA",
-      "notAccredited": "Haijaidhinishwa na SHA",
-      "unavailable": "Hali ya SHA haipatikani"
-    },
-
-    "status": {
-      "generated": "Mpya",
-      "viewed": "Imetazamwa",
-      "booked": "Imeandikwa",
-      "completed": "Imekamilika",
-      "dismissed": "Imepuuzwa",
-      "unknown": "Haijulikani"
-    }
+  "service": {
+    "navigator": "Mwongozo wa huduma",
+    "navigatorSub": "Mwongozo atakupigia simu kupanga huduma yako.",
+    "screening": "Uchunguzi",
+    "screeningSub": "Weka miadi ya uchunguzi wa afya ana kwa ana.",
+    "checkup": "Ukaguzi wa afya",
+    "dnaTest": "Kipimo cha DNA",
+    "dnaTestSub": "Kipimo cha DNA cha hatari za kiafya, ubaba au kisheria.",
+    "secondOpinion": "Maoni ya pili",
+    "secondOpinionSub": "Mwambie mtaalamu apitie matokeo au utambuzi wako.",
+    "referralVisit": "Ziara ya rufaa"
   },
-
-  "facility": {
-    "chooseTitle": "Chagua kituo",
+  "form": {
+    "facility": "Kituo",
+    "facilityOptional": "Kituo (hiari)",
+    "facilityNotSelected": "Hakijachaguliwa",
+    "facilityLocked": "Kimependekezwa kwa rufaa yako",
+    "date": "Tarehe unayopendelea (hiari)",
+    "dateSelect": "Chagua tarehe",
+    "phone": "Namba ya simu (M-Pesa)",
+    "phoneHint": "07XX XXX XXX",
+        "phoneInvalid": "Weka namba sahihi ya simu ya Kenya",
+    "phonePrefillNote": "Imejazwa kutoka wasifu wako. Unaweza kuibadilisha.",
+    "notes": "Vidokezo (hiari)",
+    "submit": "Weka miadi",
+    "price": "Bei",
+    "clinician": "Mtaalamu",
+    "clinicianGp": "Daktari wa kawaida",
+    "clinicianConsultant": "Daktari bingwa",
+    "testType": "Aina ya kipimo",
+    "testHealthRisk": "Hatari za kiafya",
+    "testPaternity": "Ubaba",
+    "testLegal": "Kisheria",
+    "lawFirm": "Kampuni ya sheria unayopendelea (hiari)"
+  },
+  "payment": {
+    "sending": "Inatuma ombi la M-Pesa…",
+    "failedTitle": "Miadi yako imeundwa, lakini ombi la malipo limeshindwa.",
+    "retry": "Jaribu kulipa tena",
+    "later": "Lipa baadaye"
+  },
+  "done": {
+    "title": "Ombi limepokelewa",
+    "bodyPaid": "Idhinisha ombi la M-Pesa kwenye simu yako. Miadi hii itaonekana kama imelipwa mara itakapothibitishwa.",
+    "bodyFree": "Hakuna malipo sasa. Mwongozo atathibitisha maelezo kwa simu.",
+    "action": "Nimemaliza"
+  },
+  "picker": {
+    "title": "Chagua kituo",
     "searchHint": "Tafuta kwa jina",
     "empty": "Hakuna vituo vilivyopatikana",
-    "addCta": "Hukipati? Ongeza kituo",
+    "add": "Hukipati? Ongeza kituo",
     "addTitle": "Ongeza kituo",
     "name": "Jina",
     "town": "Mji",
     "county": "Kaunti"
   },
+  "detail": {
+    "preferredDate": "Tarehe unayopendelea",
+    "checkedIn": "Umewasili",
+    "facility": "Kituo",
+    "price": "Bei",
+    "notes": "Vidokezo",
+    "managedNote": "Ziara hii inasimamiwa na kituo. Kuwasili na kukamilika husasishwa kiotomatiki.",
+    "markCompleted": "Weka kama imekamilika",
+    "confirmTitle": "Weka kama imekamilika?",
+    "confirmBody": "Thibitisha kuwa ziara hii imefanyika.",
+    "timeline": "Ratiba ya matukio",
+    "noActivity": "Hakuna shughuli bado",
+    "loadFailed": "Miadi hii haikuweza kupakiwa. Tafadhali jaribu tena."
+  },
+  "timeline": {
+    "created": "Miadi imeundwa",
+    "checkedIn": "Umewasili",
+    "statusChanged": "Hali imebadilika",
+    "followUpScheduled": "Ufuatiliaji umepangwa",
+    "update": "Sasisho",
+    "note": "Maelezo",
+    "diagnosis": "Utambuzi",
+    "allergy": "Mzio",
+    "prescription": "Cheti cha dawa",
+    "referral": "Rufaa"
+  },
+  "toast": {
+    "completed": "Miadi imewekwa kama imekamilika."
+  },
+  "referral": {
+    "section": "Huduma inayopendekezwa",
+    "title": "Rufaa",
+    "noFacility": "Hakuna kituo kinachofaa kilichopatikana.",
+        "book": "Weka miadi ya ushauri",
+    "checkedInAt": "Umewasili {time}",
+    "bookFollowUp": "Weka miadi ya ufuatiliaji",
+    "bookSub": "Weka miadi katika kituo kilichopendekezwa.",
+    "navigate": "Elekeza njia",
+    "viewVisit": "Tazama maelezo ya ziara",
+    "distanceKm": "{km} km",
+    "minutes": "Dakika {min}",
+    "mapsFailed": "Imeshindwa kufungua ramani.",
+    "status": {
+      "generated": "Mpya",
+      "viewed": "Imeonekana",
+      "booked": "Imewekwa miadi",
+      "completed": "Imekamilika",
+      "dismissed": "Imeondolewa",
+      "unknown": "Haijulikani"
+    },
+    "sha": {
+      "accredited": "Imesajiliwa SHA",
+      "notAccredited": "Haijasajiliwa SHA",
+      "unavailable": "Hali ya SHA haipatikani"
+    }
+  }
+},
   "greeting": {
     "morning": "Habari ya asubuhi",
     "afternoon": "Habari ya mchana",
