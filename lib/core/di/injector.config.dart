@@ -68,6 +68,15 @@ import '../../features/auth/data/repositories/auth_repository_impl.dart'
 import '../../features/auth/domain/repositories/auth_repository.dart' as _i787;
 import '../../features/auth/domain/usecases/auth_usecases.dart' as _i46;
 import '../../features/auth/presentation/bloc/auth_bloc.dart' as _i797;
+import '../../features/bookings/data/datasources/bookings_remote_datasource.dart'
+    as _i800;
+import '../../features/bookings/data/repositories/bookings_repository_impl.dart'
+    as _i124;
+import '../../features/bookings/domain/repositories/bookings_repository.dart'
+    as _i817;
+import '../../features/bookings/domain/usecases/bookings_usecases.dart'
+    as _i612;
+import '../../features/bookings/presentation/bloc/bookings_bloc.dart' as _i382;
 import '../../features/geography/data/datasources/geography_remote_datasource.dart'
     as _i474;
 import '../../features/geography/data/repositories/geography_repository_impl.dart'
@@ -241,6 +250,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i669.AppDatabase>(),
       ),
     );
+    gh.lazySingleton<_i800.BookingsRemoteDataSource>(
+      () => _i800.BookingsRemoteDataSourceImpl(gh<_i671.ApiClient>()),
+    );
     gh.lazySingleton<_i863.PricingRemoteDataSource>(
       () => _i863.PricingRemoteDataSourceImpl(gh<_i671.ApiClient>()),
     );
@@ -272,6 +284,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i470.AssessmentsRemoteDataSource>(
       () => _i470.AssessmentsRemoteDataSourceImpl(gh<_i671.ApiClient>()),
+    );
+    gh.lazySingleton<_i817.BookingsRepository>(
+      () => _i124.BookingsRepositoryImpl(gh<_i800.BookingsRemoteDataSource>()),
     );
     gh.lazySingleton<_i787.AuthRepository>(
       () => _i153.AuthRepositoryImpl(
@@ -418,6 +433,51 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i159.NotificationPreferencesRepositoryImpl(
         gh<_i220.NotificationPreferencesRemoteDataSource>(),
       ),
+    );
+    gh.lazySingleton<_i612.CreateBookingUseCase>(
+      () => _i612.CreateBookingUseCase(gh<_i817.BookingsRepository>()),
+    );
+    gh.lazySingleton<_i612.GetMyBookingsUseCase>(
+      () => _i612.GetMyBookingsUseCase(gh<_i817.BookingsRepository>()),
+    );
+    gh.lazySingleton<_i612.GetBookingTimelineUseCase>(
+      () => _i612.GetBookingTimelineUseCase(gh<_i817.BookingsRepository>()),
+    );
+    gh.lazySingleton<_i612.CompleteBookingUseCase>(
+      () => _i612.CompleteBookingUseCase(gh<_i817.BookingsRepository>()),
+    );
+    gh.lazySingleton<_i612.MatchFacilitiesUseCase>(
+      () => _i612.MatchFacilitiesUseCase(gh<_i817.BookingsRepository>()),
+    );
+    gh.lazySingleton<_i612.SearchFacilitiesUseCase>(
+      () => _i612.SearchFacilitiesUseCase(gh<_i817.BookingsRepository>()),
+    );
+    gh.lazySingleton<_i612.CreateFacilityUseCase>(
+      () => _i612.CreateFacilityUseCase(gh<_i817.BookingsRepository>()),
+    );
+    gh.lazySingleton<_i612.GetMyReferralsUseCase>(
+      () => _i612.GetMyReferralsUseCase(gh<_i817.BookingsRepository>()),
+    );
+    gh.lazySingleton<_i612.GetReferralUseCase>(
+      () => _i612.GetReferralUseCase(gh<_i817.BookingsRepository>()),
+    );
+    gh.lazySingleton<_i612.GenerateReferralFromSessionUseCase>(
+      () => _i612.GenerateReferralFromSessionUseCase(
+        gh<_i817.BookingsRepository>(),
+      ),
+    );
+    gh.lazySingleton<_i612.GenerateReferralFromBpReadingUseCase>(
+      () => _i612.GenerateReferralFromBpReadingUseCase(
+        gh<_i817.BookingsRepository>(),
+      ),
+    );
+    gh.lazySingleton<_i612.GenerateReferralFromBsReadingUseCase>(
+      () => _i612.GenerateReferralFromBsReadingUseCase(
+        gh<_i817.BookingsRepository>(),
+      ),
+    );
+    gh.lazySingleton<_i612.PushStkForBookingUseCase>(
+      () => _i612.PushStkForBookingUseCase(gh<_i817.BookingsRepository>()),
     );
     gh.factory<_i30.SyncBloc>(
       () => _i30.SyncBloc(gh<_i441.SyncRepository>(), gh<_i895.Connectivity>()),
@@ -597,6 +657,23 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i646.LaunchBloc(
         gh<_i656.CheckConnectivityUsecase>(),
         gh<_i46.GetCurrentUserUseCase>(),
+      ),
+    );
+    gh.factory<_i382.BookingsBloc>(
+      () => _i382.BookingsBloc(
+        getMyBookings: gh<_i612.GetMyBookingsUseCase>(),
+        getTimeline: gh<_i612.GetBookingTimelineUseCase>(),
+        completeBooking: gh<_i612.CompleteBookingUseCase>(),
+        createBooking: gh<_i612.CreateBookingUseCase>(),
+        pushStk: gh<_i612.PushStkForBookingUseCase>(),
+        matchFacilities: gh<_i612.MatchFacilitiesUseCase>(),
+        searchFacilities: gh<_i612.SearchFacilitiesUseCase>(),
+        createFacility: gh<_i612.CreateFacilityUseCase>(),
+        getMyReferrals: gh<_i612.GetMyReferralsUseCase>(),
+        getReferral: gh<_i612.GetReferralUseCase>(),
+        genFromSession: gh<_i612.GenerateReferralFromSessionUseCase>(),
+        genFromBp: gh<_i612.GenerateReferralFromBpReadingUseCase>(),
+        genFromBs: gh<_i612.GenerateReferralFromBsReadingUseCase>(),
       ),
     );
     gh.lazySingleton<_i493.GetHomeDashboardUseCase>(

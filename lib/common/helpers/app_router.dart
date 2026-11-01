@@ -49,6 +49,11 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: AssessmentResultRoute.page),
     AutoRoute(page: PricingRoute.page),
 
+    // Bookings
+    AutoRoute(page: BookingDetailRoute.page),
+    AutoRoute(page: CreateBookingRoute.page),
+    AutoRoute(page: ReferralDetailRoute.page),
+
     // Account / auth-adjacent
     AutoRoute(page: VerificationRoute.page),
     AutoRoute(page: SettingsRoute.page),

@@ -296,7 +296,127 @@
   "bookings": {
     "title": "Bookings",
     "subtitle": "Your appointments and bookings",
-    "noBookings": "No bookings available at the moment. Please check back later."
+    "noBookings": "No bookings available at the moment. Please check back later.",
+
+    "emptyTitle": "No bookings yet",
+    "newBooking": "New booking",
+    "priceKes": "KES {amount}",
+    "detailTitle": "Booking",
+    "preferredDate": "Preferred date: {date}",
+    "checkedInAt": "Checked in: {time}",
+    "hieManagedNote": "This visit is managed by the facility. Check-in and completion are updated automatically.",
+    "markCompleted": "Mark as completed",
+    "timelineTitle": "Timeline",
+    "timelineEmpty": "No activity yet",
+
+    "completeConfirmTitle": "Mark as completed?",
+    "completeConfirmBody": "Confirm that this visit has taken place.",
+
+    "service": {
+      "navigator": "Care navigator",
+      "screening": "Screening",
+      "dnaTest": "DNA test",
+      "secondOpinion": "Second opinion"
+    },
+
+    "status": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "paid": "Paid",
+      "cancelled": "Cancelled",
+      "completed": "Completed",
+      "unknown": "Unknown"
+    },
+
+    "timeline": {
+      "created": "Booking created",
+      "checkedIn": "Checked in",
+      "statusChanged": "Status changed",
+      "followUpScheduled": "Follow-up scheduled",
+      "note": "Note",
+      "diagnosis": "Diagnosis",
+      "allergy": "Allergy",
+      "prescription": "Prescription",
+      "referral": "Referral",
+      "update": "Update"
+    },
+
+    "create": {
+      "referralVisit": "Referral visit",
+      "followUpLabel": "Follow-up — {category}",
+      "secondOpinionGp": "Second opinion — GP review",
+      "secondOpinionConsultant": "Second opinion — Consultant review",
+      "dnaTest": "DNA test",
+      "navigator": "Navigator",
+      "screening": "Screening",
+      "booking": "Booking",
+
+      "priceLabel": "Price: {price}",
+      "clinician": "Clinician",
+      "gp": "GP",
+      "consultant": "Consultant",
+      "testType": "Test type",
+      "healthRisk": "Health risk",
+      "paternity": "Paternity",
+      "legal": "Legal",
+      "lawFirm": "Preferred law firm (optional)",
+      "facility": "Facility",
+      "facilityOptional": "Facility (optional)",
+      "facilityNotSelected": "Not selected",
+      "preferredDate": "Preferred date (optional)",
+      "selectDate": "Select date",
+      "phone": "Phone (M-Pesa)",
+      "phoneHint": "07XX XXX XXX",
+      "phoneInvalid": "Enter a valid phone number",
+      "notes": "Notes (optional)",
+      "submit": "Book",
+
+      "sendingPrompt": "Sending M-Pesa prompt…",
+      "creating": "Creating booking…",
+      "paymentFailedTitle": "Your booking was created, but the payment prompt failed.",
+      "retryPayment": "Retry payment",
+      "payLater": "Pay later",
+
+      "doneTitle": "Request received",
+      "donePaidBody": "Approve the M-Pesa prompt on your phone. This booking will show as paid once confirmed.",
+      "doneUnpaidBody": "No payment now. A navigator will confirm details by phone.",
+      "done": "Done"
+    }
+  },
+
+  "referral": {
+    "title": "Referral",
+    "noFacility": "No matching facility was found.",
+    "bookConsultation": "Book consultation",
+    "navigate": "Navigate",
+    "viewVisitDetails": "View visit details",
+    "bookFollowUp": "Book follow-up",
+
+    "sha": {
+      "accredited": "SHA accredited",
+      "notAccredited": "Not SHA accredited",
+      "unavailable": "SHA status unavailable"
+    },
+
+    "status": {
+      "generated": "New",
+      "viewed": "Viewed",
+      "booked": "Booked",
+      "completed": "Completed",
+      "dismissed": "Dismissed",
+      "unknown": "Unknown"
+    }
+  },
+
+  "facility": {
+    "chooseTitle": "Choose a facility",
+    "searchHint": "Search by name",
+    "empty": "No facilities found",
+    "addCta": "Can't find it? Add a facility",
+    "addTitle": "Add a facility",
+    "name": "Name",
+    "town": "Town",
+    "county": "County"
   },
   "greeting": {
   "morning": "Good morning",
@@ -538,6 +658,7 @@
     "deleteAccount": "Delete account",
     "deleteAccountSub": "Permanently remove your account"
   },
+  
 "pricing":{
   "viewPlans":"View plans",
   "title":"Available plans",

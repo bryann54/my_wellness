@@ -217,4 +217,22 @@ class ApiEndpoints {
       '/api/push/partner-notifications/$notificationId/';
   static String pushPartnerNotificationLookup(String token) =>
       '/api/push/partner-notifications/lookup/$token/';
+  // ─── Bookings ─────────────────────────────────────────────────────────
+  static const String bookingsCreate = '/api/bookings/';
+  static String bookingSecondOpinionEncounter(String id) =>
+      '/api/bookings/$id/second-opinion-encounter/';
+
+  // ─── Facilities (patient-reachable) ───────────────────────────────────
+  static const String facilitiesMatch = '/api/facilities/match/';
+  static const String facilitiesPatientSearch =
+      '/api/facilities/patient-search/';
+  static const String facilitiesCreate = '/api/facilities/create/';
+
+  // ─── Care-navigation referrals ────────────────────────────────────────
+  static const String referralsMine = '/api/care-navigation/referrals/mine/';
+  static String referralDetail(String id) =>
+      '/api/care-navigation/referrals/$id/';
+  static String referralFacilityCandidatesFromSession(String sessionId) =>
+      '/api/care-navigation/referrals/from-session/$sessionId/facility-candidates/';
+  static const String healthJourney = '/api/care-navigation/health-journey/';
 }
