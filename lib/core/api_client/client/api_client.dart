@@ -110,7 +110,17 @@ class ApiClient {
     }
 
     return switch (e.response?.statusCode) {
-      400 => ValidationException(message ?? 'Invalid request'),
+      400 => () {
+        final parsed = parseApiErrorBody(data);
+        if (parsed.code != null) {
+          return ApiValidationException(
+            message ?? 'Invalid request',
+            code: parsed.code,
+            body: parsed.body,
+          );
+        }
+        return ValidationException(message ?? 'Invalid request');
+      }(),
       401 => UnauthorizedException(message ?? 'Session expired'),
       404 => NotFoundException(message ?? 'Resource not found'),
       409 => ConflictException(message: message ?? 'Conflict occurred'),
@@ -118,28 +128,15 @@ class ApiClient {
     };
   }
 
-  /// Walks the response body and returns the first human-readable string.
-  /// Handles the three shapes the backend emits:
-  ///   1. { "detail": "string" }
-  ///   2. { "field": ["msg1", "msg2"] }
-  ///   3. { "error": { "detail": { "field": ["msg1", "msg2"] } } }
   String? _extractMessage(dynamic data) {
     if (data is! Map) return null;
-
-    // Unwrap the "error" envelope if present.
     final body = data['error'] is Map ? data['error'] as Map : data;
-
-    // Case 1: top-level detail string.
     final detail = body['detail'];
     if (detail is String && detail.isNotEmpty) return detail;
-
-    // Case 3: nested detail map — recurse.
     if (detail is Map) {
       final nested = _extractMessage(detail);
       if (nested != null) return nested;
     }
-
-    // Case 2: field → list-of-strings, joined into one message.
     final parts = <String>[];
     for (final entry in body.entries) {
       if (entry.key == 'status_code') continue;

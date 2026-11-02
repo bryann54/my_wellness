@@ -523,6 +523,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i6.SubmitBmiMetricsUseCase>(
       () => _i6.SubmitBmiMetricsUseCase(gh<_i544.AssessmentsRepository>()),
     );
+    gh.lazySingleton<_i6.AlertNavigatorUseCase>(
+      () => _i6.AlertNavigatorUseCase(gh<_i544.AssessmentsRepository>()),
+    );
     gh.lazySingleton<_i636.HomeDashboardRepository>(
       () => _i730.HomeDashboardRepositoryImpl(
         gh<_i219.HomeDashboardRemoteDataSource>(),
@@ -570,6 +573,23 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i771.GeographyRepositoryImpl(gh<_i474.GeographyRemoteDataSource>()),
     );
+    gh.factory<_i1022.AssessmentsBloc>(
+      () => _i1022.AssessmentsBloc(
+        gh<_i6.GetVitalsAccessUseCase>(),
+        gh<_i6.ListAssessmentsUseCase>(),
+        gh<_i6.CanStartAssessmentUseCase>(),
+        gh<_i6.GetAssessmentDefinitionUseCase>(),
+        gh<_i6.StartAssessmentSessionUseCase>(),
+        gh<_i6.SubmitCancerPreScreeningUseCase>(),
+        gh<_i6.GetAssessmentAnswersUseCase>(),
+        gh<_i6.SubmitAssessmentAnswerUseCase>(),
+        gh<_i6.GetReferralForSessionUseCase>(),
+        gh<_i6.GetAssessmentScoreUseCase>(),
+        gh<_i6.PreviewBmiUseCase>(),
+        gh<_i6.SubmitBmiMetricsUseCase>(),
+        gh<_i6.AlertNavigatorUseCase>(),
+      ),
+    );
     gh.factory<_i734.MedicationsBloc>(
       () => _i734.MedicationsBloc(
         gh<_i425.GetMedicationsPagedUseCase>(),
@@ -613,22 +633,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i181.GetPricingCatalogUseCase>(),
         gh<_i181.GetPricingQuoteUseCase>(),
         gh<_i181.CheckoutPricingSelectionUseCase>(),
-      ),
-    );
-    gh.factory<_i1022.AssessmentsBloc>(
-      () => _i1022.AssessmentsBloc(
-        gh<_i6.GetVitalsAccessUseCase>(),
-        gh<_i6.ListAssessmentsUseCase>(),
-        gh<_i6.CanStartAssessmentUseCase>(),
-        gh<_i6.GetAssessmentDefinitionUseCase>(),
-        gh<_i6.StartAssessmentSessionUseCase>(),
-        gh<_i6.SubmitCancerPreScreeningUseCase>(),
-        gh<_i6.GetAssessmentAnswersUseCase>(),
-        gh<_i6.SubmitAssessmentAnswerUseCase>(),
-        gh<_i6.GetReferralForSessionUseCase>(),
-        gh<_i6.GetAssessmentScoreUseCase>(),
-        gh<_i6.PreviewBmiUseCase>(),
-        gh<_i6.SubmitBmiMetricsUseCase>(),
       ),
     );
     gh.factory<_i797.AuthBloc>(

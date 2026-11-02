@@ -149,6 +149,105 @@
   "terminatedBody": "Kulingana na majibu yako, tathmini hii imesimamishwa. Tafadhali fuata mwongozo ulioonyeshwa.",
   "noAccessTitle": "Tathmini hazipatikani bado",
   "noAccessBody": "Utaweza kufanya tathmini mara tu ufikiaji utakapofunguliwa kwa akaunti yako.",
+      "retakeButton": "Rudia tathmini hii",
+    "backToDashboard": "Rudi kwenye dashibodi",
+    "otherAssessments": "Tathmini zingine",
+    "reportTitle": "Ripoti yako",
+    "reportDownload": "Pakua",
+    "reportEmail": "Barua pepe",
+    "reportShare": "Shiriki",
+    "resultDisclaimer": "Matokeo ya tathmini haya si utambuzi au uamuzi wa kliniki uliothibitishwa.",
+    "screeningKicker": "Uchunguzi wa {shortTitle}",
+    "screeningHeading": "Pendekezo lako la uchunguzi",
+    "screeningIntervalLabel": "Muda unaopendekezwa",
+    "screeningIntervalFallback": "Utathibitishwa",
+    "screeningBasisLabel": "Kulingana na",
+    "screeningBasisFallback": "Majibu yako ya tathmini",
+    "resultKicker": "Matokeo ya tathmini yako",
+    "resultPill": "Matokeo ya {colour}",
+    "severity": {
+      "good": "Kijani",
+      "attention": "Njano",
+      "concern": "Machungwa",
+      "urgent": "Nyekundu",
+      "neutral": "Wastani"
+    },
+    "ctaBySeverity": {
+      "good": "Gundua vidokezo vya afya",
+      "attention": "Tazama mapendekezo yangu",
+      "concern": "Panga ufuatiliaji wa kliniki",
+      "urgent": "Tembelea kituo cha afya"
+    },
+    "importantNoticeCongratulations": "Hongera, {firstName}!",
+    "screeningStatus": {
+      "due": "Uchunguzi wako umefika wakati",
+      "dueNamed": "Uchunguzi wako umefika wakati, {firstName}",
+      "upToDate": "Hongera! Uchunguzi wako uko sawa",
+      "upToDateNamed": "Hongera, {firstName}! Uchunguzi wako uko sawa",
+      "highrisk": "Unaweza kuhitaji uchunguzi wa {organ} wa hali ya juu",
+      "highriskNamed": "{firstName}, unaweza kuhitaji uchunguzi wa {organ} wa hali ya juu",
+      "underage": "Uchunguzi wa kawaida wa {organ} bado haujafika wakati kwa umri wako",
+      "underageNamed": "{firstName}, uchunguzi wa kawaida wa {organ} bado haujafika wakati kwa umri wako",
+      "unconfirmed": "Thibitisha maelezo ya uchunguzi wako",
+      "unconfirmedNamed": "{firstName}, thibitisha maelezo ya uchunguzi wako",
+      "neutral": "Jadili ikiwa uendelee na uchunguzi",
+      "neutralNamed": "{firstName}, jadili ikiwa uendelee na uchunguzi"
+    },
+    "blocked": {
+      "title": "Tathmini haipatikani",
+      "back": "Rudi",
+      "ageIneligible": {
+        "title": "Tathmini haipatikani kwa umri wako",
+        "body": "Tathmini hii inapatikana tu kwa watumiaji walio na umri wa miaka 18 na zaidi."
+      },
+      "genderIneligible": {
+        "title": "Haipatikani kwa wasifu wako",
+        "body": "Tathmini hii ya kibinafsi haipatikani kwa wasifu wako. Ikiwa unaikamilisha kwa mtu mwingine, tumia tathmini ya mtegemezi badala yake.",
+        "actionOpenDependant": "Fungua tathmini ya mtegemezi"
+      },
+      "cancerDiagnosedBlocked": {
+        "title": "Mwongozo wa ufuatiliaji unapatikana",
+        "body": "Kwa sababu umetueleza kuhusu utambuzi wa saratani, tafadhali fuata mwongozo uliotolewa na daktari wako anayekutibu. Mwongozo wa bure wa ufuatiliaji unapatikana."
+      },
+      "dependantConsentRequired": {
+        "title": "Idhini inahitajika",
+        "body": "Idhini inahitajika kabla ya kuanza tathmini hii kwa mtegemezi huyu."
+      },
+      "assessmentInProgress": {
+        "title": "Maliza tathmini yako ya sasa kwanza",
+        "body": "Maliza {title} kabla ya kuanza mpya.",
+        "bodyFallback": "Maliza tathmini yako ya sasa kabla ya kuanza mpya.",
+        "resumeAction": "Endelea na {title}",
+        "resumeActionFallback": "Endelea na tathmini ya sasa"
+      }
+    },
+    "cancerGate": {
+      "question": "Je, umewahi kugunduliwa na aina yoyote ya saratani?",
+      "helper": "Hili ni tofauti na tathmini yako ya sasa. Jibu lako linatusaidia kupendekeza hatua sahihi inayofuata.",
+      "yes": "Ndiyo",
+      "no": "Hapana",
+      "typeQuestion": "Uligunduliwa na aina gani ya saratani?",
+      "typeOther": "Aina nyingine ya saratani",
+      "yearQuestion": "Uligunduliwa mwaka gani? (si lazima)",
+      "continue": "Endelea",
+      "submitting": "Inawasilisha…"
+    },
+    "awaitingCall": {
+      "bodyNotAlerted": "Mwanatimu wa huduma atawasiliana nawe ili kukamilisha tathmini hii.",
+      "bodyAlerted": "Mwongozo wa huduma amearifiwa na atawasiliana nawe hivi karibuni.",
+      "alertAction": "Arifu Mwongozo wa Huduma",
+      "alerting": "Inaarifu…",
+      "alertedToast": "Mwanatimu wa huduma atawasiliana nawe hivi karibuni."
+    },
+    "awaitingPayment": "Tathmini hii inasubiri ufikiaji ufunguliwe.",
+    "notReady": "Tathmini hii haiko tayari kuendelea bado.",
+    "questionRequired": "Tafadhali jibu swali hili ili kuendelea.",
+    "previousQuestionFirstToast": "Tafadhali kamilisha swali la awali kwanza.",
+    "notEligible": "Hustahili kuanza tathmini hii bado.",
+    "bmiNotReady": "Matokeo ya BMI hayako tayari. Weka vipimo tena.",
+    "bmiInvalid": "Weka uzito na urefu sahihi.",
+    "bmiOutOfSequence": "Swali la BMI haliko kwenye mpangilio. Tafadhali jaribu tena.",
+    "sessionUnavailable": "Kipindi cha tathmini hakipatikani tena.",
   "bmi": {
     "title": "Hebu tuhesabu BMI yako",
     "subtitle": "Weka uzito na urefu wako. Tutahesabu BMI yako na kuonyesha maana yake.",

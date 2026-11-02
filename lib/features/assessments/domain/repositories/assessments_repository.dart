@@ -13,10 +13,16 @@ class CanStartResult {
   final bool allowed;
   final String? lastCompletedAt;
   final String? nextEligibleAt;
+  final String? blockedReason;
+  final String? priorSlug;
+  final String? priorTitle;
   const CanStartResult({
     required this.allowed,
     this.lastCompletedAt,
     this.nextEligibleAt,
+    this.blockedReason,
+    this.priorSlug,
+    this.priorTitle,
   });
 }
 
@@ -55,7 +61,7 @@ abstract class AssessmentsRepository {
     String sessionId, {
     required String questionKey,
     required int questionIndex,
-    required String answer,
+    required Object answer,
   });
   Future<Either<Failure, AssessmentScore>> getScore(
     String slug,
@@ -72,6 +78,10 @@ abstract class AssessmentsRepository {
     required double heightCm,
   });
 
-  /// Optional — returns null if the backend has no referral for this session.
+  Future<Either<Failure, AssessmentSession>> alertNavigator(
+    String slug,
+    String sessionId,
+  );
+
   Future<Either<Failure, Referral?>> getReferralForSession(String sessionId);
 }

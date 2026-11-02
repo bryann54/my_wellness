@@ -4,19 +4,21 @@ enum AssessmentStatus { initial, loading, ready, submitting, completed, error }
 
 enum ToastType { success, error, warning, info }
 
+enum AssessmentBlockKind {
+  none,
+  ageIneligible,
+  genderIneligible,
+  cancerDiagnosedBlocked,
+  dependantConsentRequired,
+  assessmentInProgress,
+}
+
 class AssessmentsState extends Equatable {
   final AssessmentStatus status;
   final VitalsAccess? access;
 
-  /// Assessments visible to the signed-in member after applying
-  /// `excluded_gender` against their profile gender.
   final List<AssessmentSummary> assessments;
-
-  /// `assessments` filtered by [searchQuery]. When [searchQuery] is empty,
-  /// this mirrors [assessments] exactly.
   final List<AssessmentSummary> filteredAssessments;
-
-  /// Trimmed raw query typed by the user. Empty string == no active search.
   final String searchQuery;
 
   final AssessmentDefinition? definition;
@@ -35,6 +37,13 @@ class AssessmentsState extends Equatable {
   final bool alreadyCompleted;
   final bool completionHandled;
   final Referral? referral;
+
+  final AssessmentBlockKind block;
+  final String? blockingSlug;
+  final String? blockingTitle;
+  final String? dependantVariantSlug;
+
+  final CanStartResult? canStart;
 
   const AssessmentsState({
     this.status = AssessmentStatus.initial,
@@ -58,6 +67,11 @@ class AssessmentsState extends Equatable {
     this.alreadyCompleted = false,
     this.completionHandled = false,
     this.referral,
+    this.block = AssessmentBlockKind.none,
+    this.blockingSlug,
+    this.blockingTitle,
+    this.dependantVariantSlug,
+    this.canStart,
   });
 
   AssessmentsState copyWith({
@@ -88,6 +102,13 @@ class AssessmentsState extends Equatable {
     bool? completionHandled,
     Referral? referral,
     bool clearReferral = false,
+    AssessmentBlockKind? block,
+    bool clearBlock = false,
+    String? blockingSlug,
+    String? blockingTitle,
+    String? dependantVariantSlug,
+    CanStartResult? canStart,
+    bool clearCanStart = false,
   }) {
     return AssessmentsState(
       status: status ?? this.status,
@@ -113,6 +134,13 @@ class AssessmentsState extends Equatable {
       alreadyCompleted: alreadyCompleted ?? this.alreadyCompleted,
       completionHandled: completionHandled ?? this.completionHandled,
       referral: clearReferral ? null : (referral ?? this.referral),
+      block: clearBlock ? AssessmentBlockKind.none : (block ?? this.block),
+      blockingSlug: clearBlock ? null : (blockingSlug ?? this.blockingSlug),
+      blockingTitle: clearBlock ? null : (blockingTitle ?? this.blockingTitle),
+      dependantVariantSlug: clearBlock
+          ? null
+          : (dependantVariantSlug ?? this.dependantVariantSlug),
+      canStart: clearCanStart ? null : (canStart ?? this.canStart),
     );
   }
 
@@ -139,5 +167,10 @@ class AssessmentsState extends Equatable {
     alreadyCompleted,
     completionHandled,
     referral,
+    block,
+    blockingSlug,
+    blockingTitle,
+    dependantVariantSlug,
+    canStart,
   ];
 }

@@ -56,3 +56,27 @@ class ConflictFailure extends Failure {
   @override
   List<Object?> get props => [error];
 }
+
+class AssessmentValidationFailure extends ValidationFailure {
+  final String? code;
+  final String? blockingSlug;
+  final String? blockingTitle;
+  final String? dependantVariantSlug;
+
+  const AssessmentValidationFailure({
+    required super.error,
+    this.code,
+    this.blockingSlug,
+    this.blockingTitle,
+    this.dependantVariantSlug,
+  });
+
+  @override
+  List<Object?> get props => [
+    error,
+    code,
+    blockingSlug,
+    blockingTitle,
+    dependantVariantSlug,
+  ];
+}

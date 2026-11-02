@@ -8,6 +8,7 @@ class AssessmentSummaryModel {
   final String slug;
   final String category;
   final String title;
+
   @JsonKey(name: 'short_title')
   final String shortTitle;
 
@@ -16,6 +17,9 @@ class AssessmentSummaryModel {
   @JsonKey(name: 'excluded_gender')
   final String? excludedGender;
 
+  @JsonKey(name: 'dependant_variant_slug')
+  final String? dependantVariantSlug;
+
   const AssessmentSummaryModel({
     required this.slug,
     required this.category,
@@ -23,6 +27,7 @@ class AssessmentSummaryModel {
     required this.shortTitle,
     required this.tagline,
     this.excludedGender,
+    this.dependantVariantSlug,
   });
 
   factory AssessmentSummaryModel.fromJson(Map<String, dynamic> json) =>
@@ -37,5 +42,6 @@ class AssessmentSummaryModel {
     shortTitle: shortTitle,
     tagline: tagline,
     excludedGender: excludedGender,
+    dependantVariantSlug: dependantVariantSlug,
   );
 }

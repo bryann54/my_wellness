@@ -10,6 +10,7 @@ import 'package:my_wellness/features/assessments/domain/entities/assessment_sess
 import 'package:my_wellness/features/assessments/presentation/bloc/assessments_bloc.dart';
 import 'package:my_wellness/features/assessments/presentation/pages/assessment_terminated_screen.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_bmi_step.dart';
+import 'package:my_wellness/features/assessments/presentation/widgets/assessment_blocked_view.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_intro_skeleton.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_progress_bar.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_question_view.dart';
@@ -43,7 +44,7 @@ class _AssessmentSessionBody extends StatefulWidget {
 }
 
 class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
-  String? _pendingAnswer;
+  Object? _pendingAnswer;
   bool? _priorCancerHistory;
   String? _priorCancerType;
   final TextEditingController _priorCancerYear = TextEditingController();
@@ -74,6 +75,17 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
     if (state.terminated) {
       return AssessmentTerminatedRouteView(
         reference: state.terminationReference,
+      );
+    }
+
+    if (state.block != AssessmentBlockKind.none) {
+      return AssessmentBlockedView(
+        state: state,
+        onResumeBlocking: state.blockingSlug == null
+            ? null
+            : () => context.router.push(
+                AssessmentIntroRoute(slug: state.blockingSlug!),
+              ),
       );
     }
 
@@ -121,122 +133,46 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
 
     if (session.status != AssessmentSessionStatus.inProgress) {
       if (session.status == AssessmentSessionStatus.needsPreScreening) {
-        final submitting = state.status == AssessmentStatus.submitting;
-        final hasHistory = _priorCancerHistory;
-        final year = int.tryParse(_priorCancerYear.text.trim());
-        final valid =
-            hasHistory != null &&
-            (hasHistory == false || _priorCancerType != null) &&
-            (_priorCancerYear.text.trim().isEmpty || year != null);
-        return Scaffold(
-          appBar: AppBar(title: Text(def.shortTitle)),
-          body: SafeArea(
-            child: ListView(
-              padding: const EdgeInsets.all(24),
-              children: [
-                Text(
-                  'Have you previously been diagnosed with this cancer?',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 12),
-                RadioListTile<bool>(
-                  value: true,
-                  groupValue: _priorCancerHistory,
-                  title: const Text('Yes'),
-                  onChanged: submitting
-                      ? null
-                      : (value) => setState(() => _priorCancerHistory = value),
-                ),
-                RadioListTile<bool>(
-                  value: false,
-                  groupValue: _priorCancerHistory,
-                  title: const Text('No'),
-                  onChanged: submitting
-                      ? null
-                      : (value) => setState(() {
-                          _priorCancerHistory = value;
-                          _priorCancerType = null;
-                          _priorCancerYear.clear();
-                        }),
-                ),
-                if (hasHistory == true) ...[
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<String>(
-                    initialValue: _priorCancerType,
-                    decoration: const InputDecoration(
-                      labelText: 'Cancer type',
-                      border: OutlineInputBorder(),
-                    ),
-                    items:
-                        const [
-                              'breast',
-                              'cervical',
-                              'prostate',
-                              'esophageal',
-                              'colorectal',
-                              'other',
-                            ]
-                            .map(
-                              (type) => DropdownMenuItem(
-                                value: type,
-                                child: Text(
-                                  type[0].toUpperCase() + type.substring(1),
-                                ),
-                              ),
-                            )
-                            .toList(),
-                    onChanged: submitting
-                        ? null
-                        : (value) => setState(() => _priorCancerType = value),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: _priorCancerYear,
-                    enabled: !submitting,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Year diagnosed (optional)',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 24),
-                AppPrimaryButton(
-                  onPressed: !valid || submitting
-                      ? null
-                      : () => context.read<AssessmentsBloc>().add(
-                          SubmitCancerPreScreeningEvent(
-                            priorCancerHistory: hasHistory ? 'yes' : 'no',
-                            priorCancerType: hasHistory
-                                ? _priorCancerType!
-                                : '',
-                            priorCancerYear: hasHistory ? year : null,
-                          ),
-                        ),
-                  label: submitting ? 'Submitting…' : 'Continue',
-                  height: 52,
-                ),
-                const SizedBox(height: 12),
-                TextButton(
-                  onPressed: submitting
-                      ? null
-                      : () => context.router.maybePop(),
-                  child: Text(
-                    AppLocalizations.getString(context, 'common.back'),
-                  ),
-                ),
-              ],
-            ),
-          ),
+        return _CancerGateBody(
+          definition: def,
+          submitting: state.status == AssessmentStatus.submitting,
+          priorCancerHistory: _priorCancerHistory,
+          priorCancerType: _priorCancerType,
+          priorCancerYearController: _priorCancerYear,
+          onHistoryChanged: (v) => setState(() {
+            _priorCancerHistory = v;
+            if (v == false) {
+              _priorCancerType = null;
+              _priorCancerYear.clear();
+            }
+          }),
+          onTypeChanged: (v) => setState(() => _priorCancerType = v),
+          onSubmit: () {
+            final hasHistory = _priorCancerHistory;
+            final year = int.tryParse(_priorCancerYear.text.trim());
+            context.read<AssessmentsBloc>().add(
+              SubmitCancerPreScreeningEvent(
+                priorCancerHistory: hasHistory == true ? 'yes' : 'no',
+                priorCancerType: hasHistory == true
+                    ? (_priorCancerType ?? '')
+                    : '',
+                priorCancerYear: hasHistory == true ? year : null,
+              ),
+            );
+          },
         );
       }
-      final message = switch (session.status) {
-        AssessmentSessionStatus.awaitingPayment =>
-          'This assessment is waiting for access to be unlocked.',
-        AssessmentSessionStatus.awaitingCall =>
-          'A care team member will contact you to complete this assessment.',
-        _ => 'This assessment is not ready to continue yet.',
-      };
+
+      if (session.status == AssessmentSessionStatus.awaitingCall) {
+        return _AwaitingCallBody(
+          session: session,
+          submitting: state.status == AssessmentStatus.submitting,
+        );
+      }
+
+      final message = session.status == AssessmentSessionStatus.awaitingPayment
+          ? AppLocalizations.getString(context, 'assessment.awaitingPayment')
+          : AppLocalizations.getString(context, 'assessment.notReady');
       return Scaffold(
         appBar: AppBar(title: Text(def.shortTitle)),
         body: Center(
@@ -278,7 +214,8 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
 
     final isBmi = q.type == AssessmentQuestionType.bmi;
     final isSubmitting = state.status == AssessmentStatus.submitting;
-    final canProceed = _pendingAnswer != null && _pendingAnswer!.isNotEmpty;
+    final canProceed =
+        _pendingAnswer != null && !_isEmptyAnswer(_pendingAnswer);
     final profile = context.watch<AccountBloc>().state.profile;
 
     return BlocListener<AssessmentsBloc, AssessmentsState>(
@@ -322,10 +259,12 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
                           initialHeightCm: profile?.heightCm?.toString(),
                           submitting: isSubmitting,
                         )
-                      : AssessmentQuestionView(
+                     : AssessmentQuestionView(
                           key: ValueKey(q.key),
                           question: q,
-                          initialValue: _pendingAnswer,
+                          initialValue: _pendingAnswer is String
+                              ? _pendingAnswer as String
+                              : null,
                           onChanged: (v) => setState(() => _pendingAnswer = v),
                         ),
                 ),
@@ -345,6 +284,13 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
     );
   }
 
+  static bool _isEmptyAnswer(Object? a) {
+    if (a == null) return true;
+    if (a is String) return a.isEmpty;
+    if (a is List) return a.isEmpty;
+    return false;
+  }
+
   void _submitAnswer() {
     final state = context.read<AssessmentsBloc>().state;
     final session = state.session;
@@ -359,6 +305,218 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
         questionKey: q.key,
         questionIndex: q.index,
         answer: _pendingAnswer!,
+      ),
+    );
+  }
+}
+
+class _CancerGateBody extends StatelessWidget {
+  final dynamic definition;
+  final bool submitting;
+  final bool? priorCancerHistory;
+  final String? priorCancerType;
+  final TextEditingController priorCancerYearController;
+  final ValueChanged<bool?> onHistoryChanged;
+  final ValueChanged<String?> onTypeChanged;
+  final VoidCallback onSubmit;
+
+  const _CancerGateBody({
+    required this.definition,
+    required this.submitting,
+    required this.priorCancerHistory,
+    required this.priorCancerType,
+    required this.priorCancerYearController,
+    required this.onHistoryChanged,
+    required this.onTypeChanged,
+    required this.onSubmit,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final hasHistory = priorCancerHistory;
+    final year = int.tryParse(priorCancerYearController.text.trim());
+    final typeChoices = <String>[
+      'breast',
+      'cervical',
+      'prostate',
+      'esophageal',
+      'colorectal',
+      'other',
+    ];
+    final valid =
+        hasHistory != null &&
+        (hasHistory == false ||
+            (priorCancerType != null && priorCancerType!.isNotEmpty)) &&
+        (priorCancerYearController.text.trim().isEmpty || year != null);
+
+    return Scaffold(
+      appBar: AppBar(title: Text(definition.shortTitle as String)),
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(24),
+          children: [
+            Text(
+              AppLocalizations.getString(
+                context,
+                'assessment.cancerGate.question',
+              ),
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              AppLocalizations.getString(
+                context,
+                'assessment.cancerGate.helper',
+              ),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 12),
+            RadioListTile<bool>(
+              value: true,
+              groupValue: hasHistory,
+              title: Text(
+                AppLocalizations.getString(
+                  context,
+                  'assessment.cancerGate.yes',
+                ),
+              ),
+              onChanged: submitting ? null : onHistoryChanged,
+            ),
+            RadioListTile<bool>(
+              value: false,
+              groupValue: hasHistory,
+              title: Text(
+                AppLocalizations.getString(context, 'assessment.cancerGate.no'),
+              ),
+              onChanged: submitting ? null : onHistoryChanged,
+            ),
+            if (hasHistory == true) ...[
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                initialValue: priorCancerType,
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.getString(
+                    context,
+                    'assessment.cancerGate.typeQuestion',
+                  ),
+                  border: const OutlineInputBorder(),
+                ),
+                items: typeChoices
+                    .map(
+                      (t) => DropdownMenuItem(
+                        value: t,
+                        child: Text(
+                          t == 'other'
+                              ? AppLocalizations.getString(
+                                  context,
+                                  'assessment.cancerGate.typeOther',
+                                )
+                              : t[0].toUpperCase() + t.substring(1),
+                        ),
+                      ),
+                    )
+                    .toList(),
+                onChanged: submitting ? null : onTypeChanged,
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: priorCancerYearController,
+                enabled: !submitting,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.getString(
+                    context,
+                    'assessment.cancerGate.yearQuestion',
+                  ),
+                  border: const OutlineInputBorder(),
+                ),
+              ),
+            ],
+            const SizedBox(height: 24),
+            AppPrimaryButton(
+              onPressed: (!valid || submitting) ? null : onSubmit,
+              label: submitting
+                  ? AppLocalizations.getString(
+                      context,
+                      'assessment.cancerGate.submitting',
+                    )
+                  : AppLocalizations.getString(
+                      context,
+                      'assessment.cancerGate.continue',
+                    ),
+              height: 52,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+class _AwaitingCallBody extends StatelessWidget {
+  final AssessmentSession session;
+  final bool submitting;
+
+  const _AwaitingCallBody({required this.session, required this.submitting});
+
+  @override
+  Widget build(BuildContext context) {
+    final alerted = session.navigatorAlertedAt != null;
+    return Scaffold(
+      appBar: AppBar(title: Text(session.assessmentSlug)),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.phone_in_talk_outlined,
+                size: 48,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                alerted
+                    ? AppLocalizations.getString(
+                        context,
+                        'assessment.awaitingCall.bodyAlerted',
+                      )
+                    : AppLocalizations.getString(
+                        context,
+                        'assessment.awaitingCall.bodyNotAlerted',
+                      ),
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+              const SizedBox(height: 24),
+              if (!alerted)
+                AppPrimaryButton(
+                  onPressed: submitting
+                      ? null
+                      : () => context.read<AssessmentsBloc>().add(
+                          const AlertNavigatorEvent(),
+                        ),
+                  label: submitting
+                      ? AppLocalizations.getString(
+                          context,
+                          'assessment.awaitingCall.alerting',
+                        )
+                      : AppLocalizations.getString(
+                          context,
+                          'assessment.awaitingCall.alertAction',
+                        ),
+                  height: 52,
+                ),
+              const SizedBox(height: 12),
+              TextButton(
+                onPressed: () => context.router.maybePop(),
+                child: Text(AppLocalizations.getString(context, 'common.back')),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -14,7 +14,6 @@ class LoadAssessmentsEvent extends AssessmentsEvent {
 }
 
 class SearchAssessmentsEvent extends AssessmentsEvent {
-  /// Empty string clears the filter and restores the full list.
   final String query;
   const SearchAssessmentsEvent(this.query);
   @override
@@ -72,7 +71,9 @@ class ResumeAssessmentsEvent extends AssessmentsEvent {
 class SubmitAnswerEvent extends AssessmentsEvent {
   final String questionKey;
   final int questionIndex;
-  final String answer;
+
+  final Object answer;
+
   const SubmitAnswerEvent({
     required this.questionKey,
     required this.questionIndex,
@@ -104,6 +105,10 @@ class ClearBmiPreviewEvent extends AssessmentsEvent {
 
 class FetchScoreEvent extends AssessmentsEvent {
   const FetchScoreEvent();
+}
+
+class AlertNavigatorEvent extends AssessmentsEvent {
+  const AlertNavigatorEvent();
 }
 
 class ResetAssessmentsEvent extends AssessmentsEvent {

@@ -6,27 +6,6 @@ part of 'assessment_definition_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-AssessmentDefinitionModel _$AssessmentDefinitionModelFromJson(
-  Map<String, dynamic> json,
-) => AssessmentDefinitionModel(
-  slug: json['slug'] as String,
-  category: json['category'] as String,
-  title: json['title'] as String,
-  shortTitle: json['short_title'] as String,
-  tagline: json['tagline'] as String,
-  questions: (json['questions'] as List<dynamic>)
-      .map((e) => AssessmentQuestionModel.fromJson(e as Map<String, dynamic>))
-      .toList(),
-  ctas: (json['ctas'] as List<dynamic>)
-      .map((e) => AssessmentCtaModel.fromJson(e as Map<String, dynamic>))
-      .toList(),
-  disclaimer: json['disclaimer'] as String?,
-  referencePrefix: json['reference_prefix'] as String?,
-  understandingCopy: json['understanding_copy'] as String?,
-  beforeYouBegin: json['before_you_begin'] as String?,
-  cancerHistoryTypeCode: json['cancer_history_type_code'] as String?,
-  encouragingFact: json['encouraging_fact'] as String?,
-);
 
 Map<String, dynamic> _$AssessmentDefinitionModelToJson(
   AssessmentDefinitionModel instance,
@@ -39,12 +18,35 @@ Map<String, dynamic> _$AssessmentDefinitionModelToJson(
   'disclaimer': instance.disclaimer,
   'reference_prefix': instance.referencePrefix,
   'understanding_copy': instance.understandingCopy,
-  'before_you_begin': instance.beforeYouBegin,
+  'before_you_begin': instance.beforeYouBegin.map((e) => e.toJson()).toList(),
   'cancer_history_type_code': instance.cancerHistoryTypeCode,
-  'encouraging_fact': instance.encouragingFact,
+  'encouraging_fact': instance.encouragingFact?.toJson(),
+  'dependant_variant_slug': instance.dependantVariantSlug,
   'questions': instance.questions.map((e) => e.toJson()).toList(),
   'ctas': instance.ctas.map((e) => e.toJson()).toList(),
 };
+
+BeforeYouBeginPageModel _$BeforeYouBeginPageModelFromJson(
+  Map<String, dynamic> json,
+) => BeforeYouBeginPageModel(
+  heading: json['heading'] as String,
+  body: json['body'] as String,
+);
+
+Map<String, dynamic> _$BeforeYouBeginPageModelToJson(
+  BeforeYouBeginPageModel instance,
+) => <String, dynamic>{'heading': instance.heading, 'body': instance.body};
+
+EncouragingFactModel _$EncouragingFactModelFromJson(
+  Map<String, dynamic> json,
+) => EncouragingFactModel(
+  emoji: json['emoji'] as String,
+  text: json['text'] as String,
+);
+
+Map<String, dynamic> _$EncouragingFactModelToJson(
+  EncouragingFactModel instance,
+) => <String, dynamic>{'emoji': instance.emoji, 'text': instance.text};
 
 AssessmentQuestionModel _$AssessmentQuestionModelFromJson(
   Map<String, dynamic> json,
@@ -65,10 +67,12 @@ AssessmentQuestionModel _$AssessmentQuestionModelFromJson(
   description: json['description'] as String?,
   min: (json['min'] as num?)?.toInt(),
   max: (json['max'] as num?)?.toInt(),
-  terminateOn: json['terminate_on'] as String?,
-  skipNextOn: json['skip_next_on'] as String?,
-  skipIf: json['skip_if'] as String?,
-  autoAnswerIf: json['auto_answer_if'] as String?,
+  terminateOn: json['terminate_on'],
+  skipNextOn: json['skip_next_on'],
+  skipIf: json['skip_if'] as Map<String, dynamic>?,
+  autoAnswerIf: json['auto_answer_if'] as Map<String, dynamic>?,
+  exclusiveValue: json['exclusive_value'] as String?,
+  optional: json['optional'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$AssessmentQuestionModelToJson(
@@ -88,6 +92,8 @@ Map<String, dynamic> _$AssessmentQuestionModelToJson(
   'skip_next_on': instance.skipNextOn,
   'skip_if': instance.skipIf,
   'auto_answer_if': instance.autoAnswerIf,
+  'exclusive_value': instance.exclusiveValue,
+  'optional': instance.optional,
 };
 
 AssessmentOptionModel _$AssessmentOptionModelFromJson(

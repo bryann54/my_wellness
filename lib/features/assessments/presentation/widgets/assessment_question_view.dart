@@ -7,8 +7,11 @@ import 'package:my_wellness/features/assessments/presentation/widgets/assessment
 
 class AssessmentQuestionView extends StatefulWidget {
   final AssessmentQuestion question;
-  final String? initialValue;
-  final ValueChanged<String> onChanged;
+
+  final Object? initialValue;
+
+  final ValueChanged<Object> onChanged;
+
   final bool showError;
   final bool hidePrompt;
 
@@ -27,7 +30,7 @@ class AssessmentQuestionView extends StatefulWidget {
 
 class _AssessmentQuestionViewState extends State<AssessmentQuestionView> {
   late final TextEditingController _numberCtrl = TextEditingController(
-    text: widget.initialValue ?? '',
+    text: _stringOf(widget.initialValue),
   );
   String? _selected;
   final Set<String> _selectedMulti = {};
@@ -35,21 +38,21 @@ class _AssessmentQuestionViewState extends State<AssessmentQuestionView> {
   @override
   void initState() {
     super.initState();
+    final initial = widget.initialValue;
 
     if (widget.question.type == AssessmentQuestionType.radio &&
-        widget.initialValue != null) {
-      _selected = widget.initialValue;
+        initial is String) {
+      _selected = initial;
     }
 
-    if (widget.question.type == AssessmentQuestionType.multiSelect &&
-        widget.initialValue != null &&
-        widget.initialValue!.isNotEmpty) {
-      _selectedMulti.addAll(
-        widget.initialValue!
-            .split(',')
-            .map((v) => v.trim())
-            .where((v) => v.isNotEmpty),
-      );
+    if (widget.question.type == AssessmentQuestionType.multiSelect) {
+      if (initial is List) {
+        _selectedMulti.addAll(initial.map((e) => e.toString()));
+      } else if (initial is String && initial.isNotEmpty) {
+        _selectedMulti.addAll(
+          initial.split(',').map((v) => v.trim()).where((v) => v.isNotEmpty),
+        );
+      }
     }
   }
 
@@ -59,18 +62,33 @@ class _AssessmentQuestionViewState extends State<AssessmentQuestionView> {
     super.dispose();
   }
 
+  static String? _stringOf(Object? v) {
+    if (v == null) return null;
+    if (v is String) return v;
+    return v.toString();
+  }
+
   void _toggleMulti(String value) {
+    final exclusive = widget.question.exclusiveValue;
     setState(() {
-      if (_selectedMulti.contains(value)) {
-        _selectedMulti.remove(value);
+      if (exclusive != null && value == exclusive) {
+        _selectedMulti
+          ..clear()
+          ..add(exclusive);
       } else {
-        _selectedMulti.add(value);
+        if (exclusive != null) _selectedMulti.remove(exclusive);
+        if (_selectedMulti.contains(value)) {
+          _selectedMulti.remove(value);
+        } else {
+          _selectedMulti.add(value);
+        }
       }
     });
+
     final ordered = widget.question.options
         .map((o) => o.value)
         .where(_selectedMulti.contains)
-        .join(',');
+        .toList(growable: false);
 
     widget.onChanged(ordered);
   }
@@ -182,14 +200,19 @@ class _AssessmentQuestionViewState extends State<AssessmentQuestionView> {
           controller: _numberCtrl,
           min: widget.question.min,
           max: widget.question.max,
-          onChanged: widget.onChanged,
+          onChanged: (v) {
+            final n = int.tryParse(v.trim());
+            if (n != null) widget.onChanged(n);
+          },
         );
 
       case AssessmentQuestionType.text:
         return AssessmentNumberField(
           controller: _numberCtrl,
-          onChanged: widget.onChanged,
-          validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+          onChanged: (v) => widget.onChanged(v),
+          validator: widget.question.optional
+              ? (v) => null
+              : (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
         );
 
       case AssessmentQuestionType.bmi:

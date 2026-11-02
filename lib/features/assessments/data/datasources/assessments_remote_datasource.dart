@@ -40,8 +40,9 @@ abstract class AssessmentsRemoteDataSource {
     String sessionId, {
     required String questionKey,
     required int questionIndex,
-    required String answer,
+    required Object answer,
   });
+  Future<AssessmentSession> alertNavigator(String slug, String sessionId);
   Future<AssessmentScore> getScore(String slug, String sessionId);
   Future<BmiPreview> previewBmi({
     required String weightKg,
@@ -69,9 +70,6 @@ class AssessmentsRemoteDataSourceImpl implements AssessmentsRemoteDataSource {
     return VitalsAccessModel.fromJson(res).toEntity();
   }
 
-  /// The care-navigation endpoint generates the referral with POST
-  /// (idempotent per session); GET is not routed and always failed here,
-  /// which silently hid the "Book consultation" step.
   @override
   Future<Referral?> getReferralForSession(String sessionId) async {
     try {
@@ -113,6 +111,9 @@ class AssessmentsRemoteDataSourceImpl implements AssessmentsRemoteDataSource {
       allowed: res['allowed'] as bool? ?? false,
       lastCompletedAt: res['last_completed_at'] as String?,
       nextEligibleAt: res['next_eligible_at'] as String?,
+      blockedReason: res['blocked_reason'] as String?,
+      priorSlug: res['prior_slug'] as String?,
+      priorTitle: res['prior_title'] as String?,
     );
   }
 
@@ -165,13 +166,12 @@ class AssessmentsRemoteDataSourceImpl implements AssessmentsRemoteDataSource {
       options: ApiClient.protected,
     );
 
-    final answersByIndex = <int, Map<String, dynamic>>{
-      for (final item in res.whereType<Map<String, dynamic>>())
-        if (item['question_index'] is int) item['question_index'] as int: item,
-    };
-    return answersByIndex.values
-        .map((e) => AssessmentAnswerModel.fromJson(e).toEntity())
-        .toList(growable: false);
+    final byKey = <String, AssessmentAnswerModel>{};
+    for (final item in res.whereType<Map<String, dynamic>>()) {
+      final model = AssessmentAnswerModel.fromJson(item);
+      byKey[model.questionKey] = model;
+    }
+    return byKey.values.map((e) => e.toEntity()).toList(growable: false);
   }
 
   @override
@@ -180,7 +180,7 @@ class AssessmentsRemoteDataSourceImpl implements AssessmentsRemoteDataSource {
     String sessionId, {
     required String questionKey,
     required int questionIndex,
-    required String answer,
+    required Object answer,
   }) async {
     final res = await _api.post<Map<String, dynamic>>(
       url: ApiEndpoints.assessmentAnswers(slug, sessionId),
@@ -193,6 +193,19 @@ class AssessmentsRemoteDataSourceImpl implements AssessmentsRemoteDataSource {
       completed: res['completed'] as bool? ?? false,
       reference: res['reference'] as String?,
     );
+  }
+
+  @override
+  Future<AssessmentSession> alertNavigator(
+    String slug,
+    String sessionId,
+  ) async {
+    final res = await _api.post<Map<String, dynamic>>(
+      url: ApiEndpoints.assessmentAlertNavigator(slug, sessionId),
+      payload: const {},
+      options: ApiClient.protected,
+    );
+    return AssessmentSessionModel.fromJson(res).toEntity();
   }
 
   @override

@@ -147,6 +147,105 @@
   "terminatedBody": "Based on your answers, this assessment has been stopped. Please follow the guidance shown.",
   "noAccessTitle": "Assessments aren't available yet",
   "noAccessBody": "You'll be able to take assessments once access is unlocked for your account.",
+      "retakeButton": "Retake this assessment",
+    "backToDashboard": "Back to dashboard",
+    "otherAssessments": "Other assessments",
+    "reportTitle": "Your report",
+    "reportDownload": "Download",
+    "reportEmail": "Email",
+    "reportShare": "Share",
+    "resultDisclaimer": "This assessment result is not a diagnosis or a validated clinical decision.",
+    "screeningKicker": "{shortTitle} screening",
+    "screeningHeading": "Your screening recommendation",
+    "screeningIntervalLabel": "Recommended interval",
+    "screeningIntervalFallback": "To be confirmed",
+    "screeningBasisLabel": "Based on",
+    "screeningBasisFallback": "Your assessment answers",
+    "resultKicker": "Your assessment result",
+    "resultPill": "{colour} result",
+    "severity": {
+      "good": "Green",
+      "attention": "Yellow",
+      "concern": "Orange",
+      "urgent": "Red",
+      "neutral": "Neutral"
+    },
+    "ctaBySeverity": {
+      "good": "Explore my health tips",
+      "attention": "View my recommendations",
+      "concern": "Arrange clinical follow-up",
+      "urgent": "Visit a healthcare facility"
+    },
+    "importantNoticeCongratulations": "Congratulations, {firstName}!",
+    "screeningStatus": {
+      "due": "Your screening is due",
+      "dueNamed": "Your screening is due, {firstName}",
+      "upToDate": "Well done! Your screening is up to date",
+      "upToDateNamed": "Well done, {firstName}! Your screening is up to date",
+      "highrisk": "You may need enhanced {organ} screening",
+      "highriskNamed": "{firstName}, you may need enhanced {organ} screening",
+      "underage": "Routine {organ} screening is not yet due for your age",
+      "underageNamed": "{firstName}, routine {organ} screening is not yet due for your age",
+      "unconfirmed": "Confirm your screening details",
+      "unconfirmedNamed": "{firstName}, confirm your screening details",
+      "neutral": "Discuss whether to continue screening",
+      "neutralNamed": "{firstName}, discuss whether to continue screening"
+    },
+    "blocked": {
+      "title": "Assessment unavailable",
+      "back": "Go back",
+      "ageIneligible": {
+        "title": "Assessment not available for your age",
+        "body": "This assessment is only available to users aged 18 and over."
+      },
+      "genderIneligible": {
+        "title": "Not available for your profile",
+        "body": "This self-assessment isn't available for your profile. If you're completing it for someone else, use the dependant assessment instead.",
+        "actionOpenDependant": "Open dependant assessment"
+      },
+      "cancerDiagnosedBlocked": {
+        "title": "Follow-up guidance available",
+        "body": "Because you've told us about a cancer diagnosis, please follow the guidance provided by your treating clinician. Free follow-up guidance is available."
+      },
+      "dependantConsentRequired": {
+        "title": "Consent required",
+        "body": "Consent is required before starting this assessment for this dependant."
+      },
+      "assessmentInProgress": {
+        "title": "Finish your current assessment first",
+        "body": "Finish {title} before starting a new one.",
+        "bodyFallback": "Finish your current assessment before starting a new one.",
+        "resumeAction": "Resume {title}",
+        "resumeActionFallback": "Resume current assessment"
+      }
+    },
+    "cancerGate": {
+      "question": "Have you ever been diagnosed with any type of cancer?",
+      "helper": "This is separate from your current assessment. Your answer helps us recommend the right next step.",
+      "yes": "Yes",
+      "no": "No",
+      "typeQuestion": "Which type of cancer were you diagnosed with?",
+      "typeOther": "Another type of cancer",
+      "yearQuestion": "What year were you diagnosed? (optional)",
+      "continue": "Continue",
+      "submitting": "Submitting…"
+    },
+    "awaitingCall": {
+      "bodyNotAlerted": "A care team member will contact you to complete this assessment.",
+      "bodyAlerted": "A care navigator has been alerted and will contact you shortly.",
+      "alertAction": "Alert Health Navigator",
+      "alerting": "Alerting…",
+      "alertedToast": "A care team member will contact you shortly."
+    },
+    "awaitingPayment": "This assessment is waiting for access to be unlocked.",
+    "notReady": "This assessment is not ready to continue yet.",
+    "questionRequired": "Please answer this question to continue.",
+    "previousQuestionFirstToast": "Please complete the earlier question first.",
+    "notEligible": "You are not eligible to start this assessment yet.",
+    "bmiNotReady": "BMI result is not ready. Re-enter your measurements.",
+    "bmiInvalid": "Enter a valid weight and height.",
+    "bmiOutOfSequence": "BMI question is out of sequence. Please try again.",
+    "sessionUnavailable": "Assessment session is no longer available.",
   
   "bmi": {
     "title": "Let's calculate your BMI",

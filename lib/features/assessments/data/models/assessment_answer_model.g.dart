@@ -11,7 +11,7 @@ AssessmentAnswerModel _$AssessmentAnswerModelFromJson(
 ) => AssessmentAnswerModel(
   questionKey: json['question_key'] as String,
   questionIndex: (json['question_index'] as num).toInt(),
-  answer: json['answer'] as String,
+  answer: json['answer'] as Object,
   answeredAt: json['answered_at'] as String?,
 );
 

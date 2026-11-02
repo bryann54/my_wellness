@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_snackbar.dart';
 import 'package:my_wellness/features/assessments/presentation/bloc/assessments_bloc.dart';
 
@@ -12,8 +13,10 @@ class AssessmentToastListener extends StatelessWidget {
     return BlocListener<AssessmentsBloc, AssessmentsState>(
       listenWhen: (p, c) => p.toastNonce != c.toastNonce,
       listener: (context, state) {
-        final msg = state.toastMessage;
-        if (msg == null) return;
+        final raw = state.toastMessage;
+        if (raw == null) return;
+
+        final msg = AppLocalizations.getString(context, raw);
 
         switch (state.toastType) {
           case ToastType.success:

@@ -11,7 +11,7 @@ class AssessmentAnswerModel {
   @JsonKey(name: 'question_index')
   final int questionIndex;
 
-  final String answer;
+  final Object answer;
 
   @JsonKey(name: 'answered_at')
   final String? answeredAt;

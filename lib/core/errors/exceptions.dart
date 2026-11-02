@@ -39,3 +39,23 @@ class ConflictException implements Exception {
   final String message;
   const ConflictException({this.message = 'Conflict'});
 }
+
+class ApiValidationException extends ValidationException {
+  final String? code;
+  final Map<String, dynamic> body;
+
+  ApiValidationException(super.message, {this.code, this.body = const {}});
+
+  String? get blockingSlug => body['blocking_slug'] as String?;
+  String? get blockingTitle => body['blocking_title'] as String?;
+  String? get dependantVariantSlug => body['dependant_variant_slug'] as String?;
+}
+
+({String? code, Map<String, dynamic> body}) parseApiErrorBody(dynamic data) {
+  if (data is! Map) return (code: null, body: const {});
+  final body = data['error'] is Map
+      ? Map<String, dynamic>.from(data['error'] as Map)
+      : Map<String, dynamic>.from(data);
+  final code = body['code'] as String?;
+  return (code: code, body: body);
+}

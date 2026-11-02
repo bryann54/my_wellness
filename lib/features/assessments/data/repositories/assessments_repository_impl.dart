@@ -107,7 +107,7 @@ class AssessmentRepositoryImpl implements AssessmentsRepository {
     String sessionId, {
     required String questionKey,
     required int questionIndex,
-    required String answer,
+    required Object answer,
   }) async {
     try {
       return Right(
@@ -119,6 +119,18 @@ class AssessmentRepositoryImpl implements AssessmentsRepository {
           answer: answer,
         ),
       );
+    } on Exception catch (e) {
+      return Left(_map(e));
+    }
+  }
+
+  @override
+  Future<Either<Failure, AssessmentSession>> alertNavigator(
+    String slug,
+    String sessionId,
+  ) async {
+    try {
+      return Right(await _remote.alertNavigator(slug, sessionId));
     } on Exception catch (e) {
       return Left(_map(e));
     }
@@ -182,6 +194,15 @@ class AssessmentRepositoryImpl implements AssessmentsRepository {
   }
 
   Failure _map(Exception e) {
+    if (e is ApiValidationException) {
+      return AssessmentValidationFailure(
+        error: e.message,
+        code: e.code,
+        blockingSlug: e.blockingSlug,
+        blockingTitle: e.blockingTitle,
+        dependantVariantSlug: e.dependantVariantSlug,
+      );
+    }
     if (e is UnauthorizedException) return const UnauthorizedFailure();
     if (e is ValidationException) return ValidationFailure(error: e.message);
     if (e is NotFoundException) return NotFoundFailure(error: e.message);

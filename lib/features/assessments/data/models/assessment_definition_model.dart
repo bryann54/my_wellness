@@ -24,13 +24,16 @@ class AssessmentDefinitionModel {
   final String? understandingCopy;
 
   @JsonKey(name: 'before_you_begin')
-  final String? beforeYouBegin;
+  final List<BeforeYouBeginPageModel> beforeYouBegin;
 
   @JsonKey(name: 'cancer_history_type_code')
   final String? cancerHistoryTypeCode;
 
   @JsonKey(name: 'encouraging_fact')
-  final String? encouragingFact;
+  final EncouragingFactModel? encouragingFact;
+
+  @JsonKey(name: 'dependant_variant_slug')
+  final String? dependantVariantSlug;
 
   final List<AssessmentQuestionModel> questions;
   final List<AssessmentCtaModel> ctas;
@@ -46,13 +49,49 @@ class AssessmentDefinitionModel {
     this.disclaimer,
     this.referencePrefix,
     this.understandingCopy,
-    this.beforeYouBegin,
+    this.beforeYouBegin = const [],
     this.cancerHistoryTypeCode,
     this.encouragingFact,
+    this.dependantVariantSlug,
   });
 
-  factory AssessmentDefinitionModel.fromJson(Map<String, dynamic> json) =>
-      _$AssessmentDefinitionModelFromJson(json);
+  factory AssessmentDefinitionModel.fromJson(Map<String, dynamic> json) {
+    final rawByb = json['before_you_begin'];
+    final byb = rawByb is List
+        ? rawByb
+              .whereType<Map<String, dynamic>>()
+              .map(BeforeYouBeginPageModel.fromJson)
+              .toList(growable: false)
+        : <BeforeYouBeginPageModel>[];
+
+    final rawEnc = json['encouraging_fact'];
+    final enc = rawEnc is Map<String, dynamic>
+        ? EncouragingFactModel.fromJson(rawEnc)
+        : null;
+
+    return AssessmentDefinitionModel(
+      slug: json['slug'] as String,
+      category: json['category'] as String,
+      title: json['title'] as String,
+      shortTitle: json['short_title'] as String,
+      tagline: json['tagline'] as String,
+      questions: (json['questions'] as List<dynamic>)
+          .map(
+            (e) => AssessmentQuestionModel.fromJson(e as Map<String, dynamic>),
+          )
+          .toList(),
+      ctas: (json['ctas'] as List<dynamic>? ?? const [])
+          .map((e) => AssessmentCtaModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      disclaimer: json['disclaimer'] as String?,
+      referencePrefix: json['reference_prefix'] as String?,
+      understandingCopy: json['understanding_copy'] as String?,
+      beforeYouBegin: byb,
+      cancerHistoryTypeCode: json['cancer_history_type_code'] as String?,
+      encouragingFact: enc,
+      dependantVariantSlug: json['dependant_variant_slug'] as String?,
+    );
+  }
 
   Map<String, dynamic> toJson() => _$AssessmentDefinitionModelToJson(this);
 
@@ -65,12 +104,44 @@ class AssessmentDefinitionModel {
     disclaimer: disclaimer,
     referencePrefix: referencePrefix,
     understandingCopy: understandingCopy,
-    beforeYouBegin: beforeYouBegin,
+    beforeYouBegin: beforeYouBegin
+        .map((p) => p.toEntity())
+        .toList(growable: false),
     cancerHistoryTypeCode: cancerHistoryTypeCode,
-    encouragingFact: encouragingFact,
+    encouragingFact: encouragingFact?.toEntity(),
+    dependantVariantSlug: dependantVariantSlug,
     questions: questions.map((q) => q.toEntity()).toList(growable: false),
     ctas: ctas.map((c) => c.toEntity()).toList(growable: false),
   );
+}
+
+@JsonSerializable()
+class BeforeYouBeginPageModel {
+  final String heading;
+  final String body;
+  const BeforeYouBeginPageModel({required this.heading, required this.body});
+
+  factory BeforeYouBeginPageModel.fromJson(Map<String, dynamic> json) =>
+      _$BeforeYouBeginPageModelFromJson(json);
+
+  Map<String, dynamic> toJson() => _$BeforeYouBeginPageModelToJson(this);
+
+  BeforeYouBeginPage toEntity() =>
+      BeforeYouBeginPage(heading: heading, body: body);
+}
+
+@JsonSerializable()
+class EncouragingFactModel {
+  final String emoji;
+  final String text;
+  const EncouragingFactModel({required this.emoji, required this.text});
+
+  factory EncouragingFactModel.fromJson(Map<String, dynamic> json) =>
+      _$EncouragingFactModelFromJson(json);
+
+  Map<String, dynamic> toJson() => _$EncouragingFactModelToJson(this);
+
+  EncouragingFact toEntity() => EncouragingFact(emoji: emoji, text: text);
 }
 
 @JsonSerializable()
@@ -87,16 +158,21 @@ class AssessmentQuestionModel {
   final int? max;
 
   @JsonKey(name: 'terminate_on')
-  final String? terminateOn;
+  final Object? terminateOn;
 
   @JsonKey(name: 'skip_next_on')
-  final String? skipNextOn;
+  final Object? skipNextOn;
 
   @JsonKey(name: 'skip_if')
-  final String? skipIf;
+  final Map<String, dynamic>? skipIf;
 
   @JsonKey(name: 'auto_answer_if')
-  final String? autoAnswerIf;
+  final Map<String, dynamic>? autoAnswerIf;
+
+  @JsonKey(name: 'exclusive_value')
+  final String? exclusiveValue;
+
+  final bool optional;
 
   const AssessmentQuestionModel({
     required this.key,
@@ -113,6 +189,8 @@ class AssessmentQuestionModel {
     this.skipNextOn,
     this.skipIf,
     this.autoAnswerIf,
+    this.exclusiveValue,
+    this.optional = false,
   });
 
   factory AssessmentQuestionModel.fromJson(Map<String, dynamic> json) =>
@@ -131,11 +209,20 @@ class AssessmentQuestionModel {
     description: description,
     min: min,
     max: max,
-    terminateOn: terminateOn,
-    skipNextOn: skipNextOn,
+    terminateOn: _terminateOnValue(),
+    skipNextOn: skipNextOn?.toString(),
     skipIf: skipIf,
     autoAnswerIf: autoAnswerIf,
+    exclusiveValue: exclusiveValue,
+    optional: optional,
   );
+
+  String? _terminateOnValue() {
+    final t = terminateOn;
+    if (t == null) return null;
+    if (t is String) return t;
+    return null;
+  }
 }
 
 @JsonSerializable()

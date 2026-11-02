@@ -127,6 +127,9 @@ class ApiEndpoints {
   static String assessmentScore(String slug, String sessionId) =>
       '/api/assessments/$slug/session/$sessionId/score/';
 
+  static String assessmentAlertNavigator(String slug, String sessionId) =>
+      '/api/assessments/$slug/session/$sessionId/alert-navigator/';
+
   // ─── Bookings ─────────────────────────────────────────────────────────
   static const String bookings = '/api/bookings/';
   static const String bookingsFacility = '/api/bookings/facility/';

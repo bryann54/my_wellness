@@ -13,7 +13,11 @@ import 'package:my_wellness/features/assessments/presentation/widgets/assessment
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_intro_skeleton.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_toast_listener.dart';
 
-const _consentRequiredSlugs = <String>{'ebola-screening'};
+const _consentRequiredSlugs = <String>{
+  'ebola-screening',
+  'ebola-screening-child',
+  'ebola-screening-assisted',
+};
 
 @RoutePage()
 class AssessmentIntroScreen extends StatelessWidget {
@@ -188,21 +192,33 @@ class _AssessmentIntroBodyState extends State<_AssessmentIntroBody> {
                           color: cs.onSurface.withValues(alpha: 0.75),
                         ),
                       ),
-                    if (def.beforeYouBegin != null) ...[
-                      const SizedBox(height: 14),
-                      Text(
-                        def.beforeYouBegin!,
-                        style: GoogleFonts.inter(
-                          fontSize: 13.5,
-                          height: 1.55,
-                          color: cs.onSurface.withValues(alpha: 0.75),
+                    if ((def.beforeYouBegin as List).isNotEmpty) ...[
+                      const SizedBox(height: 18),
+                      for (final page in def.beforeYouBegin as List) ...[
+                        Text(
+                          page.heading as String,
+                          style: GoogleFonts.inter(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: cs.onSurface,
+                          ),
                         ),
-                      ),
+                        const SizedBox(height: 4),
+                        Text(
+                          page.body as String,
+                          style: GoogleFonts.inter(
+                            fontSize: 13.5,
+                            height: 1.55,
+                            color: cs.onSurface.withValues(alpha: 0.75),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
                     ],
                     if (def.encouragingFact != null) ...[
                       const SizedBox(height: 14),
                       Text(
-                        def.encouragingFact!,
+                        (def.encouragingFact as dynamic).text as String,
                         style: GoogleFonts.inter(
                           fontSize: 13.5,
                           height: 1.55,

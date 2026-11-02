@@ -112,7 +112,7 @@ class SubmitAssessmentAnswerUseCase
             String sessionId,
             String questionKey,
             int questionIndex,
-            String answer,
+            Object answer,
           })
         > {
   final AssessmentsRepository _r;
@@ -124,7 +124,7 @@ class SubmitAssessmentAnswerUseCase
       String sessionId,
       String questionKey,
       int questionIndex,
-      String answer,
+      Object answer,
     })
     p,
   ) => _r.submitAnswer(
@@ -174,4 +174,15 @@ class SubmitBmiMetricsUseCase {
     weightKg: weightKg,
     heightCm: heightCm,
   );
+}
+
+@lazySingleton
+class AlertNavigatorUseCase {
+  final AssessmentsRepository _r;
+  AlertNavigatorUseCase(this._r);
+
+  Future<Either<Failure, AssessmentSession>> call({
+    required String slug,
+    required String sessionId,
+  }) => _r.alertNavigator(slug, sessionId);
 }
