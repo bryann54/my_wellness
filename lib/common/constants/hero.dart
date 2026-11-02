@@ -31,4 +31,11 @@ abstract final class HeroTags {
   static const String homeBloodSugarTimestamp =
       'hero_home_blood_sugar_timestamp';
   static const String homeScreeningActivity = 'hero_home_screening_activity';
+
+  /// Bookings list card → Booking detail (title + status chip).
+  static String bookingTitle(String id) => 'hero_booking_title_$id';
+  static String bookingStatus(String id) => 'hero_booking_status_$id';
+
+  /// Referral rail card → Referral detail (title).
+  static String referralTitle(String id) => 'hero_referral_title_$id';
 }

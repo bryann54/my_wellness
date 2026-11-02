@@ -293,11 +293,147 @@
     "title":"Wellness",
     "subtitle":"Your wellness and health resources"
   },
-  "bookings": {
-    "title": "Bookings",
-    "subtitle": "Your appointments and bookings",
-    "noBookings": "No bookings available at the moment. Please check back later."
+"bookings": {
+  "title": "Bookings",
+  "subtitle": "Your appointments and bookings",
+  "noBookings": "No bookings available at the moment. Please check back later.",
+  "searchHint": "Search bookings",
+  "newBooking": "New booking",
+  "newBookingTitle": "What would you like to book?",
+  "yourBookings": "Your bookings",
+  "searchResultCountOne": "1 result for “{query}”",
+  "searchResultCountMany": "{count} results for “{query}”",
+  "emptySearchTitle": "No bookings match “{query}”",
+  "emptySearchBody": "Try a different term, or clear the search.",
+  "emptySearchClear": "Clear search",
+  "emptyTitle": "No bookings yet",
+  "emptyBody": "Book a screening, a navigator call or a consultation to get started.",
+  "loadFailed": "Your bookings could not be loaded. Please try again.",
+  "priceKes": "KES {amount}",
+  "creating": "Creating your booking…",
+  "status": {
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "paid": "Paid",
+    "cancelled": "Cancelled",
+    "completed": "Completed",
+    "unknown": "Unknown"
   },
+  "service": {
+    "navigator": "Care navigator",
+    "navigatorSub": "A navigator will call you to arrange your care.",
+    "screening": "Screening",
+    "screeningSub": "Book an in-person health screening.",
+    "checkup": "Check-up",
+    "dnaTest": "DNA test",
+    "dnaTestSub": "Health-risk, paternity or legal DNA testing.",
+    "secondOpinion": "Second opinion",
+    "secondOpinionSub": "Have a clinician review your results or diagnosis.",
+    "referralVisit": "Referral visit"
+  },
+  "form": {
+    "facility": "Facility",
+    "facilityOptional": "Facility (optional)",
+    "facilityNotSelected": "Not selected",
+    "facilityLocked": "Recommended for your referral",
+    "date": "Preferred date (optional)",
+    "dateSelect": "Select a date",
+    "phone": "Phone number (M-Pesa)",
+    "phoneHint": "07XX XXX XXX",
+    "phoneInvalid": "Enter a valid Kenyan phone number",
+    "notes": "Notes (optional)",
+    "submit": "Book",
+    "price": "Price",
+    "clinician": "Clinician",
+    "clinicianGp": "GP",
+    "clinicianConsultant": "Consultant",
+    "testType": "Test type",
+    "testHealthRisk": "Health risk",
+    "testPaternity": "Paternity",
+    "testLegal": "Legal",
+    "phonePrefillNote": "Pre-filled from your profile. You can change it.",
+    "lawFirm": "Preferred law firm (optional)"
+  },
+  "payment": {
+    "sending": "Sending M-Pesa prompt…",
+    "failedTitle": "Your booking was created, but the payment prompt failed.",
+    "retry": "Retry payment",
+    "later": "Pay later"
+  },
+  "done": {
+    "title": "Request received",
+    "bodyPaid": "Approve the M-Pesa prompt on your phone. This booking will show as paid once confirmed.",
+    "bodyFree": "No payment now. A navigator will confirm the details by phone.",
+    "action": "Done"
+  },
+  "picker": {
+    "title": "Choose a facility",
+    "searchHint": "Search by name",
+    "empty": "No facilities found",
+    "add": "Can't find it? Add a facility",
+    "addTitle": "Add a facility",
+    "name": "Name",
+    "town": "Town",
+    "county": "County"
+  },
+  "detail": {
+    "preferredDate": "Preferred date",
+    "checkedIn": "Checked in",
+    "facility": "Facility",
+    "price": "Price",
+    "notes": "Notes",
+    "managedNote": "This visit is managed by the facility. Check-in and completion are updated automatically.",
+    "markCompleted": "Mark as completed",
+    "confirmTitle": "Mark as completed?",
+    "confirmBody": "Confirm that this visit has taken place.",
+    "timeline": "Timeline",
+    "noActivity": "No activity yet",
+    "loadFailed": "This booking could not be loaded. Please try again."
+  },
+  "timeline": {
+    "created": "Booking created",
+    "checkedIn": "Checked in",
+    "statusChanged": "Status changed",
+    "followUpScheduled": "Follow-up scheduled",
+    "update": "Update",
+    "note": "Note",
+    "diagnosis": "Diagnosis",
+    "allergy": "Allergy",
+    "prescription": "Prescription",
+    "referral": "Referral"
+  },
+  "toast": {
+    "completed": "Booking marked as completed."
+  },
+  "referral": {
+    
+    "section": "Recommended care",
+    "title": "Referral",
+    "noFacility": "No matching facility was found.",
+        "book": "Book consultation",
+    "checkedInAt": "Checked in {time}",
+    "bookFollowUp": "Book follow-up",
+    "bookSub": "Book a visit at the recommended facility.",
+    "navigate": "Navigate",
+    "viewVisit": "View visit details",
+    "distanceKm": "{km} km",
+    "minutes": "{min} min",
+    "mapsFailed": "Could not open maps.",
+    "status": {
+      "generated": "New",
+      "viewed": "Viewed",
+      "booked": "Booked",
+      "completed": "Completed",
+      "dismissed": "Dismissed",
+      "unknown": "Unknown"
+    },
+    "sha": {
+      "accredited": "SHA accredited",
+      "notAccredited": "Not SHA accredited",
+      "unavailable": "SHA status unavailable"
+    }
+  }
+},
   "greeting": {
   "morning": "Good morning",
   "afternoon": "Good afternoon",
@@ -538,6 +674,7 @@
     "deleteAccount": "Delete account",
     "deleteAccountSub": "Permanently remove your account"
   },
+  
 "pricing":{
   "viewPlans":"View plans",
   "title":"Available plans",

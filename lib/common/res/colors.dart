@@ -33,7 +33,17 @@ class AppColors {
   static const Color success = Color(0xFF32BF7D);
   static const Color info = Color(0xFF26C6DA);
   static const Color warning = Color(0xFFFFA726);
-
+  static const Color statusPending = Color(0xFFF59E0B);
+  static const Color statusConfirmed = Color(0xFF3B82F6);
+  static const Color statusPaid = Color(0xFF10B981);
+  static const Color statusCancelled = Color(0xFFDC2626);
+  static const Color statusCompleted = Color(0xFF14B8A6);
+  static const Color statusUnknown = Color(0xFF6B7280);
+  static const Color referralGenerated = Color(0xFF3B82F6);
+  static const Color referralViewed = Color(0xFF6366F1);
+  static const Color referralBooked = Color(0xFFF59E0B);
+  static const Color referralCompleted = Color(0xFF14B8A6);
+  static const Color referralDismissed = Color(0xFF6B7280);
   // Gradients
   static const LinearGradient lightButtonGradient = LinearGradient(
     colors: [Color(0xFF00695C), Color(0xFF20B2AA)],

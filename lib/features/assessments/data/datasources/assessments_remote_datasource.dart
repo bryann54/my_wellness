@@ -69,11 +69,15 @@ class AssessmentsRemoteDataSourceImpl implements AssessmentsRemoteDataSource {
     return VitalsAccessModel.fromJson(res).toEntity();
   }
 
+  /// The care-navigation endpoint generates the referral with POST
+  /// (idempotent per session); GET is not routed and always failed here,
+  /// which silently hid the "Book consultation" step.
   @override
   Future<Referral?> getReferralForSession(String sessionId) async {
     try {
-      final res = await _api.get<Map<String, dynamic>>(
+      final res = await _api.post<Map<String, dynamic>>(
         url: ApiEndpoints.referralFromSession(sessionId),
+        payload: const {},
         options: ApiClient.protected,
       );
       return ReferralModel.fromJson(res).toEntity();
