@@ -4,11 +4,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/res/l10n.dart';
+import 'package:my_wellness/common/utils/hex_color.dart';
 import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
 import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_score.dart';
+import 'package:my_wellness/features/assessments/domain/entities/referral.dart';
 import 'package:my_wellness/features/assessments/presentation/bloc/assessments_bloc.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_toast_listener.dart';
+import 'package:my_wellness/features/assessments/presentation/widgets/complete/complete_next_step.dart';
 
 @RoutePage()
 class AssessmentResultScreen extends StatelessWidget {
@@ -33,10 +36,13 @@ class _AssessmentResultBody extends StatefulWidget {
 }
 
 class _AssessmentResultBodyState extends State<_AssessmentResultBody> {
+  final GlobalKey _checklistKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       final bloc = context.read<AssessmentsBloc>();
       if (bloc.state.score == null) {
         bloc.add(const FetchScoreEvent());
@@ -46,9 +52,8 @@ class _AssessmentResultBodyState extends State<_AssessmentResultBody> {
 
   @override
   Widget build(BuildContext context) {
-    final score = context.select<AssessmentsBloc, AssessmentScore?>(
-      (b) => b.state.score,
-    );
+    final state = context.watch<AssessmentsBloc>().state;
+    final score = state.score;
     final firstName = _firstNameOf(
       context.watch<AccountBloc>().state.profile?.displayName,
     );
@@ -93,12 +98,12 @@ class _AssessmentResultBodyState extends State<_AssessmentResultBody> {
                     _ResultDisplayView(
                       score: score,
                       firstName: firstName,
+                      referral: state.referral,
+                      canRetake: state.canStart?.allowed == true,
+                      shortTitle: state.definition?.shortTitle ?? '',
+                      checklistKey: _checklistKey,
                       onCta: (key) {
-                        final def = context
-                            .read<AssessmentsBloc>()
-                            .state
-                            .definition;
-                        final cta = def?.ctaByKey(key);
+                        final cta = state.definition?.ctaByKey(key);
                         if (cta == null) return;
                         // Booking feature owns the actual booking route;
                         // hook it here where that route exists.
@@ -129,10 +134,13 @@ class _AssessmentResultBodyState extends State<_AssessmentResultBody> {
   }
 }
 
-
 class _ResultDisplayView extends StatelessWidget {
   final AssessmentScore score;
   final String? firstName;
+  final Referral? referral;
+  final bool canRetake;
+  final String shortTitle;
+  final GlobalKey checklistKey;
   final void Function(String key) onCta;
   final VoidCallback onRetake;
   final VoidCallback onDownload;
@@ -140,6 +148,10 @@ class _ResultDisplayView extends StatelessWidget {
 
   const _ResultDisplayView({
     required this.score,
+    required this.referral,
+    required this.canRetake,
+    required this.shortTitle,
+    required this.checklistKey,
     required this.onCta,
     required this.onRetake,
     required this.onDownload,
@@ -149,18 +161,28 @@ class _ResultDisplayView extends StatelessWidget {
 
   ResultDisplay get d => score.resultDisplay!;
 
-  _ResultPalette get _palette => _paletteFor(d.severity);
-
   @override
   Widget build(BuildContext context) {
-    final palette = _palette;
     final cs = Theme.of(context).colorScheme;
+    final isCancer = d.isCancerTiered;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _ResultCard(palette: palette, display: d, onCta: onCta),
-        if (d.importantNotice != null) ...[
+        if (isCancer)
+          _ResultCard(
+            palette: _paletteFor(d.severity),
+            display: d,
+            checklistKey: checklistKey,
+            onCta: onCta,
+          )
+        else
+          _GenericResultCard(palette: _genericPalette(d), display: d),
+        if (referral != null) ...[
+          const SizedBox(height: 16),
+          CompleteNextStep(referral: referral),
+        ],
+        if (isCancer && d.importantNotice != null) ...[
           const SizedBox(height: 16),
           _NoticeCard(
             notice: d.importantNotice!,
@@ -168,13 +190,23 @@ class _ResultDisplayView extends StatelessWidget {
             isSuccess: d.importantNotice!.heading == 'Congratulations!',
           ),
         ],
-        if (d.screeningSection != null) ...[
+        if (isCancer && d.screeningSection != null) ...[
           const SizedBox(height: 16),
           _ScreeningCard(
             section: d.screeningSection!,
-            shortTitle: _shortTitle(context),
+            shortTitle: shortTitle,
             firstName: firstName,
           ),
+        ],
+        if (!isCancer && d.screeningSection != null) ...[
+          const SizedBox(height: 16),
+          _GenericScreeningCard(section: d.screeningSection!, onCta: onCta),
+        ],
+        if (!isCancer &&
+            d.ctaSection != null &&
+            d.ctaSection!.items.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          _GenericCtaCard(section: d.ctaSection!, onCta: onCta),
         ],
         const SizedBox(height: 16),
         _ReportCard(
@@ -182,13 +214,15 @@ class _ResultDisplayView extends StatelessWidget {
           onDownload: onDownload,
           onEmail: onEmail,
         ),
-        const SizedBox(height: 16),
-        OutlinedButton(
-          onPressed: onRetake,
-          child: Text(
-            AppLocalizations.getString(context, 'assessment.retakeButton'),
+        if (canRetake) ...[
+          const SizedBox(height: 16),
+          OutlinedButton(
+            onPressed: onRetake,
+            child: Text(
+              AppLocalizations.getString(context, 'assessment.retakeButton'),
+            ),
           ),
-        ),
+        ],
         const SizedBox(height: 8),
         TextButton(
           onPressed: () => Navigator.of(context).popUntil((r) => r.isFirst),
@@ -209,23 +243,30 @@ class _ResultDisplayView extends StatelessWidget {
       ],
     );
   }
-
-  String _shortTitle(BuildContext context) {
-    final def = context.read<AssessmentsBloc>().state.definition;
-    return def?.shortTitle ?? '';
-  }
 }
 
 class _ResultCard extends StatelessWidget {
   final _ResultPalette palette;
   final ResultDisplay display;
+  final GlobalKey checklistKey;
   final void Function(String key) onCta;
 
   const _ResultCard({
     required this.palette,
     required this.display,
+    required this.checklistKey,
     required this.onCta,
   });
+
+  void _scrollToChecklist() {
+    final ctx = checklistKey.currentContext;
+    if (ctx == null) return;
+    Scrollable.ensureVisible(
+      ctx,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -239,6 +280,9 @@ class _ResultCard extends StatelessWidget {
     final firstCtaKey = display.ctaSection?.items.isNotEmpty == true
         ? display.ctaSection!.items.first.key
         : null;
+    final isTrack =
+        display.severity == 'good' || display.severity == 'attention';
+    final showButton = ctaLabel != null && (isTrack || firstCtaKey != null);
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -333,49 +377,56 @@ class _ResultCard extends StatelessWidget {
               ),
             ),
           ],
-          if (display.actionSummary != null) ...[
-            const SizedBox(height: 14),
-            Text(
-              display.actionSummary!.title,
-              style: GoogleFonts.inter(
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-                color: cs.onSurface,
-              ),
-            ),
-            const SizedBox(height: 8),
-            for (final item in display.actionSummary!.items)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      Icons.check_circle_outline,
-                      size: 16,
-                      color: palette.accent,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        item,
-                        style: GoogleFonts.inter(
-                          fontSize: 12.5,
-                          height: 1.45,
-                          color: cs.onSurface.withValues(alpha: 0.8),
-                        ),
-                      ),
-                    ),
-                  ],
+          if (display.actionSummary != null)
+            Column(
+              key: checklistKey,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 14),
+                Text(
+                  display.actionSummary!.title,
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: cs.onSurface,
+                  ),
                 ),
-              ),
-          ],
-          if (ctaLabel != null && firstCtaKey != null) ...[
+                const SizedBox(height: 8),
+                for (final item in display.actionSummary!.items)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.check_circle_outline,
+                          size: 16,
+                          color: palette.accent,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            item,
+                            style: GoogleFonts.inter(
+                              fontSize: 12.5,
+                              height: 1.45,
+                              color: cs.onSurface.withValues(alpha: 0.8),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          if (showButton) ...[
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
               child: FilledButton(
-                onPressed: () => onCta(firstCtaKey),
+                onPressed: isTrack
+                    ? _scrollToChecklist
+                    : () => onCta(firstCtaKey!),
                 style: FilledButton.styleFrom(
                   backgroundColor: palette.accent,
                   foregroundColor: Colors.white,
@@ -392,6 +443,7 @@ class _ResultCard extends StatelessWidget {
       ),
     );
   }
+
   static String? _ctaLabelFor(BuildContext context, String? severity) {
     final key = 'assessment.ctaBySeverity.${severity ?? "neutral"}';
     final resolved = AppLocalizations.getString(context, key);
@@ -399,6 +451,346 @@ class _ResultCard extends StatelessWidget {
   }
 }
 
+class _GenericResultCard extends StatelessWidget {
+  final _ResultPalette palette;
+  final ResultDisplay display;
+
+  const _GenericResultCard({required this.palette, required this.display});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final d = display;
+    final label = [
+      d.colourEmoji,
+      d.colourLabel,
+    ].whereType<String>().where((s) => s.isNotEmpty).join(' ');
+    final alerts = d.symptomAlertsSection;
+
+    TextStyle body({
+      double size = 13,
+      FontWeight? weight,
+      double alpha = 0.8,
+    }) => GoogleFonts.inter(
+      fontSize: size,
+      fontWeight: weight,
+      height: 1.5,
+      color: cs.onSurface.withValues(alpha: alpha),
+    );
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: palette.fill,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: palette.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            AppLocalizations.getString(context, 'assessment.resultKicker'),
+            style: GoogleFonts.inter(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.6,
+              color: palette.accent,
+            ),
+          ),
+          if (label.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: palette.accent.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                label,
+                style: GoogleFonts.inter(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w700,
+                  color: palette.accent,
+                ),
+              ),
+            ),
+          ],
+          if (d.categoryLabel != null && d.categoryLabel!.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              d.categoryLabel!,
+              style: body(size: 12, weight: FontWeight.w600, alpha: 0.6),
+            ),
+          ],
+          if (d.title != null) ...[
+            const SizedBox(height: 14),
+            Text(
+              d.title!,
+              style: GoogleFonts.inter(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                height: 1.25,
+                color: cs.onSurface,
+              ),
+            ),
+          ],
+          if (d.body != null) ...[
+            const SizedBox(height: 8),
+            Text(d.body!, style: body(size: 13.5)),
+          ],
+          if (d.metric != null) ...[
+            const SizedBox(height: 14),
+            Text(
+              d.metric!.value,
+              style: GoogleFonts.inter(
+                fontSize: 28,
+                fontWeight: FontWeight.w700,
+                color: palette.accent,
+              ),
+            ),
+            Text(d.metric!.label, style: body(size: 12, alpha: 0.6)),
+          ],
+          if (d.recommendationHeading != null ||
+              d.recommendationBody != null) ...[
+            const SizedBox(height: 14),
+            if (d.recommendationHeading != null)
+              Text(
+                d.recommendationHeading!,
+                style: body(size: 13, weight: FontWeight.w700, alpha: 1),
+              ),
+            if (d.recommendationBody != null) ...[
+              const SizedBox(height: 4),
+              Text(d.recommendationBody!, style: body(size: 12.5)),
+            ],
+          ],
+          if (d.observations.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            for (final o in d.observations)
+              _BulletRow(text: o, color: palette.accent),
+          ],
+          if (d.immediateRecommendation != null) ...[
+            const SizedBox(height: 14),
+            Text(d.immediateRecommendation!, style: body(size: 13)),
+          ],
+          if (d.nutritionRecommendation != null) ...[
+            const SizedBox(height: 14),
+            Text(
+              d.nutritionRecommendation!.label,
+              style: body(size: 13, weight: FontWeight.w700, alpha: 1),
+            ),
+            if (d.nutritionRecommendation!.description != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                d.nutritionRecommendation!.description!,
+                style: body(size: 12.5),
+              ),
+            ],
+          ],
+          if (alerts != null && alerts.alerts.isNotEmpty) ...[
+            const SizedBox(height: 14),
+            Text(
+              alerts.heading,
+              style: body(size: 13, weight: FontWeight.w700, alpha: 1),
+            ),
+            if (alerts.intro != null) ...[
+              const SizedBox(height: 4),
+              Text(alerts.intro!, style: body(size: 12.5)),
+            ],
+            const SizedBox(height: 8),
+            for (final a in alerts.alerts)
+              _BulletRow(
+                text: a.detail != null ? '${a.title} — ${a.detail}' : a.title,
+                color: palette.accent,
+              ),
+            if (alerts.outro != null) ...[
+              const SizedBox(height: 4),
+              Text(alerts.outro!, style: body(size: 12.5)),
+            ],
+          ],
+          if (d.importantNote != null) ...[
+            const SizedBox(height: 14),
+            Text(d.importantNote!, style: body(size: 12.5, alpha: 0.7)),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _BulletRow extends StatelessWidget {
+  final String text;
+  final Color color;
+  const _BulletRow({required this.text, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: Container(
+              width: 5,
+              height: 5,
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: GoogleFonts.inter(
+                fontSize: 12.5,
+                height: 1.45,
+                color: cs.onSurface.withValues(alpha: 0.8),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GenericScreeningCard extends StatelessWidget {
+  final ScreeningSection section;
+  final void Function(String key) onCta;
+
+  const _GenericScreeningCard({required this.section, required this.onCta});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final accent = section.due
+        ? const Color(0xFFB84140)
+        : const Color(0xFF158370);
+    final lead = section.message ?? section.intro;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: section.due ? const Color(0xFFFFF1EF) : cs.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: section.due
+              ? const Color(0xFFF3D6D2)
+              : cs.outlineVariant.withValues(alpha: 0.5),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (section.heading != null)
+            Text(
+              section.heading!,
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: section.due ? accent : cs.onSurface,
+              ),
+            ),
+          if (lead != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              lead,
+              style: GoogleFonts.inter(
+                fontSize: 12.5,
+                height: 1.5,
+                color: cs.onSurface.withValues(alpha: 0.8),
+              ),
+            ),
+          ],
+          if (section.bullets.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            for (final b in section.bullets) _BulletRow(text: b, color: accent),
+          ],
+          if (section.ctas.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final c in section.ctas)
+                  FilledButton(
+                    onPressed: () => onCta(c.key),
+                    style: FilledButton.styleFrom(backgroundColor: accent),
+                    child: Text(c.label),
+                  ),
+              ],
+            ),
+          ],
+          if (section.independenceNote != null) ...[
+            const SizedBox(height: 10),
+            Text(
+              section.independenceNote!,
+              style: GoogleFonts.inter(
+                fontSize: 11.5,
+                height: 1.45,
+                color: cs.onSurface.withValues(alpha: 0.55),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _GenericCtaCard extends StatelessWidget {
+  final CtaSection section;
+  final void Function(String key) onCta;
+
+  const _GenericCtaCard({required this.section, required this.onCta});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.5)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (section.heading != null)
+            Text(
+              section.heading!,
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: cs.onSurface,
+              ),
+            ),
+          if (section.subheading != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              section.subheading!,
+              style: GoogleFonts.inter(
+                fontSize: 12.5,
+                height: 1.45,
+                color: cs.onSurface.withValues(alpha: 0.65),
+              ),
+            ),
+          ],
+          const SizedBox(height: 10),
+          for (final item in section.items) ...[
+            OutlinedButton(
+              onPressed: () => onCta(item.key),
+              child: Text(item.label),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ],
+      ),
+    );
+  }
+}
 
 class _NoticeCard extends StatelessWidget {
   final NoticeBlock notice;
@@ -467,7 +859,6 @@ class _NoticeCard extends StatelessWidget {
     );
   }
 }
-
 
 class _ScreeningCard extends StatelessWidget {
   final ScreeningSection section;
@@ -669,7 +1060,6 @@ class _FactCell extends StatelessWidget {
   }
 }
 
-
 class _ReportCard extends StatelessWidget {
   final bool showReport;
   final VoidCallback onDownload;
@@ -737,7 +1127,6 @@ class _ReportCard extends StatelessWidget {
   }
 }
 
-
 class _ResultPalette {
   final Color accent;
   final Color fill;
@@ -747,6 +1136,17 @@ class _ResultPalette {
     required this.fill,
     required this.border,
   });
+}
+
+_ResultPalette _genericPalette(ResultDisplay d) {
+  final c = d.color;
+  if (c == null) return _paletteFor(d.severity);
+  final accent = hexToColor(c.accent);
+  return _ResultPalette(
+    accent: accent,
+    fill: hexToColor(c.background),
+    border: accent.withValues(alpha: 0.25),
+  );
 }
 
 _ResultPalette _paletteFor(String? severity) => switch (severity) {
@@ -776,7 +1176,6 @@ _ResultPalette _paletteFor(String? severity) => switch (severity) {
     border: Color(0xFFE5E7EB),
   ),
 };
-
 
 class _LegacyScoreFallback extends StatelessWidget {
   final AssessmentScore score;

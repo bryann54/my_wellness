@@ -136,7 +136,21 @@ Map<String, dynamic> _$VitalsPathwayModelToJson(
   'day_options': instance.dayOptions.map((e) => e.toJson()).toList(),
 };
 
+VitalsPathwayOptionModel _$VitalsPathwayOptionModelFromJson(
+  Map<String, dynamic> json,
+) => VitalsPathwayOptionModel(
+  value: json['value'] as String,
+  label: json['label'] as String,
+  advice: json['advice'] as String?,
+);
 
+Map<String, dynamic> _$VitalsPathwayOptionModelToJson(
+  VitalsPathwayOptionModel instance,
+) => <String, dynamic>{
+  'value': instance.value,
+  'label': instance.label,
+  'advice': instance.advice,
+};
 
 VitalsMedicationStepModel _$VitalsMedicationStepModelFromJson(
   Map<String, dynamic> json,

@@ -882,6 +882,7 @@
   "noConnection": "Haupo mtandaoni. Baadhi ya vipengele huenda visipatikane."
   },
   "pricing": {
+      "plans": "Malipo na Vifurushi",
     "viewPlans": "Angalia mipango",
     "title": "Mipango inayopatikana",
     "subtitle": "Chagua kifurushi kinacholingana na huduma za afya unazotaka kutumia.",

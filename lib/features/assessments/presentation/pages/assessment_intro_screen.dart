@@ -9,6 +9,7 @@ import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_primary_button.dart';
 import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
 import 'package:my_wellness/features/assessments/presentation/bloc/assessments_bloc.dart';
+import 'package:my_wellness/features/assessments/presentation/widgets/assessment_blocked_view.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_card.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_intro_skeleton.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_toast_listener.dart';
@@ -74,6 +75,7 @@ class _AssessmentIntroBody extends StatefulWidget {
 
 class _AssessmentIntroBodyState extends State<_AssessmentIntroBody> {
   bool _consented = false;
+  bool _requested = false;
 
   bool get _requiresConsent => _consentRequiredSlugs.contains(widget.slug);
 
@@ -82,6 +84,7 @@ class _AssessmentIntroBodyState extends State<_AssessmentIntroBody> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      _requested = true;
       final bloc = context.read<AssessmentsBloc>();
       final sessionId = widget.sessionId;
       if (sessionId != null) {
@@ -117,6 +120,11 @@ class _AssessmentIntroBodyState extends State<_AssessmentIntroBody> {
     final already = context.select<AssessmentsBloc, bool>(
       (b) => b.state.alreadyCompleted,
     );
+    final view = context
+        .select<
+          AssessmentsBloc,
+          (AssessmentBlockKind, AssessmentStatus, String?)
+        >((b) => (b.state.block, b.state.status, b.state.errorMessage));
 
     if (already) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -124,6 +132,51 @@ class _AssessmentIntroBodyState extends State<_AssessmentIntroBody> {
         context.router.replace(AssessmentCompleteRoute(slug: widget.slug));
       });
       return const Scaffold(body: SizedBox.shrink());
+    }
+
+    if (_requested && view.$1 != AssessmentBlockKind.none) {
+      final blocState = context.read<AssessmentsBloc>().state;
+      final blockingSlug = blocState.blockingSlug;
+      return AssessmentBlockedView(
+        state: blocState,
+        onResumeBlocking: blockingSlug == null
+            ? null
+            : () => context.router.replace(
+                AssessmentIntroRoute(slug: blockingSlug),
+              ),
+      );
+    }
+
+    if (_requested && view.$2 == AssessmentStatus.error) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(AppLocalizations.getString(context, 'assessment.title')),
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  AppLocalizations.getString(
+                    context,
+                    view.$3 ?? 'assessment.loadFailed',
+                  ),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                const SizedBox(height: 16),
+                AppPrimaryButton(
+                  onPressed: () => context.router.maybePop(),
+                  label: AppLocalizations.getString(context, 'common.back'),
+                  height: 48,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
     }
 
     return Scaffold(

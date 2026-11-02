@@ -4,13 +4,14 @@ import 'package:my_wellness/features/assessments/domain/entities/assessment_ques
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_choice_tile.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_multi_choice_tile.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_number_field.dart';
+import 'package:my_wellness/features/assessments/presentation/widgets/assessment_text_field.dart';
 
 class AssessmentQuestionView extends StatefulWidget {
   final AssessmentQuestion question;
 
   final Object? initialValue;
 
-  final ValueChanged<Object> onChanged;
+  final ValueChanged<Object?> onChanged;
 
   final bool showError;
   final bool hidePrompt;
@@ -29,10 +30,11 @@ class AssessmentQuestionView extends StatefulWidget {
 }
 
 class _AssessmentQuestionViewState extends State<AssessmentQuestionView> {
-  late final TextEditingController _numberCtrl = TextEditingController(
+  late final TextEditingController _inputCtrl = TextEditingController(
     text: _stringOf(widget.initialValue),
   );
   String? _selected;
+  String? _rangeError;
   final Set<String> _selectedMulti = {};
 
   @override
@@ -58,7 +60,7 @@ class _AssessmentQuestionViewState extends State<AssessmentQuestionView> {
 
   @override
   void dispose() {
-    _numberCtrl.dispose();
+    _inputCtrl.dispose();
     super.dispose();
   }
 
@@ -91,6 +93,26 @@ class _AssessmentQuestionViewState extends State<AssessmentQuestionView> {
         .toList(growable: false);
 
     widget.onChanged(ordered);
+  }
+
+  void _onNumberChanged(String raw) {
+    final q = widget.question;
+    final n = int.tryParse(raw.trim());
+    String? error;
+    if (n != null) {
+      if (q.min != null && n < q.min!) {
+        error = 'Minimum ${q.min}';
+      } else if (q.max != null && n > q.max!) {
+        error = 'Maximum ${q.max}';
+      }
+    }
+    setState(() => _rangeError = error);
+    widget.onChanged(n != null && error == null ? n : null);
+  }
+
+  void _onTextChanged(String raw) {
+    final value = raw.trim();
+    widget.onChanged(value.isEmpty ? null : value);
   }
 
   @override
@@ -151,6 +173,13 @@ class _AssessmentQuestionViewState extends State<AssessmentQuestionView> {
         ],
         const SizedBox(height: 18),
         _buildInput(),
+        if (_rangeError != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            _rangeError!,
+            style: GoogleFonts.inter(fontSize: 12.5, color: cs.error),
+          ),
+        ],
         if (widget.showError) ...[
           const SizedBox(height: 8),
           Text(
@@ -197,22 +226,16 @@ class _AssessmentQuestionViewState extends State<AssessmentQuestionView> {
 
       case AssessmentQuestionType.number:
         return AssessmentNumberField(
-          controller: _numberCtrl,
+          controller: _inputCtrl,
           min: widget.question.min,
           max: widget.question.max,
-          onChanged: (v) {
-            final n = int.tryParse(v.trim());
-            if (n != null) widget.onChanged(n);
-          },
+          onChanged: _onNumberChanged,
         );
 
       case AssessmentQuestionType.text:
-        return AssessmentNumberField(
-          controller: _numberCtrl,
-          onChanged: (v) => widget.onChanged(v),
-          validator: widget.question.optional
-              ? (v) => null
-              : (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+        return AssessmentTextField(
+          controller: _inputCtrl,
+          onChanged: _onTextChanged,
         );
 
       case AssessmentQuestionType.bmi:

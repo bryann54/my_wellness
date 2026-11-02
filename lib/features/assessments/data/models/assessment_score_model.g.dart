@@ -6,6 +6,58 @@ part of 'assessment_score_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+AssessmentScoreModel _$AssessmentScoreModelFromJson(
+  Map<String, dynamic> json,
+) => AssessmentScoreModel(
+  band: json['band'] as String,
+  bandLabel: json['band_label'] as String,
+  rawScore: (json['raw_score'] as num?)?.toInt(),
+  bandBlurb: json['band_blurb'] as String?,
+  metric: json['metric'] == null
+      ? null
+      : ScoreMetricModel.fromJson(json['metric'] as Map<String, dynamic>),
+  contributing:
+      (json['contributing'] as List<dynamic>?)
+          ?.map((e) => ScoreItemModel.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  protective:
+      (json['protective'] as List<dynamic>?)
+          ?.map((e) => ScoreItemModel.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  recommendations:
+      (json['recommendations'] as List<dynamic>?)
+          ?.map(
+            (e) => ScoreRecommendationModel.fromJson(e as Map<String, dynamic>),
+          )
+          .toList() ??
+      const [],
+  hasActiveWarning: json['has_active_warning'] as bool? ?? false,
+  computedAt: json['computed_at'] as String?,
+  symptomAlerts:
+      (json['symptom_alerts'] as List<dynamic>?)
+          ?.map((e) => SymptomAlertModel.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  screeningRecommendation: json['screening_recommendation'] == null
+      ? null
+      : ScreeningRecommendationModel.fromJson(
+          json['screening_recommendation'] as Map<String, dynamic>,
+        ),
+  additionalCtaKeys:
+      (json['additional_cta_keys'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
+  needsNutritionConsultation:
+      json['needs_nutrition_consultation'] as bool? ?? false,
+  resultDisplay: json['result_display'] == null
+      ? null
+      : ResultDisplayModel.fromJson(
+          json['result_display'] as Map<String, dynamic>,
+        ),
+);
 
 Map<String, dynamic> _$AssessmentScoreModelToJson(
   AssessmentScoreModel instance,
@@ -27,6 +79,69 @@ Map<String, dynamic> _$AssessmentScoreModelToJson(
   'result_display': instance.resultDisplay?.toJson(),
 };
 
+ResultDisplayModel _$ResultDisplayModelFromJson(Map<String, dynamic> json) =>
+    ResultDisplayModel(
+      kind: json['kind'] as String?,
+      severity: json['severity'] as String?,
+      title: json['title'] as String?,
+      body: json['body'] as String?,
+      colorMap: json['color'] as Map<String, dynamic>?,
+      metric: json['metric'] == null
+          ? null
+          : ScoreMetricModel.fromJson(json['metric'] as Map<String, dynamic>),
+      nutritionRecommendation: json['nutrition_recommendation'] == null
+          ? null
+          : NutritionRecommendationModel.fromJson(
+              json['nutrition_recommendation'] as Map<String, dynamic>,
+            ),
+      symptomAlertsSection: json['symptom_alerts_section'] == null
+          ? null
+          : SymptomAlertsSectionModel.fromJson(
+              json['symptom_alerts_section'] as Map<String, dynamic>,
+            ),
+      screeningSection: json['screening_section'] == null
+          ? null
+          : ScreeningSectionModel.fromJson(
+              json['screening_section'] as Map<String, dynamic>,
+            ),
+      ctaSection: json['cta_section'] == null
+          ? null
+          : CtaSectionModel.fromJson(
+              json['cta_section'] as Map<String, dynamic>,
+            ),
+      actionSummary: json['action_summary'] == null
+          ? null
+          : ActionSummaryModel.fromJson(
+              json['action_summary'] as Map<String, dynamic>,
+            ),
+      criticalNotice: json['critical_notice'] == null
+          ? null
+          : NoticeBlockModel.fromJson(
+              json['critical_notice'] as Map<String, dynamic>,
+            ),
+      importantNotice: json['important_notice'] == null
+          ? null
+          : NoticeBlockModel.fromJson(
+              json['important_notice'] as Map<String, dynamic>,
+            ),
+      colourEmoji: json['colour_emoji'] as String?,
+      colourLabel: json['colour_label'] as String?,
+      immediateRecommendation: json['immediate_recommendation'] as String?,
+      importantNote: json['important_note'] as String?,
+      categoryLabel: json['category_label'] as String?,
+      recommendationHeading: json['recommendation_heading'] as String?,
+      recommendationBody: json['recommendation_body'] as String?,
+      observations:
+          (json['observations'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
+      primaryCtaLabel: json['primary_cta_label'] as String?,
+      secondaryCtaLabel: json['secondary_cta_label'] as String?,
+      cardColor: json['card_color'] as String?,
+      showReportCard: json['show_report_card'] as bool? ?? false,
+      showFooterTiles: json['show_footer_tiles'] as bool? ?? false,
+    );
 
 Map<String, dynamic> _$ResultDisplayModelToJson(ResultDisplayModel instance) =>
     <String, dynamic>{

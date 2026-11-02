@@ -775,6 +775,7 @@
   },
   
 "pricing":{
+  "plans": "Payments & Packages",
   "viewPlans":"View plans",
   "title":"Available plans",
   "subtitle":"Choose a package that fits the health services you want to access.",

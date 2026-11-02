@@ -6,6 +6,38 @@ part of 'assessment_definition_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+AssessmentDefinitionModel _$AssessmentDefinitionModelFromJson(
+  Map<String, dynamic> json,
+) => AssessmentDefinitionModel(
+  slug: json['slug'] as String,
+  category: json['category'] as String,
+  title: json['title'] as String,
+  shortTitle: json['short_title'] as String,
+  tagline: json['tagline'] as String,
+  questions: (json['questions'] as List<dynamic>)
+      .map((e) => AssessmentQuestionModel.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  ctas: (json['ctas'] as List<dynamic>)
+      .map((e) => AssessmentCtaModel.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  disclaimer: json['disclaimer'] as String?,
+  referencePrefix: json['reference_prefix'] as String?,
+  understandingCopy: json['understanding_copy'] as String?,
+  beforeYouBegin:
+      (json['before_you_begin'] as List<dynamic>?)
+          ?.map(
+            (e) => BeforeYouBeginPageModel.fromJson(e as Map<String, dynamic>),
+          )
+          .toList() ??
+      const [],
+  cancerHistoryTypeCode: json['cancer_history_type_code'] as String?,
+  encouragingFact: json['encouraging_fact'] == null
+      ? null
+      : EncouragingFactModel.fromJson(
+          json['encouraging_fact'] as Map<String, dynamic>,
+        ),
+  dependantVariantSlug: json['dependant_variant_slug'] as String?,
+);
 
 Map<String, dynamic> _$AssessmentDefinitionModelToJson(
   AssessmentDefinitionModel instance,

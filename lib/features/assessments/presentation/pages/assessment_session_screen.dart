@@ -52,9 +52,20 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
   bool _navigated = false;
 
   @override
+  void initState() {
+    super.initState();
+    _priorCancerYear.addListener(_onYearChanged);
+  }
+
+  @override
   void dispose() {
+    _priorCancerYear.removeListener(_onYearChanged);
     _priorCancerYear.dispose();
     super.dispose();
+  }
+
+  void _onYearChanged() {
+    if (mounted) setState(() {});
   }
 
   void _scheduleCompleteRedirect() {
@@ -101,11 +112,10 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  state.errorMessage ??
-                      AppLocalizations.getString(
-                        context,
-                        'assessment.loadFailed',
-                      ),
+                  AppLocalizations.getString(
+                    context,
+                    state.errorMessage ?? 'assessment.loadFailed',
+                  ),
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyLarge,
                 ),
@@ -214,8 +224,10 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
 
     final isBmi = q.type == AssessmentQuestionType.bmi;
     final isSubmitting = state.status == AssessmentStatus.submitting;
+    final optionalText = q.optional && q.type == AssessmentQuestionType.text;
     final canProceed =
-        _pendingAnswer != null && !_isEmptyAnswer(_pendingAnswer);
+        optionalText ||
+        (_pendingAnswer != null && !_isEmptyAnswer(_pendingAnswer));
     final profile = context.watch<AccountBloc>().state.profile;
 
     return BlocListener<AssessmentsBloc, AssessmentsState>(
@@ -259,7 +271,7 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
                           initialHeightCm: profile?.heightCm?.toString(),
                           submitting: isSubmitting,
                         )
-                     : AssessmentQuestionView(
+                      : AssessmentQuestionView(
                           key: ValueKey(q.key),
                           question: q,
                           initialValue: _pendingAnswer is String
@@ -295,16 +307,20 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
     final state = context.read<AssessmentsBloc>().state;
     final session = state.session;
     final def = state.definition;
-    if (session == null || def == null || _pendingAnswer == null) return;
+    if (session == null || def == null) return;
 
     final q = def.questionByIndex(session.currentIndex);
     if (q == null) return;
+
+    final optionalText = q.optional && q.type == AssessmentQuestionType.text;
+    final answer = _pendingAnswer ?? (optionalText ? '' : null);
+    if (answer == null) return;
 
     context.read<AssessmentsBloc>().add(
       SubmitAnswerEvent(
         questionKey: q.key,
         questionIndex: q.index,
-        answer: _pendingAnswer!,
+        answer: answer,
       ),
     );
   }
@@ -334,7 +350,11 @@ class _CancerGateBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasHistory = priorCancerHistory;
-    final year = int.tryParse(priorCancerYearController.text.trim());
+    final yearText = priorCancerYearController.text.trim();
+    final year = int.tryParse(yearText);
+    final yearOk =
+        yearText.isEmpty ||
+        (year != null && year >= 1900 && year <= DateTime.now().year);
     final typeChoices = <String>[
       'breast',
       'cervical',
@@ -347,7 +367,7 @@ class _CancerGateBody extends StatelessWidget {
         hasHistory != null &&
         (hasHistory == false ||
             (priorCancerType != null && priorCancerType!.isNotEmpty)) &&
-        (priorCancerYearController.text.trim().isEmpty || year != null);
+        yearOk;
 
     return Scaffold(
       appBar: AppBar(title: Text(definition.shortTitle as String)),
@@ -452,7 +472,6 @@ class _CancerGateBody extends StatelessWidget {
     );
   }
 }
-
 
 class _AwaitingCallBody extends StatelessWidget {
   final AssessmentSession session;

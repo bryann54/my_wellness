@@ -24,7 +24,12 @@ class AssessmentAnswerModel {
   });
 
   factory AssessmentAnswerModel.fromJson(Map<String, dynamic> json) =>
-      _$AssessmentAnswerModelFromJson(json);
+      AssessmentAnswerModel(
+        questionKey: json['question_key'] as String,
+        questionIndex: (json['question_index'] as num).toInt(),
+        answer: json['answer'] ?? '',
+        answeredAt: json['answered_at'] as String?,
+      );
 
   Map<String, dynamic> toJson() => _$AssessmentAnswerModelToJson(this);
 
