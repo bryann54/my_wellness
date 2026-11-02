@@ -339,9 +339,6 @@ class _ReferralBodyState extends State<_ReferralBody> {
               onPressed: () => context.router.push(
                 CreateBookingRoute(
                   serviceType: ServiceType.referralVisit,
-                  // referralId: r.id,
-                  // lockedFacility: f,
-                  // serviceLabel: r.escalationCategoryDisplay,
                   followUp: true,
                 ),
               ),
