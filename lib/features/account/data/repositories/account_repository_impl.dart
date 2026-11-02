@@ -1,4 +1,3 @@
-// lib/features/account/data/repositories/account_repository_impl.dart
 
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
@@ -38,6 +37,23 @@ class AccountRepositoryImpl implements AccountRepository {
   ) async {
     try {
       final profile = await _remote.updateProfile(data);
+      await _local.cacheHealthProfile(profile);
+      return Right(profile);
+    } on Exception catch (e) {
+      return Left(_mapExceptionToFailure(e));
+    }
+  }
+
+  @override
+  Future<Either<Failure, HealthProfile>> declareCancerDiagnosis({
+    required bool declared,
+    bool? educationMaterials,
+  }) async {
+    try {
+      final profile = await _remote.declareCancerDiagnosis(
+        declared: declared,
+        educationMaterials: educationMaterials,
+      );
       await _local.cacheHealthProfile(profile);
       return Right(profile);
     } on Exception catch (e) {

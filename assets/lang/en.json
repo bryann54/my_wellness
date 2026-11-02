@@ -785,7 +785,30 @@
   "ageRange":"Ages {min}–{max}",
   "ageFrom":"Ages {min}+",
   "ageTo":"Up to age {max}",
-  "vitalsIncluded":"Vitals logging included"
+  "vitalsIncluded":"Vitals logging included",
+      "outcome": {
+      "title": "Payment",
+      "waiting": "Waiting for M-Pesa confirmation…",
+      "stillWaiting": "Still waiting… this can take a couple of minutes. Don't close the app.",
+      "hint": "Approve the prompt on your phone. Enter your M-Pesa PIN.",
+      "successTitle": "Payment Successful",
+      "successBody": "Your payment was confirmed by M-Pesa.",
+      "opening": "Opening your package…",
+      "failedTitle": "Payment Not Completed",
+      "failedBody": "We couldn't confirm the payment. You can try again, or use the M-Pesa Paybill alternative below.",
+      "tryAgain": "Try Payment Again",
+      "back": "Back",
+      "paybillHeading": "Pay via M-Pesa Paybill instead",
+      "businessNumber": "Business number",
+      "accountNumber": "Account number",
+      "paybillNote": "Manual verification is required before access unlocks. A navigator will confirm your payment."
+    },
+    "billing": {
+      "title": "My Payments",
+      "receipts": "Receipts",
+      "invoices": "Invoices",
+      "empty": "No payments yet. Your receipts and invoices will appear here."
+    }
 },
   "profile": {
     "title": "Profile",

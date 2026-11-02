@@ -8,6 +8,10 @@ abstract class AccountRepository {
   Future<Either<Failure, HealthProfile>> updateProfile(
     Map<String, dynamic> data,
   );
+  Future<Either<Failure, HealthProfile>> declareCancerDiagnosis({
+    required bool declared,
+    bool? educationMaterials,
+  });
   Future<Either<Failure, NoParams>> changeLanguage(String code);
   Future<Either<Failure, void>> deleteAccount();
   Future<Either<Failure, void>> cancelAccountDeletion();

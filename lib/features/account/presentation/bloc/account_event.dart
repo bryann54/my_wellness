@@ -19,6 +19,18 @@ class UpdateProfileEvent extends AccountEvent {
   List<Object?> get props => [updatedData];
 }
 
+class DeclareCancerDiagnosisEvent extends AccountEvent {
+  final bool declared;
+  final bool? educationMaterials;
+  const DeclareCancerDiagnosisEvent({
+    required this.declared,
+    this.educationMaterials,
+  });
+
+  @override
+  List<Object?> get props => [declared, educationMaterials];
+}
+
 class DeleteAccountEvent extends AccountEvent {
   const DeleteAccountEvent();
 }

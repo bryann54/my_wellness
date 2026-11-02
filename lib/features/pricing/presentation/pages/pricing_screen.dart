@@ -9,8 +9,14 @@ import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
 import 'package:my_wellness/common/widgets/custom_alert_dialog.dart';
 import 'package:my_wellness/core/di/injector.dart';
 import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
+import 'package:my_wellness/features/pricing/domain/entities/payment_destination.dart';
 import 'package:my_wellness/features/pricing/domain/entities/pricing_catalog.dart';
 import 'package:my_wellness/features/pricing/presentation/bloc/pricing_bloc.dart';
+import 'package:my_wellness/features/pricing/presentation/pages/payment_outcome_screen.dart';
+
+enum _Step { choose, standalone, combined, createMyPackage, review }
+
+enum _BuilderMode { standalone, combined, custom }
 
 @RoutePage()
 class PricingScreen extends StatelessWidget {
@@ -19,122 +25,71 @@ class PricingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => BlocProvider(
     create: (_) => getIt<PricingBloc>()..add(const LoadPricingPackagesEvent()),
-    child: const _PricingBody(),
+    child: const _PricingRoot(),
   );
 }
 
-class _PricingBody extends StatefulWidget {
-  const _PricingBody();
+class _PricingRoot extends StatefulWidget {
+  const _PricingRoot();
 
   @override
-  State<_PricingBody> createState() => _PricingBodyState();
+  State<_PricingRoot> createState() => _PricingRootState();
 }
 
-class _PricingBodyState extends State<_PricingBody> {
-  int _step = 0;
+class _PricingRootState extends State<_PricingRoot> {
+  _Step _step = _Step.choose;
+  _BuilderMode _builderMode = _BuilderMode.custom;
+
+  // Shared with the builder — the last-chosen selection in review.
   final List<String> _selected = [];
   String? _bundle;
   String? _sexualTier;
   String? _monitorTerm;
   String? _opinionTier;
 
-  void _requestQuote() {
-    final age = context.read<AccountBloc>().state.profile?.age;
-    final resolvedSexualTier = age != null && age >= 18
-        ? (age <= 24 ? 'youth' : 'adult')
-        : _sexualTier;
-    context.read<PricingBloc>().add(
-      QuotePricingSelectionEvent({
-        if (_bundle == null) 'service_ids': List<String>.of(_selected),
-        'sexual_age_tier': resolvedSexualTier,
-        'monitor_term': _monitorTerm,
-        'opinion_clinician_tier': _opinionTier,
-        'bundle': _bundle,
-      }),
-    );
-  }
+  void _goTo(_Step step) => setState(() => _step = step);
 
-  void _toggleService(String id, bool selected) {
+  void _openBuilder(_BuilderMode mode) {
     setState(() {
-      _bundle = null;
-      if (selected) {
-        if (!_selected.contains(id)) _selected.add(id);
-      } else {
-        _selected.remove(id);
-      }
+      _builderMode = mode;
+      _step = _Step.createMyPackage;
     });
-    _requestQuote();
-  }
-
-  void _chooseBundle(String id) {
-    setState(() {
-      _bundle = id;
-      _selected.clear();
-    });
-    _requestQuote();
-  }
-
-  void _toggleBundle() {
-    setState(() => _bundle = null);
-    _requestQuote();
   }
 
   @override
   Widget build(BuildContext context) {
-    String tr(String key) => AppLocalizations.getString(context, key);
-    final age = context.watch<AccountBloc>().state.profile?.age;
-    final lockedTier = age != null && age >= 18
-        ? (age <= 24 ? 'youth' : 'adult')
-        : null;
+    // Only show the sticky bottom bar during the builder/selection steps
+    final showBottomBar = _step == _Step.standalone ||
+        _step == _Step.combined ||
+        _step == _Step.createMyPackage;
+
+    final hasSelection = _selected.isNotEmpty || _bundle != null;
 
     return PopScope(
-      canPop: _step == 0,
+      canPop: _step == _Step.choose,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop && _step == 1) setState(() => _step = 0);
+        if (!didPop) _goTo(_Step.choose);
       },
       child: Scaffold(
-        bottomNavigationBar: BlocBuilder<PricingBloc, PricingState>(
-          builder: (context, state) {
-            final canContinue = _selected.isNotEmpty || _bundle != null;
-            final canPay =
-                state.quote != null &&
-                !state.quoteLoading &&
-                !_needsTier &&
-                !state.checkoutLoading;
-            return SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.lg,
-                  AppSpacing.sm,
-                  AppSpacing.lg,
-                  AppSpacing.md,
+        // 1. Pin the Continue button to the bottom
+        bottomNavigationBar: showBottomBar && hasSelection
+            ? SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: AppPrimaryButton(
+                    onPressed: () => _goTo(_Step.review),
+                    label: 'Continue',
+                    height: 52,
+                  ),
                 ),
-                child: AppPrimaryButton(
-                  onPressed: _step == 0
-                      ? (canContinue ? _continueToPackage : null)
-                      : (canPay
-                            ? () {
-                                final catalog = state.catalog;
-                                if (catalog != null) {
-                                  _reviewAndCheckout(context, state, catalog);
-                                }
-                              }
-                            : null),
-                  label: _step == 0
-                      ? 'Continue'
-                      : state.checkoutLoading
-                      ? 'Starting M-Pesa…'
-                      : 'Review & pay${state.quote == null ? '' : ' · ${formatPrice(state.quote!.totalKes)}'}',
-                  isLoading: _step == 1 && state.checkoutLoading,
-                  height: 52,
-                ),
-              ),
-            );
-          },
-        ),
+              )
+            : null,
         body: NestedScrollView(
           headerSliverBuilder: (_, _) => [
-            CustomAppBar(title: tr('pricing.title'), isHome: false),
+            CustomAppBar(
+              title: AppLocalizations.getString(context, 'pricing.title'),
+              isHome: false,
+            ),
           ],
           body: BlocBuilder<PricingBloc, PricingState>(
             builder: (context, state) {
@@ -148,8 +103,13 @@ class _PricingBodyState extends State<_PricingBody> {
               if (state.status == PricingStatus.error &&
                   state.catalog == null) {
                 return _PricingMessage(
-                  message: state.errorMessage ?? tr('pricing.loadError'),
-                  actionLabel: tr('common.retry'),
+                  message:
+                      state.errorMessage ??
+                      AppLocalizations.getString(context, 'pricing.loadError'),
+                  actionLabel: AppLocalizations.getString(
+                    context,
+                    'common.retry',
+                  ),
                   onAction: () => context.read<PricingBloc>().add(
                     const LoadPricingPackagesEvent(refresh: true),
                   ),
@@ -158,315 +118,577 @@ class _PricingBodyState extends State<_PricingBody> {
               final catalog = state.catalog;
               if (catalog == null) return const SizedBox.shrink();
 
-              final services = catalog.services
-                  .where((service) => service.serviceId != 'workplace')
-                  .toList(growable: false);
-              final visibleBundles = catalog.combos
-                  .where((bundle) => bundle.bundleId != 'workplace')
-                  .toList(growable: false);
-              final allInOneCount =
-                  catalog.allInOne?.serviceIds
-                      .where((id) => id != 'workplace')
-                      .length ??
-                  8;
-              final countWord = switch (allInOneCount) {
-                8 => 'eight',
-                9 => 'nine',
-                _ => '$allInOneCount',
-              };
-
-              return RefreshIndicator.adaptive(
-                onRefresh: () => _refresh(context),
-                child: ListView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.lg,
-                    AppSpacing.lg,
-                    AppSpacing.lg,
-                    AppSpacing.xl,
+              return switch (_step) {
+                _Step.choose => _ChooseView(
+                    catalog: catalog,
+                    onStandalone: () => _openBuilder(_BuilderMode.standalone),
+                    onCombined: () => _openBuilder(_BuilderMode.combined),
+                    onCreate: () => _openBuilder(_BuilderMode.custom),
+                    onAllInOne: () {
+                      setState(() {
+                        _bundle = 'all_in_one';
+                        _selected.clear();
+                        _builderMode = _BuilderMode.custom;
+                        _step = _Step.review;
+                      });
+                      context.read<PricingBloc>().add(
+                        const QuotePricingSelectionEvent(
+                          {'bundle': 'all_in_one'},
+                        ),
+                      );
+                    },
                   ),
-                  children: [
-                    Text(
-                      _step == 0 ? 'Choose What Works for You' : 'My Package',
-                      style: _heading(context),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      _step == 0
-                          ? 'Select a service or package to continue.'
-                          : 'Review your selection and choose any required options.',
-                      style: _body(context),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    if (_step == 0) ...[
-                      _sectionTitle(context, 'Standalone Packages'),
-                      for (final service in services)
-                        _ServiceTile(
-                          service: service,
-                          selected: _selected.contains(service.serviceId),
-                          onChanged: (value) =>
-                              _toggleService(service.serviceId, value),
-                        ),
-                      _sectionTitle(context, 'Combined Packages'),
-                      for (final bundle in visibleBundles)
-                        _BundleTile(
-                          bundle: bundle,
-                          selected: _bundle == bundle.bundleId,
-                          onTap: () => _chooseBundle(bundle.bundleId),
-                        ),
-                      if (catalog.allInOne case final all?) ...[
-                        _sectionTitle(context, 'Everything in One Package'),
-                        _BundleTile(
-                          bundle: all,
-                          selected: _bundle == 'all_in_one',
-                          subtitle:
-                              'One annual payment for all $countWord service areas',
-                          onTap: () => _chooseBundle('all_in_one'),
-                        ),
-                      ],
-                    ] else ...[
-                      _sectionTitle(context, 'Selected package'),
-                      if (_bundle != null)
-                        _BundleTile(
-                          bundle:
-                              _bundleForId(
-                                _bundle!,
-                                visibleBundles,
-                                catalog.allInOne,
-                              ) ??
-                              PricingBundle(
-                                bundleId: _bundle!,
-                                name: _bundle!,
-                                description: '',
-                                serviceIds: const [],
-                                priceKes: 0,
-                              ),
-                          selected: true,
-                          onTap: _toggleBundle,
-                        )
-                      else
-                        for (final service in services.where(
-                          (service) => _selected.contains(service.serviceId),
-                        ))
-                          _ServiceTile(
-                            service: service,
-                            selected: true,
-                            onChanged: (value) =>
-                                _toggleService(service.serviceId, value),
-                          ),
-                      _sectionTitle(context, 'Create My Package'),
-                    ],
-                    if (_step == 1 && _selected.contains('sexual')) ...[
-                      _TierPicker(
-                        label: 'Sexual health age category',
-                        value: lockedTier ?? _sexualTier,
-                        options: const {'youth': '18–24', 'adult': '25+'},
-                        locked: lockedTier != null,
-                        onChanged: (value) {
-                          setState(() => _sexualTier = value);
-                          _requestQuote();
-                        },
-                      ),
-                      if (lockedTier != null)
-                        const Text("Set from your account's age."),
-                    ],
-                    if (_step == 1 && _bundle == 'cs') ...[
-                      _TierPicker(
-                        label: 'Sexual health age category',
-                        value: lockedTier ?? _sexualTier,
-                        options: const {'youth': '18–24', 'adult': '25+'},
-                        locked: lockedTier != null,
-                        onChanged: (value) {
-                          setState(() => _sexualTier = value);
-                          _requestQuote();
-                        },
-                      ),
-                      if (lockedTier != null)
-                        const Text("Set from your account's age."),
-                    ],
-                    if (_step == 1 && _selected.contains('monitor'))
-                      _TierPicker(
-                        label: 'Monitoring billing term',
-                        value: _monitorTerm,
-                        options: const {
-                          'monthly': 'Monthly',
-                          'annual': 'Annual',
-                        },
-                        onChanged: (value) {
-                          setState(() => _monitorTerm = value);
-                          _requestQuote();
-                        },
-                      ),
-                    if (_step == 1 && _selected.contains('opinion'))
-                      _TierPicker(
-                        label: 'Second opinion appointment',
-                        value: _opinionTier,
-                        options: const {'gp': 'GP', 'consultant': 'Consultant'},
-                        onChanged: (value) {
-                          setState(() => _opinionTier = value);
-                          _requestQuote();
-                        },
-                      ),
-                    if (_step == 1 && state.quoteLoading)
-                      const Padding(
-                        padding: EdgeInsets.all(16),
-                        child: Center(
-                          child: CircularProgressIndicator.adaptive(),
-                        ),
-                      ),
-                    if (_step == 1 &&
-                        state.quoteError != null &&
-                        !_isMissingTierError(state.quoteError!))
-                      Text(
-                        state.quoteError!,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
-                        ),
-                      ),
-                    if (_step == 1 && _needsTier && state.quote == null)
-                      Text(_tierPrompt, style: _body(context)),
-                    if (_step == 1 && state.quote != null) ...[
-                      const SizedBox(height: 16),
-                      _QuoteCard(
-                        quote: state.quote!,
-                        catalog: catalog,
-                        onCombo: state.quote!.cheaperComboId == null
-                            ? null
-                            : () => _chooseBundle(state.quote!.cheaperComboId!),
-                      ),
-                      if (state.checkoutError != null)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: Text(
-                            state.checkoutError!,
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.error,
-                            ),
-                          ),
-                        ),
-                      if (state.payment != null)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: Text(
-                            'M-Pesa prompt sent to ${state.payment!.phoneNumber}. Enter your PIN on your phone to continue.',
-                          ),
-                        ),
-                    ],
-                  ],
-                ),
-              );
+                _Step.standalone ||
+                _Step.combined ||
+                _Step.createMyPackage => _BuilderView(
+                    catalog: catalog,
+                    mode: _builderMode,
+                    selected: _selected,
+                    bundle: _bundle,
+                    sexualTier: _sexualTier,
+                    monitorTerm: _monitorTerm,
+                    opinionTier: _opinionTier,
+                    onSelectionChanged: (next) => setState(() {
+                      _selected
+                        ..clear()
+                        ..addAll(next);
+                      if (next.isNotEmpty) _bundle = null;
+                    }),
+                    onBundleChanged: (next) => setState(() {
+                      _bundle = next;
+                      if (next != null) _selected.clear();
+                    }),
+                    onSexualTierChanged: (v) => setState(() => _sexualTier = v),
+                    onMonitorTermChanged: (v) => setState(() => _monitorTerm = v),
+                    onOpinionTierChanged: (v) => setState(() => _opinionTier = v),
+                    onBack: () => _goTo(_Step.choose),
+                  ),
+                _Step.review => _ReviewView(
+                    catalog: catalog,
+                    onBack: () => _goTo(_Step.createMyPackage),
+                    onPaid: () {
+                      _goTo(_Step.choose);
+                    },
+                  ),
+              };
             },
           ),
         ),
       ),
     );
   }
+}
 
-  PricingBundle? _bundleForId(
-    String id,
-    List<PricingBundle> combos,
-    PricingBundle? allInOne,
-  ) {
-    if (id == 'all_in_one') return allInOne;
-    for (final bundle in combos) {
-      if (bundle.bundleId == id) return bundle;
-    }
-    return null;
-  }
+// ─────────────────────────────────────────────────────────────────────────────
+// Choose view
+// ─────────────────────────────────────────────────────────────────────────────
 
-  void _continueToPackage() {
-    if (_selected.isEmpty && _bundle == null) return;
-    setState(() => _step = 1);
-    if (context.read<PricingBloc>().state.quote == null) _requestQuote();
-  }
+class _ChooseView extends StatelessWidget {
+  final PricingCatalog catalog;
+  final VoidCallback onStandalone;
+  final VoidCallback onCombined;
+  final VoidCallback onCreate;
+  final VoidCallback onAllInOne;
 
-  bool get _needsTier =>
-      ((_selected.contains('sexual') || _bundle == 'cs') &&
-          _effectiveSexualTier == null) ||
-      (_selected.contains('monitor') && _monitorTerm == null) ||
-      (_selected.contains('opinion') && _opinionTier == null);
+  const _ChooseView({
+    required this.catalog,
+    required this.onStandalone,
+    required this.onCombined,
+    required this.onCreate,
+    required this.onAllInOne,
+  });
 
-  String get _tierPrompt {
-    if ((_selected.contains('sexual') || _bundle == 'cs') &&
-        _effectiveSexualTier == null) {
-      return 'Select an age category above to see the price.';
-    }
-    if (_selected.contains('monitor') && _monitorTerm == null) {
-      return 'Select a billing term above to see the price.';
-    }
-    return 'Select an appointment type above to see the price.';
-  }
-
-  String? get _effectiveSexualTier {
-    final age = context.read<AccountBloc>().state.profile?.age;
-    if (age != null && age >= 18) return age <= 24 ? 'youth' : 'adult';
-    return _sexualTier;
-  }
-
-  bool _isMissingTierError(String error) =>
-      error.contains('sexual_age_tier') ||
-      error.contains('monitor_term') ||
-      error.contains('opinion_clinician_tier');
-
-  Future<void> _reviewAndCheckout(
-    BuildContext context,
-    PricingState state,
-    PricingCatalog catalog,
-  ) async {
-    final quote = state.quote;
-    if (quote == null) return;
-    final labels = {
-      for (final service in catalog.services) service.serviceId: service.name,
+  @override
+  Widget build(BuildContext context) {
+    final visibleAllInOneServices =
+        catalog.allInOne?.serviceIds
+            .where((id) => !PricingCatalog.hiddenServiceIds.contains(id))
+            .length ??
+        0;
+    final countWord = switch (visibleAllInOneServices) {
+      8 => 'eight',
+      9 => 'nine',
+      10 => 'ten',
+      _ => '$visibleAllInOneServices',
     };
-    final proceed = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      builder: (sheetContext) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.lg,
-            AppSpacing.lg,
-            AppSpacing.lg,
-            AppSpacing.xl,
+
+    final cheapestStandalone = catalog.visibleServices
+        .where((s) => (s.basePriceKes ?? 0) > 0)
+        .fold<int>(
+          catalog.visibleServices.isNotEmpty ? 200 : 0,
+          (prev, s) => (s.basePriceKes ?? 0) < prev ? s.basePriceKes! : prev,
+        );
+
+    return ListView(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      children: [
+        _ChooseCard(
+          badge: 'For individual health needs',
+          title: 'Choose What Works for You',
+          subtitle: 'From ${formatPrice(cheapestStandalone)} / year',
+          action: 'Explore individual services',
+          onTap: onStandalone,
+        ),
+        const SizedBox(height: AppSpacing.md),
+        _ChooseCard(
+          badge: 'Complete annual package',
+          title: 'Everything in One Package',
+          subtitle: catalog.allInOne == null
+              ? ''
+              : '${formatPrice(catalog.allInOne!.priceKes)} / year',
+          helper: 'One annual payment for all $countWord service areas',
+          primaryAction: catalog.allInOne == null
+              ? null
+              : 'Choose All-in-One · ${formatPrice(catalog.allInOne!.priceKes)}',
+          onPrimary: catalog.allInOne == null ? null : onAllInOne,
+          secondaryAction: 'View Everything Included',
+          onSecondary: onAllInOne,
+          onTap: onAllInOne,
+        ),
+        const SizedBox(height: AppSpacing.xl),
+        Text(
+          'MORE WAYS TO CHOOSE',
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            letterSpacing: 1.2,
+            fontWeight: FontWeight.w700,
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Review Your Package', style: _heading(context)),
-              const SizedBox(height: 12),
-              for (final line in quote.lines.where(
-                (line) => line.serviceId != 'workplace',
-              ))
-                ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(labels[line.serviceId] ?? line.serviceId),
-                  trailing: Text(
-                    line.isFree ? 'Included' : formatPrice(line.priceKes),
-                  ),
-                ),
-              const Divider(),
-              Text(
-                'Total · ${formatPrice(quote.totalKes)}',
-                style: Theme.of(context).textTheme.titleLarge,
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        _MiniChoice(
+          title: 'Standalone Packages',
+          subtitle: 'Choose one health service.',
+          onTap: onStandalone,
+        ),
+        _MiniChoice(
+          title: 'Combined Packages',
+          subtitle: 'Choose a discounted bundle, including All-in-One.',
+          onTap: onCombined,
+        ),
+        _MiniChoice(
+          title: 'Create My Package',
+          subtitle: 'Save KSh 50 on each additional paid service.',
+          onTap: onCreate,
+        ),
+      ],
+    );
+  }
+}
+
+class _ChooseCard extends StatelessWidget {
+  final String badge;
+  final String title;
+  final String subtitle;
+  final String? helper;
+  final String? action;
+  final VoidCallback? onTap;
+  final String? primaryAction;
+  final VoidCallback? onPrimary;
+  final String? secondaryAction;
+  final VoidCallback? onSecondary;
+
+  const _ChooseCard({
+    required this.badge,
+    required this.title,
+    required this.subtitle,
+    this.helper,
+    this.action,
+    this.onTap,
+    this.primaryAction,
+    this.onPrimary,
+    this.secondaryAction,
+    this.onSecondary,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return InkWell(
+      borderRadius: BorderRadius.circular(AppRadius.lg),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        decoration: BoxDecoration(
+          color: cs.surface,
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          border: Border.all(
+            color: cs.outlineVariant.withValues(alpha: 0.6),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: cs.shadow.withValues(alpha: 0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              badge.toUpperCase(),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: cs.primary,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.8,
+              ), 
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              title,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: cs.onSurface,
               ),
-              const SizedBox(height: 20),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              subtitle,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: cs.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            if (helper != null) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                helper!,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+            ],
+            if (primaryAction != null) ...[
+              const SizedBox(height: AppSpacing.md),
               SizedBox(
                 width: double.infinity,
                 child: AppPrimaryButton(
-                  onPressed: () => Navigator.of(sheetContext).pop(true),
-                  label: 'Pay with M-Pesa',
+                  onPressed: onPrimary,
+                  label: primaryAction!,
+                  height: 48,
                 ),
+              ),
+            ],
+            if (secondaryAction != null) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Center(
+                child: TextButton(
+                  onPressed: onSecondary,
+                  child: Text(
+                    secondaryAction!,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
+            ],
+            if (action != null && primaryAction == null) ...[
+              const SizedBox(height: AppSpacing.md),
+              Text(
+                action!,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: cs.primary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MiniChoice extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _MiniChoice({
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: cs.surface,
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            border: Border.all(
+              color: cs.outlineVariant.withValues(alpha: 0.6),
+            ),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 20,
+                color: cs.onSurface.withValues(alpha: 0.4),
               ),
             ],
           ),
         ),
       ),
     );
-    if (proceed != true || !mounted || !context.mounted) return;
+  }
+}
 
-    var enteredPhone = context.read<AccountBloc>().state.profile?.phone ?? '';
-    final phone = await CustomAlertDialog.show<String>(
+// ─────────────────────────────────────────────────────────────────────────────
+// Builder view
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _BuilderView extends StatelessWidget {
+  final PricingCatalog catalog;
+  final _BuilderMode mode;
+  final List<String> selected;
+  final String? bundle;
+  final String? sexualTier;
+  final String? monitorTerm;
+  final String? opinionTier;
+  final void Function(List<String>) onSelectionChanged;
+  final void Function(String?) onBundleChanged;
+  final ValueChanged<String?> onSexualTierChanged;
+  final ValueChanged<String?> onMonitorTermChanged;
+  final ValueChanged<String?> onOpinionTierChanged;
+  final VoidCallback onBack;
+
+  const _BuilderView({
+    required this.catalog,
+    required this.mode,
+    required this.selected,
+    required this.bundle,
+    required this.sexualTier,
+    required this.monitorTerm,
+    required this.opinionTier,
+    required this.onSelectionChanged,
+    required this.onBundleChanged,
+    required this.onSexualTierChanged,
+    required this.onMonitorTermChanged,
+    required this.onOpinionTierChanged,
+    required this.onBack,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final profile = context.read<AccountBloc>().state.profile;
+    final diagnosed = profile?.cancerDiagnosed == true;
+
+    final services = catalog.visibleServices;
+    final visibleBundles = catalog.visibleCombos;
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.md,
+        AppSpacing.lg,
+        AppSpacing.xxl, // Padding at bottom to avoid being hidden by bottom nav
+      ),
+      children: [
+        Text(
+          mode == _BuilderMode.standalone
+              ? 'Standalone Packages'
+              : mode == _BuilderMode.combined
+              ? 'Combined Packages'
+              : 'Create My Package',
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        if (mode != _BuilderMode.combined) ...[
+          _sectionTitle(context, 'Select a service'),
+          for (final service in services)
+            if (!(diagnosed && service.serviceId == 'cancer'))
+              _ServiceTile(
+                service: service,
+                selected: selected.contains(service.serviceId),
+                onChanged: (value) {
+                  final next = List<String>.of(selected);
+                  if (value) {
+                    if (!next.contains(service.serviceId)) {
+                      next.add(service.serviceId);
+                    }
+                  } else {
+                    next.remove(service.serviceId);
+                  }
+                  onSelectionChanged(next);
+                },
+              ),
+        ],
+        if (mode != _BuilderMode.standalone) ...[
+          const SizedBox(height: AppSpacing.md),
+          _sectionTitle(context, 'Select a bundle'),
+          for (final b in visibleBundles)
+            _BundleTile(
+              bundle: b,
+              selected: bundle == b.bundleId,
+              onTap: () =>
+                  onBundleChanged(bundle == b.bundleId ? null : b.bundleId),
+            ),
+        ],
+        if (mode == _BuilderMode.custom) ...[
+          const SizedBox(height: AppSpacing.md),
+          _sectionTitle(context, 'Personalise your package'),
+          if (selected.contains('sexual') || bundle == 'cs')
+            _TierPicker(
+              label: 'Sexual health age category',
+              value: sexualTier,
+              options: const {'youth': '18–24', 'adult': '25+'},
+              onChanged: onSexualTierChanged,
+            ),
+          if (selected.contains('monitor'))
+            _TierPicker(
+              label: 'Monitoring billing term',
+              value: monitorTerm,
+              options: const {'monthly': 'Monthly', 'annual': 'Annual'},
+              onChanged: onMonitorTermChanged,
+            ),
+          if (selected.contains('opinion'))
+            _TierPicker(
+              label: 'Second opinion appointment',
+              value: opinionTier,
+              options: const {'gp': 'GP', 'consultant': 'Consultant'},
+              onChanged: onOpinionTierChanged,
+            ),
+        ],
+      ],
+    );
+  }
+
+  Widget _sectionTitle(BuildContext context, String title) => Padding(
+    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+    child: Text(
+      title,
+      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+      ),
+    ),
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Review view
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _ReviewView extends StatefulWidget {
+  final PricingCatalog catalog;
+  final VoidCallback onBack;
+  final VoidCallback onPaid;
+
+  const _ReviewView({
+    required this.catalog,
+    required this.onBack,
+    required this.onPaid,
+  });
+
+  @override
+  State<_ReviewView> createState() => _ReviewViewState();
+}
+
+class _ReviewViewState extends State<_ReviewView> {
+  bool _cancerQuestionAnswered = false;
+
+  Future<void> _openOutcome(PricingDestination dest) async {
+    if (!mounted) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => BlocProvider.value(
+          value: context.read<PricingBloc>(),
+          child: PaymentOutcomeScreen(
+            initialDestination: dest,
+            onNavigate: (d) {
+              // §2 destinations. Real routes live outside this feature;
+              // wire the concrete route here when the app owns them.
+            },
+          ),
+        ),
+      ),
+    );
+    if (mounted) widget.onPaid();
+  }
+
+  Future<bool> _ensureCancerDeclared() async {
+    if (_cancerQuestionAnswered) return true;
+    final profile = context.read<AccountBloc>().state.profile;
+    if (profile?.cancerDiagnosed == true) {
+      return true;
+    }
+    final answered = await CustomAlertDialog.show<bool>(
+      context: context,
+      dialog: CustomAlertDialog(
+        title: 'Have you ever been diagnosed with cancer?',
+        message:
+            'This helps us recommend the right next step. If you have, we will guide you to free follow-up guidance instead.',
+        type: DialogType.info,
+        confirmText: 'No, never',
+        cancelText: 'Yes, I have',
+        showCancelButton: true,
+        onConfirm: () => Navigator.of(context).pop(true),
+        onCancel: () => Navigator.of(context).pop(false),
+      ),
+    );
+    if (answered == null) return false;
+    _cancerQuestionAnswered = true;
+    // TODO: PATCH /api/auth/cancer-diagnosis/ when that endpoint lands in
+    // the account feature. For now the answer only gates the flow.
+    return answered;
+  }
+
+  Future<void> _handlePay(BuildContext context, PricingState state) async {
+    final quote = state.quote;
+    if (quote == null) return;
+    final hasCancer = quote.lines.any((l) => l.serviceId == 'cancer');
+    if (hasCancer) {
+      final proceed = await _ensureCancerDeclared();
+      if (!proceed) {
+        // User said they are diagnosed — offer the guidance route and
+        // stop the purchase.
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Please follow the free diagnosed-cancer guidance. A navigator will contact you.',
+              ),
+            ),
+          );
+        }
+        return;
+      }
+    }
+
+    if (!context.mounted) return;
+
+    var phone = context.read<AccountBloc>().state.profile?.phone ?? '';
+    final confirmed = await CustomAlertDialog.show<String>(
       context: context,
       dialog: CustomAlertDialog(
         title: 'M-Pesa phone number',
@@ -474,8 +696,8 @@ class _PricingBodyState extends State<_PricingBody> {
             'Confirm the number for your M-Pesa prompt. You can edit it if needed.',
         type: DialogType.info,
         content: _PhonePromptContent(
-          initialPhone: enteredPhone,
-          onChanged: (value) => enteredPhone = value,
+          initialPhone: phone,
+          onChanged: (value) => phone = value,
         ),
         actions: [
           TextButton(
@@ -483,125 +705,163 @@ class _PricingBodyState extends State<_PricingBody> {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(enteredPhone.trim()),
+            onPressed: () => Navigator.of(context).pop(phone.trim()),
             child: const Text('Send prompt'),
           ),
         ],
       ),
     );
-    if (phone == null || phone.isEmpty || !mounted || !context.mounted) return;
+    if (confirmed == null || confirmed.isEmpty) return;
+
+    final selection = state.lastQuotedSelection;
+    if (selection == null) return;
+
     context.read<PricingBloc>().add(
-      CheckoutPricingSelectionEvent(
-        selection: _selectionPayload(),
-        phone: phone,
-      ),
+      CheckoutPricingSelectionEvent(selection: selection, phone: confirmed),
+    );
+
+    final destination =
+        state.destination?.destination ?? PricingDestination.dashboard;
+    await _openOutcome(destination);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = context.watch<PricingBloc>().state;
+    final quote = state.quote;
+
+    return ListView(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      children: [
+        Text(
+          'Review Your Package',
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        if (quote == null)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: CircularProgressIndicator.adaptive(),
+            ),
+          )
+        else ...[
+          _QuoteCard(quote: quote, catalog: widget.catalog),
+          if (state.checkoutError != null) ...[
+            const SizedBox(height: 12),
+            Text(
+              state.checkoutError!,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ],
+          const SizedBox(height: AppSpacing.xl),
+          AppPrimaryButton(
+            onPressed: state.checkoutLoading
+                ? null
+                : () => _handlePay(context, state),
+            label: state.checkoutLoading
+                ? 'Starting M-Pesa…'
+                : 'Pay with M-Pesa · ${formatPrice(quote.totalKes)}',
+            height: 52,
+            isLoading: state.checkoutLoading,
+          ),
+        ],
+      ],
     );
   }
-
-  Map<String, dynamic> _selectionPayload() {
-    final age = context.read<AccountBloc>().state.profile?.age;
-    final resolvedSexualTier = age != null && age >= 18
-        ? (age <= 24 ? 'youth' : 'adult')
-        : _sexualTier;
-    return {
-      if (_bundle == null) 'service_ids': List<String>.of(_selected),
-      'sexual_age_tier': resolvedSexualTier,
-      'monitor_term': _monitorTerm,
-      'opinion_clinician_tier': _opinionTier,
-      'bundle': _bundle,
-    };
-  }
-
-  Future<void> _refresh(BuildContext context) async {
-    final bloc = context.read<PricingBloc>();
-    final loaded = bloc.stream.firstWhere(
-      (s) =>
-          s.status == PricingStatus.loaded || s.status == PricingStatus.error,
-    );
-    bloc.add(const LoadPricingPackagesEvent(refresh: true));
-    await loaded;
-  }
-
-  TextStyle? _heading(BuildContext context) =>
-      Theme.of(context).textTheme.headlineMedium;
-
-  TextStyle? _body(BuildContext context) =>
-      Theme.of(context).textTheme.bodyMedium;
-
-  Widget _sectionTitle(BuildContext context, String title) => Padding(
-    padding: const EdgeInsets.only(bottom: AppSpacing.sm, top: AppSpacing.sm),
-    child: Text(title, style: Theme.of(context).textTheme.titleLarge),
-  );
 }
 
+
 class _ServiceTile extends StatelessWidget {
+  final PricingService service;
+  final bool selected;
+  final ValueChanged<bool> onChanged;
+
   const _ServiceTile({
     required this.service,
     required this.selected,
     required this.onChanged,
   });
-  final PricingService service;
-  final bool selected;
-  final ValueChanged<bool> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final cs = Theme.of(context).colorScheme;
     return AnimatedContainer(
       duration: AppDurations.fast,
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       decoration: BoxDecoration(
-        color: selected ? scheme.primaryContainer : scheme.surfaceContainerLow,
-        borderRadius: AppRadius.lgAll,
+        color: selected
+            ? cs.primaryContainer.withValues(alpha: 0.5)
+            : cs.surface,
+        borderRadius: BorderRadius.circular(AppRadius.md),
         border: Border.all(
-          color: selected ? scheme.primary : scheme.outlineVariant,
+          color: selected
+              ? cs.primary
+              : cs.outlineVariant.withValues(alpha: 0.6),
           width: selected ? 2 : 1,
         ),
       ),
       child: InkWell(
-        borderRadius: AppRadius.lgAll,
+        borderRadius: BorderRadius.circular(AppRadius.md),
         onTap: () => onChanged(!selected),
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.md),
-          child: Column(
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Checkbox(
+              // Checkbox on the far left
+              Padding(
+                padding: const EdgeInsets.only(top: 2.0),
+                child: SizedBox(
+                  height: 24,
+                  width: 24,
+                  child: Checkbox(
                     value: selected,
                     onChanged: (value) => onChanged(value == true),
-                    activeColor: scheme.primary,
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Text(
-                      service.name,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: selected ? scheme.primary : scheme.onSurface,
-                      ),
+                    activeColor: cs.primary,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
                     ),
                   ),
-                ],
-              ),
-              if (service.shortDescription.isNotEmpty) ...[
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  service.shortDescription,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
                 ),
-              ],
-              const SizedBox(height: AppSpacing.sm),
-              Align(
-                alignment: Alignment.centerRight,
-                child: Text(
-                  service.priceDisplay,
-                  textAlign: TextAlign.end,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall?.copyWith(color: scheme.primary),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              
+              // Title and Price stacked vertically to avoid overflow
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      service.name,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: selected ? cs.primary : cs.onSurface,
+                        fontWeight: FontWeight.w800,
+                        height: 1.3,
+                      ),
+                    ),
+                   
+                      if (service.shortDescription.isNotEmpty) ...[
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        service.shortDescription,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                     const SizedBox(height: 4),
+                    Text(
+                      service.priceDisplay,
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: cs.primary,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  
+                  ],
                 ),
               ),
             ],
@@ -612,13 +872,278 @@ class _ServiceTile extends StatelessWidget {
   }
 }
 
+class _BundleTile extends StatelessWidget {
+  final PricingBundle bundle;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _BundleTile({
+    required this.bundle,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return AnimatedContainer(
+      duration: AppDurations.fast,
+      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+      decoration: BoxDecoration(
+        color: selected
+            ? cs.primaryContainer.withValues(alpha: 0.5)
+            : cs.surface,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        border: Border.all(
+          color: selected
+              ? cs.primary
+              : cs.outlineVariant.withValues(alpha: 0.6),
+          width: selected ? 2 : 1,
+        ),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 2.0),
+                child: Icon(
+                  selected
+                      ? Icons.radio_button_checked_rounded
+                      : Icons.radio_button_off_rounded,
+                  color: selected ? cs.primary : cs.onSurfaceVariant,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      bundle.name,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: selected ? cs.primary : cs.onSurface,
+                        fontWeight: FontWeight.w600,
+                        height: 1.3,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      formatPrice(bundle.priceKes),
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: cs.primary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    if (bundle.description.isNotEmpty) ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        bundle.description,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TierPicker extends StatelessWidget {
+  final String label;
+  final String? value;
+  final Map<String, String> options;
+  final ValueChanged<String?> onChanged;
+
+  const _TierPicker({
+    required this.label,
+    required this.value,
+    required this.options,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(top: AppSpacing.sm, bottom: AppSpacing.md),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        SizedBox(
+          width: double.infinity,
+          child: SegmentedButton<String>(
+            segments: options.entries
+                .map(
+                  (entry) => ButtonSegment<String>(
+                    value: entry.key,
+                    label: Text(entry.value),
+                  ),
+                )
+                .toList(growable: false),
+            selected: value == null ? const {} : {value!},
+            emptySelectionAllowed: true,
+            onSelectionChanged: (selection) => onChanged(
+              selection.isEmpty || selection.first == value
+                  ? null
+                  : selection.first,
+            ),
+            showSelectedIcon: false, 
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _QuoteCard extends StatelessWidget {
+  final PricingQuote quote;
+  final PricingCatalog catalog;
+
+  const _QuoteCard({required this.quote, required this.catalog});
+
+  @override
+  Widget build(BuildContext context) {
+    final names = {
+      for (final service in catalog.services) service.serviceId: service.name,
+    };
+    final scheme = Theme.of(context).colorScheme;
+    final visibleLines = quote.lines.where(
+      (l) => !PricingCatalog.hiddenServiceIds.contains(l.serviceId),
+    );
+    return Container(
+      decoration: BoxDecoration(
+        color: scheme.surface,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(
+          color: scheme.outlineVariant.withValues(alpha: 0.6),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Order Summary',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            for (final line in visibleLines)
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        names[line.serviceId] ?? line.serviceId,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          formatPrice(line.priceKes),
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        if (line.isFree)
+                          Text(
+                            'Included',
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: scheme.primary,
+                            ),
+                          )
+                        else if (line.isDiscounted)
+                          Text(
+                            'Discount applied',
+                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: scheme.primary,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            if (quote.discountKes > 0) ...[
+              const Divider(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Discount',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: scheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    '- ${formatPrice(quote.discountKes)}',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: scheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            const Divider(height: AppSpacing.xl),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Total',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Text(
+                  formatPrice(quote.totalKes),
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: scheme.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _PhonePromptContent extends StatefulWidget {
+  final String initialPhone;
+  final ValueChanged<String> onChanged;
+
   const _PhonePromptContent({
     required this.initialPhone,
     required this.onChanged,
   });
-  final String initialPhone;
-  final ValueChanged<String> onChanged;
 
   @override
   State<_PhonePromptContent> createState() => _PhonePromptContentState();
@@ -653,17 +1178,12 @@ class _PhonePromptContentState extends State<_PhonePromptContent> {
           labelText: 'Phone number',
           hintText: '2547XXXXXXXX',
           prefixIcon: const Icon(Icons.phone_rounded),
-          filled: false,
           border: OutlineInputBorder(
-            borderRadius: AppRadius.mdAll,
+            borderRadius: BorderRadius.circular(AppRadius.md),
             borderSide: BorderSide(color: scheme.outline),
           ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: AppRadius.mdAll,
-            borderSide: BorderSide(color: scheme.outline),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: AppRadius.mdAll,
+                 focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppRadius.md),
             borderSide: BorderSide(color: scheme.primary, width: 1.5),
           ),
         ),
@@ -672,208 +1192,16 @@ class _PhonePromptContentState extends State<_PhonePromptContent> {
   }
 }
 
-class _BundleTile extends StatelessWidget {
-  const _BundleTile({
-    required this.bundle,
-    required this.selected,
-    required this.onTap,
-    this.subtitle,
-  });
-  final PricingBundle bundle;
-  final bool selected;
-  final VoidCallback onTap;
-  final String? subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return AnimatedContainer(
-      duration: AppDurations.fast,
-      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      decoration: BoxDecoration(
-        color: selected ? scheme.primaryContainer : scheme.surfaceContainerLow,
-        borderRadius: AppRadius.lgAll,
-        border: Border.all(
-          color: selected ? scheme.primary : scheme.outlineVariant,
-          width: selected ? 2 : 1,
-        ),
-      ),
-      child: InkWell(
-        borderRadius: AppRadius.lgAll,
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(
-                selected
-                    ? Icons.radio_button_checked_rounded
-                    : Icons.radio_button_off_rounded,
-                color: selected ? scheme.primary : scheme.onSurfaceVariant,
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      bundle.name,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: selected ? scheme.primary : scheme.onSurface,
-                      ),
-                    ),
-                    if ((subtitle ?? bundle.description).isNotEmpty) ...[
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        subtitle ?? bundle.description,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: scheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      formatPrice(bundle.priceKes),
-                      style: Theme.of(
-                        context,
-                      ).textTheme.titleSmall?.copyWith(color: scheme.primary),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _TierPicker extends StatelessWidget {
-  const _TierPicker({
-    required this.label,
-    required this.value,
-    required this.options,
-    required this.onChanged,
-    this.locked = false,
-  });
-  final String label;
-  final String? value;
-  final Map<String, String> options;
-  final ValueChanged<String?> onChanged;
-  final bool locked;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-          child: Text(label, style: Theme.of(context).textTheme.titleSmall),
-        ),
-        SegmentedButton<String>(
-          segments: options.entries
-              .map(
-                (entry) => ButtonSegment<String>(
-                  value: entry.key,
-                  label: Text(entry.value),
-                ),
-              )
-              .toList(growable: false),
-          selected: value == null ? const {} : {value!},
-          emptySelectionAllowed: true,
-          onSelectionChanged: locked
-              ? null
-              : (selection) => onChanged(
-                  selection.isEmpty || selection.first == value
-                      ? null
-                      : selection.first,
-                ),
-          showSelectedIcon: true,
-        ),
-      ],
-    ),
-  );
-}
-
-class _QuoteCard extends StatelessWidget {
-  const _QuoteCard({
-    required this.quote,
-    required this.catalog,
-    required this.onCombo,
-  });
-  final PricingQuote quote;
-  final PricingCatalog catalog;
-  final VoidCallback? onCombo;
-
-  @override
-  Widget build(BuildContext context) {
-    final visibleLines = quote.lines.where(
-      (line) => line.serviceId != 'workplace',
-    );
-    final names = {
-      for (final service in catalog.services) service.serviceId: service.name,
-    };
-    final scheme = Theme.of(context).colorScheme;
-    return Card(
-      color: scheme.surfaceContainerHigh,
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Live package quote',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            for (final line in visibleLines)
-              ListTile(
-                dense: true,
-                contentPadding: EdgeInsets.zero,
-                title: Text(names[line.serviceId] ?? line.serviceId),
-                subtitle: line.isFree
-                    ? const Text('Included at no additional cost')
-                    : line.isDiscounted
-                    ? const Text('Discount applied')
-                    : null,
-                trailing: Text(formatPrice(line.priceKes)),
-              ),
-            if (quote.discountKes > 0)
-              Text('You save ${formatPrice(quote.discountKes)}'),
-            const Divider(),
-            Text(
-              'Total: ${formatPrice(quote.totalKes)}',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            if (quote.cheaperComboId != null && onCombo != null) ...[
-              const SizedBox(height: 12),
-              Text(
-                'A fixed bundle costs less: ${formatPrice(quote.cheaperComboPriceKes ?? 0)}.',
-              ),
-              TextButton(
-                onPressed: onCombo,
-                child: const Text('View the lower-priced bundle'),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _PricingMessage extends StatelessWidget {
+  final String message;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+
   const _PricingMessage({
     required this.message,
     this.actionLabel,
     this.onAction,
   });
-  final String message;
-  final String? actionLabel;
-  final VoidCallback? onAction;
 
   @override
   Widget build(BuildContext context) => Center(

@@ -281,10 +281,7 @@ class ResultDisplayModel {
         'symptom_alerts_section',
         SymptomAlertsSectionModel.fromJson,
       ),
-      screeningSection: as(
-        'screening_section',
-        ScreeningSectionModel.fromJson,
-      ),
+      screeningSection: as('screening_section', ScreeningSectionModel.fromJson),
       ctaSection: as('cta_section', CtaSectionModel.fromJson),
       actionSummary: as('action_summary', ActionSummaryModel.fromJson),
       criticalNotice: as('critical_notice', NoticeBlockModel.fromJson),

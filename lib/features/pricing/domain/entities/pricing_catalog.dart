@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'pricing_service_details.dart';
 
 class PricingService extends Equatable {
   final String serviceId;
@@ -8,6 +9,8 @@ class PricingService extends Equatable {
   final int? basePriceKes;
   final bool isProposed;
 
+  final PricingServiceDetails? details;
+
   const PricingService({
     required this.serviceId,
     required this.name,
@@ -15,6 +18,7 @@ class PricingService extends Equatable {
     required this.priceDisplay,
     this.basePriceKes,
     this.isProposed = false,
+    this.details,
   });
 
   @override
@@ -25,6 +29,7 @@ class PricingService extends Equatable {
     priceDisplay,
     basePriceKes,
     isProposed,
+    details,
   ];
 }
 
@@ -35,12 +40,15 @@ class PricingBundle extends Equatable {
   final List<String> serviceIds;
   final int priceKes;
 
+  final PricingServiceDetails? details;
+
   const PricingBundle({
     required this.bundleId,
     required this.name,
     required this.description,
     required this.serviceIds,
     required this.priceKes,
+    this.details,
   });
 
   @override
@@ -50,6 +58,7 @@ class PricingBundle extends Equatable {
     description,
     serviceIds,
     priceKes,
+    details,
   ];
 }
 
@@ -63,6 +72,16 @@ class PricingCatalog extends Equatable {
     this.combos = const [],
     this.allInOne,
   });
+
+  static const hiddenServiceIds = {'workplace'};
+
+  List<PricingService> get visibleServices => services
+      .where((s) => !hiddenServiceIds.contains(s.serviceId))
+      .toList(growable: false);
+
+  List<PricingBundle> get visibleCombos => combos
+      .where((b) => b.serviceIds.every((id) => !hiddenServiceIds.contains(id)))
+      .toList(growable: false);
 
   @override
   List<Object?> get props => [services, combos, allInOne];
@@ -119,13 +138,38 @@ class PricingPayment extends Equatable {
   final String phoneNumber;
   final int amountKes;
 
+  final String? checkoutRequestId;
+  final String? serviceType;
+  final String? packageId;
+  final String? mpesaReceipt;
+  final String? createdAt;
+
   const PricingPayment({
     required this.id,
     required this.status,
     required this.phoneNumber,
     required this.amountKes,
+    this.checkoutRequestId,
+    this.serviceType,
+    this.packageId,
+    this.mpesaReceipt,
+    this.createdAt,
   });
 
+  bool get isPending => status == 'pending';
+  bool get isSuccess => status == 'success';
+  bool get isFailed => status == 'failed';
+
   @override
-  List<Object?> get props => [id, status, phoneNumber, amountKes];
+  List<Object?> get props => [
+    id,
+    status,
+    phoneNumber,
+    amountKes,
+    checkoutRequestId,
+    serviceType,
+    packageId,
+    mpesaReceipt,
+    createdAt,
+  ];
 }

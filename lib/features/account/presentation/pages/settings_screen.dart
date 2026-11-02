@@ -79,18 +79,34 @@ class SettingsScreen extends StatelessWidget {
                       onTap: () => NotificationPermissionSheet.show(context),
                     ),
                     const AccountSectionDivider(),
+                    // MenuItemTile(
+                    //   icon: Icons.lock_outline_rounded,
+                    //   title: AppLocalizations.getString(
+                    //     context,
+                    //     'settings.security',
+                    //   ),
+                    //   subtitle: AppLocalizations.getString(
+                    //     context,
+                    //     'settings.securitySub',
+                    //   ),
+                    //   onTap: () {
+                    //     // TODO: push SecuritySettingsRoute()
+                    //   },
+                    // ),
                     MenuItemTile(
-                      icon: Icons.lock_outline_rounded,
-                      title: AppLocalizations.getString(
-                        context,
-                        'settings.security',
-                      ),
-                      subtitle: AppLocalizations.getString(
-                        context,
-                        'settings.securitySub',
-                      ),
+                      icon: Icons.medical_information_outlined,
+                      title: 'Cancer diagnosis',
+                      subtitle: context.select<AccountBloc, String>((b) {
+                        final profile = b.state.profile;
+                        if (profile?.cancerDiagnosedDeclaredAt == null) {
+                          return 'Not answered yet';
+                        }
+                        return profile!.cancerDiagnosed == true
+                            ? 'Declared — follow-up guidance available'
+                            : 'Never diagnosed';
+                      }),
                       onTap: () {
-                        // TODO: push SecuritySettingsRoute()
+                        // Optional: re-prompt, which resets to "answered" state.
                       },
                     ),
                   ],

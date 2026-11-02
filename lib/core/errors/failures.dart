@@ -57,6 +57,23 @@ class ConflictFailure extends Failure {
   List<Object?> get props => [error];
 }
 
+class AssessmentFailure extends ValidationFailure {
+  final String? code;
+  final Map<String, dynamic> body;
+  const AssessmentFailure({
+    required super.error,
+    this.code,
+    this.body = const {},
+  });
+
+  String? get blockingSlug => body['blocking_slug'] as String?;
+  String? get blockingTitle => body['blocking_title'] as String?;
+  String? get dependantVariantSlug => body['dependant_variant_slug'] as String?;
+
+  @override
+  List<Object?> get props => [error, code, body];
+}
+
 class AssessmentValidationFailure extends ValidationFailure {
   final String? code;
   final String? blockingSlug;

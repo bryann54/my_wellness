@@ -32,6 +32,10 @@ class PricingPackage extends Equatable {
     required this.categories,
   });
 
+  bool get hasAgeTiers =>
+      priceRules.length > 1 ||
+      priceRules.any((r) => r.minAge != null || r.maxAge != null);
+
   @override
   List<Object?> get props => [
     slug,

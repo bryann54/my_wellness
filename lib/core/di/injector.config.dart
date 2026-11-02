@@ -29,6 +29,8 @@ import '../../features/account/domain/usecases/cancel_account_deletion_usecase.d
     as _i1033;
 import '../../features/account/domain/usecases/change_language_usecase.dart'
     as _i993;
+import '../../features/account/domain/usecases/declare_cancer_diagnosis_usecase.dart'
+    as _i660;
 import '../../features/account/domain/usecases/delete_account_usecase.dart'
     as _i949;
 import '../../features/account/domain/usecases/export_data_usecase.dart'
@@ -372,6 +374,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i993.ChangeLanguageUseCase>(
       () => _i993.ChangeLanguageUseCase(gh<_i1067.AccountRepository>()),
     );
+    gh.lazySingleton<_i660.DeclareCancerDiagnosisUseCase>(
+      () => _i660.DeclareCancerDiagnosisUseCase(gh<_i1067.AccountRepository>()),
+    );
     gh.lazySingleton<_i682.GetProfileUsecase>(
       () => _i682.GetProfileUsecase(gh<_i1067.AccountRepository>()),
     );
@@ -385,16 +390,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i474.GeographyRemoteDataSource>(
       () => _i474.GeographyRemoteDataSourceImpl(gh<_i671.ApiClient>()),
-    );
-    gh.factory<_i708.AccountBloc>(
-      () => _i708.AccountBloc(
-        gh<_i682.GetProfileUsecase>(),
-        gh<_i23.UpdateProfileUseCase>(),
-        gh<_i993.ChangeLanguageUseCase>(),
-        gh<_i949.DeleteAccountUseCase>(),
-        gh<_i1033.CancelAccountDeletionUseCase>(),
-        gh<_i79.ExportDataUseCase>(),
-      ),
     );
     gh.lazySingleton<_i46.SignInUseCase>(
       () => _i46.SignInUseCase(gh<_i787.AuthRepository>()),
@@ -573,6 +568,17 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i771.GeographyRepositoryImpl(gh<_i474.GeographyRemoteDataSource>()),
     );
+    gh.factory<_i708.AccountBloc>(
+      () => _i708.AccountBloc(
+        gh<_i682.GetProfileUsecase>(),
+        gh<_i23.UpdateProfileUseCase>(),
+        gh<_i993.ChangeLanguageUseCase>(),
+        gh<_i949.DeleteAccountUseCase>(),
+        gh<_i1033.CancelAccountDeletionUseCase>(),
+        gh<_i79.ExportDataUseCase>(),
+        gh<_i660.DeclareCancerDiagnosisUseCase>(),
+      ),
+    );
     gh.factory<_i1022.AssessmentsBloc>(
       () => _i1022.AssessmentsBloc(
         gh<_i6.GetVitalsAccessUseCase>(),
@@ -611,6 +617,30 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i181.CheckoutPricingSelectionUseCase(gh<_i102.PricingRepository>()),
     );
+    gh.lazySingleton<_i181.StkPushUseCase>(
+      () => _i181.StkPushUseCase(gh<_i102.PricingRepository>()),
+    );
+    gh.lazySingleton<_i181.GetMyPaymentsUseCase>(
+      () => _i181.GetMyPaymentsUseCase(gh<_i102.PricingRepository>()),
+    );
+    gh.lazySingleton<_i181.GetUnlockedCategoriesUseCase>(
+      () => _i181.GetUnlockedCategoriesUseCase(gh<_i102.PricingRepository>()),
+    );
+    gh.lazySingleton<_i181.HasVitalsLoggingAccessUseCase>(
+      () => _i181.HasVitalsLoggingAccessUseCase(gh<_i102.PricingRepository>()),
+    );
+    gh.lazySingleton<_i181.GetReceiptsUseCase>(
+      () => _i181.GetReceiptsUseCase(gh<_i102.PricingRepository>()),
+    );
+    gh.lazySingleton<_i181.DownloadReceiptPdfUseCase>(
+      () => _i181.DownloadReceiptPdfUseCase(gh<_i102.PricingRepository>()),
+    );
+    gh.lazySingleton<_i181.GetInvoicesUseCase>(
+      () => _i181.GetInvoicesUseCase(gh<_i102.PricingRepository>()),
+    );
+    gh.lazySingleton<_i181.DownloadInvoicePdfUseCase>(
+      () => _i181.DownloadInvoicePdfUseCase(gh<_i102.PricingRepository>()),
+    );
     gh.lazySingleton<_i275.GetConstituenciesUseCase>(
       () => _i275.GetConstituenciesUseCase(gh<_i480.GeographyRepository>()),
     );
@@ -626,13 +656,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i644.NotificationPreferencesUseCases>(
       () => _i644.NotificationPreferencesUseCases(
         gh<_i578.NotificationPreferencesRepository>(),
-      ),
-    );
-    gh.factory<_i20.PricingBloc>(
-      () => _i20.PricingBloc(
-        gh<_i181.GetPricingCatalogUseCase>(),
-        gh<_i181.GetPricingQuoteUseCase>(),
-        gh<_i181.CheckoutPricingSelectionUseCase>(),
       ),
     );
     gh.factory<_i797.AuthBloc>(
@@ -661,6 +684,18 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i646.LaunchBloc(
         gh<_i656.CheckConnectivityUsecase>(),
         gh<_i46.GetCurrentUserUseCase>(),
+      ),
+    );
+    gh.factory<_i20.PricingBloc>(
+      () => _i20.PricingBloc(
+        gh<_i181.GetPricingCatalogUseCase>(),
+        gh<_i181.GetPricingQuoteUseCase>(),
+        gh<_i181.CheckoutPricingSelectionUseCase>(),
+        gh<_i181.GetPricingPackagesUseCase>(),
+        gh<_i181.StkPushUseCase>(),
+        gh<_i181.GetMyPaymentsUseCase>(),
+        gh<_i181.GetUnlockedCategoriesUseCase>(),
+        gh<_i181.HasVitalsLoggingAccessUseCase>(),
       ),
     );
     gh.lazySingleton<_i382.BookingsBloc>(

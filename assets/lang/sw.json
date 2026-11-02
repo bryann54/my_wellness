@@ -892,7 +892,30 @@
     "ageRange": "Umri {min}–{max}",
     "ageFrom": "Umri {min}+",
     "ageTo": "Hadi umri wa {max}",
-    "vitalsIncluded": "Kurekodi vipimo vya afya kumejumuishwa"
+    "vitalsIncluded": "Kurekodi vipimo vya afya kumejumuishwa",
+        "outcome": {
+      "title": "Malipo",
+      "waiting": "Tunasubiri uthibitisho wa M-Pesa…",
+      "stillWaiting": "Bado tunasubiri… hii inaweza kuchukua dakika kadhaa. Usifunge programu.",
+      "hint": "Idhinisha ombi kwenye simu yako. Weka PIN yako ya M-Pesa.",
+      "successTitle": "Malipo Yamefanikiwa",
+      "successBody": "Malipo yako yamethibitishwa na M-Pesa.",
+      "opening": "Tunafungua kifurushi chako…",
+      "failedTitle": "Malipo Hayakukamilika",
+      "failedBody": "Hatukuweza kuthibitisha malipo. Unaweza kujaribu tena, au tumia M-Pesa Paybill hapa chini.",
+      "tryAgain": "Jaribu Malipo Tena",
+      "back": "Rudi",
+      "paybillHeading": "Lipa kwa M-Pesa Paybill badala yake",
+      "businessNumber": "Namba ya biashara",
+      "accountNumber": "Namba ya akaunti",
+      "paybillNote": "Uthibitisho wa mkono unahitajika kabla ya ufikiaji kufunguliwa. Mwongozo atathibitisha malipo yako."
+    },
+    "billing": {
+      "title": "Malipo Yangu",
+      "receipts": "Risiti",
+      "invoices": "Ankara",
+      "empty": "Hakuna malipo bado. Risiti na ankara zako zitaonekana hapa."
+    }
   },
   "offline": {
     "youAreOffline": "Haupo mtandaoni",

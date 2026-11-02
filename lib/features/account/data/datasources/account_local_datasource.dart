@@ -1,4 +1,4 @@
-// lib/features/account/data/datasources/account_local_datasource.dart
+
 
 import 'dart:convert';
 
@@ -13,7 +13,6 @@ class AccountLocalDatasource {
 
   AccountLocalDatasource(this._prefs);
 
-  // ── Health profile cache ─────────────────────────────────────────────────
 
   Future<void> cacheHealthProfile(HealthProfile profile) async {
     final model = _toModel(profile);
@@ -31,13 +30,10 @@ class AccountLocalDatasource {
         jsonDecode(jsonStr) as Map<String, dynamic>,
       ).toEntity();
     } catch (_) {
-      // Corrupt cache — drop it.
       _prefs.clearKey(SharedPreferencesManager.user);
       return null;
     }
   }
-
-  // ── Settings ─────────────────────────────────────────────────────────────
 
   Future<void> cacheLanguage(String code) async =>
       await _prefs.putString(SharedPreferencesManager.language, code);
@@ -45,17 +41,13 @@ class AccountLocalDatasource {
   String getLanguage() =>
       _prefs.getString(SharedPreferencesManager.language) ?? 'en';
 
-  // ── Teardown ─────────────────────────────────────────────────────────────
+
 
   Future<void> clearAllData() async {
-    // Only non-sensitive data. Tokens are owned by AuthLocalDataSource.
     await _prefs.clearKey(SharedPreferencesManager.user);
   }
 
-  // ── Helpers ──────────────────────────────────────────────────────────────
 
-  /// Field-by-field mapping; keeps the model as the sole owner of JSON keys
-  /// and avoids an `extends`-based model that breaks json_serializable.
   HealthProfileModel _toModel(HealthProfile p) => HealthProfileModel(
     email: p.email,
     fullName: p.fullName,
@@ -87,5 +79,7 @@ class AccountLocalDatasource {
     nationalIdNumber: p.nationalIdNumber,
     analyticsOptOut: p.analyticsOptOut,
     shaDataSharingConsent: p.shaDataSharingConsent,
+    cancerDiagnosed: p.cancerDiagnosed,
+    cancerDiagnosedDeclaredAt: p.cancerDiagnosedDeclaredAt,
   );
 }

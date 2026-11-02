@@ -54,6 +54,14 @@ String? _stringOrNullFromJson(Object? value) {
   return s.isEmpty ? null : s;
 }
 
+DateTime? _dateTimeOrNullFromJson(Object? value) {
+  if (value == null) return null;
+  if (value is DateTime) return value;
+  final raw = value.toString().trim();
+  if (raw.isEmpty) return null;
+  return DateTime.tryParse(raw);
+}
+
 @JsonSerializable()
 class HealthProfileModel {
   final String email;
@@ -141,6 +149,14 @@ class HealthProfileModel {
 
   @JsonKey(name: 'sha_data_sharing_consent', fromJson: _boolFromJson)
   final bool shaDataSharingConsent;
+  @JsonKey(name: 'cancer_diagnosed', fromJson: _boolOrNullFromJson)
+  final bool? cancerDiagnosed;
+
+  @JsonKey(
+    name: 'cancer_diagnosed_declared_at',
+    fromJson: _dateTimeOrNullFromJson,
+  )
+  final DateTime? cancerDiagnosedDeclaredAt;
 
   const HealthProfileModel({
     required this.email,
@@ -173,6 +189,8 @@ class HealthProfileModel {
     this.nationalIdNumber,
     this.analyticsOptOut = false,
     this.shaDataSharingConsent = false,
+    this.cancerDiagnosed,
+    this.cancerDiagnosedDeclaredAt,
   });
 
   factory HealthProfileModel.fromJson(Map<String, dynamic> json) =>
@@ -211,5 +229,7 @@ class HealthProfileModel {
     nationalIdNumber: nationalIdNumber,
     analyticsOptOut: analyticsOptOut,
     shaDataSharingConsent: shaDataSharingConsent,
+    cancerDiagnosed: cancerDiagnosed,
+    cancerDiagnosedDeclaredAt: cancerDiagnosedDeclaredAt,
   );
 }

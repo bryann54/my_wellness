@@ -7,6 +7,7 @@ import 'package:my_wellness/common/utils/functions.dart';
 import 'package:my_wellness/features/account/domain/entities/health_profile.dart';
 import 'package:my_wellness/features/account/domain/usecases/cancel_account_deletion_usecase.dart';
 import 'package:my_wellness/features/account/domain/usecases/change_language_usecase.dart';
+import 'package:my_wellness/features/account/domain/usecases/declare_cancer_diagnosis_usecase.dart';
 import 'package:my_wellness/features/account/domain/usecases/delete_account_usecase.dart';
 import 'package:my_wellness/features/account/domain/usecases/export_data_usecase.dart';
 import 'package:my_wellness/features/account/domain/usecases/get_profile_usecase.dart';
@@ -23,8 +24,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
   final DeleteAccountUseCase _deleteAccount;
   final CancelAccountDeletionUseCase _cancelDeletion;
   final ExportDataUseCase _exportData;
-  // final SubscriptionsBloc _subscriptionsBloc;
-  // final AuthBloc _authBloc;
+  final DeclareCancerDiagnosisUseCase _declareCancerDiagnosis;
 
   AccountBloc(
     this._getProfile,
@@ -33,7 +33,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     this._deleteAccount,
     this._cancelDeletion,
     this._exportData,
-    // this._authBloc,
+    this._declareCancerDiagnosis,
   ) : super(const AccountState()) {
     on<FetchProfileEvent>(_onFetchProfile);
     on<UpdateProfileEvent>(_onUpdateProfile);
@@ -41,6 +41,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     on<DeleteAccountEvent>(_onDeleteAccount);
     on<CancelAccountDeletionEvent>(_onCancelDeletion);
     on<ExportDataEvent>(_onExportData);
+    on<DeclareCancerDiagnosisEvent>(_onDeclareCancerDiagnosis);
     on<ClearErrorEvent>((event, emit) {
       emit(
         state.copyWith(
@@ -65,17 +66,8 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
           errorMessage: mapFailure(f),
         ),
       ),
-      (profile) {
-        // RC init is keyed on the auth user's id, not on the health profile.
-        // if (_subscriptionsBloc.state.status == SubscriptionStatus.initial) {
-        //   final userId = _authBloc.state.user?.id;
-        //   if (userId != null && userId.isNotEmpty) {
-        //     debugPrint('RC init from AccountBloc with user id: $userId');
-        //     _subscriptionsBloc.add(InitializeRC(userId));
-        //   }
-        // }
-        emit(state.copyWith(status: AccountStatus.loaded, profile: profile));
-      },
+      (profile) =>
+          emit(state.copyWith(status: AccountStatus.loaded, profile: profile)),
     );
   }
 
@@ -106,6 +98,37 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
           );
         });
       },
+    );
+  }
+
+  Future<void> _onDeclareCancerDiagnosis(
+    DeclareCancerDiagnosisEvent event,
+    Emitter<AccountState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        status: AccountStatus.declaringCancerDiagnosis,
+        clearError: true,
+      ),
+    );
+    final result = await _declareCancerDiagnosis(
+      declared: event.declared,
+      educationMaterials: event.educationMaterials,
+    );
+    result.fold(
+      (f) => emit(
+        state.copyWith(
+          status: AccountStatus.error,
+          errorMessage: mapFailure(f),
+        ),
+      ),
+      (profile) => emit(
+        state.copyWith(
+          status: AccountStatus.loaded,
+          profile: profile,
+          cancerDiagnosisDeclared: true,
+        ),
+      ),
     );
   }
 

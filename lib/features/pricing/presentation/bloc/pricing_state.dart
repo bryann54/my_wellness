@@ -2,6 +2,8 @@ part of 'pricing_bloc.dart';
 
 enum PricingStatus { initial, loading, loaded, error }
 
+enum PaymentPollStatus { notStarted, waiting, success, failed, waitingTooLong }
+
 class PricingState extends Equatable {
   final PricingStatus status;
   final PricingCatalog? catalog;
@@ -13,6 +15,15 @@ class PricingState extends Equatable {
   final String? checkoutError;
   final String? errorMessage;
 
+  final List<PricingPackage>? legacyPackages;
+  final String? legacyCategory;
+
+  final PaymentPollStatus paymentPollStatus;
+  final bool accessReady;
+  final PaymentDestinationResult? destination;
+
+  final Map<String, dynamic>? lastQuotedSelection;
+
   const PricingState({
     this.status = PricingStatus.initial,
     this.catalog,
@@ -23,6 +34,12 @@ class PricingState extends Equatable {
     this.payment,
     this.checkoutLoading = false,
     this.checkoutError,
+    this.legacyPackages,
+    this.legacyCategory,
+    this.paymentPollStatus = PaymentPollStatus.notStarted,
+    this.accessReady = false,
+    this.destination,
+    this.lastQuotedSelection,
   });
 
   PricingState copyWith({
@@ -40,6 +57,15 @@ class PricingState extends Equatable {
     String? checkoutError,
     bool clearPayment = false,
     bool clearCheckoutError = false,
+    List<PricingPackage>? legacyPackages,
+    String? legacyCategory,
+    bool clearLegacyPackages = false,
+    PaymentPollStatus? paymentPollStatus,
+    bool? accessReady,
+    PaymentDestinationResult? destination,
+    bool clearDestination = false,
+    Map<String, dynamic>? lastQuotedSelection,
+    bool clearLastQuotedSelection = false,
   }) => PricingState(
     status: status ?? this.status,
     catalog: catalog ?? this.catalog,
@@ -52,6 +78,18 @@ class PricingState extends Equatable {
     checkoutError: clearCheckoutError
         ? null
         : (checkoutError ?? this.checkoutError),
+    legacyPackages: clearLegacyPackages
+        ? null
+        : (legacyPackages ?? this.legacyPackages),
+    legacyCategory: clearLegacyPackages
+        ? null
+        : (legacyCategory ?? this.legacyCategory),
+    paymentPollStatus: paymentPollStatus ?? this.paymentPollStatus,
+    accessReady: accessReady ?? this.accessReady,
+    destination: clearDestination ? null : (destination ?? this.destination),
+    lastQuotedSelection: clearLastQuotedSelection
+        ? null
+        : (lastQuotedSelection ?? this.lastQuotedSelection),
   );
 
   @override
@@ -65,5 +103,11 @@ class PricingState extends Equatable {
     payment,
     checkoutLoading,
     checkoutError,
+    legacyPackages,
+    legacyCategory,
+    paymentPollStatus,
+    accessReady,
+    destination,
+    lastQuotedSelection,
   ];
 }

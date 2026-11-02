@@ -129,6 +129,7 @@ class ApiEndpoints {
 
   static String assessmentAlertNavigator(String slug, String sessionId) =>
       '/api/assessments/$slug/session/$sessionId/alert-navigator/';
+        static const String cancerDiagnosis = '/api/auth/cancer-diagnosis/';
 
   // ─── Bookings ─────────────────────────────────────────────────────────
   static const String bookings = '/api/bookings/';
@@ -169,14 +170,25 @@ class ApiEndpoints {
       '/api/invite-codes/$inviteCodeId/reports/';
 
   // ─── Payments ─────────────────────────────────────────────────────────
+  // ─── Payments: outcome polling + plain STK push ───────────────────────
   static const String paymentsMine = '/api/payments/mine/';
   static const String paymentsModuleAccess = '/api/payments/module-access/';
+  static const String paymentsPaybillReference =
+      '/api/payments/paybill-reference/';
+  static const String paymentsStkPush = '/api/payments/stk-push/';
+  static const String paymentsDonationEndometriosisStkPush =
+      '/api/payments/donations/endometriosis-awareness/stk-push/';
+
+  // ─── Receipts & invoices (§5) ─────────────────────────────────────────
+  static const String receiptsMine = '/api/receipts/mine/';
+  static String receiptPdf(String id) => '/api/receipts/$id/pdf/';
+  static const String invoicesMine = '/api/invoices/mine/';
+  static String invoicePdf(String id) => '/api/invoices/$id/pdf/';
   static const String paymentsPackages = '/api/payments/packages/';
   static const String paymentsServiceCatalog = '/api/payments/service-catalog/';
   static const String paymentsCustomQuote = '/api/payments/custom-quote/';
   static const String paymentsCustomQuoteCheckout =
       '/api/payments/custom-quote/checkout/';
-  static const String paymentsStkPush = '/api/payments/stk-push/';
   static const String paymentsC2bConfirmation =
       '/api/payments/c2b/confirmation/';
   static const String paymentsC2bValidation = '/api/payments/c2b/validation/';

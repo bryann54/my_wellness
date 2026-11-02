@@ -62,6 +62,10 @@ HealthProfileModel _$HealthProfileModelFromJson(Map<String, dynamic> json) =>
       shaDataSharingConsent: json['sha_data_sharing_consent'] == null
           ? false
           : _boolFromJson(json['sha_data_sharing_consent']),
+      cancerDiagnosed: _boolOrNullFromJson(json['cancer_diagnosed']),
+      cancerDiagnosedDeclaredAt: _dateTimeOrNullFromJson(
+        json['cancer_diagnosed_declared_at'],
+      ),
     );
 
 Map<String, dynamic> _$HealthProfileModelToJson(HealthProfileModel instance) =>
@@ -96,4 +100,7 @@ Map<String, dynamic> _$HealthProfileModelToJson(HealthProfileModel instance) =>
       'national_id_number': instance.nationalIdNumber,
       'analytics_opt_out': instance.analyticsOptOut,
       'sha_data_sharing_consent': instance.shaDataSharingConsent,
+      'cancer_diagnosed': instance.cancerDiagnosed,
+      'cancer_diagnosed_declared_at': instance.cancerDiagnosedDeclaredAt
+          ?.toIso8601String(),
     };

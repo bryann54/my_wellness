@@ -1002,7 +1002,7 @@ class _ScreeningCard extends StatelessWidget {
   ) {
     if (code == null) return null;
     final hasName = firstName != null && firstName.isNotEmpty;
-    final key = 'assessment.screeningStatus.${code}${hasName ? "Named" : ""}';
+    final key = 'assessment.screeningStatus.$code${hasName ? "Named" : ""}';
     final params = <String, String>{
       'organ': organ,
       if (hasName) 'firstName': firstName,

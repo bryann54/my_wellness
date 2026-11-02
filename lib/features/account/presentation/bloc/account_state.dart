@@ -10,6 +10,7 @@ enum AccountStatus {
   deleted,
   cancelling,
   exporting,
+  declaringCancerDiagnosis,
   error,
 }
 
@@ -20,12 +21,20 @@ class AccountState extends Equatable {
   final String? successMessage;
   final String currentLang;
 
+  /// True once the current session has declared a cancer diagnosis
+  /// (either loaded from the profile or set on this state after a
+  /// successful `DeclareCancerDiagnosisEvent`). `_ReviewView` in the
+  /// pricing feature reads this so the cancer question is not asked
+  /// twice for the same user.
+  final bool cancerDiagnosisDeclared;
+
   const AccountState({
     this.status = AccountStatus.initial,
     this.profile,
     this.errorMessage,
     this.successMessage,
     this.currentLang = 'en',
+    this.cancerDiagnosisDeclared = false,
   });
 
   AccountState copyWith({
@@ -34,6 +43,7 @@ class AccountState extends Equatable {
     String? errorMessage,
     String? successMessage,
     String? currentLang,
+    bool? cancerDiagnosisDeclared,
     bool clearError = false,
     bool clearSuccess = false,
   }) {
@@ -45,6 +55,10 @@ class AccountState extends Equatable {
           ? null
           : (successMessage ?? this.successMessage),
       currentLang: currentLang ?? this.currentLang,
+      cancerDiagnosisDeclared:
+          cancerDiagnosisDeclared ??
+          (profile?.cancerDiagnosedDeclaredAt != null ||
+              this.cancerDiagnosisDeclared),
     );
   }
 
@@ -55,5 +69,6 @@ class AccountState extends Equatable {
     errorMessage,
     successMessage,
     currentLang,
+    cancerDiagnosisDeclared,
   ];
 }

@@ -1,4 +1,5 @@
 import 'package:my_wellness/features/pricing/domain/entities/pricing_catalog.dart';
+import 'package:my_wellness/features/pricing/domain/entities/pricing_service_details.dart';
 
 class PricingCatalogModel {
   final List<PricingService> services;
@@ -43,6 +44,7 @@ PricingService _serviceFromJson(Map<String, dynamic> json) => PricingService(
   priceDisplay: json['price_display']?.toString() ?? '',
   basePriceKes: _integer(json['base_price_kes']),
   isProposed: json['is_proposed'] == true,
+  details: _detailsFromJson(json),
 );
 
 PricingBundle _bundleFromJson(Map<String, dynamic> json) => PricingBundle(
@@ -55,7 +57,35 @@ PricingBundle _bundleFromJson(Map<String, dynamic> json) => PricingBundle(
           .toList(growable: false) ??
       const [],
   priceKes: _integer(json['price_kes']) ?? 0,
+  details: _detailsFromJson(json),
 );
+
+PricingServiceDetails? _detailsFromJson(Map<String, dynamic> json) {
+  final benefits = json['benefits'];
+  final report = json['report'];
+  if (benefits is! List && report is! List) return null;
+  return PricingServiceDetails(
+    iconKey: json['icon_key']?.toString(),
+    accentHex: json['accent_hex']?.toString(),
+    bgHex: json['bg_hex']?.toString(),
+    unit: json['unit']?.toString(),
+    benefits: benefits is List
+        ? benefits
+              .whereType<Map<String, dynamic>>()
+              .map(
+                (b) => PricingBenefit(
+                  title: b['title']?.toString() ?? '',
+                  description: b['description']?.toString() ?? '',
+                ),
+              )
+              .toList(growable: false)
+        : const [],
+    report: report is List
+        ? report.map((e) => e.toString()).toList(growable: false)
+        : const [],
+    priceDisplay: json['price_display']?.toString(),
+  );
+}
 
 int? _integer(dynamic value) => value is num
     ? value.toInt()
@@ -101,4 +131,9 @@ PricingPayment paymentFromJson(Map<String, dynamic> json) => PricingPayment(
   status: json['status']?.toString() ?? 'pending',
   phoneNumber: json['phone_number']?.toString() ?? '',
   amountKes: _integer(json['amount']) ?? 0,
+  checkoutRequestId: json['checkout_request_id']?.toString(),
+  serviceType: json['service_type']?.toString(),
+  packageId: json['package_id']?.toString(),
+  mpesaReceipt: json['mpesa_receipt']?.toString(),
+  createdAt: json['created_at']?.toString(),
 );
