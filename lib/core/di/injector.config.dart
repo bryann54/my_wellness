@@ -76,7 +76,6 @@ import '../../features/bookings/domain/repositories/bookings_repository.dart'
     as _i817;
 import '../../features/bookings/domain/usecases/bookings_usecases.dart'
     as _i612;
-import '../../features/bookings/presentation/bloc/bookings_bloc.dart' as _i382;
 import '../../features/geography/data/datasources/geography_remote_datasource.dart'
     as _i474;
 import '../../features/geography/data/repositories/geography_repository_impl.dart'
@@ -737,23 +736,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i646.LaunchBloc(
         gh<_i656.CheckConnectivityUsecase>(),
         gh<_i46.GetCurrentUserUseCase>(),
-      ),
-    );
-    gh.lazySingleton<_i382.BookingsBloc>(
-      () => _i382.BookingsBloc(
-        getMyBookings: gh<_i612.GetMyBookingsUseCase>(),
-        getTimeline: gh<_i612.GetBookingTimelineUseCase>(),
-        completeBooking: gh<_i612.CompleteBookingUseCase>(),
-        createBooking: gh<_i612.CreateBookingUseCase>(),
-        pushStk: gh<_i612.PushStkForBookingUseCase>(),
-        matchFacilities: gh<_i612.MatchFacilitiesUseCase>(),
-        searchFacilities: gh<_i612.SearchFacilitiesUseCase>(),
-        createFacility: gh<_i612.CreateFacilityUseCase>(),
-        getMyReferrals: gh<_i612.GetMyReferralsUseCase>(),
-        getReferral: gh<_i612.GetReferralUseCase>(),
-        genFromSession: gh<_i612.GenerateReferralFromSessionUseCase>(),
-        genFromBp: gh<_i612.GenerateReferralFromBpReadingUseCase>(),
-        genFromBs: gh<_i612.GenerateReferralFromBsReadingUseCase>(),
       ),
     );
     gh.lazySingleton<_i493.GetHomeDashboardUseCase>(

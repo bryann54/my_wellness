@@ -102,7 +102,6 @@ class VitalsLockedCard extends StatelessWidget {
   }
 }
 
-
 class VitalsNavigatorCallCard extends StatelessWidget {
   final VitalsAccess access;
   final VoidCallback onAlert;

@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 String? ruleFromJson(Object? value) {
   if (value == null) return null;
   if (value is String) return value;

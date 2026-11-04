@@ -204,6 +204,7 @@
 },
 "appointments": {
   "title": "Appointments",
+  "allAppointments": "All appointments",
   "subtitle": "Your upcoming clinic visits",
   "book": "Book appointment",
   "bookTitle": "Book appointment",

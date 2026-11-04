@@ -204,6 +204,7 @@
   "notes": "Maelezo (si lazima)"
 },
 "appointments": {
+  "allAppointment":"Miadi yote",
   "title": "Miadi",
   "subtitle": "Ziara zako zijazo za kliniki",
   "book": "Weka miadi",

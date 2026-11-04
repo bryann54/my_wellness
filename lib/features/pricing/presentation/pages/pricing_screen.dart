@@ -576,6 +576,7 @@ class _PricingBodyState extends State<_PricingBody> {
     child: Text(title, style: Theme.of(context).textTheme.titleLarge),
   );
 }
+
 class _ServiceTile extends StatelessWidget {
   const _ServiceTile({
     required this.service,

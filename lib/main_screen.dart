@@ -16,8 +16,7 @@ class MainScreen extends StatelessWidget {
       routes: [
         HomeRoute(),
         AssessmentsListRoute(),
-        BookingsRoute(),
-        WellnessRoute(),
+        AppointmentsRoute(),
         AccountRoute(),
       ],
       bottomNavigationBuilder: (_, tabsRouter) {

@@ -113,11 +113,13 @@ class _CollapsedRow extends StatelessWidget {
     final isPast = dt != null && dt.isBefore(DateTime.now());
     final dayLabel = dt != null ? friendlyDay(dt) : a.appointmentDate;
     final timeLabel = dt != null ? friendlyTime(dt) : a.appointmentTime;
+
     final condition = a.condition?.trim();
     final showCondition =
         condition != null &&
         condition.isNotEmpty &&
         condition.toLowerCase() != 'other';
+
     final facility = a.facility;
     final hasFacilityLine =
         facility != null &&
@@ -139,34 +141,22 @@ class _CollapsedRow extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.inter(
-                    fontSize: 16,
+                    fontSize: 15,
                     fontWeight: FontWeight.w700,
                     height: 1.25,
                     color: cs.onSurface.withValues(alpha: isPast ? 0.65 : 1),
                   ),
                 ),
                 const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.schedule_rounded,
-                      size: 14,
-                      color: cs.onSurface.withValues(alpha: 0.55),
-                    ),
-                    const SizedBox(width: 5),
-                    Flexible(
-                      child: Text(
-                        '$dayLabel · $timeLabel',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.inter(
-                          fontSize: 13.5,
-                          fontWeight: FontWeight.w500,
-                          color: cs.onSurface.withValues(alpha: 0.7),
-                        ),
-                      ),
-                    ),
-                  ],
+                Text(
+                  '$dayLabel · $timeLabel',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: cs.onSurface.withValues(alpha: 0.7),
+                  ),
                 ),
                 if (hasFacilityLine) ...[
                   const SizedBox(height: 2),
@@ -176,7 +166,7 @@ class _CollapsedRow extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.inter(
                       fontSize: 12.5,
-                      color: cs.onSurface.withValues(alpha: 0.5),
+                      color: cs.onSurface.withValues(alpha: 0.55),
                     ),
                   ),
                 ],
@@ -195,7 +185,7 @@ class _CollapsedRow extends StatelessWidget {
               curve: Curves.easeOutCubic,
               child: Icon(
                 Icons.keyboard_arrow_down_rounded,
-                size: 22,
+                size: 20,
                 color: cs.onSurface.withValues(alpha: 0.4),
               ),
             ),
@@ -232,11 +222,11 @@ class _DateBadge extends StatelessWidget {
     final dt = dateTime;
 
     return Container(
-      width: 52,
-      height: 58,
+      width: 50,
+      height: 56,
       decoration: BoxDecoration(
         color: base.withValues(alpha: isPast ? 0.06 : 0.10),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: dt == null
           ? Icon(Icons.event_outlined, size: 22, color: base)
@@ -246,7 +236,7 @@ class _DateBadge extends StatelessWidget {
                 Text(
                   _months[dt.month - 1].toUpperCase(),
                   style: GoogleFonts.inter(
-                    fontSize: 10.5,
+                    fontSize: 10,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.8,
                     color: base.withValues(alpha: isPast ? 0.55 : 1),
@@ -255,7 +245,7 @@ class _DateBadge extends StatelessWidget {
                 Text(
                   '${dt.day}',
                   style: GoogleFonts.inter(
-                    fontSize: 21,
+                    fontSize: 20,
                     fontWeight: FontWeight.w800,
                     height: 1.1,
                     color: isPast ? cs.onSurface.withValues(alpha: 0.6) : base,
@@ -285,7 +275,7 @@ class _ExpandedNotes extends StatelessWidget {
           Text(
             AppLocalizations.getString(context, 'appointments.notesLabel'),
             style: GoogleFonts.inter(
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.8,
               color: cs.onSurface.withValues(alpha: 0.5),
@@ -295,7 +285,7 @@ class _ExpandedNotes extends StatelessWidget {
           Text(
             notes,
             style: GoogleFonts.inter(
-              fontSize: 14.5,
+              fontSize: 13.5,
               height: 1.6,
               color: cs.onSurface.withValues(alpha: 0.8),
             ),
@@ -324,10 +314,10 @@ class _ConditionPill extends StatelessWidget {
     };
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         color: cs.primary.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(6),
         border: Border.all(color: cs.primary.withValues(alpha: 0.16)),
       ),
       child: Text(
@@ -335,7 +325,6 @@ class _ConditionPill extends StatelessWidget {
         style: GoogleFonts.inter(
           fontSize: 11,
           fontWeight: FontWeight.w600,
-          letterSpacing: 0.1,
           color: cs.primary,
         ),
       ),
@@ -364,7 +353,7 @@ class _Card extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: AppRadius.lgAll,
               border: Border.all(
-                color: cs.outlineVariant.withValues(alpha: 0.5),
+                color: cs.outlineVariant.withValues(alpha: 0.55),
               ),
             ),
             child: child,
@@ -389,7 +378,7 @@ class _DismissBackground extends StatelessWidget {
       child: const Icon(
         Icons.delete_outline_rounded,
         color: Colors.white,
-        size: 25,
+        size: 24,
       ),
     );
   }

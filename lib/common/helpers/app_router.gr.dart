@@ -21,22 +21,24 @@ import 'package:my_wellness/features/account/presentation/pages/profile__details
     as _i20;
 import 'package:my_wellness/features/account/presentation/pages/settings_screen.dart'
     as _i23;
+import 'package:my_wellness/features/appointments/presentation/pages/add_appointment_screen.dart'
+    as _i2;
 import 'package:my_wellness/features/appointments/presentation/pages/appointments_screen.dart'
-    as _i3;
-import 'package:my_wellness/features/assessments/presentation/pages/assessment_complete_screen.dart'
     as _i4;
-import 'package:my_wellness/features/assessments/presentation/pages/assessment_intro_screen.dart'
+import 'package:my_wellness/features/assessments/presentation/pages/assessment_complete_screen.dart'
     as _i5;
-import 'package:my_wellness/features/assessments/presentation/pages/assessment_result_screen.dart'
+import 'package:my_wellness/features/assessments/presentation/pages/assessment_intro_screen.dart'
     as _i6;
-import 'package:my_wellness/features/assessments/presentation/pages/assessment_session_screen.dart'
+import 'package:my_wellness/features/assessments/presentation/pages/assessment_result_screen.dart'
     as _i7;
-import 'package:my_wellness/features/assessments/presentation/pages/assessments_list_screen.dart'
+import 'package:my_wellness/features/assessments/presentation/pages/assessment_session_screen.dart'
     as _i8;
+import 'package:my_wellness/features/assessments/presentation/pages/assessments_list_screen.dart'
+    as _i9;
 import 'package:my_wellness/features/auth/domain/entities/signup_pending_entity.dart'
     as _i44;
 import 'package:my_wellness/features/auth/presentation/pages/auth_screen.dart'
-    as _i9;
+    as _i10;
 import 'package:my_wellness/features/auth/presentation/pages/forgot_password_screen.dart'
     as _i12;
 import 'package:my_wellness/features/auth/presentation/pages/login_screen.dart'
@@ -49,8 +51,6 @@ import 'package:my_wellness/features/bookings/domain/entities/facility.dart'
     as _i42;
 import 'package:my_wellness/features/bookings/domain/entities/service_booking.dart'
     as _i41;
-import 'package:my_wellness/features/bookings/presentation/pages/bookings_screen.dart'
-    as _i10;
 import 'package:my_wellness/features/bookings/presentation/pages/create_booking_screen.dart'
     as _i11;
 import 'package:my_wellness/features/bookings/presentation/pages/referral_detail_screen.dart'
@@ -62,7 +62,7 @@ import 'package:my_wellness/features/home/presentation/pages/home_screen.dart'
 import 'package:my_wellness/features/launch/presentation/pages/splash_screen.dart'
     as _i24;
 import 'package:my_wellness/features/medications/presentation/pages/add_medication_screen.dart'
-    as _i2;
+    as _i3;
 import 'package:my_wellness/features/medications/presentation/pages/medications_screen.dart'
     as _i16;
 import 'package:my_wellness/features/notifications/presentation/pages/notifications_screen.dart'
@@ -114,7 +114,23 @@ class AccountRoute extends _i39.PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [_i2.AddMedicationScreen]
+/// [_i2.AddAppointmentScreen]
+class AddAppointmentRoute extends _i39.PageRouteInfo<void> {
+  const AddAppointmentRoute({List<_i39.PageRouteInfo>? children})
+    : super(AddAppointmentRoute.name, initialChildren: children);
+
+  static const String name = 'AddAppointmentRoute';
+
+  static _i39.PageInfo page = _i39.PageInfo(
+    name,
+    builder: (data) {
+      return const _i2.AddAppointmentScreen();
+    },
+  );
+}
+
+/// generated route for
+/// [_i3.AddMedicationScreen]
 class AddMedicationRoute extends _i39.PageRouteInfo<AddMedicationRouteArgs> {
   AddMedicationRoute({
     _i40.Key? key,
@@ -134,7 +150,7 @@ class AddMedicationRoute extends _i39.PageRouteInfo<AddMedicationRouteArgs> {
       final args = data.argsAs<AddMedicationRouteArgs>(
         orElse: () => const AddMedicationRouteArgs(),
       );
-      return _i2.AddMedicationScreen(key: args.key, condition: args.condition);
+      return _i3.AddMedicationScreen(key: args.key, condition: args.condition);
     },
   );
 }
@@ -163,7 +179,7 @@ class AddMedicationRouteArgs {
 }
 
 /// generated route for
-/// [_i3.AppointmentsScreen]
+/// [_i4.AppointmentsScreen]
 class AppointmentsRoute extends _i39.PageRouteInfo<void> {
   const AppointmentsRoute({List<_i39.PageRouteInfo>? children})
     : super(AppointmentsRoute.name, initialChildren: children);
@@ -173,13 +189,13 @@ class AppointmentsRoute extends _i39.PageRouteInfo<void> {
   static _i39.PageInfo page = _i39.PageInfo(
     name,
     builder: (data) {
-      return const _i3.AppointmentsScreen();
+      return const _i4.AppointmentsScreen();
     },
   );
 }
 
 /// generated route for
-/// [_i4.AssessmentCompleteScreen]
+/// [_i5.AssessmentCompleteScreen]
 class AssessmentCompleteRoute
     extends _i39.PageRouteInfo<AssessmentCompleteRouteArgs> {
   AssessmentCompleteRoute({
@@ -198,7 +214,7 @@ class AssessmentCompleteRoute
     name,
     builder: (data) {
       final args = data.argsAs<AssessmentCompleteRouteArgs>();
-      return _i4.AssessmentCompleteScreen(key: args.key, slug: args.slug);
+      return _i5.AssessmentCompleteScreen(key: args.key, slug: args.slug);
     },
   );
 }
@@ -227,7 +243,7 @@ class AssessmentCompleteRouteArgs {
 }
 
 /// generated route for
-/// [_i5.AssessmentIntroScreen]
+/// [_i6.AssessmentIntroScreen]
 class AssessmentIntroRoute
     extends _i39.PageRouteInfo<AssessmentIntroRouteArgs> {
   AssessmentIntroRoute({
@@ -257,7 +273,7 @@ class AssessmentIntroRoute
     name,
     builder: (data) {
       final args = data.argsAs<AssessmentIntroRouteArgs>();
-      return _i5.AssessmentIntroScreen(
+      return _i6.AssessmentIntroScreen(
         key: args.key,
         slug: args.slug,
         sessionId: args.sessionId,
@@ -319,7 +335,7 @@ class AssessmentIntroRouteArgs {
 }
 
 /// generated route for
-/// [_i6.AssessmentResultScreen]
+/// [_i7.AssessmentResultScreen]
 class AssessmentResultRoute
     extends _i39.PageRouteInfo<AssessmentResultRouteArgs> {
   AssessmentResultRoute({
@@ -338,7 +354,7 @@ class AssessmentResultRoute
     name,
     builder: (data) {
       final args = data.argsAs<AssessmentResultRouteArgs>();
-      return _i6.AssessmentResultScreen(key: args.key, slug: args.slug);
+      return _i7.AssessmentResultScreen(key: args.key, slug: args.slug);
     },
   );
 }
@@ -367,7 +383,7 @@ class AssessmentResultRouteArgs {
 }
 
 /// generated route for
-/// [_i7.AssessmentSessionScreen]
+/// [_i8.AssessmentSessionScreen]
 class AssessmentSessionRoute
     extends _i39.PageRouteInfo<AssessmentSessionRouteArgs> {
   AssessmentSessionRoute({
@@ -386,7 +402,7 @@ class AssessmentSessionRoute
     name,
     builder: (data) {
       final args = data.argsAs<AssessmentSessionRouteArgs>();
-      return _i7.AssessmentSessionScreen(key: args.key, slug: args.slug);
+      return _i8.AssessmentSessionScreen(key: args.key, slug: args.slug);
     },
   );
 }
@@ -415,7 +431,7 @@ class AssessmentSessionRouteArgs {
 }
 
 /// generated route for
-/// [_i8.AssessmentsListScreen]
+/// [_i9.AssessmentsListScreen]
 class AssessmentsListRoute extends _i39.PageRouteInfo<void> {
   const AssessmentsListRoute({List<_i39.PageRouteInfo>? children})
     : super(AssessmentsListRoute.name, initialChildren: children);
@@ -425,13 +441,13 @@ class AssessmentsListRoute extends _i39.PageRouteInfo<void> {
   static _i39.PageInfo page = _i39.PageInfo(
     name,
     builder: (data) {
-      return const _i8.AssessmentsListScreen();
+      return const _i9.AssessmentsListScreen();
     },
   );
 }
 
 /// generated route for
-/// [_i9.AuthScreen]
+/// [_i10.AuthScreen]
 class AuthRoute extends _i39.PageRouteInfo<void> {
   const AuthRoute({List<_i39.PageRouteInfo>? children})
     : super(AuthRoute.name, initialChildren: children);
@@ -441,23 +457,7 @@ class AuthRoute extends _i39.PageRouteInfo<void> {
   static _i39.PageInfo page = _i39.PageInfo(
     name,
     builder: (data) {
-      return const _i9.AuthScreen();
-    },
-  );
-}
-
-/// generated route for
-/// [_i10.BookingsScreen]
-class BookingsRoute extends _i39.PageRouteInfo<void> {
-  const BookingsRoute({List<_i39.PageRouteInfo>? children})
-    : super(BookingsRoute.name, initialChildren: children);
-
-  static const String name = 'BookingsRoute';
-
-  static _i39.PageInfo page = _i39.PageInfo(
-    name,
-    builder: (data) {
-      return const _i10.BookingsScreen();
+      return const _i10.AuthScreen();
     },
   );
 }

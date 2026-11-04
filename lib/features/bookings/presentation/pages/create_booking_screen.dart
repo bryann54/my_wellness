@@ -9,7 +9,6 @@ import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_primary_button.dart';
 import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
 import 'package:my_wellness/common/widgets/soft_input.dart';
-import 'package:my_wellness/core/di/injector.dart';
 import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
 import 'package:my_wellness/features/bookings/domain/entities/facility.dart';
 import 'package:my_wellness/features/bookings/domain/entities/service_booking.dart';
@@ -40,8 +39,12 @@ class CreateBookingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: getIt<BookingsBloc>(),
+    return BlocProvider<BookingsBloc>(
+      create: (_) {
+        final bloc = BookingsBloc.factory();
+        bloc.add(const ResetCreateBookingEvent());
+        return bloc;
+      },
       child: BookingsToastListener(
         child: _CreateBookingBody(
           serviceType: serviceType,
@@ -93,9 +96,7 @@ class _CreateBookingBodyState extends State<_CreateBookingBody> {
   @override
   void initState() {
     super.initState();
-    context.read<BookingsBloc>().add(const ResetCreateBookingEvent());
-
-    // Pre-fill the M-Pesa phone from the signed-in member. User can edit.
+    // `ResetCreateBookingEvent` is dispatched by `BlocProvider.create` above.
     final profile = context.read<AccountBloc>().state.profile;
     final prefill = _pickPrefillPhone(profile?.phone);
     if (prefill != null) {
@@ -104,8 +105,6 @@ class _CreateBookingBodyState extends State<_CreateBookingBody> {
     }
   }
 
-  /// Prefer the profile's phone; fall back to none. Never overwrite a
-  /// number the user already typed (shouldn't happen in initState, but safe).
   String? _pickPrefillPhone(String? raw) {
     if (raw == null) return null;
     final digits = raw.replaceAll(RegExp(r'[^0-9]'), '');

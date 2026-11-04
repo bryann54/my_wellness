@@ -20,7 +20,7 @@ class BpTab extends StatelessWidget {
 
   static void _startCapture(BuildContext context) {
     final access = context.read<VitalsCaptureBloc>().state.access;
-   if (access != null && !access.hasAccess) {
+    if (access != null && !access.hasAccess) {
       context.router.push(PricingRoute(initialServiceId: 'monitor'));
       return;
     }

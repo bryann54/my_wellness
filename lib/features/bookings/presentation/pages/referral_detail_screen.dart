@@ -1,7 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:my_wellness/common/constants/hero.dart';
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
@@ -27,30 +26,23 @@ class ReferralDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: getIt<BookingsBloc>(),
+    return BlocProvider<BookingsBloc>(
+      create: (_) {
+        final bloc = getIt<BookingsBloc>();
+        bloc.add(LoadReferralEvent(referralId));
+        return bloc;
+      },
       child: BookingsToastListener(child: _ReferralBody(id: referralId)),
     );
   }
 }
 
-class _ReferralBody extends StatefulWidget {
+class _ReferralBody extends StatelessWidget {
   final String id;
 
   const _ReferralBody({required this.id});
 
-  @override
-  State<_ReferralBody> createState() => _ReferralBodyState();
-}
-
-class _ReferralBodyState extends State<_ReferralBody> {
-  @override
-  void initState() {
-    super.initState();
-    context.read<BookingsBloc>().add(LoadReferralEvent(widget.id));
-  }
-
-  Future<void> _navigate(Facility f) async {
+  Future<void> _navigate(BuildContext context, Facility f) async {
     final query = f.latitude != null && f.longitude != null
         ? '${f.latitude},${f.longitude}'
         : Uri.encodeComponent('${f.name} ${f.town}');
@@ -58,7 +50,7 @@ class _ReferralBodyState extends State<_ReferralBody> {
       Uri.parse('https://www.google.com/maps/search/?api=1&query=$query'),
       mode: LaunchMode.externalApplication,
     );
-    if (!ok && mounted) {
+    if (!ok && context.mounted) {
       AppSnackbar.error(
         context,
         AppLocalizations.getString(context, 'bookings.referral.mapsFailed'),
@@ -66,41 +58,28 @@ class _ReferralBodyState extends State<_ReferralBody> {
     }
   }
 
-  String _shaLabel(String status) =>
+  String _shaLabel(BuildContext context, String status) =>
       AppLocalizations.getString(context, switch (status) {
         'accredited' => 'bookings.referral.sha.accredited',
         'not_accredited' => 'bookings.referral.sha.notAccredited',
         _ => 'bookings.referral.sha.unavailable',
       });
 
-  String _headline(Referral r) => r.escalationCategoryDisplay.isNotEmpty
+  String _headline(BuildContext context, Referral r) =>
+      r.escalationCategoryDisplay.isNotEmpty
       ? r.escalationCategoryDisplay
       : AppLocalizations.getString(context, 'bookings.referral.title');
 
   @override
   Widget build(BuildContext context) {
     final state = context.watch<BookingsBloc>().state;
-    final r = state.referralDetail?.id == widget.id
-        ? state.referralDetail
-        : null;
-
-    String title = '';
-    if (r != null) {
-      title = _headline(r);
-    } else {
-      for (final listed in state.referrals) {
-        if (listed.id == widget.id) title = _headline(listed);
-      }
-    }
+    final r = state.referralDetail?.id == id ? state.referralDetail : null;
+    final title = r != null ? _headline(context, r) : '';
 
     return Scaffold(
       body: NestedScrollView(
         headerSliverBuilder: (_, _) => [
-          CustomAppBar(
-            title: title,
-            titleHeroTag: HeroTags.referralTitle(widget.id),
-            isHome: false,
-          ),
+          CustomAppBar(title: title, isHome: false),
         ],
         body: _buildBody(context, state, r),
       ),
@@ -126,9 +105,8 @@ class _ReferralBodyState extends State<_ReferralBody> {
                 ),
                 const SizedBox(height: AppSpacing.md),
                 AppPrimaryButton(
-                  onPressed: () => context.read<BookingsBloc>().add(
-                    LoadReferralEvent(widget.id),
-                  ),
+                  onPressed: () =>
+                      context.read<BookingsBloc>().add(LoadReferralEvent(id)),
                   label: AppLocalizations.getString(context, 'common.retry'),
                   height: 48,
                 ),
@@ -165,7 +143,7 @@ class _ReferralBodyState extends State<_ReferralBody> {
           children: [
             Expanded(
               child: Text(
-                _headline(r),
+                _headline(context, r),
                 style: tt.titleLarge?.copyWith(color: cs.onSurface),
               ),
             ),
@@ -242,7 +220,7 @@ class _ReferralBodyState extends State<_ReferralBody> {
                       AppLocalizations.t(context, 'bookings.referral.minutes', {
                         'min': '${r.travelTimeMinutes}',
                       }),
-                    _shaLabel(r.shaAccreditationStatus),
+                    _shaLabel(context, r.shaAccreditationStatus),
                   ].join(' · '),
                   style: tt.labelMedium?.copyWith(
                     color: cs.onSurface.withValues(alpha: 0.6),
@@ -282,7 +260,7 @@ class _ReferralBodyState extends State<_ReferralBody> {
           const SizedBox(height: AppSpacing.md - 4),
           if (f != null)
             OutlinedButton.icon(
-              onPressed: () => _navigate(f),
+              onPressed: () => _navigate(context, f),
               icon: const Icon(Icons.directions_outlined),
               label: Text(
                 AppLocalizations.getString(
@@ -339,7 +317,9 @@ class _ReferralBodyState extends State<_ReferralBody> {
               onPressed: () => context.router.push(
                 CreateBookingRoute(
                   serviceType: ServiceType.referralVisit,
-                  followUp: true,
+                  serviceLabel: 'Follow-up — ${r.escalationCategoryDisplay}',
+                  referralId: r.id,
+                  lockedFacility: f,
                 ),
               ),
               label: AppLocalizations.getString(

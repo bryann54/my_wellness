@@ -92,7 +92,7 @@ class _NotificationHostState extends State<NotificationHost>
         router.push(const AppointmentsRoute());
 
       case NotificationRouteBookings():
-        router.push(const BookingsRoute());
+        router.push(const AppointmentsRoute());
 
       case NotificationRouteAppointment():
         router.push(const AppointmentsRoute());

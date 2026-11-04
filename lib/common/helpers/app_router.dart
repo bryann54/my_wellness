@@ -16,24 +16,18 @@ class AppRouter extends RootStackRouter {
       children: [
         AutoRoute(page: HomeRoute.page),
         AutoRoute(page: AssessmentsListRoute.page),
-        AutoRoute(page: BookingsRoute.page),
-        AutoRoute(page: WellnessRoute.page),
+        AutoRoute(page: AppointmentsRoute.page),
         AutoRoute(page: AccountRoute.page),
       ],
     ),
 
-    // Vitals / health — VitalsRouteRoute owns both VitalsBloc and
-    // VitalsCaptureBloc.
     AutoRoute(page: VitalsRoute.page),
     AutoRoute(page: VitalsRouteRoute.page),
     AutoRoute(page: NotificationsRoute.page),
     AutoRoute(page: MedicationsRoute.page),
     AutoRoute(page: MyHealthRoute.page),
-    AutoRoute(page: AppointmentsRoute.page),
     AutoRoute(page: AddMedicationRoute.page),
 
-    // Vitals capture flow — pushed on top of VitalsRouteRoute so they
-    // inherit the capture bloc from that subtree.
     AutoRoute(page: VitalsCaptureIntroRoute.page),
     AutoRoute(page: VitalsPathwayRoute.page),
     AutoRoute(page: VitalsPathwayFollowupRoute.page),
@@ -44,23 +38,20 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: VitalsWellbeingRoute.page),
     AutoRoute(page: VitalsResultRoute.page),
 
-    // Assessments
     AutoRoute(page: AssessmentCompleteRoute.page),
     AutoRoute(page: AssessmentIntroRoute.page),
     AutoRoute(page: AssessmentSessionRoute.page),
     AutoRoute(page: AssessmentResultRoute.page),
-     AutoRoute(page: PricingRoute.page),
+    AutoRoute(page: PricingRoute.page),
 
-    // Bookings
     AutoRoute(page: CreateBookingRoute.page),
     AutoRoute(page: ReferralDetailRoute.page),
+    AutoRoute(page: AddAppointmentRoute.page),
 
-    // Account / auth-adjacent
     AutoRoute(page: VerificationRoute.page),
     AutoRoute(page: SettingsRoute.page),
     AutoRoute(page: ProfileDetailsRoute.page),
 
-    // Web view
     AutoRoute(page: WebViewRoute.page),
   ];
 }
