@@ -27,6 +27,14 @@ class AddAppointmentEvent extends AppointmentsEvent {
   List<Object?> get props => [payload];
 }
 
+class UpdateAppointmentEvent extends AppointmentsEvent {
+  const UpdateAppointmentEvent(this.id, this.payload);
+  final String id;
+  final Map<String, dynamic> payload;
+  @override
+  List<Object?> get props => [id, payload];
+}
+
 class DeleteAppointmentEvent extends AppointmentsEvent {
   const DeleteAppointmentEvent(this.id);
   final String id;

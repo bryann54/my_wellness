@@ -27,6 +27,27 @@ class AddMedicationEvent extends MedicationsEvent {
   List<Object?> get props => [payload];
 }
 
+class UpdateMedicationEvent extends MedicationsEvent {
+  const UpdateMedicationEvent(this.id, this.payload);
+  final String id;
+  final Map<String, dynamic> payload;
+  @override
+  List<Object?> get props => [id, payload];
+}
+
+class RefillMedicationEvent extends MedicationsEvent {
+  const RefillMedicationEvent({
+    required this.id,
+    required this.quantityDispensed,
+    this.refilledAt,
+  });
+  final String id;
+  final int quantityDispensed;
+  final String? refilledAt;
+  @override
+  List<Object?> get props => [id, quantityDispensed, refilledAt];
+}
+
 class DeleteMedicationEvent extends MedicationsEvent {
   const DeleteMedicationEvent(this.id);
   final String id;

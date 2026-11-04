@@ -39,3 +39,12 @@ class ConflictException implements Exception {
   final String message;
   const ConflictException({this.message = 'Conflict'});
 }
+
+class PaymentRequiredException implements Exception {
+  final String code;
+  final String? message;
+  const PaymentRequiredException({
+    this.code = 'vitals_access_required',
+    this.message,
+  });
+}

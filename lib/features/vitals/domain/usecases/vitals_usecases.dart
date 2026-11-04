@@ -45,6 +45,18 @@ class CreateAppointmentUseCase
 }
 
 @lazySingleton
+class UpdateAppointmentUseCase
+    implements
+        UseCase<Appointment, ({String id, Map<String, dynamic> payload})> {
+  final VitalsRepository _repo;
+  UpdateAppointmentUseCase(this._repo);
+  @override
+  Future<Either<Failure, Appointment>> call(
+    ({String id, Map<String, dynamic> payload}) p,
+  ) => _repo.updateAppointment(p.id, p.payload);
+}
+
+@lazySingleton
 class DeleteAppointmentUseCase implements UseCase<void, String> {
   final VitalsRepository _repo;
   DeleteAppointmentUseCase(this._repo);
@@ -113,11 +125,69 @@ class CreateMedicationUseCase
 }
 
 @lazySingleton
+class UpdateMedicationUseCase
+    implements
+        UseCase<Medication, ({String id, Map<String, dynamic> payload})> {
+  final VitalsRepository _repo;
+  UpdateMedicationUseCase(this._repo);
+  @override
+  Future<Either<Failure, Medication>> call(
+    ({String id, Map<String, dynamic> payload}) p,
+  ) => _repo.updateMedication(p.id, p.payload);
+}
+
+@lazySingleton
+class RefillMedicationUseCase
+    implements
+        UseCase<
+          Medication,
+          ({String id, int quantityDispensed, String? refilledAt})
+        > {
+  final VitalsRepository _repo;
+  RefillMedicationUseCase(this._repo);
+  @override
+  Future<Either<Failure, Medication>> call(
+    ({String id, int quantityDispensed, String? refilledAt}) p,
+  ) => _repo.refillMedication(
+    p.id,
+    quantityDispensed: p.quantityDispensed,
+    refilledAt: p.refilledAt,
+  );
+}
+
+@lazySingleton
 class DeleteMedicationUseCase implements UseCase<void, String> {
   final VitalsRepository _repo;
   DeleteMedicationUseCase(this._repo);
   @override
   Future<Either<Failure, void>> call(String id) => _repo.deleteMedication(id);
+}
+
+@lazySingleton
+class SearchFormularyUseCase
+    implements
+        UseCase<
+          ({List<Map<String, dynamic>> items, String? nextCursor}),
+          ({String? cursor, String query})
+        > {
+  final VitalsRepository _repo;
+  SearchFormularyUseCase(this._repo);
+  @override
+  Future<
+    Either<Failure, ({List<Map<String, dynamic>> items, String? nextCursor})>
+  >
+  call(({String? cursor, String query}) p) async {
+    final result = await _repo.searchFormulary(
+      cursor: p.cursor,
+      query: p.query,
+    );
+    return result.map(
+      (page) => (
+        items: List<Map<String, dynamic>>.from(page.items),
+        nextCursor: page.nextCursor,
+      ),
+    );
+  }
 }
 
 @lazySingleton

@@ -70,7 +70,7 @@ class _BodyState extends State<_Body> {
   void _onChanged() {
     context.read<AssessmentsBloc>().add(const ClearBmiPreviewEvent());
     _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 600), _triggerPreview);
+    _debounce = Timer(const Duration(milliseconds: 350), _triggerPreview);
   }
 
   void _triggerPreview() {

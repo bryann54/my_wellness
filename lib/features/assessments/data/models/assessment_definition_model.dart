@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:my_wellness/features/assessments/data/models/json_field_parsers.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_definition.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_cta.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_option.dart';
@@ -23,13 +24,13 @@ class AssessmentDefinitionModel {
   @JsonKey(name: 'understanding_copy')
   final String? understandingCopy;
 
-  @JsonKey(name: 'before_you_begin')
+  @JsonKey(name: 'before_you_begin', fromJson: beforeYouBeginFromJson)
   final String? beforeYouBegin;
 
   @JsonKey(name: 'cancer_history_type_code')
   final String? cancerHistoryTypeCode;
 
-  @JsonKey(name: 'encouraging_fact')
+  @JsonKey(name: 'encouraging_fact', fromJson: encouragingFactFromJson)
   final String? encouragingFact;
 
   final List<AssessmentQuestionModel> questions;
@@ -86,16 +87,16 @@ class AssessmentQuestionModel {
   final int? min;
   final int? max;
 
-  @JsonKey(name: 'terminate_on')
+  @JsonKey(name: 'terminate_on', fromJson: ruleFromJson)
   final String? terminateOn;
 
-  @JsonKey(name: 'skip_next_on')
+  @JsonKey(name: 'skip_next_on', fromJson: ruleFromJson)
   final String? skipNextOn;
 
-  @JsonKey(name: 'skip_if')
+  @JsonKey(name: 'skip_if', fromJson: ruleFromJson)
   final String? skipIf;
 
-  @JsonKey(name: 'auto_answer_if')
+  @JsonKey(name: 'auto_answer_if', fromJson: ruleFromJson)
   final String? autoAnswerIf;
 
   const AssessmentQuestionModel({

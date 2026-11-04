@@ -182,10 +182,42 @@ class VitalsRepositoryImpl implements VitalsRepository {
   }
 
   @override
+  Future<Either<Failure, Medication>> refillMedication(
+    String id, {
+    required int quantityDispensed,
+    String? refilledAt,
+  }) async {
+    try {
+      return Right(
+        (await _remote.refillMedication(
+          id,
+          quantityDispensed: quantityDispensed,
+          refilledAt: refilledAt,
+        )).toEntity(),
+      );
+    } on Exception catch (e) {
+      return Left(_map(e));
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> deleteMedication(String id) async {
     try {
       await _remote.deleteMedication(id);
       return const Right(null);
+    } on Exception catch (e) {
+      return Left(_map(e));
+    }
+  }
+
+  @override
+  Future<
+    Either<Failure, ({List<Map<String, dynamic>> items, String? nextCursor})>
+  >
+  searchFormulary({String? cursor, required String query}) async {
+    try {
+      final page = await _remote.searchFormulary(cursor: cursor, query: query);
+      return Right((items: page.items, nextCursor: page.nextCursor));
     } on Exception catch (e) {
       return Left(_map(e));
     }
@@ -279,6 +311,9 @@ class VitalsRepositoryImpl implements VitalsRepository {
 
   Failure _map(Exception e) {
     if (e is UnauthorizedException) return const UnauthorizedFailure();
+    if (e is PaymentRequiredException) {
+      return ValidationFailure(error: e.code);
+    }
     if (e is ValidationException) return ValidationFailure(error: e.message);
     if (e is NotFoundException) return NotFoundFailure(error: e.message);
     if (e is NetworkException) return const NetworkFailure();

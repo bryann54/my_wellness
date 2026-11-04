@@ -48,7 +48,7 @@ class AssessmentsBlockedView extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             AppPrimaryButton(
-              onPressed: () => context.router.push(const PricingRoute()),
+              onPressed: () => context.router.push( PricingRoute()),
               label: AppLocalizations.getString(context, 'pricing.viewPlans'),
             ),
           ],

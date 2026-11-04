@@ -15,12 +15,16 @@ class MedicationsBloc extends Bloc<MedicationsEvent, MedicationsState> {
   MedicationsBloc(
     this._getMedications,
     this._createMedication,
+    this._updateMedication,
+    this._refillMedication,
     this._deleteMedication,
     this._scanMedication,
   ) : super(const MedicationsState()) {
     on<LoadMedicationsEvent>(_load);
     on<LoadMoreMedicationsEvent>(_loadMore);
     on<AddMedicationEvent>(_add);
+    on<UpdateMedicationEvent>(_update);
+    on<RefillMedicationEvent>(_refill);
     on<DeleteMedicationEvent>(_delete);
     on<ClearMedicationsToastEvent>(
       (_, emit) => emit(state.copyWith(clearToast: true)),
@@ -29,6 +33,8 @@ class MedicationsBloc extends Bloc<MedicationsEvent, MedicationsState> {
 
   final GetMedicationsPagedUseCase _getMedications;
   final CreateMedicationUseCase _createMedication;
+  final UpdateMedicationUseCase _updateMedication;
+  final RefillMedicationUseCase _refillMedication;
   final DeleteMedicationUseCase _deleteMedication;
   final ScanMedicationUseCase _scanMedication;
 
@@ -109,6 +115,77 @@ class MedicationsBloc extends Bloc<MedicationsEvent, MedicationsState> {
           ),
           ToastType.success,
           'Medication added.',
+        ),
+      ),
+    );
+  }
+
+  Future<void> _update(
+    UpdateMedicationEvent event,
+    Emitter<MedicationsState> emit,
+  ) async {
+    emit(state.copyWith(isSubmitting: true, clearError: true));
+    final result = await _updateMedication((
+      id: event.id,
+      payload: event.payload,
+    ));
+    result.fold(
+      (failure) => emit(
+        _toast(
+          state.copyWith(
+            isSubmitting: false,
+            errorMessage: mapFailure(failure),
+          ),
+          ToastType.error,
+          mapFailure(failure),
+        ),
+      ),
+      (medication) => emit(
+        _toast(
+          state.copyWith(
+            isSubmitting: false,
+            medications: state.medications
+                .map((m) => m.id == medication.id ? medication : m)
+                .toList(growable: false),
+          ),
+          ToastType.success,
+          'Medication updated.',
+        ),
+      ),
+    );
+  }
+
+  Future<void> _refill(
+    RefillMedicationEvent event,
+    Emitter<MedicationsState> emit,
+  ) async {
+    emit(state.copyWith(isSubmitting: true, clearError: true));
+    final result = await _refillMedication((
+      id: event.id,
+      quantityDispensed: event.quantityDispensed,
+      refilledAt: event.refilledAt,
+    ));
+    result.fold(
+      (failure) => emit(
+        _toast(
+          state.copyWith(
+            isSubmitting: false,
+            errorMessage: mapFailure(failure),
+          ),
+          ToastType.error,
+          mapFailure(failure),
+        ),
+      ),
+      (medication) => emit(
+        _toast(
+          state.copyWith(
+            isSubmitting: false,
+            medications: state.medications
+                .map((m) => m.id == medication.id ? medication : m)
+                .toList(growable: false),
+          ),
+          ToastType.success,
+          'Marked as refilled.',
         ),
       ),
     );

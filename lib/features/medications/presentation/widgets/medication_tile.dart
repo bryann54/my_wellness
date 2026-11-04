@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
@@ -10,10 +11,12 @@ class MedicationTile extends StatefulWidget {
     super.key,
     required this.medication,
     required this.onDelete,
+    this.onRefill,
   });
 
   final Medication medication;
   final VoidCallback onDelete;
+  final VoidCallback? onRefill;
 
   @override
   State<MedicationTile> createState() => _MedicationTileState();
@@ -54,6 +57,7 @@ class _MedicationTileState extends State<MedicationTile> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _Header(medication: m, expanded: _isExpanded),
+                _RefillBanner(medication: m, onRefill: widget.onRefill),
                 AnimatedSize(
                   duration: AppDurations.medium,
                   curve: Curves.easeOutCubic,
@@ -69,6 +73,10 @@ class _MedicationTileState extends State<MedicationTile> {
                             ),
                             const SizedBox(height: AppSpacing.sm),
                             _Details(medication: m),
+                            if (m.sideEffects != null) ...[
+                              const SizedBox(height: AppSpacing.sm),
+                              _SideEffectsCard(data: m.sideEffects!),
+                            ],
                             const SizedBox(height: AppSpacing.xs),
                             Divider(
                               height: 1,
@@ -102,6 +110,123 @@ class _MedicationTileState extends State<MedicationTile> {
       isDestructive: true,
     );
     if (ok == true && mounted) widget.onDelete();
+  }
+}
+
+class _RefillBanner extends StatelessWidget {
+  const _RefillBanner({required this.medication, this.onRefill});
+
+  final Medication medication;
+  final VoidCallback? onRefill;
+
+  @override
+  Widget build(BuildContext context) {
+    if (medication.refillDueDate == null) return const SizedBox.shrink();
+    final overdue = medication.isRefillOverdue;
+    final soon = medication.isRefillDueSoon;
+    if (!overdue && !soon) return const SizedBox.shrink();
+
+    final cs = Theme.of(context).colorScheme;
+    final accent = overdue ? cs.error : const Color(0xFFF59E0B);
+    final text = overdue
+        ? 'Refill overdue · ${_fmtDate(medication.refillDueDate!)}'
+        : 'Refill due soon · ${_fmtDate(medication.refillDueDate!)}';
+
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.sm),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        decoration: BoxDecoration(
+          color: accent.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: accent.withValues(alpha: 0.30)),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.event_repeat_rounded, size: 16, color: accent),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                text,
+                style: GoogleFonts.inter(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                  color: accent,
+                ),
+              ),
+            ),
+            if (onRefill != null)
+              TextButton(
+                onPressed: onRefill,
+                style: TextButton.styleFrom(
+                  foregroundColor: accent,
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  minimumSize: const Size(0, 28),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: const Text('Mark refilled'),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static String _fmtDate(DateTime d) =>
+      '${d.day.toString().padLeft(2, '0')}/'
+      '${d.month.toString().padLeft(2, '0')}/${d.year}';
+}
+
+class _SideEffectsCard extends StatelessWidget {
+  const _SideEffectsCard({required this.data});
+
+  final MedicationSideEffects data;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.sm + 2),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Side effects',
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.3,
+              color: cs.onSurface.withValues(alpha: 0.6),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            data.sideEffects,
+            style: GoogleFonts.inter(
+              fontSize: 13,
+              height: 1.5,
+              color: cs.onSurface.withValues(alpha: 0.8),
+            ),
+          ),
+          if (data.safetyCaution?.isNotEmpty == true) ...[
+            const SizedBox(height: 6),
+            Text(
+              data.safetyCaution!,
+              style: GoogleFonts.inter(
+                fontSize: 12.5,
+                height: 1.45,
+                fontWeight: FontWeight.w600,
+                color: cs.error,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 }
 
@@ -245,6 +370,7 @@ class _Details extends StatelessWidget {
     final hasCondition = condition != null && condition.isNotEmpty;
     final prescription = m.prescription?.trim();
     final hasPrescription = prescription != null && prescription.isNotEmpty;
+    final hasReminders = m.reminderTimes.isNotEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -279,6 +405,8 @@ class _Details extends StatelessWidget {
             label: _t(context, 'medications.prescription'),
             value: _t(context, 'common.available'),
           ),
+        if (hasReminders)
+          _LabeledRow(label: 'Reminders', value: m.reminderTimes.join(', ')),
         if (hasNotes) ...[
           const SizedBox(height: AppSpacing.xs),
           _LabeledRow(

@@ -49,13 +49,10 @@ class _Body extends StatelessWidget {
       );
     }
 
-    // Refresh the main vitals bloc so the tab shows the new reading.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<VitalsBloc>().add(const LoadVitalsEvent());
     });
 
-    // BS returns its classification on the reading itself; BP exposes it
-    // at the session level.
     final classification = kind == VitalsCaptureKind.bp
         ? result.bpCategory
         : (result.firstReading?.classification ?? 'neutral');
@@ -64,6 +61,9 @@ class _Body extends StatelessWidget {
         : (result.firstReading?.classificationLabel ?? '');
     final accent = classificationColor(classification);
     final facility = referral?.recommendedFacility;
+
+    final showFacilityPicker =
+        state.needsManualFacilityBooking && referral == null;
 
     return Scaffold(
       body: NestedScrollView(
@@ -135,9 +135,112 @@ class _Body extends StatelessWidget {
                       ),
                     ),
                   ],
+                  if (result.pulseNote.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      result.pulseNote,
+                      style: GoogleFonts.inter(
+                        fontSize: 12.5,
+                        height: 1.5,
+                        color: cs.onSurface.withValues(alpha: 0.6),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
+
+            if (showFacilityPicker) ...[
+              const SizedBox(height: AppSpacing.lg),
+              Text(
+                'Pick a care facility',
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.3,
+                  color: cs.onSurface.withValues(alpha: 0.55),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              if (state.candidatesLoading)
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(AppSpacing.md),
+                    child: CircularProgressIndicator.adaptive(),
+                  ),
+                )
+              else if (state.facilityCandidates.isEmpty)
+                OutlinedButton.icon(
+                  onPressed: () => context.read<VitalsCaptureBloc>().add(
+                    const LoadFacilityCandidatesEvent(),
+                  ),
+                  icon: const Icon(Icons.search_rounded, size: 18),
+                  label: const Text('Find nearby facilities'),
+                )
+              else
+                ...state.facilityCandidates.map((c) {
+                  final f = c['facility'] as Map<String, dynamic>? ?? const {};
+                  final name = (f['name'] as String?) ?? 'Facility';
+                  final id = f['id'] as String?;
+                  final distance = c['distance_km'];
+                  final minutes = c['travel_time_minutes'];
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                    child: InkWell(
+                      onTap: state.bookingReferral
+                          ? null
+                          : () => context.read<VitalsCaptureBloc>().add(
+                              BookReferralEvent(facilityId: id),
+                            ),
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        decoration: BoxDecoration(
+                          color: cs.surface,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: cs.outlineVariant.withValues(alpha: 0.5),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    name,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  if (distance != null || minutes != null) ...[
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      [
+                                        if (distance != null) '$distance km',
+                                        if (minutes != null) '$minutes min',
+                                      ].join(' · '),
+                                      style: GoogleFonts.inter(
+                                        fontSize: 12,
+                                        color: cs.onSurface.withValues(
+                                          alpha: 0.6,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                            const Icon(Icons.chevron_right_rounded),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+            ],
 
             if (facility != null) ...[
               const SizedBox(height: AppSpacing.lg),

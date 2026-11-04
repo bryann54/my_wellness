@@ -12,6 +12,7 @@ import 'package:my_wellness/features/home/presentation/widgets/home_app_bar.dart
 import 'package:my_wellness/features/home/presentation/widgets/quick_action_row.dart';
 import 'package:my_wellness/features/home/presentation/widgets/vitals_tile.dart';
 import 'package:my_wellness/features/vitals/presentation/bloc/vitals_bloc.dart';
+import 'package:my_wellness/features/vitals/presentation/bloc/vitals_capture_bloc.dart';
 
 @RoutePage()
 class HomeScreen extends StatefulWidget {
@@ -33,16 +34,22 @@ class _HomeScreenState extends State<HomeScreen> {
   void _load() {
     context.read<HomeBloc>().add(const LoadHomeDashboardEvent());
     context.read<VitalsBloc>().add(const LoadVitalsSummaryEvent());
+    context.read<VitalsCaptureBloc>().add(const LoadVitalsAccessEvent());
   }
 
   Future<void> _refresh() async {
     final home = context.read<HomeBloc>();
     final vitals = context.read<VitalsBloc>();
+    final capture = context.read<VitalsCaptureBloc>();
+
     final homeDone = home.stream.firstWhere(
       (s) => s.status != HomeDashboardStatus.loading,
     );
     final vitalsDone = vitals.stream.firstWhere(
       (s) => s.status != VitalsStatus.loading,
+    );
+    final captureDone = capture.stream.firstWhere(
+      (s) => s.access != null && !s.accessLoading,
     );
 
     _load();
@@ -51,6 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
       await Future.wait<Object?>([
         homeDone,
         vitalsDone,
+        captureDone,
       ]).timeout(const Duration(seconds: 10), onTimeout: () => const []);
     } catch (_) {}
   }

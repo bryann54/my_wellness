@@ -42,7 +42,15 @@ abstract class VitalsRemoteDataSource {
     String id,
     Map<String, dynamic> data,
   );
+  Future<MedicationModel> refillMedication(
+    String id, {
+    required int quantityDispensed,
+    String? refilledAt,
+  });
   Future<void> deleteMedication(String id);
+
+  Future<({List<Map<String, dynamic>> items, String? nextCursor})>
+  searchFormulary({String? cursor, required String query});
 
   Future<List<BpReadingModel>> getBloodPressureReadings();
   Future<BpReadingModel> createBloodPressureReading(Map<String, dynamic> data);
@@ -225,10 +233,48 @@ class VitalsRemoteDataSourceImpl implements VitalsRemoteDataSource {
   }
 
   @override
+  Future<MedicationModel> refillMedication(
+    String id, {
+    required int quantityDispensed,
+    String? refilledAt,
+  }) async {
+    final response = await _apiClient.post<Map<String, dynamic>>(
+      url: ApiEndpoints.medicationRefill(id),
+      payload: {
+        'quantity_dispensed': quantityDispensed,
+        'refilled_at': ?refilledAt,
+      },
+      options: ApiClient.protected,
+    );
+    return MedicationModel.fromJson(response);
+  }
+
+  @override
   Future<void> deleteMedication(String id) async {
     await _apiClient.delete(
       url: ApiEndpoints.medicationDetail(id),
       options: ApiClient.protected,
+    );
+  }
+
+  @override
+  Future<({List<Map<String, dynamic>> items, String? nextCursor})>
+  searchFormulary({String? cursor, required String query}) async {
+    final response = await _apiClient.get<Map<String, dynamic>>(
+      url: ApiEndpoints.formularySearch,
+      query: {'q': query, 'cursor': ?cursor},
+      options: ApiClient.protected,
+    );
+    final results = (response['results'] as List<dynamic>? ?? const []);
+    final nextUrl = response['next'] as String?;
+    final nextCursor = nextUrl == null
+        ? null
+        : Uri.parse(nextUrl).queryParameters['cursor'];
+    return (
+      items: results
+          .map((e) => e as Map<String, dynamic>)
+          .toList(growable: false),
+      nextCursor: nextCursor,
     );
   }
 

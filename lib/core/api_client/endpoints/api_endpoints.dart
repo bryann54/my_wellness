@@ -52,6 +52,7 @@ class ApiEndpoints {
 
   // ─── Vitals: Access ───────────────────────────────────────────────────
   static const String vitalsAccess = '/api/vitals/access/';
+  static const String vitalsAlertNavigator = '/api/vitals/alert-navigator/';
 
   // ─── Vitals: Blood pressure ───────────────────────────────────────────
   static const String bloodPressure = '/api/vitals/blood-pressure/';
@@ -84,6 +85,10 @@ class ApiEndpoints {
   // ─── Vitals: shared ───────────────────────────────────────────────────
   static const String vitalsClassifyPreview = '/api/vitals/classify-preview/';
   static const String vitalsReport = '/api/vitals/report/';
+  static const String vitalsReportEmail = '/api/vitals/report/email/';
+  static const String vitalsReportEmailPrefill =
+      '/api/vitals/report/email-prefill/';
+  static const String vitalsSummary = '/api/vitals/summary/';
 
   // ─── Vitals: Referrals from a reading ─────────────────────────────────
   static String referralFromBpReading(String readingId) =>
@@ -94,10 +99,17 @@ class ApiEndpoints {
   static String referralFromSession(String sessionId) =>
       '/api/care-navigation/referrals/from-session/$sessionId';
 
+  static String referralFacilityCandidatesFromBpReading(String readingId) =>
+      '/api/care-navigation/referrals/from-bp-reading/$readingId/facility-candidates/';
+  static String referralFacilityCandidatesFromBsReading(String readingId) =>
+      '/api/care-navigation/referrals/from-bs-reading/$readingId/facility-candidates/';
+
   // ─── Vitals: Medications ──────────────────────────────────────────────
   static const String medications = '/api/medications/';
   static const String medicationsScan = '/api/medications/scan/';
   static String medicationDetail(String id) => '/api/medications/$id/';
+  static String medicationRefill(String id) => '/api/medications/$id/refill/';
+  static const String formularySearch = '/api/formulary/search/';
 
   // ─── Facilities ───────────────────────────────────────────────────────
   static const String facilitySearch = '/api/facilities/patient-search';

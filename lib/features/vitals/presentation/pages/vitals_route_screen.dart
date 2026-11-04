@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_wellness/features/vitals/presentation/bloc/vitals_bloc.dart';
+import 'package:my_wellness/features/vitals/presentation/bloc/vitals_capture_bloc.dart';
 import 'package:my_wellness/features/vitals/presentation/pages/vitals_screen.dart';
 
 @RoutePage()
@@ -15,6 +16,10 @@ class VitalsRouteScreen extends StatelessWidget {
       final bloc = context.read<VitalsBloc>();
       if (bloc.state.status == VitalsStatus.initial) {
         bloc.add(const LoadVitalsEvent());
+      }
+      final capture = context.read<VitalsCaptureBloc>();
+      if (capture.state.access == null && !capture.state.accessLoading) {
+        capture.add(const LoadVitalsAccessEvent());
       }
     });
     return VitalsScreen(initialTab: initialTab);

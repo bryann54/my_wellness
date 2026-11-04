@@ -11,6 +11,7 @@ import 'package:my_wellness/features/medications/presentation/bloc/medications_b
 import 'package:my_wellness/features/medications/presentation/widgets/medications_toast_listener.dart';
 import 'package:my_wellness/features/medications/presentation/widgets/medication_tile.dart';
 import 'package:my_wellness/features/medications/presentation/widgets/medication_tile_shimmer.dart';
+import 'package:my_wellness/features/vitals/domain/entities/medication.dart';
 import 'package:my_wellness/features/vitals/presentation/widgets/vitals_empty_state.dart';
 
 @RoutePage()
@@ -44,6 +45,34 @@ class _MedicationsScreenState extends State<MedicationsScreen> {
   void _onScroll() {
     if (_scroll.position.pixels >= _scroll.position.maxScrollExtent - 200) {
       context.read<MedicationsBloc>().add(const LoadMoreMedicationsEvent());
+    }
+  }
+
+  Future<void> _onRefill(Medication m) async {
+    final qty = m.quantityDispensed ?? m.quantityPerDose ?? 30;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog.adaptive(
+        title: const Text('Mark as refilled'),
+        content: Text(
+          'Confirm that ${m.name} has been refilled with $qty units.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(AppLocalizations.getString(context, 'common.cancel')),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(AppLocalizations.getString(context, 'common.confirm')),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      context.read<MedicationsBloc>().add(
+        RefillMedicationEvent(id: m.id, quantityDispensed: qty),
+      );
     }
   }
 
@@ -153,6 +182,7 @@ class _MedicationsScreenState extends State<MedicationsScreen> {
                                 onDelete: () => context
                                     .read<MedicationsBloc>()
                                     .add(DeleteMedicationEvent(m.id)),
+                                onRefill: () => _onRefill(m),
                               ),
                             ),
                           );

@@ -1,3 +1,4 @@
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -100,6 +101,27 @@ class ApiClient {
     ),
   );
 
+  /// POST returning raw bytes (e.g. PDF report) plus response headers.
+  Future<({Uint8List bytes, Map<String, List<String>> headers})> postBytes({
+    required String url,
+    dynamic payload,
+    Options? options,
+  }) async {
+    try {
+      final response = await _dio.post<List<int>>(
+        url,
+        data: payload,
+        options: (options ?? Options()).copyWith(
+          responseType: ResponseType.bytes,
+        ),
+      );
+      final data = response.data ?? const <int>[];
+      return (bytes: Uint8List.fromList(data), headers: response.headers.map);
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
   Exception _handleDioError(DioException e) {
     final data = e.response?.data;
     final message = _extractMessage(data);
@@ -112,10 +134,21 @@ class ApiClient {
     return switch (e.response?.statusCode) {
       400 => ValidationException(message ?? 'Invalid request'),
       401 => UnauthorizedException(message ?? 'Session expired'),
+      402 => PaymentRequiredException(
+        code: _extractCode(data) ?? 'vitals_access_required',
+        message: message,
+      ),
       404 => NotFoundException(message ?? 'Resource not found'),
       409 => ConflictException(message: message ?? 'Conflict occurred'),
       _ => ServerException(message ?? 'Something went wrong'),
     };
+  }
+
+  String? _extractCode(dynamic data) {
+    if (data is! Map) return null;
+    final body = data['error'] is Map ? data['error'] as Map : data;
+    final code = body['code'];
+    return code is String && code.isNotEmpty ? code : null;
   }
 
   /// Walks the response body and returns the first human-readable string.

@@ -40,6 +40,8 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: VitalsPathwayTipsRoute.page),
     AutoRoute(page: VitalsBmiRoute.page),
     AutoRoute(page: VitalsReadingEntryRoute.page),
+    AutoRoute(page: VitalsSecondReadingRoute.page),
+    AutoRoute(page: VitalsWellbeingRoute.page),
     AutoRoute(page: VitalsResultRoute.page),
 
     // Assessments
@@ -47,7 +49,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: AssessmentIntroRoute.page),
     AutoRoute(page: AssessmentSessionRoute.page),
     AutoRoute(page: AssessmentResultRoute.page),
-    AutoRoute(page: PricingRoute.page),
+     AutoRoute(page: PricingRoute.page),
 
     // Bookings
     AutoRoute(page: CreateBookingRoute.page),

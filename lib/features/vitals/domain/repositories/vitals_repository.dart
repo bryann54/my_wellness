@@ -51,6 +51,12 @@ abstract class VitalsRepository {
     Map<String, dynamic> data,
   );
 
+  Future<Either<Failure, Medication>> refillMedication(
+    String id, {
+    required int quantityDispensed,
+    String? refilledAt,
+  });
+
   Future<Either<Failure, void>> deleteMedication(String id);
 
   Future<Either<Failure, List<BpReading>>> getBloodPressureReadings();
@@ -68,4 +74,7 @@ abstract class VitalsRepository {
   );
 
   Future<Either<Failure, void>> deleteBloodSugarReading(String id);
+
+  Future<Either<Failure, ({List<dynamic> items, String? nextCursor})>>
+  searchFormulary({String? cursor, required String query});
 }

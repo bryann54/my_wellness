@@ -38,6 +38,7 @@ class VitalsBloc extends Bloc<VitalsEvent, VitalsState> {
     );
     on<ClearToastEvent>((_, emit) => emit(state.copyWith(clearToast: true)));
   }
+
   VitalsState _toast(
     VitalsState s, {
     required ToastType type,
@@ -60,46 +61,16 @@ class VitalsBloc extends Bloc<VitalsEvent, VitalsState> {
     LoadVitalsSummaryEvent event,
     Emitter<VitalsState> emit,
   ) async {
+    // The summary endpoint only returns the two most recent readings, so
+    // we still load the full lists to populate the tab history. If the
+    // history load fails, the summary may still be available via the home
+    // dashboard (which is owned by HomeBloc, not this bloc) — so this is
+    // intentionally the same behaviour as _onLoad.
     if (state.status == VitalsStatus.loading ||
         state.status == VitalsStatus.loaded) {
       return;
     }
-
-    emit(state.copyWith(status: VitalsStatus.loading, clearError: true));
-    final bp = await _getBp(NoParams());
-    final bpFromCache = _getBp.lastLoadWasFromCache;
-    final bs = await _getBs(NoParams());
-    final bsFromCache = _getBs.lastLoadWasFromCache;
-    final failure =
-        bp.fold<Failure?>((failure) => failure, (_) => null) ??
-        bs.fold<Failure?>((failure) => failure, (_) => null);
-
-    if (failure != null) {
-      final bpReadings = bp.getOrElse(() => state.bpReadings);
-      final bsReadings = bs.getOrElse(() => state.bsReadings);
-      emit(
-        state.copyWith(
-          status: VitalsStatus.error,
-          bpReadings: bpReadings,
-          bsReadings: bsReadings,
-          isFromCache:
-              state.isFromCache ||
-              (bp.isRight() && bpFromCache) ||
-              (bs.isRight() && bsFromCache),
-          errorMessage: mapFailure(failure),
-        ),
-      );
-      return;
-    }
-
-    emit(
-      state.copyWith(
-        status: VitalsStatus.loaded,
-        bpReadings: bp.getOrElse(() => const []),
-        bsReadings: bs.getOrElse(() => const []),
-        isFromCache: bpFromCache || bsFromCache,
-      ),
-    );
+    return _onLoad(const LoadVitalsEvent(), emit);
   }
 
   Future<void> _onLoad(LoadVitalsEvent event, Emitter<VitalsState> emit) async {

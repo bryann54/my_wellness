@@ -8,6 +8,9 @@ enum VitalsCaptureStep {
   bmi,
   reading,
   submitting,
+  awaitingSecondReading,
+  awaitingWellbeing,
+  completed,
   done,
   error,
 }
@@ -29,6 +32,17 @@ class VitalsCaptureState extends Equatable {
 
   final VitalsCaptureResult? result;
   final Referral? referral;
+  final VitalsAccess? access;
+  final bool accessLoading;
+
+  final String? previewClassification;
+  final bool previewLoading;
+
+  final List<Map<String, dynamic>> facilityCandidates;
+  final List<String> requiredServices;
+  final String? facilityReason;
+  final bool candidatesLoading;
+  final bool bookingReferral;
 
   final String? errorMessage;
 
@@ -46,6 +60,15 @@ class VitalsCaptureState extends Equatable {
     this.bmi,
     this.result,
     this.referral,
+    this.access,
+    this.accessLoading = false,
+    this.previewClassification,
+    this.previewLoading = false,
+    this.facilityCandidates = const [],
+    this.requiredServices = const [],
+    this.facilityReason,
+    this.candidatesLoading = false,
+    this.bookingReferral = false,
     this.errorMessage,
   });
 
@@ -63,9 +86,20 @@ class VitalsCaptureState extends Equatable {
     double? bmi,
     VitalsCaptureResult? result,
     Referral? referral,
+    VitalsAccess? access,
+    bool? accessLoading,
+    String? previewClassification,
+    bool? previewLoading,
+    List<Map<String, dynamic>>? facilityCandidates,
+    List<String>? requiredServices,
+    String? facilityReason,
+    bool? candidatesLoading,
+    bool? bookingReferral,
     String? errorMessage,
     bool clearProviderPlan = false,
     bool clearError = false,
+    bool clearPreview = false,
+    bool clearCandidates = false,
   }) => VitalsCaptureState(
     kind: kind ?? this.kind,
     step: step ?? this.step,
@@ -82,11 +116,25 @@ class VitalsCaptureState extends Equatable {
     bmi: bmi ?? this.bmi,
     result: result ?? this.result,
     referral: referral ?? this.referral,
+    access: access ?? this.access,
+    accessLoading: accessLoading ?? this.accessLoading,
+    previewClassification: clearPreview
+        ? null
+        : (previewClassification ?? this.previewClassification),
+    previewLoading: previewLoading ?? this.previewLoading,
+    facilityCandidates: clearCandidates
+        ? const []
+        : (facilityCandidates ?? this.facilityCandidates),
+    requiredServices: clearCandidates
+        ? const []
+        : (requiredServices ?? this.requiredServices),
+    facilityReason: clearCandidates
+        ? null
+        : (facilityReason ?? this.facilityReason),
+    candidatesLoading: candidatesLoading ?? this.candidatesLoading,
+    bookingReferral: bookingReferral ?? this.bookingReferral,
     errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
   );
-
-  /// True when the currently selected pathway needs a provider-plan
-  /// follow-up question.
   bool get needsProviderPlan {
     final v = pathwayValue;
     return v == 'provider_directed';
@@ -99,6 +147,10 @@ class VitalsCaptureState extends Equatable {
 
   bool get needsDialysisDays => pathwayValue == 'kidney_dialysis';
 
+  bool get isDialysisDayToday =>
+      (content?.pathway.dialysisDaysQuestion != null) &&
+      dialysisDays.isNotEmpty;
+
   bool get pathwayCanContinue {
     return pathwayValue != null;
   }
@@ -107,6 +159,16 @@ class VitalsCaptureState extends Equatable {
       (!needsProviderPlan || providerPlanValue != null) &&
       (!needsTreatmentGap || treatmentGapValues.isNotEmpty) &&
       (!needsDialysisDays || dialysisDays.isNotEmpty);
+
+  String? get effectiveReadingId =>
+      result?.thirdReading?.id ??
+      result?.secondReading?.id ??
+      result?.firstReading?.id;
+  bool get needsManualFacilityBooking =>
+      pathwayValue == 'routine' &&
+      (result?.finalCta == 'visit_health_facility' ||
+          result?.finalCta == 'visit_health_facility_now' ||
+          result?.finalCta == 'go_to_hospital_immediately');
 
   @override
   List<Object?> get props => [
@@ -123,6 +185,15 @@ class VitalsCaptureState extends Equatable {
     bmi,
     result,
     referral,
+    access,
+    accessLoading,
+    previewClassification,
+    previewLoading,
+    facilityCandidates,
+    requiredServices,
+    facilityReason,
+    candidatesLoading,
+    bookingReferral,
     errorMessage,
   ];
 }

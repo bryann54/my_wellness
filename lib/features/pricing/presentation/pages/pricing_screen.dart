@@ -14,29 +14,52 @@ import 'package:my_wellness/features/pricing/presentation/bloc/pricing_bloc.dart
 
 @RoutePage()
 class PricingScreen extends StatelessWidget {
-  const PricingScreen({super.key});
+  final String? initialServiceId;
+
+  const PricingScreen({super.key, this.initialServiceId});
 
   @override
   Widget build(BuildContext context) => BlocProvider(
-    create: (_) => getIt<PricingBloc>()..add(const LoadPricingPackagesEvent()),
-    child: const _PricingBody(),
+    create: (_) {
+      final bloc = getIt<PricingBloc>();
+      bloc.add(const LoadPricingPackagesEvent());
+      return bloc;
+    },
+    child: _PricingBody(initialServiceId: initialServiceId),
   );
 }
 
 class _PricingBody extends StatefulWidget {
-  const _PricingBody();
+  final String? initialServiceId;
+
+  const _PricingBody({this.initialServiceId});
 
   @override
   State<_PricingBody> createState() => _PricingBodyState();
 }
 
 class _PricingBodyState extends State<_PricingBody> {
-  int _step = 0;
+  late int _step;
   final List<String> _selected = [];
   String? _bundle;
   String? _sexualTier;
   String? _monitorTerm;
   String? _opinionTier;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialServiceId != null) {
+      _step = 1;
+      _selected.add(widget.initialServiceId!);
+      if (widget.initialServiceId == 'monitor') {
+        _monitorTerm = 'monthly'; // Default to monthly as per web
+      }
+      // The quote will be requested once the catalog is loaded in build()
+    } else {
+      _step = 0;
+    }
+  }
 
   void _requestQuote() {
     final age = context.read<AccountBloc>().state.profile?.age;
@@ -101,6 +124,14 @@ class _PricingBodyState extends State<_PricingBody> {
                 !state.quoteLoading &&
                 !_needsTier &&
                 !state.checkoutLoading;
+
+            // If we entered directly into step 1 via initialServiceId, we
+            // might still be loading the initial quote.
+            final isInitialQuoteLoading =
+                widget.initialServiceId != null &&
+                state.quote == null &&
+                state.quoteLoading;
+
             return SafeArea(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(
@@ -125,7 +156,9 @@ class _PricingBodyState extends State<_PricingBody> {
                       : state.checkoutLoading
                       ? 'Starting M-Pesa…'
                       : 'Review & pay${state.quote == null ? '' : ' · ${formatPrice(state.quote!.totalKes)}'}',
-                  isLoading: _step == 1 && state.checkoutLoading,
+                  isLoading:
+                      (_step == 1 && state.checkoutLoading) ||
+                      isInitialQuoteLoading,
                   height: 52,
                 ),
               ),
@@ -157,6 +190,16 @@ class _PricingBodyState extends State<_PricingBody> {
               }
               final catalog = state.catalog;
               if (catalog == null) return const SizedBox.shrink();
+
+              // Handle initial auto-quote
+              if (widget.initialServiceId != null &&
+                  state.quote == null &&
+                  !state.quoteLoading &&
+                  state.quoteError == null) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) _requestQuote();
+                });
+              }
 
               final services = catalog.services
                   .where((service) => service.serviceId != 'workplace')
@@ -533,7 +576,6 @@ class _PricingBodyState extends State<_PricingBody> {
     child: Text(title, style: Theme.of(context).textTheme.titleLarge),
   );
 }
-
 class _ServiceTile extends StatelessWidget {
   const _ServiceTile({
     required this.service,

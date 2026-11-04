@@ -23,9 +23,9 @@ AssessmentDefinitionModel _$AssessmentDefinitionModelFromJson(
   disclaimer: json['disclaimer'] as String?,
   referencePrefix: json['reference_prefix'] as String?,
   understandingCopy: json['understanding_copy'] as String?,
-  beforeYouBegin: json['before_you_begin'] as String?,
+  beforeYouBegin: beforeYouBeginFromJson(json['before_you_begin']),
   cancerHistoryTypeCode: json['cancer_history_type_code'] as String?,
-  encouragingFact: json['encouraging_fact'] as String?,
+  encouragingFact: encouragingFactFromJson(json['encouraging_fact']),
 );
 
 Map<String, dynamic> _$AssessmentDefinitionModelToJson(
@@ -65,10 +65,10 @@ AssessmentQuestionModel _$AssessmentQuestionModelFromJson(
   description: json['description'] as String?,
   min: (json['min'] as num?)?.toInt(),
   max: (json['max'] as num?)?.toInt(),
-  terminateOn: json['terminate_on'] as String?,
-  skipNextOn: json['skip_next_on'] as String?,
-  skipIf: json['skip_if'] as String?,
-  autoAnswerIf: json['auto_answer_if'] as String?,
+  terminateOn: ruleFromJson(json['terminate_on']),
+  skipNextOn: ruleFromJson(json['skip_next_on']),
+  skipIf: ruleFromJson(json['skip_if']),
+  autoAnswerIf: ruleFromJson(json['auto_answer_if']),
 );
 
 Map<String, dynamic> _$AssessmentQuestionModelToJson(

@@ -1,9 +1,11 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
+import 'package:my_wellness/common/helpers/base_usecase.dart';
 import 'package:my_wellness/common/utils/functions.dart';
 import 'package:my_wellness/features/assessments/domain/entities/referral.dart';
 import 'package:my_wellness/features/vitals/data/datasources/vitals_capture_remote_datasource.dart';
+import 'package:my_wellness/features/vitals/domain/entities/vitals_access.dart';
 import 'package:my_wellness/features/vitals/domain/entities/vitals_capture_content.dart';
 import 'package:my_wellness/features/vitals/domain/entities/vitals_capture_result.dart';
 import 'package:my_wellness/features/vitals/domain/usecases/vitals_capture_usecases.dart';
@@ -16,11 +18,33 @@ class VitalsCaptureBloc extends Bloc<VitalsCaptureEvent, VitalsCaptureState> {
   final GetVitalsCaptureContentUseCase _getContent;
   final CreateVitalsSessionUseCase _createSession;
   final GetVitalsReferralUseCase _getReferral;
+  final GetVitalsAccessUseCase _getAccess;
+  final AlertVitalsNavigatorUseCase _alertNavigator;
+  final ClassifyVitalsPreviewUseCase _classifyPreview;
+  final GetMonitoringProfileUseCase _getMonitoringProfile;
+  final SetMonitoringProfileUseCase _setMonitoringProfile;
+  final AddVitalsSecondReadingUseCase _addSecondReading;
+  final AddVitalsWellbeingUseCase _addWellbeing;
+  final GetReferralFacilityCandidatesUseCase _getFacilityCandidates;
+  final CreateReferralFromReadingUseCase _createReferral;
+
   final Map<VitalsCaptureKind, VitalsCaptureContent> _contentCache = {};
   final Set<VitalsCaptureKind> _loadingKinds = {};
 
-  VitalsCaptureBloc(this._getContent, this._createSession, this._getReferral)
-    : super(const VitalsCaptureState()) {
+  VitalsCaptureBloc(
+    this._getContent,
+    this._createSession,
+    this._getReferral,
+    this._getAccess,
+    this._alertNavigator,
+    this._classifyPreview,
+    this._getMonitoringProfile,
+    this._setMonitoringProfile,
+    this._addSecondReading,
+    this._addWellbeing,
+    this._getFacilityCandidates,
+    this._createReferral,
+  ) : super(const VitalsCaptureState()) {
     on<StartVitalsCaptureEvent>(_onStart);
     on<CaptureContinueFromIntroEvent>(_onContinueIntro);
     on<SelectPathwayEvent>(_onSelectPathway);
@@ -31,13 +55,28 @@ class VitalsCaptureBloc extends Bloc<VitalsCaptureEvent, VitalsCaptureState> {
     on<CaptureContinueFromPathwayEvent>(_onContinuePathway);
     on<ConfirmBmiEvent>(_onConfirmBmi);
     on<SubmitVitalsReadingEvent>(_onSubmitReading);
+    on<SubmitVitalsSecondReadingEvent>(_onSubmitSecondReading);
+    on<AnswerWellbeingEvent>(_onAnswerWellbeing);
     on<CancelVitalsCaptureEvent>((_, emit) => emit(const VitalsCaptureState()));
+    on<PreviewBpEvent>(_onPreviewBp);
+    on<PreviewBsEvent>(_onPreviewBs);
+    on<ClearPreviewEvent>(
+      (_, emit) => emit(state.copyWith(clearPreview: true)),
+    );
+    on<LoadVitalsAccessEvent>(_onLoadAccess);
+    on<AlertNavigatorEvent>(_onAlertNavigator);
+    on<LoadFacilityCandidatesEvent>(_onLoadFacilityCandidates);
+    on<BookReferralEvent>(_onBookReferral);
   }
 
   Future<void> _onStart(
     StartVitalsCaptureEvent event,
     Emitter<VitalsCaptureState> emit,
   ) async {
+    // Refresh access first — cheap and authoritative.
+    final accessRes = await _getAccess(NoParams());
+    accessRes.fold((_) {}, (a) => emit(state.copyWith(access: a)));
+
     final cached = _contentCache[event.kind];
     if (cached != null) {
       emit(
@@ -45,6 +84,7 @@ class VitalsCaptureBloc extends Bloc<VitalsCaptureEvent, VitalsCaptureState> {
           kind: event.kind,
           step: VitalsCaptureStep.intro,
           content: cached,
+          access: state.access,
         ),
       );
       return;
@@ -55,6 +95,7 @@ class VitalsCaptureBloc extends Bloc<VitalsCaptureEvent, VitalsCaptureState> {
       VitalsCaptureState(
         kind: event.kind,
         step: VitalsCaptureStep.loadingContent,
+        access: state.access,
       ),
     );
 
@@ -159,15 +200,44 @@ class VitalsCaptureBloc extends Bloc<VitalsCaptureEvent, VitalsCaptureState> {
     );
   }
 
+  Future<void> _persistPathway(VitalsCaptureKind kind) async {
+    final pathway = state.pathwayValue;
+    if (pathway == null) return;
+    final payload = <String, dynamic>{'pathway': pathway};
+    if (state.providerPlanValue != null) {
+      payload['provider_plan'] = state.providerPlanValue;
+    }
+    if (state.treatmentGapValues.isNotEmpty) {
+      payload['treatment_gap_reasons'] = state.treatmentGapValues;
+    }
+    if (state.treatmentGapOther != null &&
+        state.treatmentGapOther!.trim().isNotEmpty) {
+      payload['treatment_gap_other_text'] = state.treatmentGapOther!.trim();
+    }
+    if (state.dialysisDays.isNotEmpty) {
+      payload['dialysis_days'] = state.dialysisDays;
+    }
+    await _setMonitoringProfile((kind: kind, payload: payload));
+  }
+
   Future<void> _onSubmitReading(
     SubmitVitalsReadingEvent event,
     Emitter<VitalsCaptureState> emit,
   ) async {
-    emit(state.copyWith(step: VitalsCaptureStep.submitting));
+    emit(state.copyWith(step: VitalsCaptureStep.submitting, clearError: true));
 
-    final payload = <String, dynamic>{...event.readingPayload};
+    final kind = state.kind!;
+    final payload = <String, dynamic>{
+      ...event.readingPayload,
+      if (state.weightKg != null) 'weight_kg': state.weightKg,
+      if (state.heightCm != null) 'height_cm': state.heightCm,
+    };
 
-    final res = await _createSession((kind: state.kind!, payload: payload));
+    // Persist pathway before creating the session so the server knows
+    // the pathway when validating dialysis-day rules.
+    await _persistPathway(kind);
+
+    final res = await _createSession((kind: kind, payload: payload));
 
     await res.fold(
       (f) async => emit(
@@ -177,16 +247,16 @@ class VitalsCaptureBloc extends Bloc<VitalsCaptureEvent, VitalsCaptureState> {
         ),
       ),
       (result) async {
-        emit(state.copyWith(step: VitalsCaptureStep.done, result: result));
+        _routeFromServerStatus(result, emit);
 
-        // Kick the referral fetch off the critical path. We capture the
-        // current kind locally so a cancel/reset can't leak into this
-        // closure's reference to `state`.
-        final readingId = result.firstReading?.id;
-        if (readingId != null) {
+        // Only auto-fetch referral for non-Pathway-A pathways. Pathway A
+        // uses the manual facility picker instead.
+        if (kind == VitalsCaptureKind.bp &&
+            state.pathwayValue != null &&
+            state.pathwayValue != 'routine') {
           _fetchReferralInBackground(
-            kind: state.kind!,
-            readingId: readingId,
+            kind: kind,
+            readingId: result.firstReading?.id,
             emit: emit,
           );
         }
@@ -194,16 +264,221 @@ class VitalsCaptureBloc extends Bloc<VitalsCaptureEvent, VitalsCaptureState> {
     );
   }
 
+  void _routeFromServerStatus(
+    VitalsCaptureResult result,
+    Emitter<VitalsCaptureState> emit,
+  ) {
+    switch (result.status) {
+      case 'awaiting_second_reading':
+        emit(
+          state.copyWith(
+            step: VitalsCaptureStep.awaitingSecondReading,
+            result: result,
+          ),
+        );
+        return;
+      case 'awaiting_wellbeing':
+        emit(
+          state.copyWith(
+            step: VitalsCaptureStep.awaitingWellbeing,
+            result: result,
+          ),
+        );
+        return;
+      case 'completed':
+      default:
+        emit(state.copyWith(step: VitalsCaptureStep.done, result: result));
+        return;
+    }
+  }
+
+  Future<void> _onSubmitSecondReading(
+    SubmitVitalsSecondReadingEvent event,
+    Emitter<VitalsCaptureState> emit,
+  ) async {
+    final sessionId = state.result?.id;
+    if (sessionId == null) return;
+
+    emit(state.copyWith(step: VitalsCaptureStep.submitting, clearError: true));
+
+    final res = await _addSecondReading((
+      sessionId: sessionId,
+      payload: event.readingPayload,
+    ));
+
+    res.fold(
+      (f) => emit(
+        state.copyWith(
+          step: VitalsCaptureStep.awaitingSecondReading,
+          errorMessage: mapFailure(f),
+        ),
+      ),
+      (result) => _routeFromServerStatus(result, emit),
+    );
+  }
+
+  Future<void> _onAnswerWellbeing(
+    AnswerWellbeingEvent event,
+    Emitter<VitalsCaptureState> emit,
+  ) async {
+    final sessionId = state.result?.id;
+    if (sessionId == null) return;
+
+    emit(state.copyWith(step: VitalsCaptureStep.submitting, clearError: true));
+
+    final res = await _addWellbeing((
+      sessionId: sessionId,
+      answer: event.answer,
+    ));
+
+    res.fold(
+      (f) => emit(
+        state.copyWith(
+          step: VitalsCaptureStep.awaitingWellbeing,
+          errorMessage: mapFailure(f),
+        ),
+      ),
+      (result) => _routeFromServerStatus(result, emit),
+    );
+  }
+
   Future<void> _fetchReferralInBackground({
     required VitalsCaptureKind kind,
-    required String readingId,
+    required String? readingId,
     required Emitter<VitalsCaptureState> emit,
   }) async {
+    if (readingId == null) return;
     final res = await _getReferral((kind: kind, readingId: readingId));
     if (emit.isDone) return;
+    res.fold((_) => null, (referral) {
+      if (referral != null) emit(state.copyWith(referral: referral));
+    });
+  }
+
+  Future<void> _onPreviewBp(
+    PreviewBpEvent event,
+    Emitter<VitalsCaptureState> emit,
+  ) async {
+    emit(state.copyWith(previewLoading: true));
+    final res = await _classifyPreview({
+      'systolic': event.systolic,
+      'diastolic': event.diastolic,
+    });
+    if (emit.isDone) return;
     res.fold(
-      (_) => null,
-      (referral) => emit(state.copyWith(referral: referral)),
+      (_) => emit(state.copyWith(previewLoading: false)),
+      (classification) => emit(
+        state.copyWith(
+          previewLoading: false,
+          previewClassification: classification,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onPreviewBs(
+    PreviewBsEvent event,
+    Emitter<VitalsCaptureState> emit,
+  ) async {
+    emit(state.copyWith(previewLoading: true));
+    final payload = <String, dynamic>{
+      'value': double.tryParse(event.value) ?? 0,
+      if (event.readingType != 'hba1c') 'unit': event.unit,
+      'reading_type': event.readingType,
+      if (event.mealTiming != null) 'meal_timing': event.mealTiming,
+    };
+    final res = await _classifyPreview(payload);
+    if (emit.isDone) return;
+    res.fold(
+      (_) => emit(state.copyWith(previewLoading: false)),
+      (classification) => emit(
+        state.copyWith(
+          previewLoading: false,
+          previewClassification: classification,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onLoadAccess(
+    LoadVitalsAccessEvent event,
+    Emitter<VitalsCaptureState> emit,
+  ) async {
+    emit(state.copyWith(accessLoading: true));
+    final res = await _getAccess(NoParams());
+    if (emit.isDone) return;
+    res.fold(
+      (_) => emit(state.copyWith(accessLoading: false)),
+      (access) => emit(state.copyWith(accessLoading: false, access: access)),
+    );
+  }
+
+  Future<void> _onAlertNavigator(
+    AlertNavigatorEvent event,
+    Emitter<VitalsCaptureState> emit,
+  ) async {
+    final res = await _alertNavigator(NoParams());
+    if (emit.isDone) return;
+    res.fold(
+      (f) => emit(state.copyWith(errorMessage: mapFailure(f))),
+      (access) => emit(state.copyWith(access: access)),
+    );
+  }
+
+  Future<void> _onLoadFacilityCandidates(
+    LoadFacilityCandidatesEvent event,
+    Emitter<VitalsCaptureState> emit,
+  ) async {
+    final kind = state.kind;
+    final readingId = state.effectiveReadingId;
+    if (kind == null || readingId == null) return;
+
+    emit(state.copyWith(candidatesLoading: true, clearCandidates: true));
+    final res = await _getFacilityCandidates((
+      kind: kind,
+      readingId: readingId,
+      userLat: event.userLat,
+      userLng: event.userLng,
+    ));
+    if (emit.isDone) return;
+    res.fold(
+      (f) => emit(
+        state.copyWith(candidatesLoading: false, errorMessage: mapFailure(f)),
+      ),
+      (data) => emit(
+        state.copyWith(
+          candidatesLoading: false,
+          facilityCandidates: data.candidates,
+          requiredServices: data.requiredServices,
+          facilityReason: data.reason,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onBookReferral(
+    BookReferralEvent event,
+    Emitter<VitalsCaptureState> emit,
+  ) async {
+    final kind = state.kind;
+    final readingId = state.effectiveReadingId;
+    if (kind == null || readingId == null) return;
+
+    emit(state.copyWith(bookingReferral: true, clearError: true));
+    final res = await _createReferral((
+      kind: kind,
+      readingId: readingId,
+      userLat: event.userLat,
+      userLng: event.userLng,
+      facilityId: event.facilityId,
+    ));
+    if (emit.isDone) return;
+    res.fold(
+      (f) => emit(
+        state.copyWith(bookingReferral: false, errorMessage: mapFailure(f)),
+      ),
+      (referral) =>
+          emit(state.copyWith(bookingReferral: false, referral: referral)),
     );
   }
 }

@@ -304,6 +304,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i425.CreateAppointmentUseCase>(
       () => _i425.CreateAppointmentUseCase(gh<_i515.VitalsRepository>()),
     );
+    gh.lazySingleton<_i425.UpdateAppointmentUseCase>(
+      () => _i425.UpdateAppointmentUseCase(gh<_i515.VitalsRepository>()),
+    );
     gh.lazySingleton<_i425.DeleteAppointmentUseCase>(
       () => _i425.DeleteAppointmentUseCase(gh<_i515.VitalsRepository>()),
     );
@@ -323,8 +326,17 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i425.CreateMedicationUseCase>(
       () => _i425.CreateMedicationUseCase(gh<_i515.VitalsRepository>()),
     );
+    gh.lazySingleton<_i425.UpdateMedicationUseCase>(
+      () => _i425.UpdateMedicationUseCase(gh<_i515.VitalsRepository>()),
+    );
+    gh.lazySingleton<_i425.RefillMedicationUseCase>(
+      () => _i425.RefillMedicationUseCase(gh<_i515.VitalsRepository>()),
+    );
     gh.lazySingleton<_i425.DeleteMedicationUseCase>(
       () => _i425.DeleteMedicationUseCase(gh<_i515.VitalsRepository>()),
+    );
+    gh.lazySingleton<_i425.SearchFormularyUseCase>(
+      () => _i425.SearchFormularyUseCase(gh<_i515.VitalsRepository>()),
     );
     gh.lazySingleton<_i425.GetBloodPressureReadingsUseCase>(
       () => _i425.GetBloodPressureReadingsUseCase(gh<_i515.VitalsRepository>()),
@@ -428,6 +440,16 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i46.GetCurrentUserUseCase>(
       () => _i46.GetCurrentUserUseCase(gh<_i787.AuthRepository>()),
+    );
+    gh.factory<_i734.MedicationsBloc>(
+      () => _i734.MedicationsBloc(
+        gh<_i425.GetMedicationsPagedUseCase>(),
+        gh<_i425.CreateMedicationUseCase>(),
+        gh<_i425.UpdateMedicationUseCase>(),
+        gh<_i425.RefillMedicationUseCase>(),
+        gh<_i425.DeleteMedicationUseCase>(),
+        gh<_i425.ScanMedicationUseCase>(),
+      ),
     );
     gh.lazySingleton<_i578.NotificationPreferencesRepository>(
       () => _i159.NotificationPreferencesRepositoryImpl(
@@ -538,13 +560,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i425.DeleteBloodSugarReadingUseCase>(),
       ),
     );
-    gh.factory<_i767.AppointmentsBloc>(
-      () => _i767.AppointmentsBloc(
-        gh<_i425.GetAppointmentsPagedUseCase>(),
-        gh<_i425.CreateAppointmentUseCase>(),
-        gh<_i425.DeleteAppointmentUseCase>(),
-      ),
-    );
     gh.lazySingleton<_i178.GetVitalsCaptureContentUseCase>(
       () => _i178.GetVitalsCaptureContentUseCase(
         gh<_i1013.VitalsCaptureRepository>(),
@@ -559,24 +574,65 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i178.GetVitalsReferralUseCase(gh<_i1013.VitalsCaptureRepository>()),
     );
-    gh.factory<_i864.VitalsCaptureBloc>(
-      () => _i864.VitalsCaptureBloc(
-        gh<_i178.GetVitalsCaptureContentUseCase>(),
-        gh<_i178.CreateVitalsSessionUseCase>(),
-        gh<_i178.GetVitalsReferralUseCase>(),
+    gh.lazySingleton<_i178.GetVitalsAccessUseCase>(
+      () => _i178.GetVitalsAccessUseCase(gh<_i1013.VitalsCaptureRepository>()),
+    );
+    gh.lazySingleton<_i178.AlertVitalsNavigatorUseCase>(
+      () => _i178.AlertVitalsNavigatorUseCase(
+        gh<_i1013.VitalsCaptureRepository>(),
       ),
+    );
+    gh.lazySingleton<_i178.ClassifyVitalsPreviewUseCase>(
+      () => _i178.ClassifyVitalsPreviewUseCase(
+        gh<_i1013.VitalsCaptureRepository>(),
+      ),
+    );
+    gh.lazySingleton<_i178.GetMonitoringProfileUseCase>(
+      () => _i178.GetMonitoringProfileUseCase(
+        gh<_i1013.VitalsCaptureRepository>(),
+      ),
+    );
+    gh.lazySingleton<_i178.SetMonitoringProfileUseCase>(
+      () => _i178.SetMonitoringProfileUseCase(
+        gh<_i1013.VitalsCaptureRepository>(),
+      ),
+    );
+    gh.lazySingleton<_i178.AddVitalsSecondReadingUseCase>(
+      () => _i178.AddVitalsSecondReadingUseCase(
+        gh<_i1013.VitalsCaptureRepository>(),
+      ),
+    );
+    gh.lazySingleton<_i178.AddVitalsWellbeingUseCase>(
+      () =>
+          _i178.AddVitalsWellbeingUseCase(gh<_i1013.VitalsCaptureRepository>()),
+    );
+    gh.lazySingleton<_i178.GetReferralFacilityCandidatesUseCase>(
+      () => _i178.GetReferralFacilityCandidatesUseCase(
+        gh<_i1013.VitalsCaptureRepository>(),
+      ),
+    );
+    gh.lazySingleton<_i178.CreateReferralFromReadingUseCase>(
+      () => _i178.CreateReferralFromReadingUseCase(
+        gh<_i1013.VitalsCaptureRepository>(),
+      ),
+    );
+    gh.lazySingleton<_i178.DownloadVitalsReportUseCase>(
+      () => _i178.DownloadVitalsReportUseCase(
+        gh<_i1013.VitalsCaptureRepository>(),
+      ),
+    );
+    gh.lazySingleton<_i178.GetVitalsReportEmailPrefillUseCase>(
+      () => _i178.GetVitalsReportEmailPrefillUseCase(
+        gh<_i1013.VitalsCaptureRepository>(),
+      ),
+    );
+    gh.lazySingleton<_i178.EmailVitalsReportUseCase>(
+      () =>
+          _i178.EmailVitalsReportUseCase(gh<_i1013.VitalsCaptureRepository>()),
     );
     gh.lazySingleton<_i480.GeographyRepository>(
       () =>
           _i771.GeographyRepositoryImpl(gh<_i474.GeographyRemoteDataSource>()),
-    );
-    gh.factory<_i734.MedicationsBloc>(
-      () => _i734.MedicationsBloc(
-        gh<_i425.GetMedicationsPagedUseCase>(),
-        gh<_i425.CreateMedicationUseCase>(),
-        gh<_i425.DeleteMedicationUseCase>(),
-        gh<_i425.ScanMedicationUseCase>(),
-      ),
     );
     gh.lazySingleton<_i181.GetPricingPackagesUseCase>(
       () => _i181.GetPricingPackagesUseCase(gh<_i102.PricingRepository>()),
@@ -645,12 +701,36 @@ extension GetItInjectableX on _i174.GetIt {
         verifyIdentityUseCase: gh<_i46.VerifyIdentityUseCase>(),
       ),
     );
+    gh.factory<_i767.AppointmentsBloc>(
+      () => _i767.AppointmentsBloc(
+        gh<_i425.GetAppointmentsPagedUseCase>(),
+        gh<_i425.CreateAppointmentUseCase>(),
+        gh<_i425.UpdateAppointmentUseCase>(),
+        gh<_i425.DeleteAppointmentUseCase>(),
+      ),
+    );
     gh.factory<_i137.GeographyBloc>(
       () => _i137.GeographyBloc(
         gh<_i331.GetCountiesUseCase>(),
         gh<_i8.GetSubCountiesUseCase>(),
         gh<_i275.GetConstituenciesUseCase>(),
         gh<_i903.GetWardsUseCase>(),
+      ),
+    );
+    gh.factory<_i864.VitalsCaptureBloc>(
+      () => _i864.VitalsCaptureBloc(
+        gh<_i178.GetVitalsCaptureContentUseCase>(),
+        gh<_i178.CreateVitalsSessionUseCase>(),
+        gh<_i178.GetVitalsReferralUseCase>(),
+        gh<_i178.GetVitalsAccessUseCase>(),
+        gh<_i178.AlertVitalsNavigatorUseCase>(),
+        gh<_i178.ClassifyVitalsPreviewUseCase>(),
+        gh<_i178.GetMonitoringProfileUseCase>(),
+        gh<_i178.SetMonitoringProfileUseCase>(),
+        gh<_i178.AddVitalsSecondReadingUseCase>(),
+        gh<_i178.AddVitalsWellbeingUseCase>(),
+        gh<_i178.GetReferralFacilityCandidatesUseCase>(),
+        gh<_i178.CreateReferralFromReadingUseCase>(),
       ),
     );
     gh.factory<_i646.LaunchBloc>(

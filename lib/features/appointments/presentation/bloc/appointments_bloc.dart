@@ -13,11 +13,13 @@ class AppointmentsBloc extends Bloc<AppointmentsEvent, AppointmentsState> {
   AppointmentsBloc(
     this._getAppointments,
     this._createAppointment,
+    this._updateAppointment,
     this._deleteAppointment,
   ) : super(const AppointmentsState()) {
     on<LoadAppointmentsEvent>(_load);
     on<LoadMoreAppointmentsEvent>(_loadMore);
     on<AddAppointmentEvent>(_add);
+    on<UpdateAppointmentEvent>(_update);
     on<DeleteAppointmentEvent>(_delete);
     on<ClearAppointmentsToastEvent>(
       (_, emit) => emit(state.copyWith(clearToast: true)),
@@ -26,6 +28,7 @@ class AppointmentsBloc extends Bloc<AppointmentsEvent, AppointmentsState> {
 
   final GetAppointmentsPagedUseCase _getAppointments;
   final CreateAppointmentUseCase _createAppointment;
+  final UpdateAppointmentUseCase _updateAppointment;
   final DeleteAppointmentUseCase _deleteAppointment;
 
   Future<void> _load(
@@ -105,6 +108,41 @@ class AppointmentsBloc extends Bloc<AppointmentsEvent, AppointmentsState> {
           ),
           ToastType.success,
           'Appointment booked.',
+        ),
+      ),
+    );
+  }
+
+  Future<void> _update(
+    UpdateAppointmentEvent event,
+    Emitter<AppointmentsState> emit,
+  ) async {
+    emit(state.copyWith(isSubmitting: true, clearError: true));
+    final result = await _updateAppointment((
+      id: event.id,
+      payload: event.payload,
+    ));
+    result.fold(
+      (failure) => emit(
+        _toast(
+          state.copyWith(
+            isSubmitting: false,
+            errorMessage: mapFailure(failure),
+          ),
+          ToastType.error,
+          mapFailure(failure),
+        ),
+      ),
+      (appointment) => emit(
+        _toast(
+          state.copyWith(
+            isSubmitting: false,
+            appointments: state.appointments
+                .map((a) => a.id == appointment.id ? appointment : a)
+                .toList(growable: false),
+          ),
+          ToastType.success,
+          'Appointment updated.',
         ),
       ),
     );

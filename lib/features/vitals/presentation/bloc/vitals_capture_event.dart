@@ -76,6 +76,75 @@ class SubmitVitalsReadingEvent extends VitalsCaptureEvent {
   List<Object?> get props => [readingPayload];
 }
 
+class SubmitVitalsSecondReadingEvent extends VitalsCaptureEvent {
+  final Map<String, dynamic> readingPayload;
+  const SubmitVitalsSecondReadingEvent(this.readingPayload);
+  @override
+  List<Object?> get props => [readingPayload];
+}
+
+class AnswerWellbeingEvent extends VitalsCaptureEvent {
+  final bool answer;
+  const AnswerWellbeingEvent(this.answer);
+  @override
+  List<Object?> get props => [answer];
+}
+
 class CancelVitalsCaptureEvent extends VitalsCaptureEvent {
   const CancelVitalsCaptureEvent();
+}
+
+// Preview
+class PreviewBpEvent extends VitalsCaptureEvent {
+  final int systolic;
+  final int diastolic;
+  const PreviewBpEvent({required this.systolic, required this.diastolic});
+  @override
+  List<Object?> get props => [systolic, diastolic];
+}
+
+class PreviewBsEvent extends VitalsCaptureEvent {
+  final String value;
+  final String unit;
+  final String readingType;
+  final String? mealTiming;
+  const PreviewBsEvent({
+    required this.value,
+    required this.unit,
+    required this.readingType,
+    this.mealTiming,
+  });
+  @override
+  List<Object?> get props => [value, unit, readingType, mealTiming];
+}
+
+class ClearPreviewEvent extends VitalsCaptureEvent {
+  const ClearPreviewEvent();
+}
+
+// Access gate
+class LoadVitalsAccessEvent extends VitalsCaptureEvent {
+  const LoadVitalsAccessEvent();
+}
+
+class AlertNavigatorEvent extends VitalsCaptureEvent {
+  const AlertNavigatorEvent();
+}
+
+// Facility candidates / referral booking
+class LoadFacilityCandidatesEvent extends VitalsCaptureEvent {
+  final double? userLat;
+  final double? userLng;
+  const LoadFacilityCandidatesEvent({this.userLat, this.userLng});
+  @override
+  List<Object?> get props => [userLat, userLng];
+}
+
+class BookReferralEvent extends VitalsCaptureEvent {
+  final String? facilityId;
+  final double? userLat;
+  final double? userLng;
+  const BookReferralEvent({this.facilityId, this.userLat, this.userLng});
+  @override
+  List<Object?> get props => [facilityId, userLat, userLng];
 }
