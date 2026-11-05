@@ -78,6 +78,7 @@ void main() async {
         BlocProvider(create: (_) => getIt<WellnessBloc>()),
         BlocProvider(create: (_) => getIt<GeographyBloc>()),
         BlocProvider(create: (_) => getIt<LaunchBloc>()),
+        BlocProvider(create: (_) => getIt<BookingsBloc>()),
         BlocProvider(create: (_) => getIt<VitalsCaptureBloc>()),
         BlocProvider(create: (_) => getIt<VitalsBloc>()),
         BlocProvider(create: (_) => getIt<AppointmentsBloc>()),

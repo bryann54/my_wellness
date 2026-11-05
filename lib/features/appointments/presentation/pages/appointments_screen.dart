@@ -11,8 +11,8 @@ import 'package:my_wellness/common/widgets/shimmer_box.dart';
 import 'package:my_wellness/core/di/injector.dart';
 import 'package:my_wellness/features/appointments/presentation/bloc/appointments_bloc.dart';
 import 'package:my_wellness/features/appointments/presentation/widgets/appointment_tile.dart';
+import 'package:my_wellness/features/appointments/presentation/widgets/appointments_search_bar_bottom.dart';
 import 'package:my_wellness/features/appointments/presentation/widgets/appointments_toast_listener.dart';
-import 'package:my_wellness/features/bookings/domain/entities/referral.dart';
 import 'package:my_wellness/features/bookings/domain/entities/service_booking.dart';
 import 'package:my_wellness/features/bookings/presentation/bloc/bookings_bloc.dart';
 import 'package:my_wellness/features/bookings/presentation/widgets/booking_card.dart';
@@ -76,7 +76,6 @@ class AppointmentsScreen extends StatelessWidget {
           create: (_) {
             final bloc = BookingsBloc.factory();
             bloc.add(const LoadMyBookingsEvent());
-            bloc.add(const LoadMyReferralsEvent());
             return bloc;
           },
         ),
@@ -101,6 +100,7 @@ class _Body extends StatefulWidget {
 
 class _BodyState extends State<_Body> {
   final _scroll = ScrollController();
+  final _search = TextEditingController();
 
   @override
   void initState() {
@@ -111,6 +111,7 @@ class _BodyState extends State<_Body> {
   @override
   void dispose() {
     _scroll.dispose();
+    _search.dispose();
     super.dispose();
   }
 
@@ -126,13 +127,17 @@ class _BodyState extends State<_Body> {
     }
   }
 
+  void _onSearchChanged(String value) {
+    context.read<AppointmentsBloc>().add(SearchAppointmentsEvent(value));
+    context.read<BookingsBloc>().add(SearchBookingsEvent(value));
+  }
+
   Future<void> _refresh() async {
     final appts = context.read<AppointmentsBloc>();
     final bookings = context.read<BookingsBloc>();
 
     appts.add(const LoadAppointmentsEvent());
     bookings.add(const LoadMyBookingsEvent(refresh: true));
-    bookings.add(const LoadMyReferralsEvent(refresh: true));
 
     await Future.wait([
       appts.stream
@@ -157,27 +162,62 @@ class _BodyState extends State<_Body> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      floatingActionButton: AppFabSlot(
-        visible: true,
-        child: AppFab.extended(
-          label: AppLocalizations.getString(context, 'appointments.book'),
-          icon: const Icon(Icons.add),
-          onPressed: widget.onAddPressed,
+    // Lists are cursor-paginated and filtered client-side, so while a query
+    // is active keep pulling pages until the cursor is exhausted. Firing only
+    // when the cursor changes prevents a retry loop after a failed page.
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<AppointmentsBloc, AppointmentsState>(
+          listenWhen: (p, c) =>
+              c.isSearching &&
+              c.cursor != null &&
+              !c.loadingMore &&
+              c.status == CollectionStatus.loaded &&
+              (p.searchQuery != c.searchQuery || p.cursor != c.cursor),
+          listener: (context, _) => context.read<AppointmentsBloc>().add(
+            const LoadMoreAppointmentsEvent(),
+          ),
         ),
-      ),
-      body: RefreshIndicator.adaptive(
-        onRefresh: _refresh,
-        child: NestedScrollView(
-          controller: _scroll,
-          headerSliverBuilder: (_, _) => [
-            CustomAppBar(
-              title: AppLocalizations.getString(context, 'common.appointments'),
-              isHome: false,
-              isTabRoot: true,
-            ),
-          ],
-          body: _MergedContent(onAddPressed: widget.onAddPressed),
+        BlocListener<BookingsBloc, BookingsState>(
+          listenWhen: (p, c) =>
+              c.searchQuery.trim().isNotEmpty &&
+              c.hasMore &&
+              c.listStatus == BookingsListStatus.loaded &&
+              (p.searchQuery != c.searchQuery || p.nextCursor != c.nextCursor),
+          listener: (context, _) =>
+              context.read<BookingsBloc>().add(const LoadMoreMyBookingsEvent()),
+        ),
+      ],
+      child: Scaffold(
+        floatingActionButton: AppFabSlot(
+          visible: true,
+          child: AppFab.extended(
+            label: AppLocalizations.getString(context, 'appointments.book'),
+            icon: const Icon(Icons.add),
+            onPressed: widget.onAddPressed,
+          ),
+        ),
+        body: RefreshIndicator.adaptive(
+          onRefresh: _refresh,
+          child: NestedScrollView(
+            controller: _scroll,
+            headerSliverBuilder: (_, _) => [
+              CustomAppBar(
+                title: AppLocalizations.getString(
+                  context,
+                  'common.appointments',
+                ),
+                isHome: false,
+                isTabRoot: true,
+                bottom: AppointmentsSearchBarBottom(
+                  controller: _search,
+                  hintText: 'Search appointments',
+                  onChanged: _onSearchChanged,
+                ),
+              ),
+            ],
+            body: _MergedContent(onAddPressed: widget.onAddPressed),
+          ),
         ),
       ),
     );
@@ -195,6 +235,8 @@ class _MergedContent extends StatelessWidget {
           p.status != c.status ||
           p.appointments != c.appointments ||
           p.cursor != c.cursor ||
+          p.loadingMore != c.loadingMore ||
+          p.searchQuery != c.searchQuery ||
           p.errorMessage != c.errorMessage,
       builder: (context, appts) {
         return BlocBuilder<BookingsBloc, BookingsState>(
@@ -202,7 +244,7 @@ class _MergedContent extends StatelessWidget {
               p.listStatus != c.listStatus ||
               p.bookings != c.bookings ||
               p.nextCursor != c.nextCursor ||
-              p.referrals != c.referrals ||
+              p.searchQuery != c.searchQuery ||
               p.listError != c.listError,
           builder: (context, bookings) => _MergedList(
             appointments: appts,
@@ -267,15 +309,10 @@ class _MergedList extends StatelessWidget {
       );
     }
 
-    final referrals = bookings.referrals
-        .where((r) => r.status != ReferralStatus.dismissed)
-        .take(10)
-        .toList(growable: false);
-
     final rows =
         <_MergedRow>[
-          ...appointments.appointments.map(_AppointmentRow.new),
-          ...bookings.bookings.map(_BookingRow.new),
+          ...appointments.filteredAppointments.map(_AppointmentRow.new),
+          ...bookings.filteredBookings.map(_BookingRow.new),
         ]..sort((a, b) {
           final ad = a.sortDate;
           final bd = b.sortDate;
@@ -285,7 +322,14 @@ class _MergedList extends StatelessWidget {
           return bd.compareTo(ad);
         });
 
-    if (rows.isEmpty && referrals.isEmpty) {
+    if (rows.isEmpty) {
+      if (appointments.isSearching) {
+        final stillSearching = appointments.cursor != null || bookings.hasMore;
+        return _NoResults(
+          query: appointments.searchQuery,
+          loading: stillSearching,
+        );
+      }
       return ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
@@ -323,101 +367,106 @@ class _MergedList extends StatelessWidget {
     }
 
     final loadingMore =
-        appointments.status == CollectionStatus.loading ||
+        appointments.loadingMore ||
         bookings.listStatus == BookingsListStatus.loadingMore;
 
     return CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       slivers: [
-        if (referrals.isNotEmpty)
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.only(top: AppSpacing.md - 4),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Padding(
-                  //   padding: const EdgeInsets.symmetric(horizontal: _hPad),
-                  //   child: BookingSectionLabel(
-                  //     AppLocalizations.getString(
-                  //       context,
-                  //       'bookings.referral.section',
-                  //     ),
-                  //   ),
-                  // ),
-                  // const SizedBox(height: AppSpacing.sm + 2),
-                  // SizedBox(
-                  //   height: ReferralCard.height,
-                  //   child: ListView.separated(
-                  //     scrollDirection: Axis.horizontal,
-                  //     physics: const BouncingScrollPhysics(),
-                  //     padding: const EdgeInsets.symmetric(horizontal: _hPad),
-                  //     itemCount: referrals.length,
-                  //     separatorBuilder: (_, _) =>
-                  //         const SizedBox(width: AppSpacing.sm + 4),
-                  //     itemBuilder: (context, i) => ReferralCard(
-                  //       referral: referrals[i],
-                  //       onTap: () => context.router.push(
-                  //         ReferralDetailRoute(referralId: referrals[i].id),
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
-                  // const SizedBox(height: AppSpacing.lg),
-                ],
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              _hPad,
+              AppSpacing.md,
+              _hPad,
+              AppSpacing.sm + 2,
+            ),
+            child: BookingSectionLabel(
+              AppLocalizations.getString(
+                context,
+                'appointments.allAppointments',
               ),
             ),
           ),
-        if (rows.isNotEmpty) ...[
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                _hPad,
-                AppSpacing.md - 4,
-                _hPad,
-                AppSpacing.sm + 2,
-              ),
-              child: BookingSectionLabel(
-                AppLocalizations.getString(
-                  context,
-                  'appointments.allAppointments',
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: _hPad),
+          sliver: SliverList.separated(
+            itemCount: rows.length,
+            separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
+            itemBuilder: (context, i) {
+              final row = rows[i];
+              return Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 680),
+                  child: switch (row) {
+                    _AppointmentRow(:final appointment) => AppointmentTile(
+                      appointment: appointment,
+                      onDelete: () => context.read<AppointmentsBloc>().add(
+                        DeleteAppointmentEvent(appointment.id),
+                      ),
+                    ),
+                    _BookingRow(:final booking) => BookingCard(
+                      booking: booking,
+                    ),
+                  },
                 ),
-              ),
-            ),
+              );
+            },
           ),
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: _hPad),
-            sliver: SliverList.separated(
-              itemCount: rows.length,
-              separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
-              itemBuilder: (context, i) {
-                final row = rows[i];
-                return Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 680),
-                    child: switch (row) {
-                      _AppointmentRow(:final appointment) => AppointmentTile(
-                        appointment: appointment,
-                        onDelete: () => context.read<AppointmentsBloc>().add(
-                          DeleteAppointmentEvent(appointment.id),
-                        ),
-                      ),
-                      _BookingRow(:final booking) => BookingCard(
-                        booking: booking,
-                      ),
-                    },
-                  ),
-                );
-              },
-            ),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.md, bottom: 96),
+            child: loadingMore
+                ? const Center(child: CircularProgressIndicator.adaptive())
+                : null,
           ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.only(top: AppSpacing.md, bottom: 96),
-              child: loadingMore
-                  ? const Center(child: CircularProgressIndicator.adaptive())
-                  : null,
-            ),
+        ),
+      ],
+    );
+  }
+}
+
+class _NoResults extends StatelessWidget {
+  final String query;
+  final bool loading;
+
+  const _NoResults({required this.query, required this.loading});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      padding: const EdgeInsets.symmetric(
+        vertical: 80,
+        horizontal: AppSpacing.xl,
+      ),
+      children: [
+        if (loading)
+          const Center(child: CircularProgressIndicator.adaptive())
+        else ...[
+          Icon(
+            Icons.search_off_rounded,
+            size: 48,
+            color: cs.onSurface.withValues(alpha: 0.35),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            'No results for "${query.trim()}"',
+            textAlign: TextAlign.center,
+            style: tt.titleSmall?.copyWith(color: cs.onSurface),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            'Try a clinic name, facility, town or clinic type.',
+            textAlign: TextAlign.center,
+            style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
           ),
         ],
       ],

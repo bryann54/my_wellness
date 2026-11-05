@@ -14,6 +14,7 @@ class SoftInput extends StatelessWidget {
   final int maxLines;
   final int minLines;
   final Widget? prefixIcon;
+  final Widget? suffixIcon;
   final ValueChanged<String>? onChanged;
   final bool readOnly;
   final VoidCallback? onTap;
@@ -33,6 +34,7 @@ class SoftInput extends StatelessWidget {
     this.maxLines = 1,
     this.minLines = 1,
     this.prefixIcon,
+    this.suffixIcon,
     this.onChanged,
     this.readOnly = false,
     this.onTap,
@@ -67,6 +69,7 @@ class SoftInput extends StatelessWidget {
         hintText: hint,
         suffixText: suffixText,
         prefixIcon: prefixIcon,
+        suffixIcon: suffixIcon,
         floatingLabelBehavior: FloatingLabelBehavior.always,
         filled: true,
         fillColor: cs.surfaceContainerHighest,

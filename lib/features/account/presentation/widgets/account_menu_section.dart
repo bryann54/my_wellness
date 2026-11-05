@@ -36,6 +36,21 @@ class AccountMenuSection extends StatelessWidget {
           },
         ),
         const AccountSectionDivider(),
+         MenuItemTile(
+          icon: Icons.attach_money_outlined,
+          title: AppLocalizations.getString(context, 'pricing.title'),
+          subtitle: AppLocalizations.getString(
+            context,
+            'pricing.subtitle',
+          ),
+          onTap: () {
+            final profile = state.profile;
+            if (profile != null) {
+              context.router.push(PricingRoute());
+            }
+          },
+        ),
+        const AccountSectionDivider(),
         MenuItemTile(
           icon: Icons.settings_outlined,
           title: AppLocalizations.getString(context, 'settings.title'),

@@ -21,6 +21,7 @@ class AppointmentsBloc extends Bloc<AppointmentsEvent, AppointmentsState> {
     on<AddAppointmentEvent>(_add);
     on<UpdateAppointmentEvent>(_update);
     on<DeleteAppointmentEvent>(_delete);
+    on<SearchAppointmentsEvent>(_search);
     on<ClearAppointmentsToastEvent>(
       (_, emit) => emit(state.copyWith(clearToast: true)),
     );
@@ -167,6 +168,10 @@ class AppointmentsBloc extends Bloc<AppointmentsEvent, AppointmentsState> {
         ),
       ),
     );
+  }
+
+  void _search(SearchAppointmentsEvent event, Emitter<AppointmentsState> emit) {
+    emit(state.copyWith(searchQuery: event.query.trim()));
   }
 
   AppointmentsState _toast(
