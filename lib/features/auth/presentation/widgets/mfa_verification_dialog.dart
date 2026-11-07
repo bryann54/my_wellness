@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_wellness/common/widgets/shimmer_box.dart';
+import 'package:my_wellness/common/res/l10n.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/services.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_bloc.dart';
@@ -45,15 +46,18 @@ class _MfaVerificationDialogState extends State<MfaVerificationDialog> {
         builder: (context, state) {
           final loading = state.status == AuthStatus.loading;
           return AlertDialog(
-            title: const Text('Two-factor verification'),
+            title: Text(AppLocalizations.getString(context, 'auth.mfaTitle')),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  _useBackupCode
-                      ? 'Enter one of your unused backup codes.'
-                      : 'Enter the 6-digit code from your authenticator app.',
+                  AppLocalizations.getString(
+                    context,
+                    _useBackupCode
+                        ? 'auth.mfaBackupPrompt'
+                        : 'auth.mfaAuthenticatorPrompt',
+                  ),
                 ),
                 const SizedBox(height: 16),
                 TextField(
@@ -74,9 +78,12 @@ class _MfaVerificationDialogState extends State<MfaVerificationDialog> {
                   onChanged: (_) => setState(() {}),
                   onSubmitted: (_) => _submit(),
                   decoration: InputDecoration(
-                    labelText: _useBackupCode
-                        ? 'Backup code'
-                        : 'Authenticator code',
+                    labelText: AppLocalizations.getString(
+                      context,
+                      _useBackupCode
+                          ? 'auth.mfaBackupCode'
+                          : 'auth.mfaAuthenticatorCode',
+                    ),
                     errorText: state.status == AuthStatus.mfaRequired
                         ? state.errorMessage
                         : null,
@@ -92,9 +99,12 @@ class _MfaVerificationDialogState extends State<MfaVerificationDialog> {
                           });
                         },
                   child: Text(
-                    _useBackupCode
-                        ? 'Use authenticator code'
-                        : 'Use a backup code',
+                    AppLocalizations.getString(
+                      context,
+                      _useBackupCode
+                          ? 'auth.mfaUseAuthenticator'
+                          : 'auth.mfaUseBackup',
+                    ),
                   ),
                 ),
               ],
@@ -104,13 +114,20 @@ class _MfaVerificationDialogState extends State<MfaVerificationDialog> {
                 onPressed: loading
                     ? null
                     : () => Navigator.of(context).pop(false),
-                child: const Text('Back to sign in'),
+                child: Text(
+                  AppLocalizations.getString(context, 'auth.backToSignIn'),
+                ),
               ),
               FilledButton(
                 onPressed: loading ? null : _submit,
                 child: loading
                     ? const ShimmerBox(width: 42, height: 10, radius: 5)
-                    : const Text('Verify and continue'),
+                    : Text(
+                        AppLocalizations.getString(
+                          context,
+                          'auth.verifyAndContinue',
+                        ),
+                      ),
               ),
             ],
           );

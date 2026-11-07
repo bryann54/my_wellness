@@ -70,7 +70,10 @@
     "healthJourney":"My health journey",
     "appointments":"Appointments",
 "vitals":"Vitals",
-    "myVitals":"Vitals & Chronic care"
+    "myVitals":"Vitals & Chronic care",
+    "clearSearch": "Clear search",
+    "filter": "Filter",
+    "itemOfTotal": "{current} of {total}"
   },
   "homeDashboard": {
     "welcome": "Hello, {name}",
@@ -108,6 +111,19 @@
     "priorCancerQuestion": "Have you previously been diagnosed with this cancer?",
     "cancerType": "Cancer type",
     "yearDiagnosedOptional": "Year diagnosed (optional)",
+    "beforeYouBegin": "Before you begin",
+    "continueToAssessment": "Continue to assessment",
+    "endometriosisNavigation": "Endometriosis care navigation",
+    "learnEndometriosis": "Learn about endometriosis",
+    "careSupport": "Care & support",
+    "shareProviderTitle": "Share with your healthcare provider",
+    "shareProviderBody": "We'll send the password-protected PDF to your provider's email address.",
+    "emailReportBody": "We'll send the password-protected PDF to this address.",
+    "providerEmail": "Your provider's email address",
+    "sendReport": "Send report",
+    "lockedTitle": "Assessment locked",
+    "lockedBody": "Complete payment to unlock this assessment and every other {category} assessment.",
+    "unlockMpesa": "Unlock with M-Pesa",
     "healthInformation": "YOUR HEALTH INFORMATION",
     "healthHistoryTitle": "Let's understand your health history",
     "healthHistoryBody": "Your answers help us provide a more personalised assessment and guidance.",
@@ -505,6 +521,17 @@
     "swahili": "swahili"
   },
   "auth": {
+    "sessionExpired": "Your session has expired. Please sign in again.",
+    "authenticationError": "Authentication error",
+    "mfaTitle": "Two-factor verification",
+    "mfaBackupPrompt": "Enter one of your unused backup codes.",
+    "mfaAuthenticatorPrompt": "Enter the 6-digit code from your authenticator app.",
+    "mfaBackupCode": "Backup code",
+    "mfaAuthenticatorCode": "Authenticator code",
+    "mfaUseAuthenticator": "Use authenticator code",
+    "mfaUseBackup": "Use a backup code",
+    "backToSignIn": "Back to sign in",
+    "verifyAndContinue": "Verify and continue",
     "genericError": "Something went wrong. Please try again.",
     "identifierRequired": "Enter your email address or phone number.",
     "nameRequired": "Enter your name.",
@@ -864,7 +891,10 @@
       "other": "Other"}
   },
  "validation": {
-  "required": "This field is required."
+  "required": "This field is required.",
+  "numbersOnly": "Use numbers only.",
+  "minimum": "Minimum {value}",
+  "maximum": "Maximum {value}"
  },
  "chatbot": {
   "placeholder": "Type a message…"

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:my_wellness/common/widgets/soft_input.dart';
+import 'package:my_wellness/common/res/l10n.dart';
 
 class AssessmentNumberField extends StatelessWidget {
   final TextEditingController controller;
@@ -31,11 +32,26 @@ class AssessmentNumberField extends StatelessWidget {
       validator:
           validator ??
           (v) {
-            if (v == null || v.trim().isEmpty) return 'Required';
+            if (v == null || v.trim().isEmpty) {
+              return AppLocalizations.getString(context, 'common.required');
+            }
             final n = int.tryParse(v.trim());
-            if (n == null) return 'Numbers only';
-            if (min != null && n < min!) return 'Minimum $min';
-            if (max != null && n > max!) return 'Maximum $max';
+            if (n == null) {
+              return AppLocalizations.getString(
+                context,
+                'validation.numbersOnly',
+              );
+            }
+            if (min != null && n < min!) {
+              return AppLocalizations.t(context, 'validation.minimum', {
+                'value': '$min',
+              });
+            }
+            if (max != null && n > max!) {
+              return AppLocalizations.t(context, 'validation.maximum', {
+                'value': '$max',
+              });
+            }
             return null;
           },
     );

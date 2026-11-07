@@ -67,7 +67,6 @@ class _AddAppointmentBodyState extends State<_AddAppointmentBody> {
   DateTime? _date;
   TimeOfDay? _time;
   String? _clinicName;
-  String? _facilityId;
 
   @override
   void dispose() {
@@ -77,10 +76,19 @@ class _AddAppointmentBodyState extends State<_AddAppointmentBody> {
     super.dispose();
   }
 
-  bool get _canSubmit =>
-      _clinicType != null &&
-      _date != null &&
-      (_clinicName?.trim().isNotEmpty ?? false);
+  bool get _canSubmit => _clinicType != null && _date != null;
+
+  String get _apiClinicName => switch (_clinicType) {
+    'general' => 'General medical clinic',
+    'hypertension' => 'Hypertension clinic',
+    'diabetes' => 'Diabetes clinic',
+    'cardiology' => 'Cardiology clinic',
+    'oncology' => 'Oncology clinic',
+    'gynaecology' => 'Gynaecology clinic',
+    'mental_health' => 'Mental health clinic',
+    'surgical' => 'Surgical clinic',
+    _ => 'Other clinic',
+  };
 
   Future<void> _pickClinicType() async {
     FocusScope.of(context).unfocus();
@@ -166,11 +174,12 @@ class _AddAppointmentBodyState extends State<_AddAppointmentBody> {
 
     context.read<AppointmentsBloc>().add(
       AddAppointmentEvent({
-        'clinic_name': _clinicName!.trim(),
-        'condition': _clinicType!,
+        // Keep this payload aligned with the web appointment contract.
+        'clinic_name': _apiClinicName,
+        'condition': 'other',
         'appointment_date': isoDate(_date!),
         if (_time != null) 'appointment_time': _hm(_time!),
-        if (_facilityId != null) 'facility_id': _facilityId,
+        'notes': _clinicName?.trim() ?? '',
       }),
     );
   }
@@ -185,7 +194,7 @@ class _AddAppointmentBodyState extends State<_AddAppointmentBody> {
     return BlocListener<AppointmentsBloc, AppointmentsState>(
       listenWhen: (p, c) =>
           p.isSubmitting && !c.isSubmitting && c.toastType == ToastType.success,
-      listener: (context, _) => context.router.pop(),
+      listener: (context, _) => context.router.maybePop(),
       child: Scaffold(
         body: NestedScrollView(
           headerSliverBuilder: (_, _) => [
@@ -204,9 +213,8 @@ class _AddAppointmentBodyState extends State<_AddAppointmentBody> {
             ),
             children: [
               FacilitySearchField(
-                onChanged: (name, id) => setState(() {
+                onChanged: (name, _) => setState(() {
                   _clinicName = name;
-                  _facilityId = id;
                 }),
               ),
               const SizedBox(height: AppSpacing.md),

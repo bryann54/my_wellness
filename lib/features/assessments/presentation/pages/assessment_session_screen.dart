@@ -144,7 +144,9 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
                 RadioListTile<bool>(
                   value: true,
                   groupValue: _priorCancerHistory,
-                  title: const Text('Yes'),
+                  title: Text(
+                    AppLocalizations.getString(context, 'common.yes'),
+                  ),
                   onChanged: submitting
                       ? null
                       : (value) => setState(() => _priorCancerHistory = value),
@@ -152,7 +154,7 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
                 RadioListTile<bool>(
                   value: false,
                   groupValue: _priorCancerHistory,
-                  title: const Text('No'),
+                  title: Text(AppLocalizations.getString(context, 'common.no')),
                   onChanged: submitting
                       ? null
                       : (value) => setState(() {
@@ -185,7 +187,19 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
                               (type) => DropdownMenuItem(
                                 value: type,
                                 child: Text(
-                                  type[0].toUpperCase() + type.substring(1),
+                                  AppLocalizations.getString(
+                                    context,
+                                    switch (type) {
+                                      'breast' => 'assessment.cancerBreast',
+                                      'cervical' => 'assessment.cancerCervical',
+                                      'prostate' => 'assessment.cancerProstate',
+                                      'esophageal' =>
+                                        'assessment.cancerOesophageal',
+                                      'colorectal' =>
+                                        'assessment.cancerColorectal',
+                                      _ => 'assessment.cancerOther',
+                                    },
+                                  ),
                                 ),
                               ),
                             )

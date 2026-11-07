@@ -162,20 +162,15 @@ class _AssessmentsListBodyState extends State<_AssessmentsListBody> {
 
               return RefreshIndicator.adaptive(
                 onRefresh: _refresh,
-                child: Column(
-                  children: [
-                    if (isSearching)
-                      AssessmentSearchResultCount(
-                        count: items.length,
-                        query: state.searchQuery,
-                      ),
-                    Expanded(
-                      child: AssessmentListBody(
-                        assessments: items,
-                        searchQuery: state.searchQuery,
-                      ),
-                    ),
-                  ],
+                child: AssessmentListBody(
+                  assessments: items,
+                  searchQuery: state.searchQuery,
+                  header: isSearching
+                      ? AssessmentSearchResultCount(
+                          count: items.length,
+                          query: state.searchQuery,
+                        )
+                      : null,
                 ),
               );
             },

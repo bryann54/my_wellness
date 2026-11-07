@@ -8,7 +8,6 @@ import 'package:my_wellness/common/utils/functions.dart';
 import 'package:my_wellness/common/widgets/app_fab.dart';
 import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
 import 'package:my_wellness/common/widgets/shimmer_box.dart';
-import 'package:my_wellness/core/di/injector.dart';
 import 'package:my_wellness/features/appointments/presentation/bloc/appointments_bloc.dart';
 import 'package:my_wellness/features/appointments/presentation/widgets/appointment_tile.dart';
 import 'package:my_wellness/features/appointments/presentation/widgets/appointments_search_bar_bottom.dart';
@@ -57,42 +56,23 @@ class _BookingRow extends _MergedRow {
 class AppointmentsScreen extends StatelessWidget {
   const AppointmentsScreen({super.key});
 
-  void _openAdd(BuildContext context) {
-    context.router.push(const AddAppointmentRoute());
-  }
-
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider<AppointmentsBloc>(
-          create: (_) {
-            final bloc = getIt<AppointmentsBloc>();
-            bloc.add(const LoadAppointmentsEvent());
-            return bloc;
-          },
-        ),
-        BlocProvider<BookingsBloc>(
-          create: (_) {
-            final bloc = BookingsBloc.factory();
-            bloc.add(const LoadMyBookingsEvent());
-            return bloc;
-          },
-        ),
-      ],
+    return BlocProvider<BookingsBloc>(
+      create: (_) {
+        final bloc = BookingsBloc.factory();
+        bloc.add(const LoadMyBookingsEvent());
+        return bloc;
+      },
       child: AppointmentsToastListener(
-        child: BookingsToastListener(
-          child: _Body(onAddPressed: () => _openAdd(context)),
-        ),
+        child: BookingsToastListener(child: const _Body()),
       ),
     );
   }
 }
 
 class _Body extends StatefulWidget {
-  final VoidCallback onAddPressed;
-
-  const _Body({required this.onAddPressed});
+  const _Body();
 
   @override
   State<_Body> createState() => _BodyState();
@@ -105,6 +85,7 @@ class _BodyState extends State<_Body> {
   @override
   void initState() {
     super.initState();
+    context.read<AppointmentsBloc>().add(const LoadAppointmentsEvent());
     _scroll.addListener(_onScroll);
   }
 
@@ -130,6 +111,12 @@ class _BodyState extends State<_Body> {
   void _onSearchChanged(String value) {
     context.read<AppointmentsBloc>().add(SearchAppointmentsEvent(value));
     context.read<BookingsBloc>().add(SearchBookingsEvent(value));
+  }
+
+  void _openAdd() {
+    // Use this route's context so the shared AppointmentsBloc remains
+    // available to AddAppointmentScreen.
+    context.router.push(const AddAppointmentRoute());
   }
 
   Future<void> _refresh() async {
@@ -194,7 +181,7 @@ class _BodyState extends State<_Body> {
           child: AppFab.extended(
             label: AppLocalizations.getString(context, 'appointments.book'),
             icon: const Icon(Icons.add),
-            onPressed: widget.onAddPressed,
+            onPressed: _openAdd,
           ),
         ),
         body: RefreshIndicator.adaptive(
@@ -219,7 +206,7 @@ class _BodyState extends State<_Body> {
                 ),
               ),
             ],
-            body: _MergedContent(onAddPressed: widget.onAddPressed),
+            body: _MergedContent(onAddPressed: _openAdd),
           ),
         ),
       ),

@@ -70,7 +70,10 @@
     "healthJourney":"Safari ya Afya Yangu",
     "appointments":" Miadi",
 "vitals":"Vitali",
-    "myVitals":"Vitali & Huduma za Kudumu"
+    "myVitals":"Vitali & Huduma za Kudumu",
+    "clearSearch": "Safisha utafutaji",
+    "filter": "Chuja",
+    "itemOfTotal": "{current} kati ya {total}"
   },
 "homeDashboard": {
   "welcome": "Habari, {name}",
@@ -108,6 +111,19 @@
     "priorCancerQuestion": "Je, uliwahi kutambuliwa kuwa na saratani hii?",
     "cancerType": "Aina ya saratani",
     "yearDiagnosedOptional": "Mwaka wa utambuzi (si lazima)",
+    "beforeYouBegin": "Kabla hujaanza",
+    "continueToAssessment": "Endelea kwenye tathmini",
+    "endometriosisNavigation": "Mwongozo wa huduma ya endometriosis",
+    "learnEndometriosis": "Jifunze kuhusu endometriosis",
+    "careSupport": "Huduma na msaada",
+    "shareProviderTitle": "Shiriki na mtoa huduma wako wa afya",
+    "shareProviderBody": "Tutamtumia mtoa huduma wako ripoti ya PDF iliyolindwa kwa nenosiri.",
+    "emailReportBody": "Tutakutumia ripoti ya PDF iliyolindwa kwa nenosiri kwenye anwani hii.",
+    "providerEmail": "Barua pepe ya mtoa huduma wako",
+    "sendReport": "Tuma ripoti",
+    "lockedTitle": "Tathmini imefungwa",
+    "lockedBody": "Kamilisha malipo ili kufungua tathmini hii na tathmini nyingine zote za {category}.",
+    "unlockMpesa": "Fungua kwa M-Pesa",
     "healthInformation": "TAARIFA ZAKO ZA AFYA",
     "healthHistoryTitle": "Tuelewe historia yako ya afya",
     "healthHistoryBody": "Majibu yako hutusaidia kutoa tathmini na mwongozo unaokufaa zaidi.",
@@ -498,6 +514,17 @@
     "swahili": "kiswahili"
   },
   "auth": {
+    "sessionExpired": "Kipindi chako kimeisha. Tafadhali ingia tena.",
+    "authenticationError": "Hitilafu ya uthibitishaji",
+    "mfaTitle": "Uthibitishaji wa hatua mbili",
+    "mfaBackupPrompt": "Weka mojawapo ya misimbo yako ya akiba ambayo haijatumika.",
+    "mfaAuthenticatorPrompt": "Weka msimbo wa tarakimu 6 kutoka kwenye programu yako ya uthibitishaji.",
+    "mfaBackupCode": "Msimbo wa akiba",
+    "mfaAuthenticatorCode": "Msimbo wa uthibitishaji",
+    "mfaUseAuthenticator": "Tumia msimbo wa programu ya uthibitishaji",
+    "mfaUseBackup": "Tumia msimbo wa akiba",
+    "backToSignIn": "Rudi kuingia",
+    "verifyAndContinue": "Thibitisha na uendelee",
     "genericError": "Kuna tatizo. Tafadhali jaribu tena.",
     "identifierRequired": "Weka anwani ya barua pepe au namba ya simu.",
     "nameRequired": "Weka jina lako.",
@@ -846,7 +873,10 @@
     }
   },
   "validation": {
-    "required": "Sehemu hii inahitajika."
+    "required": "Sehemu hii inahitajika.",
+    "numbersOnly": "Tumia namba pekee.",
+    "minimum": "Kiwango cha chini {value}",
+    "maximum": "Kiwango cha juu {value}"
   },
   "chatbot": {
     "placeholder": "Andika ujumbe…"

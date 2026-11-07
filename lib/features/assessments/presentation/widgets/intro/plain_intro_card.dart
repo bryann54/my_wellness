@@ -338,7 +338,7 @@ class _LockedCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Assessment Locked',
+            AppLocalizations.getString(context, 'assessment.lockedTitle'),
             style: GoogleFonts.inter(
               fontSize: 15,
               fontWeight: FontWeight.w700,
@@ -347,8 +347,9 @@ class _LockedCard extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            'Complete payment to unlock this assessment and every other '
-            '${definition.category} assessment.',
+            AppLocalizations.t(context, 'assessment.lockedBody', {
+              'category': definition.category,
+            }),
             style: GoogleFonts.inter(
               fontSize: 13,
               height: 1.5,
@@ -367,7 +368,9 @@ class _LockedCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            label: const Text('Unlock with M-Pesa'),
+            label: Text(
+              AppLocalizations.getString(context, 'assessment.unlockMpesa'),
+            ),
           ),
         ],
       ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/res/app_spacing.dart';
+import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_primary_button.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_definition.dart';
 
@@ -39,7 +40,7 @@ class _BeforeYouBeginPagesState extends State<BeforeYouBeginPages> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'BEFORE YOU BEGIN · ${widget.shortTitle.toUpperCase()}',
+                '${AppLocalizations.getString(context, 'assessment.beforeYouBegin').toUpperCase()} · ${widget.shortTitle.toUpperCase()}',
                 style: GoogleFonts.inter(
                   fontSize: 10.5,
                   fontWeight: FontWeight.w700,
@@ -49,7 +50,10 @@ class _BeforeYouBeginPagesState extends State<BeforeYouBeginPages> {
               ),
               const SizedBox(height: 6),
               Text(
-                '${_index + 1} of ${widget.pages.length}',
+                AppLocalizations.t(context, 'common.itemOfTotal', {
+                  'current': '${_index + 1}',
+                  'total': '${widget.pages.length}',
+                }),
                 style: GoogleFonts.inter(
                   fontSize: 12,
                   color: cs.onSurface.withValues(alpha: 0.55),
@@ -90,7 +94,9 @@ class _BeforeYouBeginPagesState extends State<BeforeYouBeginPages> {
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () => setState(() => _index--),
-                        child: const Text('Back'),
+                        child: Text(
+                          AppLocalizations.getString(context, 'common.back'),
+                        ),
                       ),
                     ),
                   if (_index > 0) const SizedBox(width: 12),
@@ -104,7 +110,12 @@ class _BeforeYouBeginPagesState extends State<BeforeYouBeginPages> {
                           setState(() => _index++);
                         }
                       },
-                      label: last ? 'Continue to assessment' : 'Continue',
+                      label: AppLocalizations.getString(
+                        context,
+                        last
+                            ? 'assessment.continueToAssessment'
+                            : 'common.continue',
+                      ),
                     ),
                   ),
                 ],

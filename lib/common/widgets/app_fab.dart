@@ -80,7 +80,9 @@ class AppFab extends StatelessWidget {
 
   Widget _buildExtended(BuildContext context) {
     return FloatingActionButton.extended(
-      heroTag: _heroTag,
+      // FABs do not have matching destination heroes. Opting out prevents
+      // duplicate default/unstable tags when tab routes remain mounted.
+      heroTag: null,
       onPressed: _handleTap,
       backgroundColor: backgroundColor ?? AppColors.primaryColor,
       foregroundColor: AppColors.background,
@@ -102,7 +104,7 @@ class AppFab extends StatelessWidget {
   Widget _buildCompact(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return FloatingActionButton(
-      heroTag: _heroTag,
+      heroTag: null,
       onPressed: _handleTap,
       backgroundColor: backgroundColor ?? cs.primary,
       foregroundColor: cs.onPrimary,
@@ -117,7 +119,7 @@ class AppFab extends StatelessWidget {
   Widget _buildDelete(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return FloatingActionButton(
-      heroTag: _heroTag,
+      heroTag: null,
       backgroundColor: cs.error,
       foregroundColor: cs.onError,
       elevation: 3,
@@ -144,8 +146,6 @@ class AppFab extends StatelessWidget {
     HapticFeedback.lightImpact();
     onPressed?.call();
   }
-
-  String get _heroTag => 'fab_${_variant.name}_$hashCode';
 }
 
 enum _FabVariant { extended, compact, delete }

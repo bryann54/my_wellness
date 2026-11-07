@@ -112,7 +112,10 @@ class _CollapsedRow extends StatelessWidget {
     final dt = parseDateTime(a.appointmentDate, a.appointmentTime);
     final isPast = dt != null && dt.isBefore(DateTime.now());
     final dayLabel = dt != null ? friendlyDay(dt) : a.appointmentDate;
-    final timeLabel = dt != null ? friendlyTime(dt) : a.appointmentTime;
+    final hasTime = a.appointmentTime?.trim().isNotEmpty == true;
+    final timeLabel = hasTime
+        ? (dt != null ? friendlyTime(dt) : a.appointmentTime!)
+        : null;
 
     final condition = a.condition?.trim();
     final showCondition =
@@ -149,7 +152,7 @@ class _CollapsedRow extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '$dayLabel · $timeLabel',
+                  timeLabel == null ? dayLabel : '$dayLabel · $timeLabel',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.inter(

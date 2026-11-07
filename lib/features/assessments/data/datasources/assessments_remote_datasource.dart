@@ -122,8 +122,12 @@ class AssessmentsRemoteDataSourceImpl implements AssessmentsRemoteDataSource {
   @override
   Future<AssessmentDefinition> getDefinition(String slug) async {
     final res = await _api.get<Map<String, dynamic>>(
-      url: ApiEndpoints.assessmentOffline(slug),
-      options: ApiClient.mobileProtected,
+      // The detail endpoint is the normalized assessment-definition
+      // contract. The offline endpoint is an engine-specific payload for
+      // flows such as STI/UTI and endometriosis and cannot be decoded as an
+      // AssessmentDefinitionModel.
+      url: ApiEndpoints.assessmentDetail(slug),
+      options: ApiClient.protected,
     );
     return AssessmentDefinitionModel.fromJson(res).toEntity();
   }

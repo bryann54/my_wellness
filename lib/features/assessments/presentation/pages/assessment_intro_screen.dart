@@ -97,7 +97,8 @@ class _AssessmentIntroBodyState extends State<_AssessmentIntroBody> {
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: Text(
-              state.errorMessage ?? 'Could not load this assessment.',
+              state.errorMessage ??
+                  AppLocalizations.getString(context, 'assessment.loadFailed'),
               textAlign: TextAlign.center,
             ),
           ),

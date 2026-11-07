@@ -84,7 +84,11 @@ class CompleteBody extends StatelessWidget {
                 score: score,
                 onPrimaryCta: () => _openNavigator(
                   context,
-                  display?.primaryCtaLabel ?? 'Endometriosis care navigation',
+                  display?.primaryCtaLabel ??
+                      AppLocalizations.getString(
+                        context,
+                        'assessment.endometriosisNavigation',
+                      ),
                 ),
                 onSecondaryCta: () {
                   // TODO: Route to Endometriosis Learn More (help tab)
@@ -119,8 +123,11 @@ class CompleteBody extends StatelessWidget {
                           // TODO: Route to Endometriosis Learn More
                         },
                         style: _outlinedStyle(cs),
-                        child: const Text(
-                          'Learn about endometriosis',
+                        child: Text(
+                          AppLocalizations.getString(
+                            context,
+                            'assessment.learnEndometriosis',
+                          ),
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -130,10 +137,18 @@ class CompleteBody extends StatelessWidget {
                       child: OutlinedButton(
                         onPressed: () => _openNavigator(
                           context,
-                          'Endometriosis care navigation',
+                          AppLocalizations.getString(
+                            context,
+                            'assessment.endometriosisNavigation',
+                          ),
                         ),
                         style: _outlinedStyle(cs),
-                        child: const Text('Care & support'),
+                        child: Text(
+                          AppLocalizations.getString(
+                            context,
+                            'assessment.careSupport',
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -144,7 +159,9 @@ class CompleteBody extends StatelessWidget {
                 OutlinedButton.icon(
                   onPressed: () => _retake(context),
                   icon: const Icon(Icons.refresh_rounded, size: 18),
-                  label: const Text('Retake this assessment'),
+                  label: Text(
+                    AppLocalizations.getString(context, 'assessment.retake'),
+                  ),
                   style: _outlinedStyle(cs),
                 ),
               ],
@@ -213,18 +230,24 @@ class CompleteBody extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog.adaptive(
         title: Text(
-          forProvider
-              ? 'Share with your healthcare provider'
-              : 'Email me this report',
+          AppLocalizations.getString(
+            context,
+            forProvider
+                ? 'assessment.shareProviderTitle'
+                : 'assessment.emailReport',
+          ),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              forProvider
-                  ? "We'll send the password-protected PDF to your provider's email address."
-                  : "We'll send the password-protected PDF to this address.",
+              AppLocalizations.getString(
+                context,
+                forProvider
+                    ? 'assessment.shareProviderBody'
+                    : 'assessment.emailReportBody',
+              ),
             ),
             const SizedBox(height: 12),
             TextField(
@@ -232,9 +255,10 @@ class CompleteBody extends StatelessWidget {
               keyboardType: TextInputType.emailAddress,
               autofocus: true,
               decoration: InputDecoration(
-                labelText: forProvider
-                    ? "Your provider's email address"
-                    : 'Email address',
+                labelText: AppLocalizations.getString(
+                  context,
+                  forProvider ? 'assessment.providerEmail' : 'auth.email',
+                ),
                 hintText: forProvider ? 'doctor@clinic.com' : 'you@example.com',
               ),
             ),
@@ -247,7 +271,9 @@ class CompleteBody extends StatelessWidget {
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, controller.text.trim()),
-            child: const Text('Send report'),
+            child: Text(
+              AppLocalizations.getString(context, 'assessment.sendReport'),
+            ),
           ),
         ],
       ),

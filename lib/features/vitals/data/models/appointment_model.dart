@@ -18,7 +18,7 @@ class AppointmentModel {
   final String appointmentDate;
 
   @JsonKey(name: 'appointment_time')
-  final String appointmentTime;
+  final String? appointmentTime;
 
   final String? notes;
   final String source;
@@ -33,7 +33,7 @@ class AppointmentModel {
     required this.clinicName,
     this.facility,
     required this.appointmentDate,
-    required this.appointmentTime,
+    this.appointmentTime,
     this.notes,
     this.source = 'manual',
     this.booking,
