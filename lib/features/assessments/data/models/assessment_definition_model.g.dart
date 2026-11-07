@@ -20,12 +20,15 @@ AssessmentDefinitionModel _$AssessmentDefinitionModelFromJson(
   ctas: (json['ctas'] as List<dynamic>)
       .map((e) => AssessmentCtaModel.fromJson(e as Map<String, dynamic>))
       .toList(),
+  beforeYouBegin: json['before_you_begin'] == null
+      ? const []
+      : beforeYouBeginPagesFromJson(json['before_you_begin']),
   disclaimer: json['disclaimer'] as String?,
   referencePrefix: json['reference_prefix'] as String?,
   understandingCopy: json['understanding_copy'] as String?,
-  beforeYouBegin: beforeYouBeginFromJson(json['before_you_begin']),
   cancerHistoryTypeCode: json['cancer_history_type_code'] as String?,
   encouragingFact: encouragingFactFromJson(json['encouraging_fact']),
+  dependantVariantSlug: json['dependant_variant_slug'] as String?,
 );
 
 Map<String, dynamic> _$AssessmentDefinitionModelToJson(
@@ -39,12 +42,24 @@ Map<String, dynamic> _$AssessmentDefinitionModelToJson(
   'disclaimer': instance.disclaimer,
   'reference_prefix': instance.referencePrefix,
   'understanding_copy': instance.understandingCopy,
-  'before_you_begin': instance.beforeYouBegin,
+  'before_you_begin': instance.beforeYouBegin.map((e) => e.toJson()).toList(),
   'cancer_history_type_code': instance.cancerHistoryTypeCode,
   'encouraging_fact': instance.encouragingFact,
+  'dependant_variant_slug': instance.dependantVariantSlug,
   'questions': instance.questions.map((e) => e.toJson()).toList(),
   'ctas': instance.ctas.map((e) => e.toJson()).toList(),
 };
+
+BeforeYouBeginPageModel _$BeforeYouBeginPageModelFromJson(
+  Map<String, dynamic> json,
+) => BeforeYouBeginPageModel(
+  heading: json['heading'] as String,
+  body: json['body'] as String,
+);
+
+Map<String, dynamic> _$BeforeYouBeginPageModelToJson(
+  BeforeYouBeginPageModel instance,
+) => <String, dynamic>{'heading': instance.heading, 'body': instance.body};
 
 AssessmentQuestionModel _$AssessmentQuestionModelFromJson(
   Map<String, dynamic> json,
@@ -65,6 +80,8 @@ AssessmentQuestionModel _$AssessmentQuestionModelFromJson(
   description: json['description'] as String?,
   min: (json['min'] as num?)?.toInt(),
   max: (json['max'] as num?)?.toInt(),
+  exclusiveValue: json['exclusive_value'] as String?,
+  optional: json['optional'] as bool? ?? false,
   terminateOn: ruleFromJson(json['terminate_on']),
   skipNextOn: ruleFromJson(json['skip_next_on']),
   skipIf: ruleFromJson(json['skip_if']),
@@ -84,6 +101,8 @@ Map<String, dynamic> _$AssessmentQuestionModelToJson(
   'description': instance.description,
   'min': instance.min,
   'max': instance.max,
+  'exclusive_value': instance.exclusiveValue,
+  'optional': instance.optional,
   'terminate_on': instance.terminateOn,
   'skip_next_on': instance.skipNextOn,
   'skip_if': instance.skipIf,

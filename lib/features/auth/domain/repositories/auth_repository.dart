@@ -3,13 +3,19 @@ import 'package:my_wellness/core/errors/failures.dart';
 import 'package:my_wellness/features/auth/data/models/signup_request_model.dart';
 import 'package:my_wellness/features/auth/domain/entities/auth_session_entity.dart';
 import 'package:my_wellness/features/auth/domain/entities/signup_result_entity.dart';
+import 'package:my_wellness/features/auth/domain/entities/sign_in_result_entity.dart';
 import 'package:my_wellness/features/auth/domain/entities/user_entity.dart';
 import 'package:my_wellness/features/auth/domain/entities/verified_identity.dart';
 
 abstract class AuthRepository {
-  Future<Either<Failure, AuthSessionEntity>> signIn({
+  Future<Either<Failure, SignInResultEntity>> signIn({
     required String identifier,
     required String password,
+  });
+  Future<Either<Failure, AuthSessionEntity>> verifyMfa({
+    required String mfaToken,
+    String? code,
+    String? backupCode,
   });
 
   Future<Either<Failure, SignupResultEntity>> signUp(SignupRequestModel req);

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:my_wellness/common/widgets/shimmer_box.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_wellness/common/res/app_spacing.dart';
@@ -603,7 +604,7 @@ class _BusyView extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const CircularProgressIndicator.adaptive(),
+          const ShimmerBox(width: 140, height: 14, radius: 7),
           const SizedBox(height: AppSpacing.md),
           Text(
             message,

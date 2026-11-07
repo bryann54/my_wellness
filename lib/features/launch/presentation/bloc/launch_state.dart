@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:my_wellness/features/auth/domain/entities/user_entity.dart';
 
 abstract class LaunchState extends Equatable {
   const LaunchState();
@@ -16,10 +15,7 @@ class LaunchOffline extends LaunchState {}
 class LaunchUnauthenticated extends LaunchState {}
 
 class LaunchAuthenticated extends LaunchState {
-  final UserEntity user;
-  const LaunchAuthenticated(this.user);
-  @override
-  List<Object?> get props => [user];
+  const LaunchAuthenticated();
 }
 
 class LaunchError extends LaunchState {

@@ -1,11 +1,7 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:my_wellness/core/api_client/client/api_client.dart';
 import 'package:my_wellness/core/api_client/endpoints/api_endpoints.dart';
-import 'package:my_wellness/core/errors/exceptions.dart';
-import 'package:my_wellness/features/offline_sync/data/local/app_database.dart';
 import 'package:my_wellness/core/api_client/models/cursor_page.dart';
 import 'package:my_wellness/features/vitals/data/models/appointment_model.dart';
 import 'package:my_wellness/features/vitals/data/models/bp_reading_model.dart';
@@ -64,9 +60,8 @@ abstract class VitalsRemoteDataSource {
 @LazySingleton(as: VitalsRemoteDataSource)
 class VitalsRemoteDataSourceImpl implements VitalsRemoteDataSource {
   final ApiClient _apiClient;
-  final AppDatabase _database;
 
-  VitalsRemoteDataSourceImpl(this._apiClient, this._database);
+  VitalsRemoteDataSourceImpl(this._apiClient);
 
   @override
   bool bloodPressureReadingsFromCache = false;
@@ -280,25 +275,11 @@ class VitalsRemoteDataSourceImpl implements VitalsRemoteDataSource {
 
   @override
   Future<List<BpReadingModel>> getBloodPressureReadings() async {
-    late final List<dynamic> response;
-    try {
-      bloodPressureReadingsFromCache = false;
-      response = await _apiClient.get<List<dynamic>>(
-        url: ApiEndpoints.bloodPressure,
-        options: ApiClient.protected,
-      );
-      await _database.cachePayload(
-        'blood_pressure_readings',
-        jsonEncode(response),
-      );
-    } on NetworkException {
-      final cached = await _database.getCachedPayload(
-        'blood_pressure_readings',
-      );
-      if (cached == null) rethrow;
-      response = jsonDecode(cached) as List<dynamic>;
-      bloodPressureReadingsFromCache = true;
-    }
+    bloodPressureReadingsFromCache = false;
+    final response = await _apiClient.get<List<dynamic>>(
+      url: ApiEndpoints.bloodPressure,
+      options: ApiClient.protected,
+    );
     return response
         .map((e) => BpReadingModel.fromJson(e as Map<String, dynamic>))
         .toList(growable: false);
@@ -326,23 +307,11 @@ class VitalsRemoteDataSourceImpl implements VitalsRemoteDataSource {
 
   @override
   Future<List<BsReadingModel>> getBloodSugarReadings() async {
-    late final List<dynamic> response;
-    try {
-      bloodSugarReadingsFromCache = false;
-      response = await _apiClient.get<List<dynamic>>(
-        url: ApiEndpoints.bloodSugar,
-        options: ApiClient.protected,
-      );
-      await _database.cachePayload(
-        'blood_sugar_readings',
-        jsonEncode(response),
-      );
-    } on NetworkException {
-      final cached = await _database.getCachedPayload('blood_sugar_readings');
-      if (cached == null) rethrow;
-      response = jsonDecode(cached) as List<dynamic>;
-      bloodSugarReadingsFromCache = true;
-    }
+    bloodSugarReadingsFromCache = false;
+    final response = await _apiClient.get<List<dynamic>>(
+      url: ApiEndpoints.bloodSugar,
+      options: ApiClient.protected,
+    );
     return response
         .map((e) => BsReadingModel.fromJson(e as Map<String, dynamic>))
         .toList(growable: false);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_wellness/common/widgets/shimmer_box.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/utils/debouncer.dart';
@@ -257,13 +258,7 @@ class _ResultsPanel extends StatelessWidget {
     if (loading) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 16),
-        child: Center(
-          child: SizedBox(
-            width: 18,
-            height: 18,
-            child: CircularProgressIndicator.adaptive(strokeWidth: 2),
-          ),
-        ),
+        child: Center(child: ShimmerBox(width: 24, height: 8, radius: 4)),
       );
     }
 

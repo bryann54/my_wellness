@@ -59,6 +59,10 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
       _secure.write(key: _accessTokenKey, value: access),
       _secure.write(key: _refreshTokenKey, value: refresh),
       _secure.write(key: _isLoggedInKey, value: 'true'),
+      // Remove legacy identity/signup caches. Only session secrets belong in
+      // secure storage; profile data is fetched into memory after sign-in.
+      _secure.delete(key: _userKey),
+      _secure.delete(key: _pendingKey),
     ]);
     _isLoggedIn = true;
   }

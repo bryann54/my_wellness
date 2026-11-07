@@ -13,7 +13,6 @@ import 'package:my_wellness/features/assessments/presentation/widgets/assessment
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_intro_skeleton.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_progress_bar.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_question_view.dart';
-import 'package:my_wellness/features/assessments/presentation/widgets/assessment_card.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_session_bottom_bar.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_toast_listener.dart';
 import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
@@ -135,7 +134,10 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
               padding: const EdgeInsets.all(24),
               children: [
                 Text(
-                  'Have you previously been diagnosed with this cancer?',
+                  AppLocalizations.getString(
+                    context,
+                    'assessment.priorCancerQuestion',
+                  ),
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 12),
@@ -163,8 +165,11 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
                     initialValue: _priorCancerType,
-                    decoration: const InputDecoration(
-                      labelText: 'Cancer type',
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.getString(
+                        context,
+                        'assessment.cancerType',
+                      ),
                       border: OutlineInputBorder(),
                     ),
                     items:
@@ -194,8 +199,11 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
                     controller: _priorCancerYear,
                     enabled: !submitting,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Year diagnosed (optional)',
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.getString(
+                        context,
+                        'assessment.yearDiagnosedOptional',
+                      ),
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -213,7 +221,12 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
                             priorCancerYear: hasHistory ? year : null,
                           ),
                         ),
-                  label: submitting ? 'Submitting…' : 'Continue',
+                  label: submitting
+                      ? AppLocalizations.getString(
+                          context,
+                          'assessment.submitting',
+                        )
+                      : AppLocalizations.getString(context, 'common.continue'),
                   height: 52,
                 ),
                 const SizedBox(height: 12),
@@ -231,11 +244,15 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
         );
       }
       final message = switch (session.status) {
-        AssessmentSessionStatus.awaitingPayment =>
-          'This assessment is waiting for access to be unlocked.',
-        AssessmentSessionStatus.awaitingCall =>
-          'A care team member will contact you to complete this assessment.',
-        _ => 'This assessment is not ready to continue yet.',
+        AssessmentSessionStatus.awaitingPayment => AppLocalizations.getString(
+          context,
+          'assessment.awaitingPayment',
+        ),
+        AssessmentSessionStatus.awaitingCall => AppLocalizations.getString(
+          context,
+          'assessment.awaitingCall',
+        ),
+        _ => AppLocalizations.getString(context, 'assessment.notReady'),
       };
       return Scaffold(
         appBar: AppBar(title: Text(def.shortTitle)),
@@ -297,25 +314,24 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
       child: Scaffold(
         body: NestedScrollView(
           headerSliverBuilder: (_, _) => [
-            CustomAppBar(
-              title: def.shortTitle,
-              titleHeroTag: assessmentTitleTag(widget.slug),
-              isHome: false,
-            ),
+            CustomAppBar(title: def.shortTitle, isHome: false),
           ],
-          body: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 12, 24, 8),
-                child: AssessmentProgressBar(
-                  current: session.currentIndex,
-                  total: session.totalQuestions,
-                  section: q.section,
+          body: CustomScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 12, 24, 8),
+                  child: AssessmentProgressBar(
+                    current: session.currentIndex,
+                    total: session.totalQuestions,
+                    section: q.section,
+                  ),
                 ),
               ),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+                sliver: SliverToBoxAdapter(
                   child: isBmi
                       ? AssessmentBmiStep(
                           initialWeightKg: profile?.weightKg?.toString(),

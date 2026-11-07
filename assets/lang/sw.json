@@ -7,6 +7,10 @@
   "optional": "Si lazima",
   "notes": "Maelezo",
     "notifications":"Arifa",
+    "weak": "Dhaifu",
+    "fair": "Wastani",
+    "good": "Nzuri",
+    "strong": "Imara",
     "continue": "Endelea",
      "optionalNotes": "Vidokezo (hiari)",
     "save": "Hifadhi",
@@ -63,7 +67,7 @@
     "at": "saa",
      "medication":"Dawa",
     "myHealth":"Afya Yangu",
-    "health journey":"Safari ya Afya Yangu",
+    "healthJourney":"Safari ya Afya Yangu",
     "appointments":" Miadi",
 "vitals":"Vitali",
     "myVitals":"Vitali & Huduma za Kudumu"
@@ -95,6 +99,37 @@
     "titlebot": "Uchunguzi",
     "referenceLabel": "Marejeleo",
     "searchHint": "Tafuta uchunguzi",
+    "answerRequired": "Tafadhali jibu swali hili ili kuendelea.",
+    "selectOption": "Chagua chaguo",
+    "submitting": "Inawasilisha…",
+    "notReady": "Tathmini hii bado haiko tayari kuendelea.",
+    "awaitingPayment": "Tathmini hii inasubiri ruhusa ifunguliwe.",
+    "awaitingCall": "Mwanatimu wa huduma atawasiliana nawe ili kukamilisha tathmini hii.",
+    "priorCancerQuestion": "Je, uliwahi kutambuliwa kuwa na saratani hii?",
+    "cancerType": "Aina ya saratani",
+    "yearDiagnosedOptional": "Mwaka wa utambuzi (si lazima)",
+    "healthInformation": "TAARIFA ZAKO ZA AFYA",
+    "healthHistoryTitle": "Tuelewe historia yako ya afya",
+    "healthHistoryBody": "Majibu yako hutusaidia kutoa tathmini na mwongozo unaokufaa zaidi.",
+    "yesCancerHistory": "Niliwahi kutambuliwa kuwa na saratani.",
+    "noCancerHistory": "Sijawahi kutambuliwa kuwa na saratani.",
+    "diagnosisDetails": "Maelezo ya utambuzi",
+    "diagnosisDetailsBody": "Tafadhali toa maelezo kuhusu utambuzi wako wa saratani.",
+    "cancerTypeQuestion": "Ulitambuliwa kuwa na aina gani ya saratani?",
+    "yearDiagnosedQuestion": "Ulitambuliwa mwaka gani?",
+    "cancerBreast": "Saratani ya matiti",
+    "cancerCervical": "Saratani ya mlango wa kizazi",
+    "cancerProstate": "Saratani ya tezi dume",
+    "cancerOesophageal": "Saratani ya umio",
+    "cancerColorectal": "Saratani ya utumbo mpana",
+    "cancerOther": "Aina nyingine ya saratani",
+    "encouragingFact": "Ujumbe wa kutia moyo",
+    "backToInstructions": "Rudi kwenye maelekezo",
+    "confidential": "Siri",
+    "pdfReport": "Ripoti ya PDF",
+    "personalisedRecommendation": "Pendekezo linalokufaa",
+    "nutritionRecommendation": "Pendekezo la lishe",
+    "shareWithDoctor": "Shiriki na daktari wangu",
  "completedLabel": "Imekamilika",
   "nextStep": "Hatua inayofuata",
   "noActionNeeded": "Hakuna hatua zaidi inayohitajika. Endelea na tabia za afya njema.",
@@ -204,7 +239,7 @@
   "notes": "Maelezo (si lazima)"
 },
 "appointments": {
-  "allAppointment":"Miadi yote",
+  "allAppointments":"Miadi yote",
   "title": "Miadi",
   "subtitle": "Ziara zako zijazo za kliniki",
   "book": "Weka miadi",
@@ -227,12 +262,33 @@
     "sectionWhen": "Lini",
     "sectionNotes": "Vidokezo",
   "save": "Hifadhi miadi",
+  "searchHint": "Tafuta miadi",
+  "clinicType": "Aina ya kliniki",
+  "selectClinicType": "Chagua aina ya kliniki",
+  "timeOptional": "Muda (si lazima)",
+  "selectDate": "Chagua tarehe",
+  "selectTime": "Chagua muda",
+  "noResults": "Hakuna matokeo ya “{query}”",
+  "searchHelp": "Jaribu jina la kliniki, kituo, mji au aina ya kliniki.",
+  "bookedSuccess": "Miadi imewekwa.",
+  "updatedSuccess": "Miadi imesasishwa.",
+  "deletedSuccess": "Miadi imefutwa.",
+  "clinicGeneral": "Kliniki ya matibabu ya jumla",
+  "clinicHypertension": "Kliniki ya shinikizo la damu",
+  "clinicDiabetes": "Kliniki ya kisukari",
+  "clinicCardiology": "Kliniki ya moyo",
+  "clinicOncology": "Kliniki ya saratani",
+  "clinicGynaecology": "Kliniki ya afya ya wanawake",
+  "clinicMentalHealth": "Kliniki ya afya ya akili",
+  "clinicSurgical": "Kliniki ya upasuaji",
+  "clinicOther": "Kliniki nyingine",
   "empty": "Hakuna miadi bado",
   "emptySub": "Panga uchunguzi na kliniki.",
   "deleteConfirm": "Ghairi miadi hii?",
   "deleteMessage": "Miadi itaondolewa kwenye ratiba yako."
 },
   "medications": {
+    "conditionRequired": "Tafadhali chagua hali inayohusiana.",
     "add": "Ongeza dawa",
     "addTitle": "Ongeza dawa",
     "title": "Dawa",
@@ -442,6 +498,16 @@
     "swahili": "kiswahili"
   },
   "auth": {
+    "genericError": "Kuna tatizo. Tafadhali jaribu tena.",
+    "identifierRequired": "Weka anwani ya barua pepe au namba ya simu.",
+    "nameRequired": "Weka jina lako.",
+    "nameTooShort": "Jina ni fupi sana.",
+    "nameTooLong": "Jina ni refu sana.",
+    "nameInvalidCharacters": "Jina lina herufi zisizokubalika.",
+    "nationalIdRequired": "Weka namba ya kitambulisho.",
+    "nationalIdInvalid": "Weka namba sahihi ya kitambulisho.",
+    "passwordRequirements": "Tumia herufi kubwa na ndogo, namba na alama maalum.",
+    "verifiedIdNotice": "Taarifa za kitambulisho zilizothibitishwa haziwezi kubadilishwa hapa.",
     "title": "Usajili wa mywellness",
    "constituency": "Eneo la Uchaguzi",
 "selectConstituency": "Chagua eneo la uchaguzi",
@@ -468,6 +534,7 @@
 "biometricsPrompt": "Fungua ili kuendelea",
 "tryPinFallback": "Tumia PIN badala yake",
 "enterPin": "Weka PIN yako",
+"pin": "PIN",
 "logout": "Toka",
       "idType": "Aina ya kitambulisho",
   "idTypeNational": "Kitambulisho cha Kitaifa",
@@ -601,6 +668,8 @@
     "phoneInvalidLength": "Tafadhali weka namba sahihi ya simu (tarakimu 10-15)"
   },
    "notifications": {
+    "blockedTitle": "Arifa zimezuiwa",
+    "blockedBody": "Washa arifa katika mipangilio ya kifaa ili upokee vikumbusho.",
     "emptyTitle": "Hakuna arifa bado",
     "emptyBody": "Tutakujulisha wakati kuna jambo linalohitaji uangalizi wako.",
     "unreadCountLabel": "Arifa, {count} ambazo hazijasomwa",
@@ -672,6 +741,8 @@
     "deleteAccountSub": "Ondoa akaunti yako kabisa"
   },
   "profile": {
+    "getHelpSub": "Wasiliana na timu ya msaada ya My Wellness.",
+    "nationalId": "Kitambulisho cha taifa",
     "title": "Wasifu",
     "welcome": "Karibu",
     "welcomeTo": "Karibu kwenye",
@@ -774,11 +845,20 @@
       "other": "Nyingine"
     }
   },
- "splash": {
+  "validation": {
+    "required": "Sehemu hii inahitajika."
+  },
+  "chatbot": {
+    "placeholder": "Andika ujumbe…"
+  },
+  "attorneys": {
+    "connecting": "Inaunganisha…"
+  },
+  "splash": {
   "tagline": "Jua hatari yako. Chukua hatua mapema. Ishi vyema.",
   "preparing": "Inaandaa uzoefu wako…",
   "checkingSession": "Inaangalia kipindi chako…",
-  "checkingSession2": "",
+  "checkingSession2": "Inaangalia kipindi chako…",
   "loadingProfile": "Inapakia wasifu wako…",
   "ready": "Karibu kumaliza…",
   "noConnection": "Haupo mtandaoni. Baadhi ya vipengele huenda visipatikane."
@@ -825,5 +905,20 @@
         "subtitle": "Panga uchunguzi, pitia rasilimali za kuaminika, na omba mwongozo wa huduma unapohitaji."
       }
     }
+  },
+  "appLock": {
+    "setupTitle": "Linda My Wellness kwa bayometriki",
+    "setupBody": "Tumia Face ID au alama ya kidole iliyosajiliwa kufungua programu. Data ya bayometriki inabaki kwenye kifaa hiki.",
+    "noLockTitle": "Bayometriki hazipatikani",
+    "noLockBody": "Sajili Face ID au alama ya kidole katika mipangilio ya kifaa kabla ya kuwasha ufunguaji wa bayometriki.",
+    "enable": "Washa ufunguaji wa bayometriki",
+    "notNow": "Si sasa",
+    "understand": "Nimeelewa",
+    "enableReason": "Thibitisha utambulisho wako ili kuwasha ufunguaji wa bayometriki",
+    "unlockReason": "Fungua My Wellness",
+    "unlock": "Fungua kwa bayometriki",
+    "lockedOut": "Uthibitishaji wa bayometriki umefungwa kwa muda. Fungua kifaa chako kisha ujaribu tena.",
+    "failed": "Hatukuweza kuthibitisha bayometriki zako. Tafadhali jaribu tena.",
+    "logoutConfirmBody": "Kutoka kutaondoa kipindi hiki na ufunguaji wa bayometriki kwenye kifaa hiki."
   }
 }

@@ -15,6 +15,7 @@ AssessmentSummaryModel _$AssessmentSummaryModelFromJson(
   shortTitle: json['short_title'] as String,
   tagline: json['tagline'] as String,
   excludedGender: json['excluded_gender'] as String?,
+  dependantVariantSlug: json['dependant_variant_slug'] as String?,
 );
 
 Map<String, dynamic> _$AssessmentSummaryModelToJson(
@@ -26,4 +27,5 @@ Map<String, dynamic> _$AssessmentSummaryModelToJson(
   'short_title': instance.shortTitle,
   'tagline': instance.tagline,
   'excluded_gender': instance.excludedGender,
+  'dependant_variant_slug': instance.dependantVariantSlug,
 };

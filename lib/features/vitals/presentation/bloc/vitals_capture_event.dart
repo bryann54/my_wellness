@@ -69,6 +69,10 @@ class ConfirmBmiEvent extends VitalsCaptureEvent {
   List<Object?> get props => [weightKg, heightCm, bmi];
 }
 
+class SkipBmiEvent extends VitalsCaptureEvent {
+  const SkipBmiEvent();
+}
+
 class SubmitVitalsReadingEvent extends VitalsCaptureEvent {
   final Map<String, dynamic> readingPayload;
   const SubmitVitalsReadingEvent(this.readingPayload);

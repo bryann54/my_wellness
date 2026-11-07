@@ -13,11 +13,26 @@ class CanStartResult {
   final bool allowed;
   final String? lastCompletedAt;
   final String? nextEligibleAt;
+  final String? blockedReason;
+  final String? priorSlug;
+  final String? priorTitle;
+
   const CanStartResult({
     required this.allowed,
     this.lastCompletedAt,
     this.nextEligibleAt,
+    this.blockedReason,
+    this.priorSlug,
+    this.priorTitle,
   });
+
+  bool get isChapterLocked => blockedReason == 'chapter_not_unlocked';
+  bool get isCancerBlocked => blockedReason == 'cancer_diagnosed_blocked';
+  bool get isAgeIneligible => blockedReason == 'age_ineligible';
+  bool get isGenderIneligible => blockedReason == 'gender_ineligible';
+  bool get isEbolaAccessRequired => blockedReason == 'ebola_access_required';
+  bool get isPaused => blockedReason == 'assessment_paused';
+  bool get isCooldown => blockedReason == null && !allowed;
 }
 
 class SubmitAnswerResult {
@@ -71,7 +86,30 @@ abstract class AssessmentsRepository {
     required double weightKg,
     required double heightCm,
   });
-
-  /// Optional — returns null if the backend has no referral for this session.
   Future<Either<Failure, Referral?>> getReferralForSession(String sessionId);
+  Future<Either<Failure, DownloadedReport>> downloadReport(
+    String slug,
+    String sessionId,
+  );
+  Future<Either<Failure, String?>> getReportEmailPrefill(
+    String slug,
+    String sessionId,
+  );
+  Future<Either<Failure, void>> emailReport(
+    String slug,
+    String sessionId,
+    String email,
+  );
+}
+
+class DownloadedReport {
+  final List<int> bytes;
+  final String? filename;
+  final String? passwordHint;
+
+  const DownloadedReport({
+    required this.bytes,
+    this.filename,
+    this.passwordHint,
+  });
 }

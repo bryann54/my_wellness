@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/res/l10n.dart';
+import 'package:my_wellness/common/widgets/shimmer_box.dart';
 
 class AssessmentSessionBottomBar extends StatelessWidget {
   final bool canProceed;
@@ -62,11 +63,7 @@ class AssessmentSessionBottomBar extends StatelessWidget {
             onPressed: (canProceed && !submitting) ? onNext : null,
             iconAlignment: IconAlignment.end,
             icon: submitting
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator.adaptive(strokeWidth: 2),
-                  )
+                ? const ShimmerBox(width: 20, height: 8, radius: 4)
                 : const Icon(Icons.chevron_right, size: 18),
             label: Text(
               AppLocalizations.getString(context, 'common.next'),

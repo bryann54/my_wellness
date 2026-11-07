@@ -8,13 +8,13 @@ abstract class AssessmentsEvent extends Equatable {
 
 class LoadAssessmentsEvent extends AssessmentsEvent {
   final String? userGender;
-  const LoadAssessmentsEvent({required this.userGender});
+  final bool silent;
+  const LoadAssessmentsEvent({required this.userGender, this.silent = false});
   @override
-  List<Object?> get props => [userGender];
+  List<Object?> get props => [userGender, silent];
 }
 
 class SearchAssessmentsEvent extends AssessmentsEvent {
-  /// Empty string clears the filter and restores the full list.
   final String query;
   const SearchAssessmentsEvent(this.query);
   @override
@@ -26,6 +26,14 @@ class StartAssessmentsEvent extends AssessmentsEvent {
   const StartAssessmentsEvent(this.slug);
   @override
   List<Object?> get props => [slug];
+}
+
+class ResumeAssessmentsEvent extends AssessmentsEvent {
+  final String slug;
+  final String sessionId;
+  const ResumeAssessmentsEvent({required this.slug, required this.sessionId});
+  @override
+  List<Object?> get props => [slug, sessionId];
 }
 
 class SubmitCancerPreScreeningEvent extends AssessmentsEvent {
@@ -43,29 +51,6 @@ class SubmitCancerPreScreeningEvent extends AssessmentsEvent {
     priorCancerHistory,
     priorCancerType,
     priorCancerYear,
-  ];
-}
-
-class ResumeAssessmentsEvent extends AssessmentsEvent {
-  final String slug;
-  final String sessionId;
-  final int currentIndex;
-  final int totalQuestions;
-  final int completionPercent;
-  const ResumeAssessmentsEvent({
-    required this.slug,
-    required this.sessionId,
-    required this.currentIndex,
-    required this.totalQuestions,
-    required this.completionPercent,
-  });
-  @override
-  List<Object?> get props => [
-    slug,
-    sessionId,
-    currentIndex,
-    totalQuestions,
-    completionPercent,
   ];
 }
 
@@ -104,6 +89,18 @@ class ClearBmiPreviewEvent extends AssessmentsEvent {
 
 class FetchScoreEvent extends AssessmentsEvent {
   const FetchScoreEvent();
+}
+
+class AlertNavigatorEvent extends AssessmentsEvent {
+  const AlertNavigatorEvent();
+}
+
+class DownloadReportEvent extends AssessmentsEvent {
+  final String email;
+  final bool emailOnly;
+  const DownloadReportEvent({this.email = '', this.emailOnly = false});
+  @override
+  List<Object?> get props => [email, emailOnly];
 }
 
 class ResetAssessmentsEvent extends AssessmentsEvent {

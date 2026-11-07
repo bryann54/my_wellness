@@ -1,5 +1,6 @@
 // lib/common/widgets/app_bottom_sheet.dart
 import 'package:flutter/material.dart';
+import 'package:my_wellness/common/widgets/shimmer_box.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppBottomSheet extends StatelessWidget {
@@ -200,11 +201,7 @@ class _ActionBar extends StatelessWidget {
                 ),
               ),
               child: isSubmitting
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator.adaptive(strokeWidth: 2),
-                    )
+                  ? const ShimmerBox(width: 42, height: 10, radius: 5)
                   : Text(
                       primaryLabel,
                       style: GoogleFonts.inter(

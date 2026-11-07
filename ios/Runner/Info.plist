@@ -31,7 +31,7 @@
 	<key>NSContactsUsageDescription</key>
 	<string>We need access to your contacts to add them as emergency contacts</string>
 	<key>NSFaceIDUsageDescription</key>
-	<string>We need Face ID to securely authenticate you</string>
+	<string>Use Face ID to unlock My Wellness and protect your private health information.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>mywellness needs access to your location to provide safety alerts nearby.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>

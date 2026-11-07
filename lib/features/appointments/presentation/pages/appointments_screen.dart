@@ -211,7 +211,10 @@ class _BodyState extends State<_Body> {
                 isTabRoot: true,
                 bottom: AppointmentsSearchBarBottom(
                   controller: _search,
-                  hintText: 'Search appointments',
+                  hintText: AppLocalizations.getString(
+                    context,
+                    'appointments.searchHint',
+                  ),
                   onChanged: _onSearchChanged,
                 ),
               ),
@@ -420,7 +423,9 @@ class _MergedList extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.only(top: AppSpacing.md, bottom: 96),
             child: loadingMore
-                ? const Center(child: CircularProgressIndicator.adaptive())
+                ? const Center(
+                    child: ShimmerBox(width: 96, height: 12, radius: 6),
+                  )
                 : null,
           ),
         ),
@@ -449,7 +454,7 @@ class _NoResults extends StatelessWidget {
       ),
       children: [
         if (loading)
-          const Center(child: CircularProgressIndicator.adaptive())
+          const Center(child: ShimmerBox(width: 96, height: 12, radius: 6))
         else ...[
           Icon(
             Icons.search_off_rounded,
@@ -458,13 +463,15 @@ class _NoResults extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
-            'No results for "${query.trim()}"',
+            AppLocalizations.t(context, 'appointments.noResults', {
+              'query': query.trim(),
+            }),
             textAlign: TextAlign.center,
             style: tt.titleSmall?.copyWith(color: cs.onSurface),
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            'Try a clinic name, facility, town or clinic type.',
+            AppLocalizations.getString(context, 'appointments.searchHelp'),
             textAlign: TextAlign.center,
             style: tt.bodySmall?.copyWith(color: cs.onSurfaceVariant),
           ),

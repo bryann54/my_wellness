@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_summary.dart';
-import 'package:my_wellness/features/assessments/presentation/widgets/assessment_card.dart';
 
 class AssessmentCompactCard extends StatelessWidget {
   static const double height = 138;
@@ -46,23 +45,16 @@ class AssessmentCompactCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      child: Hero(
-                        tag: assessmentTitleTag(summary.slug),
-                        flightShuttleBuilder: textShuttleBuilder,
-                        child: Material(
-                          color: Colors.transparent,
-                          child: Text(
-                            summary.shortTitle,
-                            style: GoogleFonts.inter(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                              height: 1.25,
-                              color: cs.onSurface,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                      child: Text(
+                        summary.shortTitle,
+                        style: GoogleFonts.inter(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          height: 1.25,
+                          color: cs.onSurface,
                         ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     const SizedBox(width: 4),
@@ -78,24 +70,17 @@ class AssessmentCompactCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Expanded(
-                  child: Hero(
-                    tag: assessmentTaglineTag(summary.slug),
-                    flightShuttleBuilder: textShuttleBuilder,
-                    child: Material(
-                      color: Colors.transparent,
-                      child: Align(
-                        alignment: Alignment.topLeft,
-                        child: Text(
-                          summary.tagline,
-                          style: GoogleFonts.inter(
-                            fontSize: 13,
-                            height: 1.4,
-                            color: cs.onSurface.withValues(alpha: 0.62),
-                          ),
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                  child: Align(
+                    alignment: Alignment.topLeft,
+                    child: Text(
+                      summary.tagline,
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        height: 1.4,
+                        color: cs.onSurface.withValues(alpha: 0.62),
                       ),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ),

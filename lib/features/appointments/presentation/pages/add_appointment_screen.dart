@@ -32,17 +32,32 @@ class _AddAppointmentBody extends StatefulWidget {
 }
 
 class _AddAppointmentBodyState extends State<_AddAppointmentBody> {
-  static const _clinicTypes = <(String, String)>[
-    ('general', 'General medical clinic'),
-    ('hypertension', 'Hypertension clinic'),
-    ('diabetes', 'Diabetes clinic'),
-    ('cardiology', 'Cardiology clinic'),
-    ('oncology', 'Oncology clinic'),
-    ('gynaecology', 'Gynaecology clinic'),
-    ('mental_health', 'Mental health clinic'),
-    ('surgical', 'Surgical clinic'),
-    ('other', 'Other clinic'),
+  static const _clinicTypes = <String>[
+    'general',
+    'hypertension',
+    'diabetes',
+    'cardiology',
+    'oncology',
+    'gynaecology',
+    'mental_health',
+    'surgical',
+    'other',
   ];
+
+  String _clinicTypeLabel(BuildContext context, String value) {
+    final key = switch (value) {
+      'general' => 'appointments.clinicGeneral',
+      'hypertension' => 'appointments.clinicHypertension',
+      'diabetes' => 'appointments.clinicDiabetes',
+      'cardiology' => 'appointments.clinicCardiology',
+      'oncology' => 'appointments.clinicOncology',
+      'gynaecology' => 'appointments.clinicGynaecology',
+      'mental_health' => 'appointments.clinicMentalHealth',
+      'surgical' => 'appointments.clinicSurgical',
+      _ => 'appointments.clinicOther',
+    };
+    return AppLocalizations.getString(context, key);
+  }
 
   final _typeText = TextEditingController();
   final _dateText = TextEditingController();
@@ -80,9 +95,9 @@ class _AddAppointmentBodyState extends State<_AddAppointmentBody> {
         shrinkWrap: true,
         padding: const EdgeInsets.only(bottom: AppSpacing.md),
         children: [
-          for (final (value, label) in _clinicTypes)
+          for (final value in _clinicTypes)
             ListTile(
-              title: Text(label),
+              title: Text(_clinicTypeLabel(context, value)),
               trailing: value == _clinicType
                   ? Icon(Icons.check_rounded, color: primary)
                   : null,
@@ -95,7 +110,7 @@ class _AddAppointmentBodyState extends State<_AddAppointmentBody> {
 
     setState(() {
       _clinicType = picked;
-      _typeText.text = _clinicTypes.firstWhere((e) => e.$1 == picked).$2;
+      _typeText.text = _clinicTypeLabel(context, picked);
     });
   }
 
@@ -170,7 +185,7 @@ class _AddAppointmentBodyState extends State<_AddAppointmentBody> {
     return BlocListener<AppointmentsBloc, AppointmentsState>(
       listenWhen: (p, c) =>
           p.isSubmitting && !c.isSubmitting && c.toastType == ToastType.success,
-      listener: (context, _) => context.router.maybePop(),
+      listener: (context, _) => context.router.pop(),
       child: Scaffold(
         body: NestedScrollView(
           headerSliverBuilder: (_, _) => [
@@ -197,8 +212,14 @@ class _AddAppointmentBodyState extends State<_AddAppointmentBody> {
               const SizedBox(height: AppSpacing.md),
               SoftInput(
                 controller: _typeText,
-                label: 'Clinic type',
-                hint: 'Select clinic type',
+                label: AppLocalizations.getString(
+                  context,
+                  'appointments.clinicType',
+                ),
+                hint: AppLocalizations.getString(
+                  context,
+                  'appointments.selectClinicType',
+                ),
                 readOnly: true,
                 onTap: _pickClinicType,
                 suffixIcon: Icon(
@@ -213,8 +234,14 @@ class _AddAppointmentBodyState extends State<_AddAppointmentBody> {
                   Expanded(
                     child: SoftInput(
                       controller: _dateText,
-                      label: 'Date',
-                      hint: 'Select date',
+                      label: AppLocalizations.getString(
+                        context,
+                        'appointments.date',
+                      ),
+                      hint: AppLocalizations.getString(
+                        context,
+                        'appointments.selectDate',
+                      ),
                       readOnly: true,
                       onTap: _pickDate,
                     ),
@@ -223,8 +250,14 @@ class _AddAppointmentBodyState extends State<_AddAppointmentBody> {
                   Expanded(
                     child: SoftInput(
                       controller: _timeText,
-                      label: 'Time (optional)',
-                      hint: 'Select time',
+                      label: AppLocalizations.getString(
+                        context,
+                        'appointments.timeOptional',
+                      ),
+                      hint: AppLocalizations.getString(
+                        context,
+                        'appointments.selectTime',
+                      ),
                       readOnly: true,
                       onTap: _pickTime,
                       suffixIcon: _time == null
@@ -248,7 +281,7 @@ class _AddAppointmentBodyState extends State<_AddAppointmentBody> {
             padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
             child: AppPrimaryButton(
               onPressed: (!_canSubmit || isSubmitting) ? null : _submit,
-              label: 'Save appointment',
+              label: AppLocalizations.getString(context, 'appointments.save'),
               isLoading: isSubmitting,
             ),
           ),

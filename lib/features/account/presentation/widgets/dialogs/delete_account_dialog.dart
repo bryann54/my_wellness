@@ -5,32 +5,61 @@ import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart
 
 class DeleteAccountDialog {
   static Future<void> show(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
+    final controller = TextEditingController();
+    final password = await showDialog<String>(
       context: context,
-      builder: (ctx) => AlertDialog.adaptive(
-        title: Text(AppLocalizations.getString(ctx, 'settings.deleteAccount')),
-        content: Text(
-          AppLocalizations.getString(ctx, 'settings.deleteAccountWarning'),
-        ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(AppLocalizations.getString(ctx, 'common.cancel')),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) => AlertDialog.adaptive(
+          title: Text(
+            AppLocalizations.getString(ctx, 'settings.deleteAccount'),
           ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(
-              AppLocalizations.getString(ctx, 'common.delete'),
-              style: const TextStyle(color: Colors.red),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                AppLocalizations.getString(
+                  ctx,
+                  'settings.deleteAccountWarning',
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: controller,
+                obscureText: true,
+                autofocus: true,
+                onChanged: (_) => setState(() {}),
+                decoration: const InputDecoration(
+                  labelText: 'Current password',
+                ),
+              ),
+            ],
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(AppLocalizations.getString(ctx, 'common.cancel')),
             ),
-          ),
-        ],
+            TextButton(
+              onPressed: controller.text.isEmpty
+                  ? null
+                  : () => Navigator.pop(ctx, controller.text),
+              child: Text(
+                'Confirm deletion',
+                style: const TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        ),
       ),
     );
+    controller.dispose();
 
-    if (confirmed == true && context.mounted) {
-      context.read<AccountBloc>().add(const DeleteAccountEvent());
+    if (password != null && password.isNotEmpty && context.mounted) {
+      context.read<AccountBloc>().add(DeleteAccountEvent(password));
     }
   }
 }

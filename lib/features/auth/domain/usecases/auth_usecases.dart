@@ -4,6 +4,7 @@ import 'package:my_wellness/core/errors/failures.dart';
 import 'package:my_wellness/features/auth/data/models/signup_request_model.dart';
 import 'package:my_wellness/features/auth/domain/entities/auth_session_entity.dart';
 import 'package:my_wellness/features/auth/domain/entities/signup_result_entity.dart';
+import 'package:my_wellness/features/auth/domain/entities/sign_in_result_entity.dart';
 import 'package:my_wellness/features/auth/domain/entities/user_entity.dart';
 import 'package:my_wellness/features/auth/domain/entities/verified_identity.dart';
 import 'package:my_wellness/features/auth/domain/repositories/auth_repository.dart';
@@ -13,10 +14,26 @@ class SignInUseCase {
   final AuthRepository repository;
   SignInUseCase(this.repository);
 
-  Future<Either<Failure, AuthSessionEntity>> call({
+  Future<Either<Failure, SignInResultEntity>> call({
     required String identifier,
     required String password,
   }) => repository.signIn(identifier: identifier, password: password);
+}
+
+@lazySingleton
+class VerifyMfaUseCase {
+  final AuthRepository repository;
+  VerifyMfaUseCase(this.repository);
+
+  Future<Either<Failure, AuthSessionEntity>> call({
+    required String mfaToken,
+    String? code,
+    String? backupCode,
+  }) => repository.verifyMfa(
+    mfaToken: mfaToken,
+    code: code,
+    backupCode: backupCode,
+  );
 }
 
 @lazySingleton
@@ -119,4 +136,12 @@ class GetCurrentUserUseCase {
   GetCurrentUserUseCase(this.repository);
 
   Future<Either<Failure, UserEntity?>> call() => repository.getCurrentUser();
+}
+
+@lazySingleton
+class RestoreSessionUseCase {
+  final AuthRepository repository;
+  RestoreSessionUseCase(this.repository);
+
+  Future<Either<Failure, String>> call() => repository.refreshToken();
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:my_wellness/common/res/colors.dart';
+import 'package:my_wellness/common/widgets/shimmer_box.dart';
 
 class AppPrimaryButton extends StatelessWidget {
   final VoidCallback? onPressed;
@@ -62,11 +63,7 @@ class AppPrimaryButton extends StatelessWidget {
           ),
         ),
         child: isLoading
-            ? const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator.adaptive(strokeWidth: 2),
-              )
+            ? const ShimmerBox(width: 42, height: 10, radius: 5)
             : Row(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,

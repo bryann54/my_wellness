@@ -278,11 +278,7 @@ class _ReferralBody extends StatelessWidget {
                       CompleteBookingEvent(b.id),
                     ),
               child: state.completing
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator.adaptive(strokeWidth: 2),
-                    )
+                  ? const ShimmerBox(width: 42, height: 10, radius: 5)
                   : Text(
                       AppLocalizations.getString(
                         context,

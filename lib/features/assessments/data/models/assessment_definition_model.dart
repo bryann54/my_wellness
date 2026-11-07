@@ -1,9 +1,10 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:my_wellness/features/assessments/data/models/json_field_parsers.dart';
-import 'package:my_wellness/features/assessments/domain/entities/assessment_definition.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_cta.dart';
+import 'package:my_wellness/features/assessments/domain/entities/assessment_definition.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_option.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_question.dart';
+
 part 'assessment_definition_model.g.dart';
 
 @JsonSerializable(explicitToJson: true)
@@ -24,14 +25,17 @@ class AssessmentDefinitionModel {
   @JsonKey(name: 'understanding_copy')
   final String? understandingCopy;
 
-  @JsonKey(name: 'before_you_begin', fromJson: beforeYouBeginFromJson)
-  final String? beforeYouBegin;
+  @JsonKey(name: 'before_you_begin', fromJson: beforeYouBeginPagesFromJson)
+  final List<BeforeYouBeginPageModel> beforeYouBegin;
 
   @JsonKey(name: 'cancer_history_type_code')
   final String? cancerHistoryTypeCode;
 
   @JsonKey(name: 'encouraging_fact', fromJson: encouragingFactFromJson)
   final String? encouragingFact;
+
+  @JsonKey(name: 'dependant_variant_slug')
+  final String? dependantVariantSlug;
 
   final List<AssessmentQuestionModel> questions;
   final List<AssessmentCtaModel> ctas;
@@ -44,12 +48,13 @@ class AssessmentDefinitionModel {
     required this.tagline,
     required this.questions,
     required this.ctas,
+    this.beforeYouBegin = const [],
     this.disclaimer,
     this.referencePrefix,
     this.understandingCopy,
-    this.beforeYouBegin,
     this.cancerHistoryTypeCode,
     this.encouragingFact,
+    this.dependantVariantSlug,
   });
 
   factory AssessmentDefinitionModel.fromJson(Map<String, dynamic> json) =>
@@ -66,12 +71,31 @@ class AssessmentDefinitionModel {
     disclaimer: disclaimer,
     referencePrefix: referencePrefix,
     understandingCopy: understandingCopy,
-    beforeYouBegin: beforeYouBegin,
+    beforeYouBegin: beforeYouBegin
+        .map((p) => p.toEntity())
+        .toList(growable: false),
     cancerHistoryTypeCode: cancerHistoryTypeCode,
     encouragingFact: encouragingFact,
+    dependantVariantSlug: dependantVariantSlug,
     questions: questions.map((q) => q.toEntity()).toList(growable: false),
     ctas: ctas.map((c) => c.toEntity()).toList(growable: false),
   );
+}
+
+@JsonSerializable()
+class BeforeYouBeginPageModel {
+  final String heading;
+  final String body;
+
+  const BeforeYouBeginPageModel({required this.heading, required this.body});
+
+  factory BeforeYouBeginPageModel.fromJson(Map<String, dynamic> json) =>
+      _$BeforeYouBeginPageModelFromJson(json);
+
+  Map<String, dynamic> toJson() => _$BeforeYouBeginPageModelToJson(this);
+
+  BeforeYouBeginPage toEntity() =>
+      BeforeYouBeginPage(heading: heading, body: body);
 }
 
 @JsonSerializable()
@@ -86,6 +110,12 @@ class AssessmentQuestionModel {
   final String? description;
   final int? min;
   final int? max;
+
+  @JsonKey(name: 'exclusive_value')
+  final String? exclusiveValue;
+
+  @JsonKey(defaultValue: false)
+  final bool optional;
 
   @JsonKey(name: 'terminate_on', fromJson: ruleFromJson)
   final String? terminateOn;
@@ -110,6 +140,8 @@ class AssessmentQuestionModel {
     this.description,
     this.min,
     this.max,
+    this.exclusiveValue,
+    this.optional = false,
     this.terminateOn,
     this.skipNextOn,
     this.skipIf,
@@ -132,6 +164,8 @@ class AssessmentQuestionModel {
     description: description,
     min: min,
     max: max,
+    exclusiveValue: exclusiveValue,
+    optional: optional,
     terminateOn: terminateOn,
     skipNextOn: skipNextOn,
     skipIf: skipIf,

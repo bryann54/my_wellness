@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:my_wellness/common/widgets/shimmer_box.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -125,7 +126,9 @@ class _VerificationScreenState extends State<VerificationScreen> {
         builder: (context, state) {
           final pending = widget.pending ?? state.pendingSignup;
           if (pending == null) {
-            return const Center(child: CircularProgressIndicator.adaptive());
+            return const Center(
+              child: ShimmerBox(width: 160, height: 14, radius: 7),
+            );
           }
 
           final isPhone = pending.channel == SignupChannel.phone;

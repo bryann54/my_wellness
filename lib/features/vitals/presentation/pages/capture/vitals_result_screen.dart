@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:my_wellness/common/widgets/shimmer_box.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
@@ -45,7 +46,7 @@ class _Body extends StatelessWidget {
 
     if (result == null) {
       return const Scaffold(
-        body: Center(child: CircularProgressIndicator.adaptive()),
+        body: Center(child: ShimmerBox(width: 160, height: 14, radius: 7)),
       );
     }
 
@@ -166,7 +167,7 @@ class _Body extends StatelessWidget {
                 const Center(
                   child: Padding(
                     padding: EdgeInsets.all(AppSpacing.md),
-                    child: CircularProgressIndicator.adaptive(),
+                    child: ShimmerBox(width: 120, height: 12, radius: 6),
                   ),
                 )
               else if (state.facilityCandidates.isEmpty)

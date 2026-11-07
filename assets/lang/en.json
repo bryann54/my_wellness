@@ -2,6 +2,11 @@
   "appName": "my wellness",
   "common": {
     "hello": "Hello",
+    "notifications": "Notifications",
+    "weak": "Weak",
+    "fair": "Fair",
+    "good": "Good",
+    "strong": "Strong",
      "cancel": "Cancel",
   "required": "Required",
   "optional": "Optional",
@@ -94,6 +99,37 @@
     "loadFailed": "This screening could not be loaded. Please try again later.",
     "referenceLabel": "Reference",
     "searchHint": "Search screenings",
+    "answerRequired": "Please answer this question to continue.",
+    "selectOption": "Select an option",
+    "submitting": "Submitting…",
+    "notReady": "This assessment is not ready to continue yet.",
+    "awaitingPayment": "This assessment is waiting for access to be unlocked.",
+    "awaitingCall": "A care team member will contact you to complete this assessment.",
+    "priorCancerQuestion": "Have you previously been diagnosed with this cancer?",
+    "cancerType": "Cancer type",
+    "yearDiagnosedOptional": "Year diagnosed (optional)",
+    "healthInformation": "YOUR HEALTH INFORMATION",
+    "healthHistoryTitle": "Let's understand your health history",
+    "healthHistoryBody": "Your answers help us provide a more personalised assessment and guidance.",
+    "yesCancerHistory": "I have been diagnosed with cancer in the past.",
+    "noCancerHistory": "I have not been diagnosed with cancer.",
+    "diagnosisDetails": "Diagnosis details",
+    "diagnosisDetailsBody": "Please provide details about your cancer diagnosis.",
+    "cancerTypeQuestion": "Which type of cancer were you diagnosed with?",
+    "yearDiagnosedQuestion": "What year were you diagnosed?",
+    "cancerBreast": "Breast cancer",
+    "cancerCervical": "Cervical cancer",
+    "cancerProstate": "Prostate cancer",
+    "cancerOesophageal": "Oesophageal cancer",
+    "cancerColorectal": "Colorectal cancer",
+    "cancerOther": "Another type of cancer",
+    "encouragingFact": "Encouraging fact",
+    "backToInstructions": "Back to instructions",
+    "confidential": "Confidential",
+    "pdfReport": "PDF report",
+    "personalisedRecommendation": "Personalised recommendation",
+    "nutritionRecommendation": "Nutrition recommendation",
+    "shareWithDoctor": "Share with my doctor",
  "completedLabel": "Completed",
   "nextStep": "Next step",
   "noActionNeeded": "No further action needed. Keep up the healthy habits.",
@@ -213,6 +249,26 @@
   "date": "Date",
   "time": "Time",
   "save": "Save appointment",
+  "searchHint": "Search appointments",
+  "clinicType": "Clinic type",
+  "selectClinicType": "Select clinic type",
+  "timeOptional": "Time (optional)",
+  "selectDate": "Select date",
+  "selectTime": "Select time",
+  "noResults": "No results for “{query}”",
+  "searchHelp": "Try a clinic name, facility, town or clinic type.",
+  "bookedSuccess": "Appointment booked.",
+  "updatedSuccess": "Appointment updated.",
+  "deletedSuccess": "Appointment deleted.",
+  "clinicGeneral": "General medical clinic",
+  "clinicHypertension": "Hypertension clinic",
+  "clinicDiabetes": "Diabetes clinic",
+  "clinicCardiology": "Cardiology clinic",
+  "clinicOncology": "Oncology clinic",
+  "clinicGynaecology": "Gynaecology clinic",
+  "clinicMentalHealth": "Mental health clinic",
+  "clinicSurgical": "Surgical clinic",
+  "clinicOther": "Other clinic",
   "empty": "No appointments yet",
   "emptySub": "Schedule a check-up with a clinic.",
   "deleteConfirm": "Cancel this appointment?",
@@ -236,6 +292,7 @@
 
 
   "medications": {
+    "conditionRequired": "Please select a related condition.",
     "add": "Add medication",
     "addTitle": "Add medication",
     "title": "Medications",
@@ -448,6 +505,16 @@
     "swahili": "swahili"
   },
   "auth": {
+    "genericError": "Something went wrong. Please try again.",
+    "identifierRequired": "Enter your email address or phone number.",
+    "nameRequired": "Enter your name.",
+    "nameTooShort": "Name is too short.",
+    "nameTooLong": "Name is too long.",
+    "nameInvalidCharacters": "Name contains unsupported characters.",
+    "nationalIdRequired": "Enter your ID number.",
+    "nationalIdInvalid": "Enter a valid ID number.",
+    "passwordRequirements": "Use upper and lowercase letters, a number and a special character.",
+    "verifiedIdNotice": "Your verified ID details cannot be changed here.",
      "title": "mywellness Sign up",
     
     "welcomeBack": "Welcome Back",
@@ -610,6 +677,8 @@
 
   },
  "notifications": {
+    "blockedTitle": "Notifications are blocked",
+    "blockedBody": "Enable notifications in your device settings to receive reminders.",
     "emptyTitle": "No notifications yet",
     "emptyBody": "We'll let you know when something needs your attention.",
     "unreadCountLabel": "Notifications, {count} unread",
@@ -634,6 +703,7 @@
     "darkMode": "Dark Mode",
     "toggleDarkTheme": "Toggle dark theme",
     "language": "Language",
+    "logOut": "Log out",
     "changeLanguage": "Change app language",
     "subscription": "Subscription",
     "manageSubscription": "Manage your subscription",
@@ -689,6 +759,8 @@
   "vitalsIncluded":"Vitals logging included"
 },
   "profile": {
+    "getHelpSub": "Contact the My Wellness support team.",
+    "nationalId": "National ID",
     "title": "Profile",
     "welcome": "Welcome",
     "welcomeTo": "Welcome to",
@@ -791,10 +863,20 @@
       "female": "Female",
       "other": "Other"}
   },
+ "validation": {
+  "required": "This field is required."
+ },
+ "chatbot": {
+  "placeholder": "Type a message…"
+ },
+ "attorneys": {
+  "connecting": "Connecting…"
+ },
  "splash": {
   "tagline": "Know your risk. Take action early. Live better.",
   "preparing": "Preparing your experience…",
   "checkingSession": "Checking your session…",
+  "checkingSession2": "Checking your session…",
   "loadingProfile": "Loading your profile…",
   "ready": "Almost ready…",
   "noConnection": "You're offline. Some features may not be available."
@@ -829,5 +911,20 @@
       "subtitle": "Schedule check-ups, review trusted resources, and request a care navigator when you need one."
     }
   }
-}
+},
+"appLock": {
+    "setupTitle": "Protect My Wellness with biometrics",
+    "setupBody": "Use Face ID or your enrolled fingerprint to unlock the app. Your biometric data stays on this device.",
+    "noLockTitle": "Biometrics are not available",
+    "noLockBody": "Enroll Face ID or a fingerprint in your device settings before turning on biometric unlock.",
+    "enable": "Enable biometric unlock",
+    "notNow": "Not now",
+    "understand": "Got it",
+    "enableReason": "Confirm your identity to enable biometric unlock",
+    "unlockReason": "Unlock My Wellness",
+    "unlock": "Unlock with biometrics",
+    "lockedOut": "Biometric authentication is temporarily locked. Unlock your device and try again.",
+    "failed": "We couldn't verify your biometrics. Please try again.",
+    "logoutConfirmBody": "Signing out removes this session and biometric unlock from this device."
+  }
 }

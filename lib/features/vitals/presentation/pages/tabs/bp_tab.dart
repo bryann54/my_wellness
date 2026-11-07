@@ -27,7 +27,7 @@ class BpTab extends StatelessWidget {
     context.read<VitalsCaptureBloc>().add(
       const StartVitalsCaptureEvent(VitalsCaptureKind.bp),
     );
-    context.router.push(VitalsCaptureIntroRoute(kind: VitalsCaptureKind.bp));
+    context.router.push(VitalsPathwayRoute(kind: VitalsCaptureKind.bp));
   }
 
   @override
@@ -40,7 +40,9 @@ class BpTab extends StatelessWidget {
         final locked = access != null && !access.hasAccess;
 
         if (captureState.accessLoading && access == null) {
-          return const Center(child: CircularProgressIndicator.adaptive());
+          return const Center(
+            child: ShimmerBox(width: 160, height: 14, radius: 7),
+          );
         }
 
         if (locked && !access.demoRestricted) {

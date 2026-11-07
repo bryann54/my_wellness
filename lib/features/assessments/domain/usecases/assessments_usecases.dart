@@ -175,3 +175,37 @@ class SubmitBmiMetricsUseCase {
     heightCm: heightCm,
   );
 }
+
+@lazySingleton
+class DownloadAssessmentReportUseCase {
+  final AssessmentsRepository _r;
+  DownloadAssessmentReportUseCase(this._r);
+
+  Future<Either<Failure, DownloadedReport>> call({
+    required String slug,
+    required String sessionId,
+  }) => _r.downloadReport(slug, sessionId);
+}
+
+@lazySingleton
+class GetReportEmailPrefillUseCase {
+  final AssessmentsRepository _r;
+  GetReportEmailPrefillUseCase(this._r);
+
+  Future<Either<Failure, String?>> call({
+    required String slug,
+    required String sessionId,
+  }) => _r.getReportEmailPrefill(slug, sessionId);
+}
+
+@lazySingleton
+class EmailAssessmentReportUseCase {
+  final AssessmentsRepository _r;
+  EmailAssessmentReportUseCase(this._r);
+
+  Future<Either<Failure, void>> call({
+    required String slug,
+    required String sessionId,
+    required String email,
+  }) => _r.emailReport(slug, sessionId, email);
+}

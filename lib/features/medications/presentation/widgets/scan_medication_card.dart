@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_wellness/common/widgets/shimmer_box.dart';
 
 import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
@@ -58,11 +59,7 @@ class ScanMedicationCard extends StatelessWidget {
           if (scanning)
             Row(
               children: [
-                const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator.adaptive(strokeWidth: 2),
-                ),
+                const ShimmerBox(width: 24, height: 8, radius: 4),
                 const SizedBox(width: AppSpacing.md),
                 Text(
                   AppLocalizations.getString(context, 'medications.scanning'),

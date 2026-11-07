@@ -138,9 +138,7 @@ class _FollowupBodyState extends State<_FollowupBody> {
               onPressed: state.followupCanContinue
                   ? () {
                       bloc.add(const CaptureContinueFromPathwayEvent());
-                      context.router.push(
-                        VitalsPathwayTipsRoute(kind: state.kind!),
-                      );
+                      context.router.push(VitalsBmiRoute(kind: state.kind!));
                     }
                   : null,
               label: AppLocalizations.getString(context, 'common.continue'),

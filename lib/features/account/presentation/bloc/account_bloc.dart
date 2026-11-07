@@ -114,7 +114,7 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
     Emitter<AccountState> emit,
   ) async {
     emit(state.copyWith(status: AccountStatus.deleting, clearError: true));
-    final result = await _deleteAccount(NoParams());
+    final result = await _deleteAccount(event.password);
     result.fold(
       (f) => emit(
         state.copyWith(
@@ -122,7 +122,12 @@ class AccountBloc extends Bloc<AccountEvent, AccountState> {
           errorMessage: mapFailure(f),
         ),
       ),
-      (_) => emit(state.copyWith(status: AccountStatus.deleted)),
+      (_) => emit(
+        state.copyWith(
+          status: AccountStatus.loaded,
+          successMessage: 'Account deletion scheduled',
+        ),
+      ),
     );
   }
 

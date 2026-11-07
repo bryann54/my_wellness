@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_wellness/common/widgets/shimmer_box.dart';
 
 class AuthButton extends StatelessWidget {
   const AuthButton({
@@ -65,16 +66,7 @@ class AuthButton extends StatelessWidget {
 
   Widget _buildChild(BuildContext context) {
     if (isLoading) {
-      return SizedBox(
-        height: 20,
-        width: 20,
-        child: CircularProgressIndicator.adaptive(
-          strokeWidth: 2.2,
-          valueColor: AlwaysStoppedAnimation(
-            Theme.of(context).colorScheme.onPrimary,
-          ),
-        ),
-      );
+      return const ShimmerBox(width: 42, height: 10, radius: 5);
     }
 
     if (icon == null) {

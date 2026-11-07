@@ -57,7 +57,14 @@ class AssessmentSession extends Equatable {
     }
   }
 
+  bool get isCompleted => status == AssessmentSessionStatus.completed;
+  bool get isInProgress => status == AssessmentSessionStatus.inProgress;
+  bool get isLocked =>
+      status == AssessmentSessionStatus.awaitingPayment ||
+      status == AssessmentSessionStatus.awaitingCall;
+
   AssessmentSession applyResult(SubmitAnswerResult r) {
+    final nextIndex = r.nextIndex;
     return AssessmentSession(
       id: id,
       assessmentSlug: assessmentSlug,
@@ -66,11 +73,11 @@ class AssessmentSession extends Equatable {
           : (r.terminate
                 ? AssessmentSessionStatus.terminated
                 : AssessmentSessionStatus.inProgress),
-      currentIndex: r.nextIndex,
+      currentIndex: nextIndex,
       totalQuestions: totalQuestions,
       completionPct: totalQuestions == 0
           ? 0
-          : ((r.nextIndex / totalQuestions) * 100).round(),
+          : ((nextIndex / totalQuestions) * 100).round().clamp(0, 100),
       referenceNumber: r.reference ?? referenceNumber,
       paidAt: paidAt,
       startedAt: startedAt,

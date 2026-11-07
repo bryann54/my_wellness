@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:my_wellness/common/widgets/shimmer_box.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -363,13 +364,7 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
         if (_searching)
           const Padding(
             padding: EdgeInsets.only(top: 8),
-            child: Center(
-              child: SizedBox(
-                width: 18,
-                height: 18,
-                child: CircularProgressIndicator.adaptive(strokeWidth: 2),
-              ),
-            ),
+            child: Center(child: ShimmerBox(width: 24, height: 8, radius: 4)),
           )
         else if (_searchDone && _searchResults.isNotEmpty)
           Container(

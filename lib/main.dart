@@ -1,5 +1,4 @@
 import 'package:my_wellness/common/helpers/app_router.dart';
-import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/notifiers/locale_provider.dart';
 import 'package:my_wellness/common/notifiers/theme_provider.dart';
 import 'package:my_wellness/common/res/app_theme.dart';
@@ -18,13 +17,10 @@ import 'package:my_wellness/features/bookings/presentation/bloc/bookings_bloc.da
 import 'package:my_wellness/features/geography/presentation/bloc/geography_bloc.dart';
 import 'package:my_wellness/features/home/presentation/bloc/home_bloc.dart';
 import 'package:my_wellness/features/launch/presentation/bloc/launch_bloc.dart';
-import 'package:my_wellness/features/launch/presentation/bloc/launch_state.dart';
 import 'package:my_wellness/features/medications/presentation/bloc/medications_bloc.dart';
 import 'package:my_wellness/features/notifications/data/notification_service.dart';
 import 'package:my_wellness/features/notifications/presentation/bloc/notifications_bloc.dart';
 import 'package:my_wellness/features/notifications/presentation/notification_host.dart';
-import 'package:my_wellness/features/offline_sync/presentation/bloc/sync_bloc.dart';
-import 'package:my_wellness/features/offline_sync/presentation/widgets/sync_banner.dart';
 import 'package:my_wellness/features/vitals/presentation/bloc/vitals_bloc.dart';
 import 'package:my_wellness/features/vitals/presentation/bloc/vitals_capture_bloc.dart';
 import 'package:my_wellness/features/wellness/presentation/bloc/wellness_bloc.dart';
@@ -84,10 +80,6 @@ void main() async {
         BlocProvider(create: (_) => getIt<AppointmentsBloc>()),
         BlocProvider(create: (_) => getIt<MedicationsBloc>()),
         BlocProvider(create: (_) => getIt<NotificationsBloc>()),
-        BlocProvider(
-          create: (_) =>
-              getIt<SyncBloc>()..add(const StartSyncMonitoringEvent()),
-        ),
       ],
       child: const MyApp(),
     ),
@@ -155,19 +147,7 @@ class _MyAppState extends State<MyApp> {
             child: AppLockGate(
               onLogout: () =>
                   context.read<AuthBloc>().add(const SignOutEvent()),
-              child: BlocBuilder<LaunchBloc, LaunchState>(
-                builder: (context, launchState) {
-                  final isSplash = _appRouter.current.name == SplashRoute.name;
-                  return SyncBanner(
-                    showBanner:
-                        !isSplash &&
-                        launchState is! LaunchInitial &&
-                        launchState is! LaunchLoading &&
-                        launchState is! LaunchOffline,
-                    child: NotificationHost(child: child),
-                  );
-                },
-              ),
+              child: NotificationHost(child: child),
             ),
           );
         },

@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:my_wellness/common/widgets/shimmer_box.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/res/app_spacing.dart';
@@ -36,7 +37,7 @@ class _Body extends StatelessWidget {
 
     if (pathway == null) {
       return const Scaffold(
-        body: Center(child: CircularProgressIndicator.adaptive()),
+        body: Center(child: ShimmerBox(width: 160, height: 14, radius: 7)),
       );
     }
 
@@ -87,9 +88,10 @@ class _Body extends StatelessWidget {
                           VitalsPathwayFollowupRoute(kind: state.kind!),
                         );
                       } else {
-                        context.router.push(
-                          VitalsPathwayTipsRoute(kind: state.kind!),
+                        context.read<VitalsCaptureBloc>().add(
+                          const CaptureContinueFromPathwayEvent(),
                         );
+                        context.router.push(VitalsBmiRoute(kind: state.kind!));
                       }
                     }
                   : null,

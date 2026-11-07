@@ -54,6 +54,9 @@ class VitalsCaptureBloc extends Bloc<VitalsCaptureEvent, VitalsCaptureState> {
     on<ToggleDialysisDayEvent>(_onToggleDialysisDay);
     on<CaptureContinueFromPathwayEvent>(_onContinuePathway);
     on<ConfirmBmiEvent>(_onConfirmBmi);
+    on<SkipBmiEvent>(
+      (_, emit) => emit(state.copyWith(step: VitalsCaptureStep.reading)),
+    );
     on<SubmitVitalsReadingEvent>(_onSubmitReading);
     on<SubmitVitalsSecondReadingEvent>(_onSubmitSecondReading);
     on<AnswerWellbeingEvent>(_onAnswerWellbeing);
@@ -77,14 +80,21 @@ class VitalsCaptureBloc extends Bloc<VitalsCaptureEvent, VitalsCaptureState> {
     final accessRes = await _getAccess(NoParams());
     accessRes.fold((_) {}, (a) => emit(state.copyWith(access: a)));
 
+    final profileRes = await _getMonitoringProfile(event.kind);
+    final profile = profileRes.getOrElse(() => const <String, dynamic>{});
+    final existingPathway = (profile['pathway'] as String?)?.trim();
+
     final cached = _contentCache[event.kind];
     if (cached != null) {
       emit(
         VitalsCaptureState(
           kind: event.kind,
-          step: VitalsCaptureStep.intro,
+          step: VitalsCaptureStep.pathway,
           content: cached,
           access: state.access,
+          pathwayValue: existingPathway?.isEmpty == false
+              ? existingPathway
+              : null,
         ),
       );
       return;
@@ -96,6 +106,9 @@ class VitalsCaptureBloc extends Bloc<VitalsCaptureEvent, VitalsCaptureState> {
         kind: event.kind,
         step: VitalsCaptureStep.loadingContent,
         access: state.access,
+        pathwayValue: existingPathway?.isEmpty == false
+            ? existingPathway
+            : null,
       ),
     );
 
@@ -116,7 +129,7 @@ class VitalsCaptureBloc extends Bloc<VitalsCaptureEvent, VitalsCaptureState> {
           _contentCache[event.kind] = content;
           if (state.kind == event.kind) {
             emit(
-              state.copyWith(step: VitalsCaptureStep.intro, content: content),
+              state.copyWith(step: VitalsCaptureStep.pathway, content: content),
             );
           }
         },

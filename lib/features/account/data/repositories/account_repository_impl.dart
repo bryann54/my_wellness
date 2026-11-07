@@ -20,13 +20,7 @@ class AccountRepositoryImpl implements AccountRepository {
   @override
   Future<Either<Failure, HealthProfile>> getProfile() async {
     try {
-      final remoteProfile = await _remote.getProfile();
-      await _local.cacheHealthProfile(remoteProfile);
-      return Right(remoteProfile);
-    } on NetworkException {
-      final localProfile = _local.getCachedProfile();
-      if (localProfile != null) return Right(localProfile);
-      return Left(NetworkFailure());
+      return Right(await _remote.getProfile());
     } on Exception catch (e) {
       return Left(_mapExceptionToFailure(e));
     }
@@ -37,9 +31,7 @@ class AccountRepositoryImpl implements AccountRepository {
     Map<String, dynamic> data,
   ) async {
     try {
-      final profile = await _remote.updateProfile(data);
-      await _local.cacheHealthProfile(profile);
-      return Right(profile);
+      return Right(await _remote.updateProfile(data));
     } on Exception catch (e) {
       return Left(_mapExceptionToFailure(e));
     }
@@ -56,10 +48,9 @@ class AccountRepositoryImpl implements AccountRepository {
   }
 
   @override
-  Future<Either<Failure, void>> deleteAccount() async {
+  Future<Either<Failure, void>> deleteAccount(String password) async {
     try {
-      await _remote.requestAccountDeletion();
-      await _local.clearAllData();
+      await _remote.requestAccountDeletion(password);
       return const Right(null);
     } on Exception catch (e) {
       return Left(_mapExceptionToFailure(e));

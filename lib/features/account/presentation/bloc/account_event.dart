@@ -20,7 +20,11 @@ class UpdateProfileEvent extends AccountEvent {
 }
 
 class DeleteAccountEvent extends AccountEvent {
-  const DeleteAccountEvent();
+  final String password;
+  const DeleteAccountEvent(this.password);
+
+  @override
+  List<Object?> get props => [password];
 }
 
 class CancelAccountDeletionEvent extends AccountEvent {

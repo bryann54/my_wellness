@@ -18,6 +18,20 @@ class SignInEvent extends AuthEvent {
   List<Object?> get props => [identifier, password];
 }
 
+class VerifyMfaEvent extends AuthEvent {
+  final String value;
+  final bool useBackupCode;
+
+  const VerifyMfaEvent({required this.value, this.useBackupCode = false});
+
+  @override
+  List<Object?> get props => [value, useBackupCode];
+}
+
+class CancelMfaEvent extends AuthEvent {
+  const CancelMfaEvent();
+}
+
 class SignUpEvent extends AuthEvent {
   final SignupRequestModel request;
   const SignUpEvent(this.request);

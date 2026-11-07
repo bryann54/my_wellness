@@ -16,10 +16,10 @@ class CompleteNextStep extends StatelessWidget {
 
     if (r == null) {
       return Container(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: cs.surfaceContainerHighest.withValues(alpha: 0.4),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(14),
         ),
         child: Row(
           children: [
@@ -44,158 +44,121 @@ class CompleteNextStep extends StatelessWidget {
     }
 
     final facility = r.recommendedFacility;
+    final urgent = r.escalationCategory.toLowerCase().contains('urgent');
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          AppLocalizations.getString(
-            context,
-            'assessment.nextStep',
-          ).toUpperCase(),
-          style: GoogleFonts.inter(
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1.0,
-            color: cs.onSurface.withValues(alpha: 0.45),
-          ),
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: urgent
+              ? cs.error.withValues(alpha: 0.4)
+              : cs.outlineVariant.withValues(alpha: 0.45),
         ),
-        const SizedBox(height: 10),
-        Container(
-          decoration: BoxDecoration(
-            color: cs.surface,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.5)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(18, 18, 18, 14),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    Text(
-                      r.escalationCategoryDisplay ?? r.escalationCategory,
-                      style: GoogleFonts.inter(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        height: 1.3,
-                        color: cs.onSurface,
-                      ),
+                    Icon(
+                      urgent
+                          ? Icons.warning_amber_rounded
+                          : Icons.local_hospital_outlined,
+                      size: 18,
+                      color: urgent ? cs.error : cs.primary,
                     ),
-                    if (r.reason != null) ...[
-                      const SizedBox(height: 6),
-                      Text(
-                        r.reason!,
-                        style: GoogleFonts.inter(
-                          fontSize: 13,
-                          height: 1.5,
-                          color: cs.onSurface.withValues(alpha: 0.65),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              if (facility != null) ...[
-                Divider(
-                  height: 1,
-                  thickness: 1,
-                  color: cs.outlineVariant.withValues(alpha: 0.35),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        facility.name,
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        r.escalationCategoryDisplay ?? r.escalationCategory,
                         style: GoogleFonts.inter(
                           fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w700,
                           height: 1.3,
                           color: cs.onSurface,
                         ),
                       ),
-                      if (facility.locality.isNotEmpty) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          facility.locality,
-                          style: GoogleFonts.inter(
-                            fontSize: 12.5,
-                            color: cs.onSurface.withValues(alpha: 0.6),
-                          ),
-                        ),
-                      ],
-                      if (facility.coversSha || facility.kephLevel != null) ...[
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 6,
-                          runSpacing: 6,
-                          children: [
-                            if (facility.kephLevel != null)
-                              _Tag('KEPH ${facility.kephLevel}'),
-                            if (facility.coversSha) const _Tag('SHA'),
-                          ],
-                        ),
-                      ],
-                      const SizedBox(height: 16),
-                      SizedBox(
-                        width: double.infinity,
-                        child: FilledButton(
-                          onPressed: onBook,
-                          style: FilledButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 13),
-                            backgroundColor: cs.primary,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(11),
-                            ),
-                          ),
-                          child: Text(
-                            AppLocalizations.getString(
-                              context,
-                              'assessment.bookConsultation',
-                            ),
-                            style: GoogleFonts.inter(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                    ),
+                  ],
+                ),
+                if (r.reason != null) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    r.reason!,
+                    style: GoogleFonts.inter(
+                      fontSize: 12.5,
+                      height: 1.5,
+                      color: cs.onSurface.withValues(alpha: 0.65),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          if (facility != null) ...[
+            Divider(
+              height: 1,
+              thickness: 1,
+              color: cs.outlineVariant.withValues(alpha: 0.35),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    facility.name,
+                    style: GoogleFonts.inter(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w600,
+                      height: 1.3,
+                      color: cs.onSurface,
+                    ),
+                  ),
+                  if (facility.locality.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      facility.locality,
+                      style: GoogleFonts.inter(
+                        fontSize: 12.5,
+                        color: cs.onSurface.withValues(alpha: 0.6),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: onBook,
+                      icon: const Icon(Icons.arrow_forward_rounded, size: 16),
+                      iconAlignment: IconAlignment.end,
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        backgroundColor: urgent ? cs.error : cs.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                    ],
+                      label: Text(
+                        urgent ? 'Find urgent care' : 'Book consultation',
+                        style: GoogleFonts.inter(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _Tag extends StatelessWidget {
-  final String label;
-  const _Tag(this.label);
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(5),
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.inter(
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          color: cs.onSurface.withValues(alpha: 0.7),
-        ),
+                ],
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }

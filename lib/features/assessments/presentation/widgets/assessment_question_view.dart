@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_question.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_choice_tile.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_multi_choice_tile.dart';
@@ -29,6 +30,7 @@ class _AssessmentQuestionViewState extends State<AssessmentQuestionView> {
   late final TextEditingController _numberCtrl = TextEditingController(
     text: widget.initialValue ?? '',
   );
+  final TextEditingController _textCtrl = TextEditingController();
   String? _selected;
   final Set<String> _selectedMulti = {};
 
@@ -36,42 +38,57 @@ class _AssessmentQuestionViewState extends State<AssessmentQuestionView> {
   void initState() {
     super.initState();
 
-    if (widget.question.type == AssessmentQuestionType.radio &&
-        widget.initialValue != null) {
-      _selected = widget.initialValue;
-    }
-
-    if (widget.question.type == AssessmentQuestionType.multiSelect &&
-        widget.initialValue != null &&
-        widget.initialValue!.isNotEmpty) {
-      _selectedMulti.addAll(
-        widget.initialValue!
-            .split(',')
-            .map((v) => v.trim())
-            .where((v) => v.isNotEmpty),
-      );
+    switch (widget.question.type) {
+      case AssessmentQuestionType.radio:
+      case AssessmentQuestionType.select:
+        _selected = widget.initialValue;
+      case AssessmentQuestionType.checkbox:
+        if (widget.initialValue != null && widget.initialValue!.isNotEmpty) {
+          _selectedMulti.addAll(
+            widget.initialValue!
+                .split(',')
+                .map((v) => v.trim())
+                .where((v) => v.isNotEmpty),
+          );
+        }
+      case AssessmentQuestionType.text:
+      case AssessmentQuestionType.date:
+        if (widget.initialValue != null) {
+          _textCtrl.text = widget.initialValue!;
+        }
+      default:
+        break;
     }
   }
 
   @override
   void dispose() {
     _numberCtrl.dispose();
+    _textCtrl.dispose();
     super.dispose();
   }
 
   void _toggleMulti(String value) {
+    final q = widget.question;
+    final exclusive = q.exclusiveValue;
     setState(() {
       if (_selectedMulti.contains(value)) {
         _selectedMulti.remove(value);
       } else {
-        _selectedMulti.add(value);
+        if (exclusive != null && value == exclusive) {
+          _selectedMulti
+            ..clear()
+            ..add(value);
+        } else {
+          if (exclusive != null) _selectedMulti.remove(exclusive);
+          _selectedMulti.add(value);
+        }
       }
     });
-    final ordered = widget.question.options
+    final ordered = q.options
         .map((o) => o.value)
         .where(_selectedMulti.contains)
         .join(',');
-
     widget.onChanged(ordered);
   }
 
@@ -136,7 +153,7 @@ class _AssessmentQuestionViewState extends State<AssessmentQuestionView> {
         if (widget.showError) ...[
           const SizedBox(height: 8),
           Text(
-            'Please answer this question to continue.',
+            AppLocalizations.getString(context, 'assessment.answerRequired'),
             style: GoogleFonts.inter(fontSize: 12.5, color: cs.error),
           ),
         ],
@@ -163,7 +180,28 @@ class _AssessmentQuestionViewState extends State<AssessmentQuestionView> {
           ],
         );
 
-      case AssessmentQuestionType.multiSelect:
+      case AssessmentQuestionType.select:
+        return DropdownButtonFormField<String>(
+          initialValue: _selected,
+          isExpanded: true,
+          decoration: InputDecoration(
+            hintText: AppLocalizations.getString(
+              context,
+              'assessment.selectOption',
+            ),
+          ),
+          items: [
+            for (final o in widget.question.options)
+              DropdownMenuItem(value: o.value, child: Text(o.label)),
+          ],
+          onChanged: (v) {
+            if (v == null) return;
+            setState(() => _selected = v);
+            widget.onChanged(v);
+          },
+        );
+
+      case AssessmentQuestionType.checkbox:
         return Column(
           children: [
             for (final o in widget.question.options) ...[
@@ -178,21 +216,54 @@ class _AssessmentQuestionViewState extends State<AssessmentQuestionView> {
         );
 
       case AssessmentQuestionType.number:
-        return AssessmentNumberField(
-          controller: _numberCtrl,
-          min: widget.question.min,
-          max: widget.question.max,
-          onChanged: widget.onChanged,
+        return Column(
+          children: [
+            AssessmentNumberField(
+              controller: _numberCtrl,
+              min: widget.question.min,
+              max: widget.question.max,
+              onChanged: widget.onChanged,
+            ),
+            if (widget.question.options.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              for (final o in widget.question.options) ...[
+                AssessmentChoiceTile(
+                  option: o,
+                  selected: _selected == o.value,
+                  onTap: () {
+                    setState(() {
+                      _selected = o.value;
+                      _numberCtrl.clear();
+                    });
+                    widget.onChanged(o.value);
+                  },
+                ),
+                const SizedBox(height: 10),
+              ],
+            ],
+          ],
         );
 
       case AssessmentQuestionType.text:
+      case AssessmentQuestionType.date:
         return AssessmentNumberField(
-          controller: _numberCtrl,
+          controller: _textCtrl,
           onChanged: widget.onChanged,
           validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
         );
 
       case AssessmentQuestionType.bmi:
+        return const SizedBox.shrink();
+
+      case AssessmentQuestionType.info:
+        return Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton(
+            onPressed: () => widget.onChanged('acknowledged'),
+            child: Text(AppLocalizations.getString(context, 'common.continue')),
+          ),
+        );
+
       case AssessmentQuestionType.unknown:
         return const SizedBox.shrink();
     }

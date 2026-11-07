@@ -107,7 +107,7 @@ class _NotificationHostState extends State<NotificationHost>
         router.push(AssessmentIntroRoute(slug: slug));
 
       case NotificationRouteAssessmentResult(:final slug):
-        router.push(AssessmentResultRoute(slug: slug));
+        router.push(AssessmentIntroRoute(slug: slug));
 
       case NotificationRouteVitals():
         router.push(VitalsRoute());

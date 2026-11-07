@@ -53,6 +53,9 @@ abstract class AssessmentsRemoteDataSource {
     required double weightKg,
     required double heightCm,
   });
+  Future<DownloadedReport> downloadReport(String slug, String sessionId);
+  Future<String?> getReportEmailPrefill(String slug, String sessionId);
+  Future<void> emailReport(String slug, String sessionId, String email);
 }
 
 @LazySingleton(as: AssessmentsRemoteDataSource)
@@ -69,9 +72,6 @@ class AssessmentsRemoteDataSourceImpl implements AssessmentsRemoteDataSource {
     return VitalsAccessModel.fromJson(res).toEntity();
   }
 
-  /// The care-navigation endpoint generates the referral with POST
-  /// (idempotent per session); GET is not routed and always failed here,
-  /// which silently hid the "Book consultation" step.
   @override
   Future<Referral?> getReferralForSession(String sessionId) async {
     try {
@@ -113,6 +113,9 @@ class AssessmentsRemoteDataSourceImpl implements AssessmentsRemoteDataSource {
       allowed: res['allowed'] as bool? ?? false,
       lastCompletedAt: res['last_completed_at'] as String?,
       nextEligibleAt: res['next_eligible_at'] as String?,
+      blockedReason: res['blocked_reason'] as String?,
+      priorSlug: res['prior_slug'] as String?,
+      priorTitle: res['prior_title'] as String?,
     );
   }
 
@@ -147,8 +150,8 @@ class AssessmentsRemoteDataSourceImpl implements AssessmentsRemoteDataSource {
       url: ApiEndpoints.assessmentPreScreening(slug, sessionId),
       payload: {
         'prior_cancer_history': priorCancerHistory,
-        'prior_cancer_type': priorCancerType,
-        'prior_cancer_year': priorCancerYear,
+        if (priorCancerType.isNotEmpty) 'prior_cancer_type': priorCancerType,
+        'prior_cancer_year': ?priorCancerYear,
       },
       options: ApiClient.protected,
     );
@@ -165,11 +168,12 @@ class AssessmentsRemoteDataSourceImpl implements AssessmentsRemoteDataSource {
       options: ApiClient.protected,
     );
 
-    final answersByIndex = <int, Map<String, dynamic>>{
+    final byKey = <String, Map<String, dynamic>>{
       for (final item in res.whereType<Map<String, dynamic>>())
-        if (item['question_index'] is int) item['question_index'] as int: item,
+        if (item['question_key'] is String)
+          item['question_key'] as String: item,
     };
-    return answersByIndex.values
+    return byKey.values
         .map((e) => AssessmentAnswerModel.fromJson(e).toEntity())
         .toList(growable: false);
   }
@@ -227,6 +231,45 @@ class AssessmentsRemoteDataSourceImpl implements AssessmentsRemoteDataSource {
     await _api.post<Map<String, dynamic>>(
       url: ApiEndpoints.assessmentBmiMetrics(slug, sessionId),
       payload: {'weight_kg': weightKg, 'height_cm': heightCm},
+      options: ApiClient.protected,
+    );
+  }
+
+  @override
+  Future<DownloadedReport> downloadReport(String slug, String sessionId) async {
+    final res = await _api.postBytes(
+      url: ApiEndpoints.assessmentReport(slug, sessionId),
+      payload: const {},
+      options: ApiClient.protected,
+    );
+    final cd = res.headers['content-disposition']?.firstOrNull;
+    String? filename;
+    if (cd != null) {
+      final match = RegExp(r'filename="?([^";]+)"?').firstMatch(cd);
+      filename = match?.group(1);
+    }
+    final hint = res.headers['x-pdf-password-hint']?.firstOrNull;
+    return DownloadedReport(
+      bytes: res.bytes,
+      filename: filename,
+      passwordHint: hint,
+    );
+  }
+
+  @override
+  Future<String?> getReportEmailPrefill(String slug, String sessionId) async {
+    final res = await _api.get<Map<String, dynamic>>(
+      url: ApiEndpoints.assessmentReportEmailPrefill(slug, sessionId),
+      options: ApiClient.protected,
+    );
+    return res['email'] as String?;
+  }
+
+  @override
+  Future<void> emailReport(String slug, String sessionId, String email) async {
+    await _api.post<Map<String, dynamic>>(
+      url: ApiEndpoints.assessmentReportEmail(slug, sessionId),
+      payload: {'email': email},
       options: ApiClient.protected,
     );
   }

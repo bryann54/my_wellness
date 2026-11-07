@@ -9,6 +9,8 @@ import 'package:my_wellness/features/app_lock/presentation/bloc/app_lock_bloc.da
 import 'package:my_wellness/features/app_lock/presentation/widgets/app_lock_setup_sheet.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_state.dart';
+import 'package:my_wellness/features/auth/presentation/bloc/auth_event.dart';
+import 'package:my_wellness/features/auth/presentation/widgets/mfa_verification_dialog.dart';
 
 class AuthStateListener extends StatelessWidget {
   const AuthStateListener({
@@ -55,6 +57,23 @@ class AuthStateListener extends StatelessWidget {
         await context.router.push(
           VerificationRoute(pending: state.pendingSignup),
         );
+
+      case AuthStatus.mfaRequired:
+        final verified = await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => BlocProvider.value(
+            value: context.read<AuthBloc>(),
+            child: const MfaVerificationDialog(),
+          ),
+        );
+        if (!context.mounted) return;
+        if (verified == true) {
+          _showSuccess(context);
+          context.read<AppLockBloc>().add(const AppLockSignedIn());
+        } else {
+          context.read<AuthBloc>().add(const CancelMfaEvent());
+        }
 
       case AuthStatus.passwordResetRequested:
       case AuthStatus.passwordResetCompleted:

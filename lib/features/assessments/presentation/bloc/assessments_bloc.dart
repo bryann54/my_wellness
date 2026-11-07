@@ -1,20 +1,23 @@
+import 'dart:io';
+
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
+import 'package:injectable/injectable.dart';
+import 'package:path_provider/path_provider.dart';
+
+import 'package:my_wellness/common/helpers/base_usecase.dart';
+import 'package:my_wellness/common/utils/functions.dart';
 import 'package:my_wellness/core/errors/failures.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_answer.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_definition.dart';
-import 'package:my_wellness/features/assessments/domain/entities/assessment_score.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_question.dart';
+import 'package:my_wellness/features/assessments/domain/entities/assessment_score.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_session.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_summary.dart';
 import 'package:my_wellness/features/assessments/domain/entities/bmi_preview.dart';
 import 'package:my_wellness/features/assessments/domain/entities/referral.dart';
 import 'package:my_wellness/features/assessments/domain/entities/vitals_access.dart';
-
-import 'package:injectable/injectable.dart';
-import 'package:my_wellness/common/helpers/base_usecase.dart';
-import 'package:my_wellness/common/utils/functions.dart';
 import 'package:my_wellness/features/assessments/domain/repositories/assessments_repository.dart';
 import 'package:my_wellness/features/assessments/domain/usecases/assessments_usecases.dart';
 
@@ -35,6 +38,8 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
   final GetAssessmentScoreUseCase _getScore;
   final PreviewBmiUseCase _previewBmi;
   final SubmitBmiMetricsUseCase _submitBmiMetrics;
+  final DownloadAssessmentReportUseCase _downloadReport;
+  final EmailAssessmentReportUseCase _emailReport;
 
   String? _activeSlug;
   String? _activeSessionId;
@@ -53,17 +58,21 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
     this._getScore,
     this._previewBmi,
     this._submitBmiMetrics,
+    this._downloadReport,
+    this._emailReport,
   ) : super(const AssessmentsState()) {
     on<LoadAssessmentsEvent>(_onLoad, transformer: restartable());
     on<SearchAssessmentsEvent>(_onSearch);
-    on<StartAssessmentsEvent>(_onStart);
+    on<StartAssessmentsEvent>(_onStart, transformer: restartable());
+    on<ResumeAssessmentsEvent>(_onResume, transformer: restartable());
     on<SubmitCancerPreScreeningEvent>(_onSubmitPreScreening);
-    on<ResumeAssessmentsEvent>(_onResume);
-    on<SubmitAnswerEvent>(_onSubmitAnswer);
+    on<SubmitAnswerEvent>(_onSubmitAnswer, transformer: droppable());
     on<SubmitBmiEvent>(_onSubmitBmi, transformer: droppable());
     on<PreviewBmiEvent>(_onPreviewBmi);
     on<ClearBmiPreviewEvent>(_onClearBmiPreview);
     on<FetchScoreEvent>(_onFetchScore);
+    on<AlertNavigatorEvent>(_onAlertNavigator);
+    on<DownloadReportEvent>(_onDownloadReport, transformer: droppable());
     on<ResetAssessmentsEvent>((_, emit) {
       _activeSlug = null;
       _activeSessionId = null;
@@ -76,7 +85,9 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
     LoadAssessmentsEvent event,
     Emitter<AssessmentsState> emit,
   ) async {
-    emit(state.copyWith(status: AssessmentStatus.loading, clearError: true));
+    if (!event.silent || state.assessments.isEmpty) {
+      emit(state.copyWith(status: AssessmentStatus.loading, clearError: true));
+    }
 
     final accessRes = await _getAccess(NoParams());
     final listRes = await _listAssessments(NoParams());
@@ -86,12 +97,14 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
         listRes.fold<Failure?>((f) => f, (_) => null);
 
     if (failure != null) {
-      emit(
-        state.copyWith(
-          status: AssessmentStatus.error,
-          errorMessage: mapFailure(failure),
-        ),
-      );
+      if (!event.silent || state.assessments.isEmpty) {
+        emit(
+          state.copyWith(
+            status: AssessmentStatus.error,
+            errorMessage: mapFailure(failure),
+          ),
+        );
+      }
       return;
     }
 
@@ -99,10 +112,12 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
       () => const VitalsAccess(hasAccess: false),
     );
     final all = listRes.getOrElse(() => const <AssessmentSummary>[]);
-    final userGender = event.userGender;
 
     final visible = all
-        .where((a) => a.isVisibleFor(userGender))
+        .where(
+          (a) =>
+              !a.slug.endsWith('-followup') && a.isVisibleFor(event.userGender),
+        )
         .toList(growable: false);
 
     emit(
@@ -138,18 +153,19 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
     emit(state.copyWith(searchQuery: query, filteredAssessments: filtered));
   }
 
+  /// If the bloc already holds a live session for this slug, no need to hit
+  /// the network again.
   bool _isWarmForSlug(String slug) {
-    return state.status == AssessmentStatus.ready &&
-        state.definition?.slug == slug &&
+    return state.definition?.slug == slug &&
         state.session?.assessmentSlug == slug &&
-        !state.alreadyCompleted;
+        state.status == AssessmentStatus.ready;
   }
 
   Future<void> _onStart(
     StartAssessmentsEvent event,
     Emitter<AssessmentsState> emit,
   ) async {
-    if (_isWarmForSlug(event.slug)) return;
+    if (_isWarmForSlug(event.slug) && !state.alreadyCompleted) return;
 
     _bmiPreviewRequestId++;
     emit(
@@ -157,15 +173,12 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
         status: AssessmentStatus.loading,
         clearError: true,
         terminated: false,
-        terminationReference: null,
         clearBmiPreview: true,
-        bmiPreviewLoading: false,
         clearBmiPreviewInputKey: true,
         completionHandled: false,
         alreadyCompleted: false,
       ),
     );
-
     _activeSlug = event.slug;
 
     final canStartRes = await _canStart(event.slug);
@@ -174,29 +187,56 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
       (r) => r,
     );
 
-    final alreadyDone = !canStart.allowed && canStart.lastCompletedAt != null;
-
     final defRes = await _getDefinition(event.slug);
-    final sessionRes = await _startSession(event.slug);
-
-    final failure =
-        defRes.fold<Failure?>((f) => f, (_) => null) ??
-        sessionRes.fold<Failure?>((f) => f, (_) => null);
-    if (failure != null) {
+    final defFailure = defRes.fold<Failure?>((f) => f, (_) => null);
+    if (defFailure != null) {
       emit(
         state.copyWith(
           status: AssessmentStatus.error,
-          errorMessage: mapFailure(failure),
+          errorMessage: mapFailure(defFailure),
+        ),
+      );
+      return;
+    }
+    final def = defRes.getOrElse(() => throw StateError('definition missing'));
+
+    // Blocked reasons that live only on can-start: don't create a session.
+    if (!canStart.allowed &&
+        canStart.blockedReason != null &&
+        canStart.blockedReason != 'gender_ineligible' &&
+        canStart.blockedReason != 'age_ineligible' &&
+        canStart.blockedReason != 'cancer_diagnosed_blocked' &&
+        canStart.blockedReason != 'assessment_paused' &&
+        canStart.blockedReason != 'ebola_access_required') {
+      // chapter_not_unlocked or ordinary cooldown: show intro without a session.
+      emit(
+        state.copyWith(
+          status: AssessmentStatus.ready,
+          definition: def,
+          canStart: canStart,
         ),
       );
       return;
     }
 
-    final def = defRes.getOrElse(() => throw StateError('definition missing'));
+    final sessionRes = await _startSession(event.slug);
+    final sessionFailure = sessionRes.fold<Failure?>((f) => f, (_) => null);
+    if (sessionFailure != null) {
+      // Any hard gate (age/gender/cancer/in-progress) surfaces here.
+      emit(
+        state.copyWith(
+          status: AssessmentStatus.error,
+          errorMessage: mapFailure(sessionFailure),
+        ),
+      );
+      return;
+    }
     final session = sessionRes.getOrElse(
       () => throw StateError('session missing'),
     );
     _activeSessionId = session.id;
+
+    final alreadyDone = !canStart.allowed && canStart.lastCompletedAt != null;
 
     if (alreadyDone) {
       emit(
@@ -204,7 +244,22 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
           status: AssessmentStatus.ready,
           definition: def,
           session: session,
+          canStart: canStart,
           alreadyCompleted: true,
+        ),
+      );
+      await _loadScoreAndReferral(emit);
+      return;
+    }
+
+    if (session.status == AssessmentSessionStatus.completed) {
+      // Skip straight to the thank-you/result screen.
+      emit(
+        state.copyWith(
+          status: AssessmentStatus.completed,
+          definition: def,
+          session: session,
+          canStart: canStart,
         ),
       );
       await _loadScoreAndReferral(emit);
@@ -217,6 +272,7 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
           status: AssessmentStatus.ready,
           definition: def,
           session: session,
+          canStart: canStart,
           terminated: true,
           terminationReference: session.referenceNumber,
         ),
@@ -224,54 +280,32 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
       return;
     }
 
-    if (session.status == AssessmentSessionStatus.completed) {
-      emit(
-        state.copyWith(
-          status: AssessmentStatus.completed,
-          definition: def,
-          session: session,
-        ),
-      );
-      await _loadScoreAndReferral(emit);
-      return;
-    }
-
-    if (!canStart.allowed) {
-      emit(
-        state.copyWith(
-          status: AssessmentStatus.error,
-          errorMessage: 'You are not eligible to start this assessment yet.',
-          definition: def,
-          session: session,
-        ),
-      );
-      return;
-    }
-
-    if (session.status != AssessmentSessionStatus.inProgress) {
+    if (session.status == AssessmentSessionStatus.inProgress) {
+      final answersRes = await _getAnswers((
+        slug: event.slug,
+        sessionId: session.id,
+      ));
+      final answers = answersRes.getOrElse(() => const <AssessmentAnswer>[]);
       emit(
         state.copyWith(
           status: AssessmentStatus.ready,
           definition: def,
           session: session,
-          answers: const <AssessmentAnswer>[],
+          canStart: canStart,
+          answers: answers,
         ),
       );
       return;
     }
 
-    final answersRes = await _getAnswers((
-      slug: event.slug,
-      sessionId: session.id,
-    ));
-    final answers = answersRes.getOrElse(() => const <AssessmentAnswer>[]);
-
+    // awaiting_payment / awaiting_call / needs_pre_screening: show the intro.
     emit(
       state.copyWith(
         status: AssessmentStatus.ready,
         definition: def,
         session: session,
-        answers: answers,
+        canStart: canStart,
+        answers: const <AssessmentAnswer>[],
       ),
     );
   }
@@ -280,9 +314,9 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
     ResumeAssessmentsEvent event,
     Emitter<AssessmentsState> emit,
   ) async {
-    if (state.status == AssessmentStatus.ready &&
-        state.session?.id == event.sessionId &&
-        state.definition?.slug == event.slug) {
+    if (state.session?.id == event.sessionId &&
+        state.definition?.slug == event.slug &&
+        state.status == AssessmentStatus.ready) {
       return;
     }
 
@@ -292,7 +326,6 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
         status: AssessmentStatus.loading,
         clearError: true,
         clearBmiPreview: true,
-        bmiPreviewLoading: false,
         clearBmiPreviewInputKey: true,
         terminated: false,
         alreadyCompleted: false,
@@ -303,6 +336,19 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
     );
     _activeSlug = event.slug;
     _activeSessionId = event.sessionId;
+
+    final defRes = await _getDefinition(event.slug);
+    final defFailure = defRes.fold<Failure?>((f) => f, (_) => null);
+    if (defFailure != null) {
+      emit(
+        state.copyWith(
+          status: AssessmentStatus.error,
+          errorMessage: mapFailure(defFailure),
+        ),
+      );
+      return;
+    }
+    final def = defRes.getOrElse(() => throw StateError('definition missing'));
 
     final sessionRes = await _startSession(event.slug);
     final sessionFailure = sessionRes.fold<Failure?>((f) => f, (_) => null);
@@ -319,75 +365,33 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
       () => throw StateError('session missing'),
     );
     _activeSessionId = session.id;
-    final defRes = await _getDefinition(event.slug);
 
-    final answersRes =
-        session.status == AssessmentSessionStatus.inProgress ||
-            session.status == AssessmentSessionStatus.completed
-        ? await _getAnswers((slug: event.slug, sessionId: session.id))
-        : null;
-
-    final definitionFailure = defRes.fold<Failure?>((f) => f, (_) => null);
-    final answersFailure = answersRes?.fold<Failure?>((f) => f, (_) => null);
-
-    if (definitionFailure != null || answersFailure != null) {
-      final failure = definitionFailure ?? answersFailure;
+    if (session.status == AssessmentSessionStatus.completed) {
       emit(
         state.copyWith(
-          status: AssessmentStatus.error,
-          errorMessage: mapFailure(failure!),
+          status: AssessmentStatus.completed,
+          session: session,
+          definition: def,
         ),
       );
+      await _loadScoreAndReferral(emit);
       return;
     }
 
-    final definition = defRes.getOrElse(
-      () => throw StateError('definition missing'),
-    );
-    final answers =
-        answersRes?.getOrElse(() => const <AssessmentAnswer>[]) ??
-        const <AssessmentAnswer>[];
-    final firstUnanswered = session.status == AssessmentSessionStatus.inProgress
-        ? _firstUnansweredQuestion(definition, answers)
-        : null;
-    final currentIndex =
-        firstUnanswered != null && firstUnanswered.index > session.currentIndex
-        ? firstUnanswered.index
-        : session.currentIndex;
-    final resumedSession = session.status == AssessmentSessionStatus.inProgress
-        ? AssessmentSession(
-            id: session.id,
-            assessmentSlug: session.assessmentSlug,
-            status: session.status,
-            currentIndex: currentIndex,
-            totalQuestions: session.totalQuestions,
-            completionPct: session.totalQuestions == 0
-                ? session.completionPct
-                : ((currentIndex / session.totalQuestions) * 100)
-                      .round()
-                      .clamp(0, 100)
-                      .toInt(),
-            referenceNumber: session.referenceNumber,
-            paidAt: session.paidAt,
-            startedAt: session.startedAt,
-            completedAt: session.completedAt,
-            navigatorAlertedAt: session.navigatorAlertedAt,
-          )
-        : session;
+    final answersRes = await _getAnswers((
+      slug: event.slug,
+      sessionId: session.id,
+    ));
+    final answers = answersRes.getOrElse(() => const <AssessmentAnswer>[]);
 
     emit(
       state.copyWith(
-        status: session.status == AssessmentSessionStatus.completed
-            ? AssessmentStatus.completed
-            : AssessmentStatus.ready,
-        session: resumedSession,
-        definition: definition,
+        status: AssessmentStatus.ready,
+        session: session,
+        definition: def,
         answers: answers,
       ),
     );
-    if (session.status == AssessmentSessionStatus.completed) {
-      await _loadScoreAndReferral(emit);
-    }
   }
 
   Future<void> _onSubmitPreScreening(
@@ -396,11 +400,8 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
   ) async {
     final session = state.session;
     final slug = _activeSlug;
-    if (session == null ||
-        slug == null ||
-        session.status != AssessmentSessionStatus.needsPreScreening) {
-      return;
-    }
+    if (session == null || slug == null) return;
+    if (session.status != AssessmentSessionStatus.needsPreScreening) return;
 
     emit(state.copyWith(status: AssessmentStatus.submitting, clearError: true));
     final result = await _submitPreScreening(
@@ -410,6 +411,7 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
       priorCancerType: event.priorCancerType,
       priorCancerYear: event.priorCancerYear,
     );
+
     await result.fold<Future<void>>(
       (failure) async => emit(
         state.copyWith(
@@ -453,39 +455,6 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
 
     await res.fold(
       (f) async {
-        final definition = state.definition;
-        final session = state.session;
-        if (f is ValidationFailure &&
-            f.error.toLowerCase().contains(
-              'please answer the previous question first',
-            ) &&
-            definition != null &&
-            session != null) {
-          final expectedQuestion = _firstUnansweredQuestion(
-            definition,
-            state.answers,
-          );
-          if (expectedQuestion != null &&
-              expectedQuestion.index < event.questionIndex) {
-            emit(
-              state.copyWith(
-                status: AssessmentStatus.ready,
-                clearError: true,
-                session: session.applyResult(
-                  SubmitAnswerResult(
-                    nextIndex: expectedQuestion.index,
-                    terminate: false,
-                    completed: false,
-                  ),
-                ),
-                toastType: ToastType.info,
-                toastMessage: 'Please complete the earlier question first.',
-                toastNonce: state.toastNonce + 1,
-              ),
-            );
-            return;
-          }
-        }
         final message = mapFailure(f);
         emit(
           state.copyWith(
@@ -498,20 +467,12 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
         );
       },
       (result) async {
-        final recordedAnswers = _recordAnswer(state.answers, event);
-        if (result.terminate) {
-          emit(
-            state.copyWith(
-              status: AssessmentStatus.ready,
-              terminated: true,
-              terminationReference: result.reference,
-              session: state.session?.applyResult(result),
-              answers: recordedAnswers,
-            ),
-          );
-          return;
-        }
-
+        final recorded = _recordAnswer(
+          state.answers,
+          questionKey: event.questionKey,
+          questionIndex: event.questionIndex,
+          answer: event.answer,
+        );
         final updatedSession = state.session?.applyResult(result);
 
         if (result.completed) {
@@ -519,18 +480,29 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
             state.copyWith(
               status: AssessmentStatus.completed,
               session: updatedSession,
-              answers: recordedAnswers,
+              answers: recorded,
             ),
           );
           await _loadScoreAndReferral(emit);
           return;
         }
-
+        if (result.terminate) {
+          emit(
+            state.copyWith(
+              status: AssessmentStatus.ready,
+              terminated: true,
+              terminationReference: result.reference,
+              session: updatedSession,
+              answers: recorded,
+            ),
+          );
+          return;
+        }
         emit(
           state.copyWith(
             status: AssessmentStatus.ready,
             session: updatedSession,
-            answers: recordedAnswers,
+            answers: recorded,
           ),
         );
       },
@@ -545,14 +517,14 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
     final sessionId = _activeSessionId;
     if (slug == null || sessionId == null) return;
 
-    emit(state.copyWith(status: AssessmentStatus.submitting));
-
     final weightKg = double.tryParse(event.weightKg);
     final heightCm = double.tryParse(event.heightCm);
     if (weightKg == null ||
         heightCm == null ||
-        weightKg <= 0 ||
-        heightCm <= 0) {
+        weightKg < 20 ||
+        weightKg > 400 ||
+        heightCm < 80 ||
+        heightCm > 250) {
       emit(
         state.copyWith(
           status: AssessmentStatus.error,
@@ -565,16 +537,15 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
       return;
     }
 
-    final bmiPreview = state.bmiPreview;
-    if (bmiPreview == null ||
-        state.bmiPreviewInputKey != _bmiPreviewInputKey(weightKg, heightCm) ||
-        state.bmiPreviewLoading) {
+    final preview = state.bmiPreview;
+    final inputKey = _inputKey(weightKg, heightCm);
+    if (preview == null || state.bmiPreviewInputKey != inputKey) {
       emit(
         state.copyWith(
           status: AssessmentStatus.error,
           errorMessage: 'BMI result is not ready. Re-enter your measurements.',
           toastType: ToastType.error,
-          toastMessage: 'BMI result is not ready. Re-enter your measurements.',
+          toastMessage: 'BMI result is not ready.',
           toastNonce: state.toastNonce + 1,
         ),
       );
@@ -583,78 +554,23 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
 
     final session = state.session;
     final definition = state.definition;
-    if (session == null || definition == null) {
-      emit(
-        state.copyWith(
-          status: AssessmentStatus.error,
-          errorMessage: 'Assessment session is no longer available.',
-          toastType: ToastType.error,
-          toastMessage: 'Assessment session is no longer available.',
-          toastNonce: state.toastNonce + 1,
-        ),
-      );
-      return;
-    }
-
+    if (session == null || definition == null) return;
     final bmiQuestion = definition.questionByIndex(session.currentIndex);
-    if (bmiQuestion?.type != AssessmentQuestionType.bmi) {
-      emit(
-        state.copyWith(
-          status: AssessmentStatus.error,
-          errorMessage: 'BMI question is out of sequence. Please try again.',
-          toastType: ToastType.error,
-          toastMessage: 'BMI question is out of sequence. Please try again.',
-          toastNonce: state.toastNonce + 1,
-        ),
-      );
+    if (bmiQuestion == null || bmiQuestion.type != AssessmentQuestionType.bmi) {
       return;
     }
 
-    final currentBmiQuestion = bmiQuestion!;
+    emit(state.copyWith(status: AssessmentStatus.submitting));
 
-    final latestAnswersResult = await _getAnswers((
-      slug: slug,
-      sessionId: sessionId,
-    ));
-    final latestAnswers = latestAnswersResult.getOrElse(() => state.answers);
-
-    final previousUnanswered = _firstUnansweredQuestion(
-      definition,
-      latestAnswers,
-      beforeIndex: currentBmiQuestion.index,
-      skipBmi: true,
-    );
-    if (previousUnanswered != null) {
-      emit(
-        state.copyWith(
-          status: AssessmentStatus.ready,
-          answers: latestAnswers,
-          session: session.applyResult(
-            SubmitAnswerResult(
-              nextIndex: previousUnanswered.index,
-              terminate: false,
-              completed: false,
-            ),
-          ),
-          clearBmiPreview: true,
-          clearBmiPreviewInputKey: true,
-        ),
-      );
-      return;
-    }
-
-    final bmiMetricsResult = await _submitBmiMetrics(
+    final metrics = await _submitBmiMetrics(
       slug: slug,
       sessionId: sessionId,
       weightKg: weightKg,
       heightCm: heightCm,
     );
-    final bmiMetricsFailure = bmiMetricsResult.fold<Failure?>(
-      (f) => f,
-      (_) => null,
-    );
-    if (bmiMetricsFailure != null) {
-      final message = mapFailure(bmiMetricsFailure);
+    final metricsFailure = metrics.fold<Failure?>((f) => f, (_) => null);
+    if (metricsFailure != null) {
+      final message = mapFailure(metricsFailure);
       emit(
         state.copyWith(
           status: AssessmentStatus.error,
@@ -667,16 +583,18 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
       return;
     }
 
-    final answer = bmiPreview.bmi.toStringAsFixed(1);
-    final answerResult = await _submitAnswer((
+    // The preview endpoint is the authoritative source for the bucket sent
+    // back to the assessment engine. Do not duplicate clinical thresholds.
+    final bucket = preview.classification;
+    final answerRes = await _submitAnswer((
       slug: slug,
       sessionId: sessionId,
-      questionKey: currentBmiQuestion.key,
-      questionIndex: currentBmiQuestion.index,
-      answer: answer,
+      questionKey: bmiQuestion.key,
+      questionIndex: bmiQuestion.index,
+      answer: bucket,
     ));
 
-    await answerResult.fold(
+    await answerRes.fold(
       (failure) async {
         final message = mapFailure(failure);
         emit(
@@ -691,34 +609,19 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
       },
       (result) async {
         final updatedSession = session.applyResult(result);
-        final recordedAnswers = _recordAnswerValue(
+        final recorded = _recordAnswer(
           state.answers,
-          questionKey: currentBmiQuestion.key,
-          questionIndex: currentBmiQuestion.index,
-          answer: answer,
+          questionKey: bmiQuestion.key,
+          questionIndex: bmiQuestion.index,
+          answer: bucket,
         );
-
-        if (result.terminate) {
-          emit(
-            state.copyWith(
-              status: AssessmentStatus.ready,
-              terminated: true,
-              terminationReference: result.reference,
-              session: updatedSession,
-              answers: recordedAnswers,
-              clearBmiPreview: true,
-              clearBmiPreviewInputKey: true,
-            ),
-          );
-          return;
-        }
 
         if (result.completed) {
           emit(
             state.copyWith(
               status: AssessmentStatus.completed,
               session: updatedSession,
-              answers: recordedAnswers,
+              answers: recorded,
               clearBmiPreview: true,
               clearBmiPreviewInputKey: true,
             ),
@@ -726,67 +629,17 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
           await _loadScoreAndReferral(emit);
           return;
         }
-
         emit(
           state.copyWith(
             status: AssessmentStatus.ready,
             session: updatedSession,
-            answers: recordedAnswers,
+            answers: recorded,
             clearBmiPreview: true,
             clearBmiPreviewInputKey: true,
           ),
         );
       },
     );
-  }
-
-  List<AssessmentAnswer> _recordAnswer(
-    List<AssessmentAnswer> answers,
-    SubmitAnswerEvent event,
-  ) => _recordAnswerValue(
-    answers,
-    questionKey: event.questionKey,
-    questionIndex: event.questionIndex,
-    answer: event.answer,
-  );
-
-  List<AssessmentAnswer> _recordAnswerValue(
-    List<AssessmentAnswer> answers, {
-    required String questionKey,
-    required int questionIndex,
-    required String answer,
-  }) {
-    final updated = answers
-        .where((existing) => existing.questionKey != questionKey)
-        .toList(growable: true);
-    updated.add(
-      AssessmentAnswer(
-        questionKey: questionKey,
-        questionIndex: questionIndex,
-        answer: answer,
-      ),
-    );
-    return updated;
-  }
-
-  AssessmentQuestion? _firstUnansweredQuestion(
-    AssessmentDefinition definition,
-    List<AssessmentAnswer> answers, {
-    int? beforeIndex,
-    bool skipBmi = false,
-  }) {
-    final answeredIndices = answers
-        .map((answer) => answer.questionIndex)
-        .toSet();
-    final questions = [...definition.questions]
-      ..sort((a, b) => a.index.compareTo(b.index));
-    for (final question in questions) {
-      if (beforeIndex != null && question.index >= beforeIndex) continue;
-      if (question.type == AssessmentQuestionType.unknown) continue;
-      if (skipBmi && question.type == AssessmentQuestionType.bmi) continue;
-      if (!answeredIndices.contains(question.index)) return question;
-    }
-    return null;
   }
 
   Future<void> _onPreviewBmi(
@@ -797,16 +650,13 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
     final heightCm = double.tryParse(event.heightCm);
     if (weightKg == null ||
         heightCm == null ||
-        !weightKg.isFinite ||
-        !heightCm.isFinite ||
         weightKg <= 0 ||
         heightCm <= 0) {
       _onClearBmiPreview(const ClearBmiPreviewEvent(), emit);
       return;
     }
-
     final requestId = ++_bmiPreviewRequestId;
-    final inputKey = _bmiPreviewInputKey(weightKg, heightCm);
+    final inputKey = _inputKey(weightKg, heightCm);
     emit(
       state.copyWith(
         clearBmiPreview: true,
@@ -856,17 +706,106 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
     );
   }
 
-  String _bmiPreviewInputKey(double weightKg, double heightCm) =>
-      '${weightKg.toString()}|${heightCm.toString()}';
-
   Future<void> _onFetchScore(
     FetchScoreEvent event,
     Emitter<AssessmentsState> emit,
   ) async {
     if (state.completionHandled && state.score != null) return;
-
-    emit(state.copyWith(status: AssessmentStatus.loading));
+    if (state.status != AssessmentStatus.completed) {
+      emit(state.copyWith(status: AssessmentStatus.loading));
+    }
     await _loadScoreAndReferral(emit);
+  }
+
+  Future<void> _onAlertNavigator(
+    AlertNavigatorEvent event,
+    Emitter<AssessmentsState> emit,
+  ) async {
+    // Stub: the backend endpoint exists but isn't ported here; the navigator
+    // block will surface via the awaiting_call UI once a call is queued.
+    // Keeping a placeholder so the button's disabled state can be driven.
+  }
+
+  Future<void> _onDownloadReport(
+    DownloadReportEvent event,
+    Emitter<AssessmentsState> emit,
+  ) async {
+    final slug = _activeSlug;
+    final sessionId = _activeSessionId;
+    if (slug == null || sessionId == null) return;
+
+    if (event.emailOnly) {
+      emit(state.copyWith(reportEmailing: true, clearError: true));
+      final res = await _emailReport(
+        slug: slug,
+        sessionId: sessionId,
+        email: event.email.trim(),
+      );
+      res.fold(
+        (f) => emit(
+          state.copyWith(
+            reportEmailing: false,
+            toastType: ToastType.error,
+            toastMessage: mapFailure(f),
+            toastNonce: state.toastNonce + 1,
+          ),
+        ),
+        (_) => emit(
+          state.copyWith(
+            reportEmailing: false,
+            toastType: ToastType.success,
+            toastMessage: 'Report queued for ${event.email}',
+            toastNonce: state.toastNonce + 1,
+          ),
+        ),
+      );
+      return;
+    }
+
+    emit(state.copyWith(reportDownloading: true, clearError: true));
+    final res = await _downloadReport(slug: slug, sessionId: sessionId);
+
+    await res.fold<Future<void>>(
+      (f) async => emit(
+        state.copyWith(
+          reportDownloading: false,
+          toastType: ToastType.error,
+          toastMessage: mapFailure(f),
+          toastNonce: state.toastNonce + 1,
+        ),
+      ),
+      (report) async {
+        try {
+          final dir = await getTemporaryDirectory();
+          final filename =
+              report.filename ??
+              'assessment-report-${DateTime.now().millisecondsSinceEpoch}.pdf';
+          final file = File('${dir.path}/$filename');
+          await file.writeAsBytes(report.bytes, flush: true);
+
+          final hint = report.passwordHint;
+          emit(
+            state.copyWith(
+              reportDownloading: false,
+              toastType: ToastType.success,
+              toastMessage: hint != null
+                  ? 'Report saved. Password hint: $hint.'
+                  : 'Report saved to ${file.path}',
+              toastNonce: state.toastNonce + 1,
+            ),
+          );
+        } catch (_) {
+          emit(
+            state.copyWith(
+              reportDownloading: false,
+              toastType: ToastType.error,
+              toastMessage: 'Could not save the report.',
+              toastNonce: state.toastNonce + 1,
+            ),
+          );
+        }
+      },
+    );
   }
 
   Future<void> _loadScoreAndReferral(Emitter<AssessmentsState> emit) async {
@@ -874,11 +813,9 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
     final sessionId = _activeSessionId;
     if (slug == null || sessionId == null) return;
 
-    final scoreFut = _getScore((slug: slug, sessionId: sessionId));
-    final referralFut = _getReferral(sessionId);
-
-    final scoreRes = await scoreFut;
-    final referralRes = await referralFut;
+    final scoreRes = await _getScore((slug: slug, sessionId: sessionId));
+    final referralRes = await _getReferral(sessionId);
+    final canStartRes = await _canStart(slug);
 
     scoreRes.fold(
       (f) => emit(
@@ -894,10 +831,36 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
             status: AssessmentStatus.completed,
             score: score,
             referral: referral,
+            canStart: canStartRes.getOrElse(
+              () => const CanStartResult(allowed: false),
+            ),
             completionHandled: true,
           ),
         );
       },
     );
   }
+
+  List<AssessmentAnswer> _recordAnswer(
+    List<AssessmentAnswer> answers, {
+    required String questionKey,
+    required int questionIndex,
+    required String answer,
+  }) {
+    final updated =
+        answers
+            .where((a) => a.questionKey != questionKey)
+            .toList(growable: true)
+          ..add(
+            AssessmentAnswer(
+              questionKey: questionKey,
+              questionIndex: questionIndex,
+              answer: answer,
+            ),
+          );
+    return updated;
+  }
+
+  String _inputKey(double weightKg, double heightCm) =>
+      '${weightKg.toString()}|${heightCm.toString()}';
 }

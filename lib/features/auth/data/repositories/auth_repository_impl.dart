@@ -8,6 +8,7 @@ import 'package:my_wellness/features/auth/data/models/auth_session_model.dart';
 import 'package:my_wellness/features/auth/data/models/signup_request_model.dart';
 import 'package:my_wellness/features/auth/domain/entities/auth_session_entity.dart';
 import 'package:my_wellness/features/auth/domain/entities/signup_result_entity.dart';
+import 'package:my_wellness/features/auth/domain/entities/sign_in_result_entity.dart';
 import 'package:my_wellness/features/auth/domain/entities/user_entity.dart';
 import 'package:my_wellness/features/auth/domain/entities/verified_identity.dart';
 import 'package:my_wellness/features/auth/domain/repositories/auth_repository.dart';
@@ -20,23 +21,29 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl(this._remote, this._local);
 
   @override
-  Future<Either<Failure, AuthSessionEntity>> signIn({
+  Future<Either<Failure, SignInResultEntity>> signIn({
     required String identifier,
     required String password,
   }) async {
     try {
-      final session = await _remote.login(
+      final response = await _remote.login(
         identifier: identifier,
         password: password,
       );
 
-      await _local.saveTokens(access: session.access, refresh: session.refresh);
-
-      if (session.user != null) {
-        await _local.saveUser(session.user!);
+      if (response['mfa_required'] == true) {
+        final token = response['mfa_token'] as String?;
+        if (token == null || token.isEmpty) {
+          return const Left(GeneralFailure(error: 'Invalid MFA challenge'));
+        }
+        return Right(SignInResultEntity(mfaToken: token));
       }
 
-      return Right(session.toEntity());
+      final session = AuthSessionModel.fromJson(response);
+
+      await _local.saveTokens(access: session.access, refresh: session.refresh);
+
+      return Right(SignInResultEntity(session: session.toEntity()));
     } on ValidationException catch (e) {
       return Left(ValidationFailure(error: e.message));
     } on UnauthorizedException {
@@ -47,6 +54,29 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(
         GeneralFailure(error: e.toString().replaceFirst('Exception: ', '')),
       );
+    }
+  }
+
+  @override
+  Future<Either<Failure, AuthSessionEntity>> verifyMfa({
+    required String mfaToken,
+    String? code,
+    String? backupCode,
+  }) async {
+    try {
+      final session = await _remote.verifyMfa(
+        mfaToken: mfaToken,
+        code: code,
+        backupCode: backupCode,
+      );
+      await _saveSession(session);
+      return Right(session.toEntity());
+    } on ValidationException catch (e) {
+      return Left(ValidationFailure(error: e.message));
+    } on NetworkException {
+      return const Left(NetworkFailure());
+    } on Exception catch (e) {
+      return Left(GeneralFailure(error: e.toString()));
     }
   }
 
@@ -79,7 +109,6 @@ class AuthRepositoryImpl implements AuthRepository {
       if (pendingModel.hasSession) {
         final session = pendingModel.toSessionModel();
         await _saveSession(session);
-        await _local.clearPendingSignup();
         return Right(SignupResultEntity(session: session.toEntity()));
       }
       if (pendingModel.channel == null) {
@@ -91,8 +120,6 @@ class AuthRepositoryImpl implements AuthRepository {
       final pendingEntity = pendingModel.toEntity(
         fallbackDestination: fallbackDestination,
       );
-
-      await _local.savePendingSignup(pendingEntity);
 
       return Right(SignupResultEntity(pending: pendingEntity));
     } on ValidationException catch (e) {
@@ -117,7 +144,6 @@ class AuthRepositoryImpl implements AuthRepository {
         code: code,
       );
       await _saveSession(session);
-      await _local.clearPendingSignup();
       return Right(session.toEntity());
     } on ValidationException catch (e) {
       return Left(ValidationFailure(error: e.message));
@@ -137,7 +163,6 @@ class AuthRepositoryImpl implements AuthRepository {
         code: code,
       );
       await _saveSession(session);
-      await _local.clearPendingSignup();
       return Right(session.toEntity());
     } on ValidationException catch (e) {
       return Left(ValidationFailure(error: e.message));
@@ -148,8 +173,6 @@ class AuthRepositoryImpl implements AuthRepository {
 
   Future<void> _saveSession(AuthSessionModel session) async {
     await _local.saveTokens(access: session.access, refresh: session.refresh);
-    final user = session.user;
-    if (user != null) await _local.saveUser(user);
   }
 
   @override
@@ -261,6 +284,13 @@ class AuthRepositoryImpl implements AuthRepository {
     } on UnauthorizedException {
       await _local.clearAuthData();
       return const Left(UnauthorizedFailure());
+    } on ValidationException {
+      await _local.clearAuthData();
+      return const Left(UnauthorizedFailure());
+    } on NetworkException {
+      return const Left(NetworkFailure());
+    } on ServerException {
+      return const Left(ServerFailure());
     } catch (e) {
       return Left(GeneralFailure(error: e.toString()));
     }

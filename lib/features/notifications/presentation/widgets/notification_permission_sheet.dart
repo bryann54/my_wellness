@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_wellness/common/widgets/shimmer_box.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:my_wellness/common/res/app_spacing.dart';
@@ -158,7 +159,7 @@ class NotificationPermissionSheet extends StatelessWidget {
                       const Padding(
                         padding: EdgeInsets.all(AppSpacing.lg),
                         child: Center(
-                          child: CircularProgressIndicator.adaptive(),
+                          child: ShimmerBox(width: 120, height: 12, radius: 6),
                         ),
                       )
                     else if (state.preferencesError != null &&

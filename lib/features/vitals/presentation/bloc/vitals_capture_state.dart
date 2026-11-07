@@ -135,10 +135,8 @@ class VitalsCaptureState extends Equatable {
     bookingReferral: bookingReferral ?? this.bookingReferral,
     errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
   );
-  bool get needsProviderPlan {
-    final v = pathwayValue;
-    return v == 'provider_directed';
-  }
+  // Provider plan was removed from the 2026-11-03 monitoring setup.
+  bool get needsProviderPlan => false;
 
   bool get needsTreatmentGap {
     final v = pathwayValue;
