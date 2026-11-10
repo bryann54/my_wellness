@@ -40,6 +40,7 @@ abstract class AuthRepository {
 
   Future<Either<Failure, void>> requestPasswordReset({
     required String identifier,
+    String? channel,
   });
   Future<Either<Failure, void>> confirmPasswordReset({
     required String identifier,

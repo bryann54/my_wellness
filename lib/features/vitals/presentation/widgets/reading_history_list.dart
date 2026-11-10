@@ -12,6 +12,7 @@ class ReadingHistoryRow {
     required this.primary,
     required this.unit,
     required this.classification,
+    this.classificationLabel,
     required this.timestampIso,
     this.secondary,
     required this.onDelete,
@@ -21,6 +22,7 @@ class ReadingHistoryRow {
   final String primary;
   final String unit;
   final String classification;
+  final String? classificationLabel;
   final String timestampIso;
   final String? secondary;
   final VoidCallback onDelete;
@@ -175,7 +177,11 @@ class _HistoryItem extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
-            VitalsStatusPill(classification: row.classification, compact: true),
+            VitalsStatusPill(
+              classification: row.classification,
+              label: row.classificationLabel,
+              compact: true,
+            ),
           ],
         ),
       ),

@@ -54,6 +54,10 @@ class AuthStateListener extends StatelessWidget {
 
       case AuthStatus.awaitingSignupConfirmation:
         if (state.pendingSignup == null) return;
+        final message = state.pendingSignup?.message;
+        if (message != null && message.isNotEmpty) {
+          AppSnackbar.error(context, message);
+        }
         await context.router.push(
           VerificationRoute(pending: state.pendingSignup),
         );
@@ -74,6 +78,12 @@ class AuthStateListener extends StatelessWidget {
         } else {
           context.read<AuthBloc>().add(const CancelMfaEvent());
         }
+
+      case AuthStatus.mfaExpired:
+        AppSnackbar.error(
+          context,
+          state.errorMessage ?? _genericError(context),
+        );
 
       case AuthStatus.passwordResetRequested:
       case AuthStatus.passwordResetCompleted:

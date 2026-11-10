@@ -6,32 +6,49 @@ enum IdType { nationalId, maisha }
 
 @JsonSerializable()
 class SignupRequestModel {
+  @JsonKey(includeIfNull: false)
   final String? email;
+
+  @JsonKey(includeIfNull: false)
   final String? phone;
+
   final String password;
 
-  @JsonKey(name: 'national_id_number')
+  @JsonKey(name: 'first_name', includeIfNull: false)
+  final String? firstName;
+
+  @JsonKey(includeIfNull: false)
+  final String? surname;
+
+  @JsonKey(includeIfNull: false)
+  final String? gender;
+
+  @JsonKey(name: 'date_of_birth', includeIfNull: false)
+  final String? dateOfBirth;
+
+  @JsonKey(name: 'national_id_number', includeIfNull: false)
   final String? nationalIdNumber;
 
-  @JsonKey(name: 'county')
+  @JsonKey(includeIfNull: false)
   final String? county;
 
-  @JsonKey(name: 'sub_county')
+  @JsonKey(name: 'sub_county', includeIfNull: false)
   final int? subCountyId;
 
-  @JsonKey(name: 'constituency')
+  @JsonKey(name: 'constituency', includeIfNull: false)
   final int? constituencyId;
 
-  @JsonKey(name: 'ward')
+  @JsonKey(name: 'ward', includeIfNull: false)
   final int? wardId;
 
-  @JsonKey(name: 'identity_verification_id')
+  @JsonKey(name: 'identity_verification_id', includeIfNull: false)
   final String? identityVerificationId;
 
-  @JsonKey(name: 'invite_token')
+  @JsonKey(name: 'invite_token', includeIfNull: false)
   final String? inviteToken;
 
-  final String? subdomain;
+  @JsonKey(name: 'accepted_terms')
+  final bool acceptedTerms;
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   final IdType? idType;
@@ -40,6 +57,10 @@ class SignupRequestModel {
     this.email,
     this.phone,
     required this.password,
+    this.firstName,
+    this.surname,
+    this.gender,
+    this.dateOfBirth,
     this.nationalIdNumber,
     this.county,
     this.subCountyId,
@@ -47,7 +68,7 @@ class SignupRequestModel {
     this.wardId,
     this.identityVerificationId,
     this.inviteToken,
-    this.subdomain,
+    required this.acceptedTerms,
     this.idType,
   }) : assert(
          email != null || phone != null,

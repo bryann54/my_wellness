@@ -22,6 +22,11 @@ import 'package:my_wellness/features/vitals/presentation/widgets/vitals_empty_st
 
 const double _hPad = AppSpacing.md + AppSpacing.xs;
 
+bool shouldShowAppointmentsFab({
+  required bool hasAppointments,
+  required bool hasBookings,
+}) => hasAppointments || hasBookings;
+
 sealed class _MergedRow {
   DateTime? get sortDate;
 }
@@ -149,6 +154,13 @@ class _BodyState extends State<_Body> {
 
   @override
   Widget build(BuildContext context) {
+    final hasAppointments = context.select<AppointmentsBloc, bool>(
+      (bloc) => bloc.state.appointments.isNotEmpty,
+    );
+    final hasBookings = context.select<BookingsBloc, bool>(
+      (bloc) => bloc.state.bookings.isNotEmpty,
+    );
+
     // Lists are cursor-paginated and filtered client-side, so while a query
     // is active keep pulling pages until the cursor is exhausted. Firing only
     // when the cursor changes prevents a retry loop after a failed page.
@@ -177,7 +189,12 @@ class _BodyState extends State<_Body> {
       ],
       child: Scaffold(
         floatingActionButton: AppFabSlot(
-          visible: true,
+          // The true empty state already owns the primary booking CTA.
+          // Show the persistent action once there is content to accompany it.
+          visible: shouldShowAppointmentsFab(
+            hasAppointments: hasAppointments,
+            hasBookings: hasBookings,
+          ),
           child: AppFab.extended(
             label: AppLocalizations.getString(context, 'appointments.book'),
             icon: const Icon(Icons.add),

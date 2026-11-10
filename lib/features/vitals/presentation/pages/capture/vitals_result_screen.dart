@@ -45,9 +45,7 @@ class _Body extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     if (result == null) {
-      return const Scaffold(
-        body: Center(child: ShimmerBox(width: 160, height: 14, radius: 7)),
-      );
+      return const _ResultSkeleton();
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -164,12 +162,7 @@ class _Body extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.sm),
               if (state.candidatesLoading)
-                const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(AppSpacing.md),
-                    child: ShimmerBox(width: 120, height: 12, radius: 6),
-                  ),
-                )
+                const _FacilitySkeleton()
               else if (state.facilityCandidates.isEmpty)
                 OutlinedButton.icon(
                   onPressed: () => context.read<VitalsCaptureBloc>().add(
@@ -304,14 +297,15 @@ class _Body extends StatelessWidget {
 
             OutlinedButton.icon(
               onPressed: () {
-                context.read<VitalsCaptureBloc>().add(
-                  const CancelVitalsCaptureEvent(),
-                );
                 context.router.popUntilRouteWithName(VitalsRoute.name);
                 context.read<VitalsCaptureBloc>().add(
-                  StartVitalsCaptureEvent(kind),
+                  StartVitalsCaptureEvent(
+                    kind,
+                    setupSeen: true,
+                    bmiPromptDue: false,
+                  ),
                 );
-                context.router.push(VitalsCaptureIntroRoute(kind: kind));
+                context.router.push(VitalsPathwayRoute(kind: kind));
               },
               icon: const Icon(Icons.refresh_rounded, size: 18),
               label: const Text('Log another reading'),
@@ -334,6 +328,57 @@ class _Body extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ResultSkeleton extends StatelessWidget {
+  const _ResultSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: NestedScrollView(
+        headerSliverBuilder: (_, _) => [
+          CustomAppBar(
+            title: AppLocalizations.getString(context, 'vitals.title'),
+            isHome: false,
+          ),
+        ],
+        body: ListView(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.md,
+            AppSpacing.lg,
+            AppSpacing.xl,
+          ),
+          children: const [
+            Row(
+              children: [
+                ShimmerCircle(size: 28),
+                SizedBox(width: 10),
+                ShimmerLine(width: 110, height: 15),
+              ],
+            ),
+            SizedBox(height: AppSpacing.lg),
+            ShimmerCard(height: 132, radius: 14),
+            SizedBox(height: AppSpacing.lg),
+            ShimmerCard(height: 50, radius: 12),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FacilitySkeleton extends StatelessWidget {
+  const _FacilitySkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.only(bottom: AppSpacing.sm),
+      child: ShimmerCard(height: 72, radius: 12),
     );
   }
 }

@@ -10,6 +10,7 @@ import 'package:my_wellness/common/widgets/app_primary_button.dart';
 import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
 import 'package:my_wellness/common/widgets/soft_input.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_option.dart';
+import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_choice_tile.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_multi_choice_tile.dart';
 import 'package:my_wellness/features/vitals/data/datasources/vitals_capture_remote_datasource.dart';
@@ -138,7 +139,28 @@ class _FollowupBodyState extends State<_FollowupBody> {
               onPressed: state.followupCanContinue
                   ? () {
                       bloc.add(const CaptureContinueFromPathwayEvent());
-                      context.router.push(VitalsBmiRoute(kind: state.kind!));
+                      context.read<AccountBloc>().add(
+                        UpdateProfileEvent(
+                          updatedData: {
+                            (state.kind == VitalsCaptureKind.bp
+                                    ? 'htn_onboarding_seen'
+                                    : 'dm_onboarding_seen'):
+                                true,
+                          },
+                        ),
+                      );
+                      final bmiDue =
+                          context
+                              .read<AccountBloc>()
+                              .state
+                              .profile
+                              ?.bmiPromptDue ??
+                          true;
+                      context.router.push(
+                        bmiDue
+                            ? VitalsBmiRoute(kind: state.kind!)
+                            : VitalsReadingEntryRoute(kind: state.kind!),
+                      );
                     }
                   : null,
               label: AppLocalizations.getString(context, 'common.continue'),

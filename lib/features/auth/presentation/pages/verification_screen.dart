@@ -126,9 +126,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
         builder: (context, state) {
           final pending = widget.pending ?? state.pendingSignup;
           if (pending == null) {
-            return const Center(
-              child: ShimmerBox(width: 160, height: 14, radius: 7),
-            );
+            return const _VerificationSkeleton();
           }
 
           final isPhone = pending.channel == SignupChannel.phone;
@@ -229,6 +227,46 @@ class _VerificationScreenState extends State<VerificationScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _VerificationSkeleton extends StatelessWidget {
+  const _VerificationSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const ShimmerLine(width: 220, height: 28),
+            const SizedBox(height: 12),
+            const ShimmerParagraph(lines: 2),
+            const SizedBox(height: AppSpacing.xl),
+            Row(
+              children: List.generate(
+                6,
+                (index) => const Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 3),
+                    child: ShimmerBox(height: 52, radius: 10),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            const ShimmerCard(height: 50, radius: 12),
+            const SizedBox(height: AppSpacing.sm),
+            const Center(child: ShimmerLine(width: 120, height: 14)),
+          ],
+        ),
       ),
     );
   }

@@ -43,10 +43,11 @@ class NotFoundFailure extends Failure {
 
 class ValidationFailure extends Failure {
   final String error;
-  const ValidationFailure({required this.error});
+  final String? code;
+  const ValidationFailure({required this.error, this.code});
 
   @override
-  List<Object?> get props => [error];
+  List<Object?> get props => [error, code];
 }
 
 class ConflictFailure extends Failure {

@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,21 +9,23 @@ import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_primary_button.dart';
 import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
 import 'package:my_wellness/common/widgets/soft_input.dart';
-import 'package:my_wellness/features/assessments/presentation/bloc/assessments_bloc.dart';
+import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
 import 'package:my_wellness/features/vitals/data/datasources/vitals_capture_remote_datasource.dart';
+import 'package:my_wellness/features/vitals/domain/entities/bmi_measurement.dart';
 import 'package:my_wellness/features/vitals/presentation/bloc/vitals_capture_bloc.dart';
 
 @RoutePage()
 class VitalsBmiScreen extends StatelessWidget {
-  final VitalsCaptureKind kind;
   const VitalsBmiScreen({super.key, required this.kind});
+
+  final VitalsCaptureKind kind;
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
         BlocProvider.value(value: context.read<VitalsCaptureBloc>()),
-        BlocProvider.value(value: context.read<AssessmentsBloc>()),
+        BlocProvider.value(value: context.read<AccountBloc>()),
       ],
       child: _Body(kind: kind),
     );
@@ -34,6 +34,7 @@ class VitalsBmiScreen extends StatelessWidget {
 
 class _Body extends StatefulWidget {
   const _Body({required this.kind});
+
   final VitalsCaptureKind kind;
 
   @override
@@ -44,7 +45,8 @@ class _BodyState extends State<_Body> {
   final _formKey = GlobalKey<FormState>();
   final _weightCtrl = TextEditingController();
   final _heightCtrl = TextEditingController();
-  Timer? _debounce;
+  bool _isSaving = false;
+  BmiMeasurement? _pendingMeasurement;
 
   @override
   void initState() {
@@ -56,223 +58,193 @@ class _BodyState extends State<_Body> {
     if (state.heightCm != null) {
       _heightCtrl.text = state.heightCm!.toStringAsFixed(1);
     }
-    WidgetsBinding.instance.addPostFrameCallback((_) => _triggerPreview());
   }
 
   @override
   void dispose() {
-    _debounce?.cancel();
     _weightCtrl.dispose();
     _heightCtrl.dispose();
     super.dispose();
   }
 
-  void _onChanged() {
-    context.read<AssessmentsBloc>().add(const ClearBmiPreviewEvent());
-    _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 350), _triggerPreview);
-  }
-
-  void _triggerPreview() {
-    final w = _weightCtrl.text.trim();
-    final h = _heightCtrl.text.trim();
-    final weightKg = double.tryParse(w);
-    final heightCm = double.tryParse(h);
-    if (weightKg == null ||
-        heightCm == null ||
-        !weightKg.isFinite ||
-        !heightCm.isFinite ||
-        weightKg <= 0 ||
-        heightCm <= 0) {
-      return;
-    }
-    context.read<AssessmentsBloc>().add(
-      PreviewBmiEvent(weightKg: w, heightCm: h),
-    );
-  }
-
-  String? get _currentInputKey {
+  BmiMeasurement? get _measurement {
     final weightKg = double.tryParse(_weightCtrl.text.trim());
     final heightCm = double.tryParse(_heightCtrl.text.trim());
-    if (weightKg == null ||
-        heightCm == null ||
-        !weightKg.isFinite ||
-        !heightCm.isFinite ||
-        weightKg <= 0 ||
-        heightCm <= 0) {
+    if (weightKg == null || heightCm == null) return null;
+    try {
+      return BmiMeasurement.calculate(weightKg: weightKg, heightCm: heightCm);
+    } on FormatException {
       return null;
     }
-    return '${weightKg.toString()}|${heightCm.toString()}';
+  }
+
+  bool get _bothBlank =>
+      _weightCtrl.text.trim().isEmpty && _heightCtrl.text.trim().isEmpty;
+
+  String? _validateMeasurement(String? _) {
+    if (_bothBlank || _measurement != null) return null;
+    return AppLocalizations.getString(context, 'vitals.bmiBothOrBlank');
   }
 
   void _submit() {
     if (_formKey.currentState?.validate() != true) return;
-    final bmiState = context.read<AssessmentsBloc>().state;
-    final preview = bmiState.bmiPreview;
-    if (preview == null || bmiState.bmiPreviewInputKey != _currentInputKey) {
-      return;
-    }
-    context.read<VitalsCaptureBloc>().add(
-      ConfirmBmiEvent(
-        weightKg: double.parse(_weightCtrl.text.trim()),
-        heightCm: double.parse(_heightCtrl.text.trim()),
-        bmi: preview.bmi,
+    final measurement = _measurement;
+    if (!_bothBlank && measurement == null) return;
+
+    setState(() {
+      _isSaving = true;
+      _pendingMeasurement = measurement;
+    });
+    context.read<AccountBloc>().add(
+      UpdateProfileEvent(
+        updatedData: measurement == null
+            ? const {'bmi_prompt_skipped': true}
+            : {
+                'weight_kg': measurement.weightKg,
+                'height_cm': measurement.heightCm,
+              },
       ),
     );
+  }
+
+  void _onProfileState(BuildContext context, AccountState state) {
+    if (!_isSaving) return;
+    if (state.status == AccountStatus.error) {
+      setState(() => _isSaving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            state.errorMessage ??
+                AppLocalizations.getString(context, 'common.error'),
+          ),
+        ),
+      );
+      return;
+    }
+    if (state.status != AccountStatus.updated) return;
+
+    final measurement = _pendingMeasurement;
+    final capture = context.read<VitalsCaptureBloc>();
+    if (measurement == null) {
+      capture.add(const SkipBmiEvent());
+    } else {
+      capture.add(
+        ConfirmBmiEvent(
+          weightKg: measurement.weightKg,
+          heightCm: measurement.heightCm,
+          bmi: measurement.bmi,
+        ),
+      );
+    }
     context.router.push(VitalsReadingEntryRoute(kind: widget.kind));
   }
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final bmiState = context.watch<AssessmentsBloc>().state;
-    final preview = bmiState.bmiPreview;
-    final isPreviewReady =
-        preview != null &&
-        bmiState.bmiPreviewInputKey == _currentInputKey &&
-        !bmiState.bmiPreviewLoading;
-    final canContinue = isPreviewReady && !bmiState.bmiPreviewLoading;
+    final measurement = _measurement;
+    final canContinue = !_isSaving && (_bothBlank || measurement != null);
 
-    return Scaffold(
-      body: NestedScrollView(
-        headerSliverBuilder: (_, _) => [
-          CustomAppBar(
-            title: AppLocalizations.getString(context, 'vitals.title'),
-            isHome: false,
-          ),
-        ],
-        body: Form(
-          key: _formKey,
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.lg,
-              AppSpacing.lg,
-              AppSpacing.lg,
-              AppSpacing.xl,
+    return BlocListener<AccountBloc, AccountState>(
+      listener: _onProfileState,
+      child: Scaffold(
+        body: NestedScrollView(
+          headerSliverBuilder: (_, _) => [
+            CustomAppBar(
+              title: AppLocalizations.getString(context, 'vitals.title'),
+              isHome: false,
             ),
-            children: [
-              Text(
-                AppLocalizations.getString(context, 'assessment.bmi.title'),
-                style: GoogleFonts.inter(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  height: 1.25,
-                  color: cs.onSurface,
-                ),
+          ],
+          body: Form(
+            key: _formKey,
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.lg,
+                AppSpacing.lg,
+                AppSpacing.xl,
               ),
-              const SizedBox(height: 8),
-              Text(
-                AppLocalizations.getString(context, 'assessment.bmi.subtitle'),
-                style: GoogleFonts.inter(
-                  fontSize: 13.5,
-                  height: 1.5,
-                  color: cs.onSurface.withValues(alpha: 0.65),
-                ),
-              ),
-              const SizedBox(height: 24),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: SoftInput(
-                      controller: _weightCtrl,
-                      label: AppLocalizations.getString(
-                        context,
-                        'assessment.bmi.weightKg',
-                      ),
-                      hint: 'e.g. 76',
-                      suffixText: 'kg',
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                      ],
-                      onChanged: (_) => _onChanged(),
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) {
-                          return AppLocalizations.getString(
-                            context,
-                            'common.required',
-                          );
-                        }
-                        final n = double.tryParse(v.trim());
-                        if (n == null) {
-                          return AppLocalizations.getString(
-                            context,
-                            'vitals.bmiNumbersOnly',
-                          );
-                        }
-                        if (n < 20 || n > 400) {
-                          return AppLocalizations.getString(
-                            context,
-                            'vitals.bmiWeightRange',
-                          );
-                        }
-                        return null;
-                      },
-                    ),
+              children: [
+                Text(
+                  AppLocalizations.getString(context, 'assessment.bmi.title'),
+                  style: GoogleFonts.inter(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    height: 1.25,
+                    color: cs.onSurface,
                   ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: SoftInput(
-                      controller: _heightCtrl,
-                      label: AppLocalizations.getString(
-                        context,
-                        'assessment.bmi.heightCm',
-                      ),
-                      hint: 'e.g. 177',
-                      suffixText: 'cm',
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      inputFormatters: [
-                        FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
-                      ],
-                      onChanged: (_) => _onChanged(),
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) {
-                          return AppLocalizations.getString(
-                            context,
-                            'common.required',
-                          );
-                        }
-                        final n = double.tryParse(v.trim());
-                        if (n == null) {
-                          return AppLocalizations.getString(
-                            context,
-                            'vitals.bmiNumbersOnly',
-                          );
-                        }
-                        if (n < 60 || n > 250) {
-                          return AppLocalizations.getString(
-                            context,
-                            'vitals.bmiHeightRange',
-                          );
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              if (isPreviewReady)
-                _BmiPreviewCard(
-                  bmi: preview.bmi,
-                  classification: preview.classification,
-                  deficitKg: preview.deficitKg,
                 ),
-              const SizedBox(height: 28),
-              AppPrimaryButton(
-                onPressed: canContinue ? _submit : null,
-                label: AppLocalizations.getString(context, 'common.continue'),
-                color: cs.primary,
-                borderRadius: 12,
-                isLoading: bmiState.bmiPreviewLoading,
-                disabled: !canContinue,
-              ),
-            ],
+                const SizedBox(height: 8),
+                Text(
+                  AppLocalizations.getString(
+                    context,
+                    'assessment.bmi.subtitle',
+                  ),
+                  style: GoogleFonts.inter(
+                    fontSize: 13.5,
+                    height: 1.5,
+                    color: cs.onSurface.withValues(alpha: 0.65),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: SoftInput(
+                        controller: _weightCtrl,
+                        label: AppLocalizations.getString(
+                          context,
+                          'assessment.bmi.weightKg',
+                        ),
+                        hint: 'e.g. 76',
+                        suffixText: 'kg',
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                        ],
+                        onChanged: (_) => setState(() {}),
+                        validator: _validateMeasurement,
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: SoftInput(
+                        controller: _heightCtrl,
+                        label: AppLocalizations.getString(
+                          context,
+                          'assessment.bmi.heightCm',
+                        ),
+                        hint: 'e.g. 177',
+                        suffixText: 'cm',
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                        ],
+                        onChanged: (_) => setState(() {}),
+                        validator: _validateMeasurement,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                if (measurement != null)
+                  _BmiPreviewCard(measurement: measurement),
+                const SizedBox(height: 28),
+                AppPrimaryButton(
+                  onPressed: canContinue ? _submit : null,
+                  label: AppLocalizations.getString(context, 'common.continue'),
+                  color: cs.primary,
+                  borderRadius: 12,
+                  isLoading: _isSaving,
+                  disabled: !canContinue,
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -281,29 +253,29 @@ class _BodyState extends State<_Body> {
 }
 
 class _BmiPreviewCard extends StatelessWidget {
-  final double bmi;
-  final String classification;
-  final double deficitKg;
+  const _BmiPreviewCard({required this.measurement});
 
-  const _BmiPreviewCard({
-    required this.bmi,
-    required this.classification,
-    required this.deficitKg,
-  });
+  final BmiMeasurement measurement;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-
-    final (color, label) = switch (classification.toLowerCase()) {
-      'underweight' => (const Color(0xFF3B82F6), 'Underweight'),
-      'normal' => (const Color(0xFF10B981), 'Healthy'),
-      'overweight' => (const Color(0xFFF59E0B), 'Overweight'),
-      'obese' => (const Color(0xFFDC2626), 'Obese'),
-      _ => (cs.primary, classification),
+    final within = measurement.category == BmiCategory.withinReference;
+    final color = within ? const Color(0xFF10B981) : const Color(0xFFDC2626);
+    final label = switch (measurement.category) {
+      BmiCategory.belowReference => 'Below reference range',
+      BmiCategory.withinReference => 'Within reference range',
+      BmiCategory.aboveReference => 'Above reference range',
+      BmiCategory.wellAboveReference => 'Well above reference range',
     };
-
-    final showDeficit = deficitKg > 0;
+    final guidance = switch (measurement.category) {
+      BmiCategory.belowReference =>
+        'Reference weight ${measurement.referenceWeightLowKg.toStringAsFixed(1)}–${measurement.referenceWeightHighKg.toStringAsFixed(1)} kg; current weight ${measurement.weightKg.toStringAsFixed(1)} kg. Weight loss is not recommended based on this BMI. Consider discussing nutrition and your weight with a healthcare professional.',
+      BmiCategory.withinReference =>
+        'Reference weight ${measurement.referenceWeightLowKg.toStringAsFixed(1)}–${measurement.referenceWeightHighKg.toStringAsFixed(1)} kg; current weight ${measurement.weightKg.toStringAsFixed(1)} kg. Your BMI is within the general adult reference range. Maintain healthy habits; BMI alone does not determine overall health.',
+      BmiCategory.aboveReference || BmiCategory.wellAboveReference =>
+        'A BMI near 24.9 corresponds to approximately ${measurement.referenceWeightHighKg.toStringAsFixed(1)} kg. Weight difference ${measurement.weightDifferenceKg.toStringAsFixed(1)} kg. An illustrative first milestone is ${measurement.firstMilestoneKg.toStringAsFixed(1)} kg (about ${(measurement.weightKg - measurement.firstMilestoneKg).toStringAsFixed(1)} kg body weight). Discuss goals with your clinician.',
+    };
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -324,7 +296,7 @@ class _BmiPreviewCard extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: Text(
-              bmi.toStringAsFixed(1),
+              measurement.bmi.toStringAsFixed(1),
               style: GoogleFonts.inter(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
@@ -338,7 +310,7 @@ class _BmiPreviewCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'YOUR BMI',
+                  'YOUR CALCULATED BMI',
                   style: GoogleFonts.inter(
                     fontSize: 10.5,
                     fontWeight: FontWeight.w700,
@@ -357,33 +329,13 @@ class _BmiPreviewCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  switch (classification.toLowerCase()) {
-                    'underweight' =>
-                      'BMI below 18.5 — a balanced diet can help.',
-                    'normal' => 'BMI 18.5–24.9 — keep up the healthy habits.',
-                    'overweight' =>
-                      'BMI 25–29.9 — small lifestyle changes can lower long-term risk.',
-                    'obese' => 'BMI 30+ — a care plan can help reduce risk.',
-                    _ => '',
-                  },
+                  guidance,
                   style: GoogleFonts.inter(
                     fontSize: 12.5,
                     height: 1.45,
                     color: cs.onSurface.withValues(alpha: 0.7),
                   ),
                 ),
-                if (showDeficit) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    'Lose about ${deficitKg.toStringAsFixed(1)} kg to reach a healthy weight.',
-                    style: GoogleFonts.inter(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w600,
-                      height: 1.4,
-                      color: color,
-                    ),
-                  ),
-                ],
               ],
             ),
           ),

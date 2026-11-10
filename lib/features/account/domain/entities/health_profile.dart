@@ -12,6 +12,7 @@ class HealthProfile extends Equatable {
   final double? weightKg;
   final double? heightCm;
   final bool bmiStale;
+  final bool bmiPromptDue;
 
   final String gender;
 
@@ -53,6 +54,7 @@ class HealthProfile extends Equatable {
     this.weightKg,
     this.heightCm,
     this.bmiStale = false,
+    this.bmiPromptDue = false,
     required this.gender,
     this.county,
     this.subCounty,
@@ -95,6 +97,7 @@ class HealthProfile extends Equatable {
     weightKg,
     heightCm,
     bmiStale,
+    bmiPromptDue,
     gender,
     county,
     subCounty,

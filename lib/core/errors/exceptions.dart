@@ -32,7 +32,10 @@ class ClientException implements Exception {
 
 class ValidationException implements Exception {
   final String message;
-  ValidationException(this.message);
+  final String? code;
+  final Map<String, dynamic>? details;
+
+  ValidationException(this.message, {this.code, this.details});
 }
 
 class ConflictException implements Exception {

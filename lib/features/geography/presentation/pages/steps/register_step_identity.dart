@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
+import 'package:my_wellness/common/utils/auth_validators.dart';
 import 'package:my_wellness/common/widgets/app_primary_button.dart';
 import 'package:my_wellness/common/widgets/app_snackbar.dart';
 import 'package:my_wellness/features/auth/data/models/signup_request_model.dart';
@@ -20,6 +22,8 @@ class IdentityDraft {
   final String? gender;
   final DateTime? dateOfBirth;
   final String? verifiedPhone;
+  final bool phoneLocked;
+  final bool acceptedTerms;
   final int? countyId;
   final int? subCountyId;
   final int? constituencyId;
@@ -35,6 +39,8 @@ class IdentityDraft {
     this.gender,
     this.dateOfBirth,
     this.verifiedPhone,
+    this.phoneLocked = false,
+    this.acceptedTerms = false,
     this.countyId,
     this.subCountyId,
     this.constituencyId,
@@ -53,6 +59,8 @@ class IdentityDraft {
     String? gender,
     DateTime? dateOfBirth,
     String? verifiedPhone,
+    bool? phoneLocked,
+    bool? acceptedTerms,
     int? countyId,
     int? subCountyId,
     int? constituencyId,
@@ -71,6 +79,8 @@ class IdentityDraft {
       gender: gender ?? this.gender,
       dateOfBirth: dateOfBirth ?? this.dateOfBirth,
       verifiedPhone: verifiedPhone ?? this.verifiedPhone,
+      phoneLocked: phoneLocked ?? this.phoneLocked,
+      acceptedTerms: acceptedTerms ?? this.acceptedTerms,
       countyId: countyId ?? this.countyId,
       subCountyId: subCountyId ?? this.subCountyId,
       constituencyId: constituencyId ?? this.constituencyId,
@@ -109,6 +119,8 @@ class _RegisterStepIdentityState extends State<RegisterStepIdentity> {
   int? _constituencyId;
   int? _wardId;
   bool _fromAfyaConnect = false;
+  bool _phoneLocked = false;
+  bool _acceptedTerms = false;
 
   @override
   void initState() {
@@ -128,6 +140,8 @@ class _RegisterStepIdentityState extends State<RegisterStepIdentity> {
       _constituencyId = i.constituencyId;
       _wardId = i.wardId;
       _fromAfyaConnect = i.fromAfyaConnect;
+      _phoneLocked = i.phoneLocked;
+      _acceptedTerms = i.acceptedTerms;
     } else {
       _idCtrl = TextEditingController();
     }
@@ -141,7 +155,10 @@ class _RegisterStepIdentityState extends State<RegisterStepIdentity> {
 
   bool get _isVerified =>
       _verificationId != null && _verificationId!.isNotEmpty;
-  bool get _canVerify => _idCtrl.text.trim().length >= 6 && !_isVerified;
+  bool get _canVerify =>
+      AuthValidators.isValidIdentityNumber(_idCtrl.text.trim()) &&
+      _acceptedTerms &&
+      !_isVerified;
 
   void _verify() {
     if (!_canVerify) return;
@@ -167,6 +184,7 @@ class _RegisterStepIdentityState extends State<RegisterStepIdentity> {
       _constituencyId = null;
       _wardId = null;
       _fromAfyaConnect = false;
+      _phoneLocked = false;
       _idCtrl.clear();
     });
   }
@@ -183,6 +201,8 @@ class _RegisterStepIdentityState extends State<RegisterStepIdentity> {
         gender: _gender,
         dateOfBirth: _dateOfBirth,
         verifiedPhone: _verifiedPhone,
+        phoneLocked: _phoneLocked,
+        acceptedTerms: _acceptedTerms,
         countyId: _countyId,
         subCountyId: _subCountyId,
         constituencyId: _constituencyId,
@@ -212,6 +232,7 @@ class _RegisterStepIdentityState extends State<RegisterStepIdentity> {
                 ? null
                 : DateTime.tryParse(v.dateOfBirth!);
             _verifiedPhone = v.phone;
+            _phoneLocked = v.phoneLocked;
             _countyId = v.countyId;
             _subCountyId = v.subCountyId;
             _constituencyId = v.constituencyId;
@@ -309,11 +330,29 @@ class _RegisterStepIdentityState extends State<RegisterStepIdentity> {
                 AuthTextField(
                   controller: _idCtrl,
                   keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(10),
+                  ],
                   label: AppLocalizations.getString(context, 'auth.idNumber'),
                   icon: Icons.perm_identity,
                   onChanged: (_) => setState(() {}),
                 ),
                 const SizedBox(height: 20),
+                CheckboxListTile(
+                  value: _acceptedTerms,
+                  contentPadding: EdgeInsets.zero,
+                  controlAffinity: ListTileControlAffinity.leading,
+                  onChanged: verifying
+                      ? null
+                      : (value) =>
+                            setState(() => _acceptedTerms = value ?? false),
+                  title: Text(
+                    AppLocalizations.getString(context, 'auth.identityConsent'),
+                    style: GoogleFonts.inter(fontSize: 12.5, height: 1.45),
+                  ),
+                ),
+                const SizedBox(height: 8),
                 AppPrimaryButton(
                   onPressed: (_canVerify && !verifying) ? _verify : null,
                   label: AppLocalizations.getString(context, 'auth.verifyId'),

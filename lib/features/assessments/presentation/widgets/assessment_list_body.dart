@@ -1,10 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/res/l10n.dart';
-import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
-import 'package:my_wellness/features/assessments/presentation/bloc/assessments_bloc.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_summary.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_card.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_section_label.dart';
@@ -21,12 +18,8 @@ class AssessmentListBody extends StatelessWidget {
     this.header,
   });
 
-  Future<void> _open(BuildContext context, AssessmentSummary summary) async {
-    await context.router.push(AssessmentIntroRoute(slug: summary.slug));
-    if (!context.mounted) return;
-    final bloc = context.read<AssessmentsBloc>();
-    final gender = context.read<AccountBloc>().state.profile?.gender;
-    bloc.add(LoadAssessmentsEvent(userGender: gender, silent: true));
+  void _open(BuildContext context, AssessmentSummary summary) {
+    context.router.push(AssessmentIntroRoute(slug: summary.slug));
   }
 
   @override

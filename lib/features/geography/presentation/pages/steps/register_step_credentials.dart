@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
@@ -86,7 +87,7 @@ class _RegisterStepCredentialsState extends State<RegisterStepCredentials> {
     final emailOk = email.isEmpty || AuthValidators.isValidEmail(email);
     final phoneOk = phone.isEmpty || AuthValidators.isValidPhone(phone);
     final contactOk = email.isNotEmpty || phone.isNotEmpty;
-    final passwordOk = AuthValidators.isValidPassword(_passwordCtrl.text);
+    final passwordOk = AuthValidators.isValidPasscode(_passwordCtrl.text);
     final matchOk =
         _confirmCtrl.text.isNotEmpty && _confirmCtrl.text == _passwordCtrl.text;
 
@@ -149,24 +150,36 @@ class _RegisterStepCredentialsState extends State<RegisterStepCredentials> {
             const SizedBox(height: 16),
             AuthTextField(
               controller: _passwordCtrl,
-              label: AppLocalizations.getString(context, 'auth.password'),
+              label: AppLocalizations.getString(
+                context,
+                'auth.sixDigitPasscode',
+              ),
               icon: Icons.lock_outline,
               isPassword: true,
+              keyboardType: TextInputType.number,
+              inputFormatters: [LengthLimitingTextInputFormatter(6)],
+              helperText: AppLocalizations.getString(
+                context,
+                'auth.passcodeSixDigits',
+              ),
+              textInputAction: TextInputAction.next,
               isPasswordVisible: _passwordVisible,
               onVisibilityToggle: () =>
                   setState(() => _passwordVisible = !_passwordVisible),
-              validator: (v) =>
-                  AuthValidators.validatePassword(context, v, isStrict: true),
+              validator: (v) => AuthValidators.validatePasscode(context, v),
             ),
             const SizedBox(height: 16),
             AuthTextField(
               controller: _confirmCtrl,
               label: AppLocalizations.getString(
                 context,
-                'auth.confirmPassword',
+                'auth.confirmPasscode',
               ),
               icon: Icons.lock_outline,
               isPassword: true,
+              keyboardType: TextInputType.number,
+              inputFormatters: [LengthLimitingTextInputFormatter(6)],
+              textInputAction: TextInputAction.next,
               isPasswordVisible: _confirmVisible,
               onVisibilityToggle: () =>
                   setState(() => _confirmVisible = !_confirmVisible),

@@ -10,12 +10,17 @@ part 'assessment_definition_model.g.dart';
 @JsonSerializable(explicitToJson: true)
 class AssessmentDefinitionModel {
   final String slug;
+
+  @JsonKey(defaultValue: '')
   final String category;
+
+  @JsonKey(defaultValue: '')
   final String title;
 
-  @JsonKey(name: 'short_title')
+  @JsonKey(name: 'short_title', defaultValue: '')
   final String shortTitle;
 
+  @JsonKey(defaultValue: '')
   final String tagline;
   final String? disclaimer;
 
@@ -62,24 +67,34 @@ class AssessmentDefinitionModel {
 
   Map<String, dynamic> toJson() => _$AssessmentDefinitionModelToJson(this);
 
-  AssessmentDefinition toEntity() => AssessmentDefinition(
-    slug: slug,
-    category: category,
-    title: title,
-    shortTitle: shortTitle,
-    tagline: tagline,
-    disclaimer: disclaimer,
-    referencePrefix: referencePrefix,
-    understandingCopy: understandingCopy,
-    beforeYouBegin: beforeYouBegin
-        .map((p) => p.toEntity())
-        .toList(growable: false),
-    cancerHistoryTypeCode: cancerHistoryTypeCode,
-    encouragingFact: encouragingFact,
-    dependantVariantSlug: dependantVariantSlug,
-    questions: questions.map((q) => q.toEntity()).toList(growable: false),
-    ctas: ctas.map((c) => c.toEntity()).toList(growable: false),
-  );
+  AssessmentDefinition toEntity() {
+    final resolvedTitle = title.trim().isNotEmpty
+        ? title
+        : shortTitle.trim().isNotEmpty
+        ? shortTitle
+        : slug;
+    final resolvedShortTitle = shortTitle.trim().isNotEmpty
+        ? shortTitle
+        : resolvedTitle;
+    return AssessmentDefinition(
+      slug: slug,
+      category: category,
+      title: resolvedTitle,
+      shortTitle: resolvedShortTitle,
+      tagline: tagline,
+      disclaimer: disclaimer,
+      referencePrefix: referencePrefix,
+      understandingCopy: understandingCopy,
+      beforeYouBegin: beforeYouBegin
+          .map((p) => p.toEntity())
+          .toList(growable: false),
+      cancerHistoryTypeCode: cancerHistoryTypeCode,
+      encouragingFact: encouragingFact,
+      dependantVariantSlug: dependantVariantSlug,
+      questions: questions.map((q) => q.toEntity()).toList(growable: false),
+      ctas: ctas.map((c) => c.toEntity()).toList(growable: false),
+    );
+  }
 }
 
 @JsonSerializable()

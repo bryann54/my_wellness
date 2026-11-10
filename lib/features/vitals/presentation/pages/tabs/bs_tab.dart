@@ -7,6 +7,7 @@ import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_fab.dart';
 import 'package:my_wellness/common/widgets/shimmer_box.dart';
+import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
 import 'package:my_wellness/features/vitals/data/datasources/vitals_capture_remote_datasource.dart';
 import 'package:my_wellness/features/vitals/domain/entities/bs_reading.dart';
 import 'package:my_wellness/features/vitals/presentation/bloc/vitals_bloc.dart';
@@ -25,8 +26,13 @@ class BsTab extends StatelessWidget {
       context.router.push(PricingRoute(initialServiceId: 'monitor'));
       return;
     }
+    final profile = context.read<AccountBloc>().state.profile;
     context.read<VitalsCaptureBloc>().add(
-      const StartVitalsCaptureEvent(VitalsCaptureKind.bs),
+      StartVitalsCaptureEvent(
+        VitalsCaptureKind.bs,
+        setupSeen: profile?.dmOnboardingSeen ?? false,
+        bmiPromptDue: profile?.bmiPromptDue ?? false,
+      ),
     );
     context.router.push(VitalsPathwayRoute(kind: VitalsCaptureKind.bs));
   }
@@ -41,9 +47,7 @@ class BsTab extends StatelessWidget {
         final locked = access != null && !access.hasAccess;
 
         if (captureState.accessLoading && access == null) {
-          return const Center(
-            child: ShimmerBox(width: 160, height: 14, radius: 7),
-          );
+          return const _BsSkeleton();
         }
 
         if (locked && !access.demoRestricted) {
@@ -134,6 +138,7 @@ class BsTab extends StatelessWidget {
                             LatestReadingCard(
                               kind: ReadingKind.bs,
                               classification: latest.classification,
+                              classificationLabel: latest.classificationLabel,
                               primary: latest.value,
                               unit: latest.unit,
                               timestampIso: latest.takenAt,
@@ -161,6 +166,8 @@ class BsTab extends StatelessWidget {
                                       primary: r.value,
                                       unit: r.unit,
                                       classification: r.classification,
+                                      classificationLabel:
+                                          r.classificationLabel,
                                       timestampIso: r.takenAt,
                                       secondary: _readingContext(context, r),
                                       onDelete: () => context

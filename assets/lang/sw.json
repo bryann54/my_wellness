@@ -253,6 +253,7 @@
   "dialysisPost": "Baada ya dialysis",
   "takenAt": "Ilipimwa",
   "notes": "Maelezo (si lazima)"
+  ,"bmiBothOrBlank": "Weka vipimo vyote viwili sahihi, au acha vyote wazi ili kuruka BMI."
 },
 "appointments": {
   "allAppointments":"Miadi yote",
@@ -658,9 +659,15 @@
     "verifying": "Inathibitisha...",
     "sendingCode": "Inatuma msimbo...",
     "sendCode": "Tuma Msimbo",
+    "resetCodeSent": "Tumetuma msimbo wa tarakimu sita kwa {identifier}.",
     "resetPassword": "Badilisha Nenosiri",
     "resetPasswordDescription": "Weka nenosiri lako jipya hapa chini.",
+    "resetPasscodeDescription": "Weka na uthibitishe namba yako mpya ya siri ya tarakimu sita.",
     "newPassword": "Nenosiri Jipya",
+    "passcodeSixDigits": "Namba ya siri lazima iwe na tarakimu sita kamili",
+    "sixDigitPasscode": "Namba ya siri ya tarakimu sita",
+    "confirmPasscode": "Thibitisha namba ya siri",
+    "identityConsent": "Ninakubali utambulisho huu uthibitishwe na taarifa zilizothibitishwa zitumike kufungua akaunti yangu.",
     "passwordsDoNotMatch": "Manenosiri hayafanani",
     "passwordResetSuccess": "Mafanikio",
     "passwordResetSuccessMessage": "Nenosiri lako limebadilishwa kwa mafanikio. Tafadhali ingia kwa nenosiri lako jipya.",

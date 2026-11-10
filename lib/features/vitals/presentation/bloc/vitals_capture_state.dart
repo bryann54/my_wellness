@@ -155,7 +155,6 @@ class VitalsCaptureState extends Equatable {
 
   bool get followupCanContinue =>
       (!needsProviderPlan || providerPlanValue != null) &&
-      (!needsTreatmentGap || treatmentGapValues.isNotEmpty) &&
       (!needsDialysisDays || dialysisDays.isNotEmpty);
 
   String? get effectiveReadingId =>

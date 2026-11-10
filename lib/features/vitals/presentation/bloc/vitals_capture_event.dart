@@ -8,9 +8,15 @@ abstract class VitalsCaptureEvent extends Equatable {
 
 class StartVitalsCaptureEvent extends VitalsCaptureEvent {
   final VitalsCaptureKind kind;
-  const StartVitalsCaptureEvent(this.kind);
+  final bool setupSeen;
+  final bool bmiPromptDue;
+  const StartVitalsCaptureEvent(
+    this.kind, {
+    this.setupSeen = false,
+    this.bmiPromptDue = false,
+  });
   @override
-  List<Object?> get props => [kind];
+  List<Object?> get props => [kind, setupSeen, bmiPromptDue];
 }
 
 class CaptureContinueFromIntroEvent extends VitalsCaptureEvent {

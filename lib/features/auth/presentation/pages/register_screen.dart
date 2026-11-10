@@ -28,6 +28,20 @@ import 'package:my_wellness/features/geography/presentation/pages/steps/register
 import 'package:my_wellness/features/geography/presentation/pages/steps/register_step_location.dart';
 import 'package:my_wellness/features/geography/presentation/pages/steps/register_step_submit.dart';
 
+extension _IdentityDraftDebug on IdentityDraft {
+  String toDebugString() =>
+      'IdentityDraft('
+      'firstName: $firstName, '
+      'surname: $surname, '
+      'idNumber: $idNumber, '
+      'verificationId: $verificationId, '
+      'idType: $idType, '
+      'acceptedTerms: $acceptedTerms, '
+      'gender: $gender, '
+      'dateOfBirth: $dateOfBirth'
+      ')';
+}
+
 @RoutePage()
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -89,13 +103,38 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void _submit() {
-    final identity = _identity;
-    if (identity == null) return;
+    debugPrint('🔵 [RegisterScreen] _submit() called.');
 
-    final request = SignupRequestModel(
+    final identity = _identity;
+    if (identity == null) {
+      debugPrint(
+        '🔴 [RegisterScreen] ERROR: _identity is null. Aborting submission.',
+      );
+      return;
+    }
+
+    debugPrint('🔵 [RegisterScreen] Building SignupRequestModel with data:');
+    debugPrint('    identity.firstName: ${identity.firstName}');
+    debugPrint('    identity.surname: ${identity.surname}');
+    debugPrint('    identity.gender: ${identity.gender}');
+    debugPrint('    identity.dateOfBirth: ${identity.dateOfBirth}');
+    debugPrint('    identity.idNumber: ${identity.idNumber}');
+    debugPrint('    identity.verificationId: ${identity.verificationId}');
+    debugPrint('    identity.acceptedTerms: ${identity.acceptedTerms}');
+    debugPrint('    _email: $_email');
+    debugPrint('    _phone: $_phone');
+    debugPrint('    _password: ${_password != null ? '***' : 'NULL'}');
+
+   final request = SignupRequestModel(
       email: (_email ?? '').trim().isEmpty ? null : _email!.trim(),
       phone: (_phone ?? '').trim().isEmpty ? null : _phone!.trim(),
       password: _password ?? '',
+      firstName: identity.firstName,
+      surname: identity.surname,
+      gender: identity.gender,
+      dateOfBirth: identity.dateOfBirth == null
+          ? null
+          : _toIsoDate(identity.dateOfBirth!),
       nationalIdNumber: identity.idNumber,
       idType: identity.idType,
       identityVerificationId: identity.verificationId,
@@ -103,12 +142,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
       inviteToken: (_inviteToken ?? '').trim().isEmpty
           ? null
           : _inviteToken!.trim(),
+      acceptedTerms: identity.acceptedTerms,
       subCountyId: _subCounty?.id,
       constituencyId: _constituency?.id,
       wardId: _ward?.id,
     );
 
+    debugPrint(
+      '🟢 [RegisterScreen] SignupRequestModel Payload to send: ${request.toJson()}',
+    );
+
     context.read<AuthBloc>().add(SignUpEvent(request));
+    debugPrint('🟢 [RegisterScreen] Dispatched SignUpEvent to AuthBloc.');
   }
 
   void _handleAccountState(BuildContext context, AccountState state) {
@@ -205,6 +250,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       RegisterStepIdentity(
                         initial: _identity,
                         onContinue: (draft) {
+                          debugPrint(
+                            '🟢 [RegisterScreen] Identity step completed. '
+                            'Draft: ${draft.toDebugString()}',
+                          );
                           setState(() => _identity = draft);
                           _next();
                         },
@@ -212,8 +261,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       RegisterStepCredentials(
                         initialEmail: _email,
                         initialPhone: _identity?.verifiedPhone ?? _phone,
-                        phoneIsVerified:
-                            _identity?.verifiedPhone?.isNotEmpty ?? false,
+                        phoneIsVerified: _identity?.phoneLocked ?? false,
                         onContinue:
                             ({
                               required email,
@@ -221,6 +269,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               required password,
                               required inviteToken,
                             }) {
+                              debugPrint(
+                                '🟢 [RegisterScreen] Credentials step completed. '
+                                'Email: $email, Phone: $phone',
+                              );
                               setState(() {
                                 _email = email;
                                 _phone = phone;
@@ -244,8 +296,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               required county,
                               required subCounty,
                               required constituency,
-                              ward,
+                              required ward,
                             }) {
+                              debugPrint(
+                                '🟢 [RegisterScreen] Location step completed. '
+                                'County: ${county.name}',
+                              );
                               setState(() {
                                 _county = county;
                                 _subCounty = subCounty;
@@ -290,4 +346,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
     );
   }
+}
+String _toIsoDate(DateTime date) {
+  final y = date.year.toString().padLeft(4, '0');
+  final m = date.month.toString().padLeft(2, '0');
+  final d = date.day.toString().padLeft(2, '0');
+  return '$y-$m-$d';
 }

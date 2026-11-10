@@ -56,11 +56,13 @@ String? _stringOrNullFromJson(Object? value) {
 
 @JsonSerializable()
 class HealthProfileModel {
+  @JsonKey(fromJson: _stringFromJson)
   final String email;
 
-  @JsonKey(name: 'full_name')
+  @JsonKey(name: 'full_name', fromJson: _stringFromJson)
   final String fullName;
 
+  @JsonKey(fromJson: _stringFromJson)
   final String phone;
 
   @JsonKey(fromJson: _intFromJson)
@@ -81,6 +83,10 @@ class HealthProfileModel {
   @JsonKey(name: 'bmi_stale', fromJson: _boolFromJson)
   final bool bmiStale;
 
+  @JsonKey(name: 'bmi_prompt_due', fromJson: _boolFromJson)
+  final bool bmiPromptDue;
+
+  @JsonKey(fromJson: _stringFromJson)
   final String gender;
 
   final String? county;
@@ -97,7 +103,7 @@ class HealthProfileModel {
   @JsonKey(fromJson: _stringFromJson)
   final String occupation;
 
-  @JsonKey(name: 'member_code')
+  @JsonKey(name: 'member_code', fromJson: _stringFromJson)
   final String memberCode;
 
   @JsonKey(name: 'health_profile_completed', fromJson: _boolFromJson)
@@ -152,6 +158,7 @@ class HealthProfileModel {
     this.weightKg,
     this.heightCm,
     this.bmiStale = false,
+    this.bmiPromptDue = false,
     required this.gender,
     this.county,
     this.subCounty,
@@ -190,6 +197,7 @@ class HealthProfileModel {
     weightKg: weightKg,
     heightCm: heightCm,
     bmiStale: bmiStale,
+    bmiPromptDue: bmiPromptDue,
     gender: gender,
     county: county,
     subCounty: subCounty,

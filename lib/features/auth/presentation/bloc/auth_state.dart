@@ -13,6 +13,7 @@ enum AuthStatus {
   passwordResetRequested,
   passwordResetCompleted,
   mfaRequired,
+  mfaExpired,
 }
 
 enum KycStatus { idle, verifying, verified, error }

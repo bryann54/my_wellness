@@ -4,7 +4,7 @@
 > platform** — the wellness-health user web app (the source of truth).
 > The mobile app implements exactly the regular-user features that exist
 > and are usable there, with the same screens, labels and wording, and
-> nothing more: no CHP, doctor, admin or organization-buyer features, no
+> nothing more: no doctor, admin or organization-buyer features, no
 > hidden UI, no mobile-only extras, and a feature behind one of web's
 > build switches only behind the same switch. If something
 > here doesn't match the web platform, or you think a feature is missing,
@@ -150,15 +150,10 @@ stays disabled until it's ticked. That same answer is later sent as
   signing up again.", then a **Continue** button to page 2 (web title-cases
   the ALL-CAPS names for display only). Once verified, page 1 offers no way
   to verify a different ID in the same session — the only way out is
-  restarting signup from scratch. Web also treats a `200` with a blank
-  `first_name` or `last_name` as a failure ("We couldn't retrieve your
-  full name from national records…") and won't let the user continue —
-  mirror that.
+  restarting signup from scratch. A record with no full name gets a `400` with `code: "identity_incomplete"`.
 - `phone`/`from_afyaconnect` are only non-empty when DHA's AfyaConnect
-  Client Registry already has a phone on file for this identity. `phone`
-  is digits only and may come back `0`-prefixed (`0712345678`) or
-  `254`-prefixed — normalize it the README's way before showing/sending.
-  **When `from_afyaconnect` is true and `phone` is non-empty, page 2's
+  Client Registry already has a phone on file for this identity. Use
+  `phone_normalized`. **When `phone_locked` is true, page 2's
   "Phone number" field must be pre-filled with this value and locked (not
   editable)** — this is what makes the later skip-OTP phone path
   (Branch B2 below) actually trigger; if the client lets the user enter a
@@ -366,8 +361,7 @@ all**:
 }
 ```
 
-Detection logic (`handleSignUp`, `app/auth/page.tsx`): `if (!("channel" in
-res))` → this is a B2 response. Store tokens immediately, the account is
+`next_step` tells you which response this is: `otp` shows the code screen, and `signed_in` is a B2 response. Store tokens immediately, the account is
 already fully active (and `phone_verified` is already true) — **never show
 an OTP-entry screen for this response shape**. Web shows a "Welcome!"
 toast and then the "Link your health records" step when
@@ -440,7 +434,7 @@ Web's screens (copy to mirror):
 
 - `404` → **Link not found** ("We couldn't find an invite for this link. It
   may have been mistyped.") with **Visit My Wellness Health**.
-- `self_pay: false` with `seats_remaining` 0 → **This invite has already
+- `claimable: false` → **This invite has already
   been fully claimed** ("Please contact your organization or group admin if
   you believe this is a mistake.").
 - Otherwise "You're invited" and either **Join {organization} on My
@@ -581,7 +575,7 @@ whitespace — don't upper-case or reformat them — and each works once.
 wrong code — the `mfa_token` is still valid for retrying until it
 expires. `400` `{"detail": "This verification step has expired. Please log
 in again."}` once it's past 5 minutes — only then go back to sign in.
-Neither has a `code`, so branch on the message (or just show it).
+Their `code`s are `mfa_incorrect_code` and `mfa_expired`.
 
 ### "Two-factor authentication" card (Account Settings → Security)
 

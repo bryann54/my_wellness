@@ -5,6 +5,31 @@ import 'package:my_wellness/common/res/l10n.dart';
 
 class AuthValidators {
   AuthValidators._();
+  static bool isValidSignInPassword(String value) => value.isNotEmpty;
+
+  static bool isValidIdentityNumber(String value) =>
+      RegExp(r'^\d{6,10}$').hasMatch(value);
+
+  static bool isValidPasscode(String value) =>
+      RegExp(r'^\d{6}$').hasMatch(value);
+
+  static String? validateSignInPassword(BuildContext context, String? value) {
+    if (value == null || !isValidSignInPassword(value)) {
+      return AppLocalizations.getString(context, 'auth.passwordRequired');
+    }
+    return null;
+  }
+
+  static String? validatePasscode(BuildContext context, String? value) {
+    if (value == null || value.isEmpty) {
+      return AppLocalizations.getString(context, 'auth.passwordRequired');
+    }
+    if (!isValidPasscode(value)) {
+      return AppLocalizations.getString(context, 'auth.passcodeSixDigits');
+    }
+    return null;
+  }
+
   static bool isValidPassword(String v) =>
       v.length >= 8 &&
       v.contains(RegExp(r'[A-Z]')) &&

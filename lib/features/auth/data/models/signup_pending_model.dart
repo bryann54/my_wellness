@@ -7,6 +7,8 @@ part 'signup_pending_model.g.dart';
 
 @JsonSerializable()
 class SignupPendingModel {
+  @JsonKey(name: 'next_step')
+  final String? nextStep;
   final String? channel;
   final String? destination;
   final String? message;
@@ -19,6 +21,7 @@ class SignupPendingModel {
   final Object? pendingSubdomainClaim;
 
   const SignupPendingModel({
+    this.nextStep,
     this.channel,
     this.destination,
     this.message,
@@ -30,6 +33,10 @@ class SignupPendingModel {
   });
 
   bool get hasSession => access != null && refresh != null;
+
+  bool get expectsSession => nextStep?.toLowerCase() == 'signed_in';
+
+  bool get expectsOtp => nextStep?.toLowerCase() == 'otp';
 
   AuthSessionModel toSessionModel() =>
       AuthSessionModel(access: access!, refresh: refresh!, user: user);

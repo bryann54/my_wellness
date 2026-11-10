@@ -97,10 +97,11 @@ class SignOutEvent extends AuthEvent {
 
 class RequestPasswordResetEvent extends AuthEvent {
   final String identifier;
-  const RequestPasswordResetEvent({required this.identifier});
+  final String? channel;
+  const RequestPasswordResetEvent({required this.identifier, this.channel});
 
   @override
-  List<Object?> get props => [identifier];
+  List<Object?> get props => [identifier, channel];
 }
 
 class ConfirmPasswordResetEvent extends AuthEvent {

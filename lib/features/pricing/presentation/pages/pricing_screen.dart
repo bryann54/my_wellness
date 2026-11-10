@@ -175,9 +175,7 @@ class _PricingBodyState extends State<_PricingBody> {
               if (state.status == PricingStatus.initial ||
                   (state.status == PricingStatus.loading &&
                       state.catalog == null)) {
-                return const Center(
-                  child: ShimmerBox(width: 160, height: 14, radius: 7),
-                );
+                return const _PricingSkeleton();
               }
               if (state.status == PricingStatus.error &&
                   state.catalog == null) {
@@ -938,4 +936,32 @@ class _PricingMessage extends StatelessWidget {
       ),
     ),
   );
+}
+
+class _PricingSkeleton extends StatelessWidget {
+  const _PricingSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.lg,
+        AppSpacing.xl,
+      ),
+      children: const [
+        ShimmerLine(width: 220, height: 26),
+        SizedBox(height: 10),
+        ShimmerParagraph(lines: 2),
+        SizedBox(height: AppSpacing.lg),
+        ShimmerCard(height: 132, radius: 16),
+        SizedBox(height: AppSpacing.md),
+        ShimmerCard(height: 104, radius: 16),
+        SizedBox(height: AppSpacing.md),
+        ShimmerCard(height: 104, radius: 16),
+      ],
+    );
+  }
 }

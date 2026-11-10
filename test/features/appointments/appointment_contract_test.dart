@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:my_wellness/common/utils/functions.dart';
 import 'package:my_wellness/features/vitals/data/models/appointment_model.dart';
+import 'package:my_wellness/features/appointments/presentation/pages/appointments_screen.dart';
 
 void main() {
   group('appointment web contract', () {
@@ -27,6 +28,21 @@ void main() {
       final value = parseDateTime('2026-11-09', null);
 
       expect(value, DateTime(2026, 11, 9));
+    });
+
+    test('empty state owns the only booking CTA', () {
+      expect(
+        shouldShowAppointmentsFab(hasAppointments: false, hasBookings: false),
+        isFalse,
+      );
+      expect(
+        shouldShowAppointmentsFab(hasAppointments: true, hasBookings: false),
+        isTrue,
+      );
+      expect(
+        shouldShowAppointmentsFab(hasAppointments: false, hasBookings: true),
+        isTrue,
+      );
     });
   });
 }

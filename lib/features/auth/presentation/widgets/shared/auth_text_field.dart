@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 
 class AuthTextField extends StatelessWidget {
@@ -17,6 +18,8 @@ class AuthTextField extends StatelessWidget {
     this.textInputAction,
     this.autofillHints,
     this.enabled = true,
+    this.inputFormatters,
+    this.helperText,
   });
 
   final TextEditingController controller;
@@ -32,6 +35,8 @@ class AuthTextField extends StatelessWidget {
   final TextInputAction? textInputAction;
   final Iterable<String>? autofillHints;
   final bool enabled;
+  final List<TextInputFormatter>? inputFormatters;
+  final String? helperText;
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +50,7 @@ class AuthTextField extends StatelessWidget {
       keyboardType: keyboardType,
       textInputAction: textInputAction,
       autofillHints: autofillHints,
+      inputFormatters: inputFormatters,
       onChanged: onChanged,
       onFieldSubmitted: onSubmitted,
       validator: validator,
@@ -53,6 +59,7 @@ class AuthTextField extends StatelessWidget {
       ).textTheme.bodyLarge?.copyWith(fontSize: 15.5, color: cs.onSurface),
       decoration: InputDecoration(
         labelText: label,
+        helperText: helperText,
         prefixIcon: Icon(
           icon,
           size: 20,

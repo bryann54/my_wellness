@@ -44,5 +44,63 @@ void main() {
       expect(definition.questions, hasLength(1));
       expect(definition.questions.single.key, 'S1');
     });
+
+    test('tolerates nullable definition display metadata', () {
+      final definition = AssessmentDefinitionModel.fromJson({
+        'slug': 'wellness-check',
+        'category': null,
+        'title': null,
+        'short_title': null,
+        'tagline': null,
+        'questions': const [],
+        'ctas': const [],
+      }).toEntity();
+
+      expect(definition.category, isEmpty);
+      expect(definition.title, 'wellness-check');
+      expect(definition.shortTitle, 'wellness-check');
+      expect(definition.tagline, isEmpty);
+    });
+
+    test('decodes contract intro pages and encouraging-fact text', () {
+      final definition = AssessmentDefinitionModel.fromJson({
+        'slug': 'breast-cancer',
+        'category': 'Cancer',
+        'title': 'Breast cancer assessment',
+        'short_title': 'Breast cancer',
+        'tagline': 'Know your risk',
+        'before_you_begin': [
+          {'heading': 'Before you begin', 'body': 'Have your details ready.'},
+          {'heading': '', 'body': ''},
+          'invalid legacy item',
+        ],
+        'encouraging_fact': const {
+          'emoji': 'heart',
+          'text': 'Screening can find changes early.',
+        },
+        'questions': const [],
+        'ctas': const [],
+      }).toEntity();
+
+      expect(definition.beforeYouBegin, hasLength(1));
+      expect(definition.beforeYouBegin.single.heading, 'Before you begin');
+      expect(definition.encouragingFact, 'Screening can find changes early.');
+    });
+
+    test('rejects legacy non-list intro content without crashing', () {
+      final definition = AssessmentDefinitionModel.fromJson({
+        'slug': 'legacy',
+        'category': null,
+        'title': null,
+        'short_title': null,
+        'tagline': null,
+        'before_you_begin': const {'heading': 'Legacy', 'body': 'Shape'},
+        'questions': const [],
+        'ctas': const [],
+      }).toEntity();
+
+      expect(definition.beforeYouBegin, isEmpty);
+      expect(definition.title, 'legacy');
+    });
   });
 }

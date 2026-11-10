@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:my_wellness/common/utils/functions.dart';
+import 'package:my_wellness/core/errors/failures.dart';
 import 'package:my_wellness/features/auth/domain/usecases/auth_usecases.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
@@ -82,6 +83,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         ),
       ),
       (result) {
+        if (result.requiresSignupConfirmation) {
+          emit(
+            state.copyWith(
+              status: AuthStatus.awaitingSignupConfirmation,
+              pendingSignup: result.pendingSignup,
+              clearError: true,
+              clearMfa: true,
+            ),
+          );
+          return;
+        }
         if (result.requiresMfa) {
           emit(
             state.copyWith(
@@ -120,8 +132,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     result.fold(
       (failure) => emit(
         state.copyWith(
-          status: AuthStatus.mfaRequired,
+          status: failure is ValidationFailure && failure.code == 'mfa_expired'
+              ? AuthStatus.mfaExpired
+              : AuthStatus.mfaRequired,
           errorMessage: mapFailureToMessage(failure),
+          clearMfa:
+              failure is ValidationFailure && failure.code == 'mfa_expired',
         ),
       ),
       (session) => emit(
@@ -275,6 +291,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(state.copyWith(status: AuthStatus.loading, clearError: true));
     final result = await _requestPasswordResetUseCase(
       identifier: event.identifier,
+      channel: event.channel,
     );
     result.fold(
       (failure) => emit(

@@ -110,8 +110,11 @@ class RequestPasswordResetUseCase {
   final AuthRepository repository;
   RequestPasswordResetUseCase(this.repository);
 
-  Future<Either<Failure, void>> call({required String identifier}) =>
-      repository.requestPasswordReset(identifier: identifier);
+  Future<Either<Failure, void>> call({
+    required String identifier,
+    String? channel,
+  }) =>
+      repository.requestPasswordReset(identifier: identifier, channel: channel);
 }
 
 @lazySingleton

@@ -15,6 +15,34 @@ void main() {
       reason: 'Localized UI strings must not be blank.',
     );
   });
+
+  test('new auth contract copy exists in both supported locales', () {
+    for (final locale in ['assets/lang/en.json', 'assets/lang/sw.json']) {
+      final auth = _readLocale(locale)['auth'] as Map<String, dynamic>;
+
+      expect(
+        auth['identityConsent'],
+        isA<String>().having((v) => v.trim(), 'text', isNotEmpty),
+      );
+      expect(
+        auth['passcodeSixDigits'],
+        isA<String>().having((v) => v.trim(), 'text', isNotEmpty),
+      );
+      expect(
+        auth['sixDigitPasscode'],
+        isA<String>().having((v) => v.trim(), 'text', isNotEmpty),
+      );
+      expect(
+        auth['confirmPasscode'],
+        isA<String>().having((v) => v.trim(), 'text', isNotEmpty),
+      );
+      expect(auth['resetCodeSent'], contains('{identifier}'));
+      expect(
+        auth['resetPasscodeDescription'],
+        isA<String>().having((v) => v.trim(), 'text', isNotEmpty),
+      );
+    }
+  });
 }
 
 Map<String, dynamic> _readLocale(String path) {

@@ -253,6 +253,7 @@
   "dialysisPost": "Post-dialysis",
   "takenAt": "Taken at",
   "notes": "Notes (optional)"
+  ,"bmiBothOrBlank": "Enter both valid measurements, or leave both blank to skip BMI."
 },
 "appointments": {
   "title": "Appointments",
@@ -639,9 +640,15 @@
     "verifying": "Verifying...",
     "sendingCode": "Sending code...",
     "sendCode": "Send Code",
+    "resetCodeSent": "We sent a six-digit reset code to {identifier}.",
     "resetPassword": "Reset Password",
     "resetPasswordDescription": "Enter your new password below.",
+    "resetPasscodeDescription": "Enter and confirm your new six-digit passcode.",
     "newPassword": "New Password",
+    "passcodeSixDigits": "Passcode must contain exactly six digits",
+    "sixDigitPasscode": "Six-digit passcode",
+    "confirmPasscode": "Confirm passcode",
+    "identityConsent": "I consent to verifying this identity and using the verified details to create my account.",
     "passwordsDoNotMatch": "Passwords do not match",
     "passwordResetSuccess": "Success",
     "passwordResetSuccessMessage": "Your password has been reset successfully. Please login with your new password.",

@@ -99,7 +99,10 @@ class LatestReadingCard extends StatelessWidget {
                   ),
                 ),
               ),
-              VitalsStatusPill(classification: classification),
+              VitalsStatusPill(
+                classification: classification,
+                label: classificationLabel,
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.md),

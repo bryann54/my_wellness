@@ -10,10 +10,10 @@ AssessmentDefinitionModel _$AssessmentDefinitionModelFromJson(
   Map<String, dynamic> json,
 ) => AssessmentDefinitionModel(
   slug: json['slug'] as String,
-  category: json['category'] as String,
-  title: json['title'] as String,
-  shortTitle: json['short_title'] as String,
-  tagline: json['tagline'] as String,
+  category: json['category'] as String? ?? '',
+  title: json['title'] as String? ?? '',
+  shortTitle: json['short_title'] as String? ?? '',
+  tagline: json['tagline'] as String? ?? '',
   questions: (json['questions'] as List<dynamic>)
       .map((e) => AssessmentQuestionModel.fromJson(e as Map<String, dynamic>))
       .toList(),

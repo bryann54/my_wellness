@@ -9,6 +9,7 @@ import 'package:my_wellness/features/auth/data/models/signup_request_model.dart'
 import 'package:my_wellness/features/auth/domain/entities/auth_session_entity.dart';
 import 'package:my_wellness/features/auth/domain/entities/signup_result_entity.dart';
 import 'package:my_wellness/features/auth/domain/entities/sign_in_result_entity.dart';
+import 'package:my_wellness/features/auth/domain/entities/signup_pending_entity.dart';
 import 'package:my_wellness/features/auth/domain/entities/user_entity.dart';
 import 'package:my_wellness/features/auth/domain/entities/verified_identity.dart';
 import 'package:my_wellness/features/auth/domain/repositories/auth_repository.dart';
@@ -45,6 +46,35 @@ class AuthRepositoryImpl implements AuthRepository {
 
       return Right(SignInResultEntity(session: session.toEntity()));
     } on ValidationException catch (e) {
+      final details = e.details;
+      if (e.code == 'email_not_confirmed') {
+        final email = details?['email']?.toString();
+        if (email != null && email.isNotEmpty) {
+          return Right(
+            SignInResultEntity(
+              pendingSignup: SignupPendingEntity(
+                channel: SignupChannel.email,
+                destination: email,
+                message: e.message,
+              ),
+            ),
+          );
+        }
+      }
+      if (e.code == 'phone_not_verified') {
+        final phone = details?['phone']?.toString();
+        if (phone != null && phone.isNotEmpty) {
+          return Right(
+            SignInResultEntity(
+              pendingSignup: SignupPendingEntity(
+                channel: SignupChannel.phone,
+                destination: phone,
+                message: e.message,
+              ),
+            ),
+          );
+        }
+      }
       return Left(ValidationFailure(error: e.message));
     } on UnauthorizedException {
       return const Left(UnauthorizedFailure());
@@ -72,7 +102,7 @@ class AuthRepositoryImpl implements AuthRepository {
       await _saveSession(session);
       return Right(session.toEntity());
     } on ValidationException catch (e) {
-      return Left(ValidationFailure(error: e.message));
+      return Left(ValidationFailure(error: e.message, code: e.code));
     } on NetworkException {
       return const Left(NetworkFailure());
     } on Exception catch (e) {
@@ -111,7 +141,9 @@ class AuthRepositoryImpl implements AuthRepository {
         await _saveSession(session);
         return Right(SignupResultEntity(session: session.toEntity()));
       }
-      if (pendingModel.channel == null) {
+      if (pendingModel.expectsSession ||
+          pendingModel.channel == null ||
+          (pendingModel.nextStep != null && !pendingModel.expectsOtp)) {
         return const Left(
           GeneralFailure(error: 'Signup response was incomplete'),
         );
@@ -231,9 +263,13 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, void>> requestPasswordReset({
     required String identifier,
+    String? channel,
   }) async {
     try {
-      await _remote.requestPasswordReset(identifier: identifier);
+      await _remote.requestPasswordReset(
+        identifier: identifier,
+        channel: channel,
+      );
       return const Right(null);
     } on ValidationException catch (e) {
       return Left(ValidationFailure(error: e.message));

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_wellness/common/widgets/shimmer_box.dart';
+import 'package:my_wellness/common/widgets/app_snackbar.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/services.dart';
@@ -17,6 +18,7 @@ class MfaVerificationDialog extends StatefulWidget {
 class _MfaVerificationDialogState extends State<MfaVerificationDialog> {
   final _controller = TextEditingController();
   bool _useBackupCode = false;
+  String? _localError;
 
   @override
   void dispose() {
@@ -26,10 +28,18 @@ class _MfaVerificationDialogState extends State<MfaVerificationDialog> {
 
   void _submit() {
     final value = _controller.text.trim();
-    if ((_useBackupCode && value.isEmpty) ||
-        (!_useBackupCode && value.length != 6)) {
+    final valid = _useBackupCode
+        ? RegExp(r'^[0-9a-f]{10}$').hasMatch(value)
+        : RegExp(r'^\d{6}$').hasMatch(value);
+    if (!valid) {
+      setState(() {
+        _localError = _useBackupCode
+            ? 'Enter a valid 10-character backup code.'
+            : 'Enter the 6-digit code.';
+      });
       return;
     }
+    setState(() => _localError = null);
     context.read<AuthBloc>().add(
       VerifyMfaEvent(value: value, useBackupCode: _useBackupCode),
     );
@@ -38,10 +48,19 @@ class _MfaVerificationDialogState extends State<MfaVerificationDialog> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
-      listenWhen: (previous, current) =>
-          previous.status != current.status &&
-          current.status == AuthStatus.authenticated,
-      listener: (context, _) => Navigator.of(context).pop(true),
+      listenWhen: (previous, current) => previous.status != current.status,
+      listener: (context, state) {
+        if (state.status == AuthStatus.authenticated) {
+          Navigator.of(context).pop(true);
+        } else if (state.status == AuthStatus.mfaExpired) {
+          AppSnackbar.error(
+            context,
+            state.errorMessage ??
+                AppLocalizations.getString(context, 'auth.sessionExpired'),
+          );
+          Navigator.of(context).pop(false);
+        }
+      },
       child: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
           final loading = state.status == AuthStatus.loading;
@@ -75,7 +94,7 @@ class _MfaVerificationDialogState extends State<MfaVerificationDialog> {
                           LengthLimitingTextInputFormatter(6),
                         ],
                   textInputAction: TextInputAction.done,
-                  onChanged: (_) => setState(() {}),
+                  onChanged: (_) => setState(() => _localError = null),
                   onSubmitted: (_) => _submit(),
                   decoration: InputDecoration(
                     labelText: AppLocalizations.getString(
@@ -84,9 +103,11 @@ class _MfaVerificationDialogState extends State<MfaVerificationDialog> {
                           ? 'auth.mfaBackupCode'
                           : 'auth.mfaAuthenticatorCode',
                     ),
-                    errorText: state.status == AuthStatus.mfaRequired
-                        ? state.errorMessage
-                        : null,
+                    errorText:
+                        _localError ??
+                        (state.status == AuthStatus.mfaRequired
+                            ? state.errorMessage
+                            : null),
                   ),
                 ),
                 TextButton(

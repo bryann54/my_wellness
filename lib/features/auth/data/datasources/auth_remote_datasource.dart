@@ -40,7 +40,10 @@ abstract class AuthRemoteDataSource {
     required String idType,
     required String idNumber,
   });
-  Future<void> requestPasswordReset({required String identifier});
+  Future<void> requestPasswordReset({
+    required String identifier,
+    String? channel,
+  });
   Future<void> confirmPasswordReset({
     required String identifier,
     required String code,
@@ -184,10 +187,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<void> requestPasswordReset({required String identifier}) async {
+  Future<void> requestPasswordReset({
+    required String identifier,
+    String? channel,
+  }) async {
+    final payload = <String, dynamic>{'identifier': identifier};
+    if (channel != null) payload['channel'] = channel;
     await _client.post(
       url: ApiEndpoints.authPasswordResetRequest,
-      payload: {'identifier': identifier},
+      payload: payload,
       options: ApiClient.open,
     );
   }

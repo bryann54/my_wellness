@@ -53,7 +53,8 @@ class _BodyState extends State<_Body> {
     final payload = <String, dynamic>{
       'systolic': int.parse(_sysCtrl.text.trim()),
       'diastolic': int.parse(_diaCtrl.text.trim()),
-      'pulse': int.parse(_pulseCtrl.text.trim()),
+      if (_pulseCtrl.text.trim().isNotEmpty)
+        'pulse': int.parse(_pulseCtrl.text.trim()),
     };
     context.read<VitalsCaptureBloc>().add(
       SubmitVitalsSecondReadingEvent(payload),
@@ -146,11 +147,11 @@ class _BodyState extends State<_Body> {
               const SizedBox(height: AppSpacing.md),
               SoftInput(
                 controller: _pulseCtrl,
-                label: 'Pulse',
+                label: AppLocalizations.getString(context, 'vitals.pulse'),
                 suffixText: 'bpm',
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                validator: _requiredInt(20, 250),
+                validator: _optionalInt(20, 250),
               ),
               const SizedBox(height: AppSpacing.xl),
               AppPrimaryButton(
@@ -169,6 +170,14 @@ class _BodyState extends State<_Body> {
 
   String? Function(String?) _requiredInt(int min, int max) => (v) {
     if (v == null || v.trim().isEmpty) return 'Required';
+    final n = int.tryParse(v.trim());
+    if (n == null) return 'Numbers only';
+    if (n < min || n > max) return 'Must be $min–$max';
+    return null;
+  };
+
+  String? Function(String?) _optionalInt(int min, int max) => (v) {
+    if (v == null || v.trim().isEmpty) return null;
     final n = int.tryParse(v.trim());
     if (n == null) return 'Numbers only';
     if (n < min || n > max) return 'Must be $min–$max';
