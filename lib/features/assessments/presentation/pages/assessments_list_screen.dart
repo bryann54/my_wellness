@@ -101,10 +101,10 @@ class _AssessmentsListBodyState extends State<_AssessmentsListBody> {
   }
 
   Future<void> _refresh() async {
+    final bloc = context.read<AssessmentsBloc>();
     final gender = context.read<AccountBloc>().state.profile?.gender;
-    context.read<AssessmentsBloc>().add(
-      LoadAssessmentsEvent(userGender: gender, silent: true),
-    );
+    bloc.add(LoadAssessmentsEvent(userGender: gender, silent: true));
+    await bloc.stream.firstWhere((state) => !state.refreshing);
   }
 
   @override

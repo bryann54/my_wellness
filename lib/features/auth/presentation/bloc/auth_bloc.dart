@@ -168,6 +168,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             state.copyWith(
               status: AuthStatus.authenticated,
               user: session.user,
+              shrLinkagePending: session.shrLinkagePending,
               clearPending: true,
               clearError: true,
             ),
@@ -205,6 +206,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         state.copyWith(
           status: AuthStatus.authenticated,
           user: session.user,
+          shrLinkagePending: session.shrLinkagePending,
           clearPending: true,
           clearError: true,
         ),
@@ -232,6 +234,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         state.copyWith(
           status: AuthStatus.authenticated,
           user: session.user,
+          shrLinkagePending: session.shrLinkagePending,
           clearPending: true,
           clearError: true,
         ),

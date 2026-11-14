@@ -5,13 +5,15 @@ class AuthSessionEntity extends Equatable {
   final String access;
   final String refresh;
   final UserEntity user;
+  final bool shrLinkagePending;
 
   const AuthSessionEntity({
     required this.access,
     required this.refresh,
     required this.user,
+    this.shrLinkagePending = false,
   });
 
   @override
-  List<Object?> get props => [access, refresh, user];
+  List<Object?> get props => [access, refresh, user, shrLinkagePending];
 }

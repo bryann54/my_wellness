@@ -24,6 +24,7 @@ class AuthState extends Equatable {
   final String? errorMessage;
   final SignupPendingEntity? pendingSignup;
   final String? mfaToken;
+  final bool shrLinkagePending;
 
   final KycStatus kycStatus;
   final VerifiedIdentity? verifiedIdentity;
@@ -35,6 +36,7 @@ class AuthState extends Equatable {
     this.errorMessage,
     this.pendingSignup,
     this.mfaToken,
+    this.shrLinkagePending = false,
     this.kycStatus = KycStatus.idle,
     this.verifiedIdentity,
     this.kycError,
@@ -55,6 +57,7 @@ class AuthState extends Equatable {
     bool clearMfa = false,
     bool clearVerifiedIdentity = false,
     bool clearKycError = false,
+    bool? shrLinkagePending,
   }) {
     return AuthState(
       status: status ?? this.status,
@@ -67,6 +70,7 @@ class AuthState extends Equatable {
           ? null
           : verifiedIdentity ?? this.verifiedIdentity,
       kycError: clearKycError ? null : kycError ?? this.kycError,
+      shrLinkagePending: shrLinkagePending ?? this.shrLinkagePending,
     );
   }
 
@@ -80,5 +84,6 @@ class AuthState extends Equatable {
     kycStatus,
     verifiedIdentity,
     kycError,
+    shrLinkagePending,
   ];
 }

@@ -92,6 +92,16 @@ import '../../features/geography/domain/usecases/get_wards_usecase.dart'
     as _i903;
 import '../../features/geography/presentation/bloc/geography_bloc.dart'
     as _i137;
+import '../../features/health_profile/data/datasources/health_history_remote_datasource.dart'
+    as _i106;
+import '../../features/health_profile/data/repositories/health_history_repository_impl.dart'
+    as _i998;
+import '../../features/health_profile/domain/repositories/health_history_repository.dart'
+    as _i691;
+import '../../features/health_profile/domain/usecases/get_health_history.dart'
+    as _i110;
+import '../../features/health_profile/presentation/bloc/health_history_bloc.dart'
+    as _i693;
 import '../../features/home/data/datasources/home_dashboard_remote_datasource.dart'
     as _i219;
 import '../../features/home/data/repositories/home_dashboard_repository_impl.dart'
@@ -243,6 +253,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i29.AccountLocalDatasource>(
       () => _i29.AccountLocalDatasource(gh<_i934.SharedPreferencesManager>()),
     );
+    gh.lazySingleton<_i106.HealthHistoryRemoteDataSource>(
+      () => _i106.HealthHistoryRemoteDataSourceImpl(gh<_i671.ApiClient>()),
+    );
     gh.lazySingleton<_i800.BookingsRemoteDataSource>(
       () => _i800.BookingsRemoteDataSourceImpl(gh<_i671.ApiClient>()),
     );
@@ -376,6 +389,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i578.NotificationPreferencesRepository>(
       () => _i159.NotificationPreferencesRepositoryImpl(
         gh<_i220.NotificationPreferencesRemoteDataSource>(),
+      ),
+    );
+    gh.lazySingleton<_i691.HealthHistoryRepository>(
+      () => _i998.HealthHistoryRepositoryImpl(
+        gh<_i106.HealthHistoryRemoteDataSource>(),
       ),
     );
     gh.lazySingleton<_i612.CreateBookingUseCase>(
@@ -644,6 +662,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i903.GetWardsUseCase>(),
       ),
     );
+    gh.lazySingleton<_i110.GetHealthHistoryUseCase>(
+      () => _i110.GetHealthHistoryUseCase(gh<_i691.HealthHistoryRepository>()),
+    );
     gh.lazySingleton<_i425.GetAppointmentsByConditionUseCase>(
       () =>
           _i425.GetAppointmentsByConditionUseCase(gh<_i515.VitalsRepository>()),
@@ -755,6 +776,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i597.NotificationService>(),
         gh<_i644.NotificationPreferencesUseCases>(),
       ),
+    );
+    gh.lazySingleton<_i693.HealthHistoryBloc>(
+      () => _i693.HealthHistoryBloc(gh<_i110.GetHealthHistoryUseCase>()),
     );
     gh.factory<_i767.AppointmentsBloc>(
       () => _i767.AppointmentsBloc(

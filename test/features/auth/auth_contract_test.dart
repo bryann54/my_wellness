@@ -11,10 +11,14 @@ import 'package:my_wellness/features/geography/presentation/pages/steps/register
 
 void main() {
   group('auth contract', () {
-    test('signup sends consent and never sends a subdomain', () {
+    test('signup sends consent without duplicating verified identity', () {
       const request = SignupRequestModel(
         email: 'member@example.com',
         password: '123456',
+        firstName: 'Must not be sent',
+        surname: 'Must not be sent',
+        gender: 'female',
+        dateOfBirth: '1990-01-01',
         county: 'Nairobi',
         subCountyId: 1,
         constituencyId: 2,
@@ -29,6 +33,10 @@ void main() {
       expect(json['identity_verification_id'], 'verification-id');
       expect(json['ward'], 3);
       expect(json, isNot(contains('subdomain')));
+      expect(json, isNot(contains('first_name')));
+      expect(json, isNot(contains('surname')));
+      expect(json, isNot(contains('gender')));
+      expect(json, isNot(contains('date_of_birth')));
     });
 
     test('signup and reset passcodes are exactly six digits', () {
@@ -133,12 +141,14 @@ void main() {
         'next_step': 'signed_in',
         'access': 'access-token',
         'refresh': 'refresh-token',
+        'shr_linkage_pending': true,
       });
 
       expect(otp.expectsOtp, isTrue);
       expect(otp.hasSession, isFalse);
       expect(trusted.expectsSession, isTrue);
       expect(trusted.hasSession, isTrue);
+      expect(trusted.toSessionModel().shrLinkagePending, isTrue);
     });
 
     test('sign-in result represents exactly one server outcome', () {

@@ -8,11 +8,9 @@ part of 'health_profile_model.dart';
 
 HealthProfileModel _$HealthProfileModelFromJson(Map<String, dynamic> json) =>
     HealthProfileModel(
-      email: json['email'] == null ? '' : _stringFromJson(json['email']),
-      fullName: json['full_name'] == null
-          ? ''
-          : _stringFromJson(json['full_name']),
-      phone: json['phone'] == null ? '' : _stringFromJson(json['phone']),
+      email: _stringFromJson(json['email']),
+      fullName: _stringFromJson(json['full_name']),
+      phone: _stringFromJson(json['phone']),
       age: _intFromJson(json['age']),
       ageStale: json['age_stale'] == null
           ? false
@@ -26,7 +24,7 @@ HealthProfileModel _$HealthProfileModelFromJson(Map<String, dynamic> json) =>
       bmiPromptDue: json['bmi_prompt_due'] == null
           ? false
           : _boolFromJson(json['bmi_prompt_due']),
-      gender: json['gender'] == null ? '' : _stringFromJson(json['gender']),
+      gender: _stringFromJson(json['gender']),
       county: json['county'] as String?,
       subCounty: _intFromJson(json['sub_county']),
       constituency: _intFromJson(json['constituency']),
@@ -34,9 +32,7 @@ HealthProfileModel _$HealthProfileModelFromJson(Map<String, dynamic> json) =>
       occupation: json['occupation'] == null
           ? ''
           : _stringFromJson(json['occupation']),
-      memberCode: json['member_code'] == null
-          ? ''
-          : _stringFromJson(json['member_code']),
+      memberCode: _stringFromJson(json['member_code']),
       healthProfileCompleted: json['health_profile_completed'] == null
           ? false
           : _boolFromJson(json['health_profile_completed']),

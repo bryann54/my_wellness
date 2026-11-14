@@ -77,11 +77,9 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
     }
 
     if (state.status == AssessmentStatus.error) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(AppLocalizations.getString(context, 'assessment.title')),
-        ),
-        body: Center(
+      return _AssessmentPageScaffold(
+        title: AppLocalizations.getString(context, 'assessment.title'),
+        child: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
@@ -127,133 +125,123 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
             hasHistory != null &&
             (hasHistory == false || _priorCancerType != null) &&
             (_priorCancerYear.text.trim().isEmpty || year != null);
-        return Scaffold(
-          appBar: AppBar(title: Text(def.shortTitle)),
-          body: SafeArea(
-            child: ListView(
-              padding: const EdgeInsets.all(24),
-              children: [
-                Text(
-                  AppLocalizations.getString(
-                    context,
-                    'assessment.priorCancerQuestion',
-                  ),
-                  style: Theme.of(context).textTheme.titleLarge,
+        return _AssessmentPageScaffold(
+          title: def.shortTitle,
+          child: ListView(
+            padding: const EdgeInsets.all(24),
+            children: [
+              Text(
+                AppLocalizations.getString(
+                  context,
+                  'assessment.priorCancerQuestion',
                 ),
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 12),
+              RadioListTile<bool>(
+                value: true,
+                groupValue: _priorCancerHistory,
+                title: Text(AppLocalizations.getString(context, 'common.yes')),
+                onChanged: submitting
+                    ? null
+                    : (value) => setState(() => _priorCancerHistory = value),
+              ),
+              RadioListTile<bool>(
+                value: false,
+                groupValue: _priorCancerHistory,
+                title: Text(AppLocalizations.getString(context, 'common.no')),
+                onChanged: submitting
+                    ? null
+                    : (value) => setState(() {
+                        _priorCancerHistory = value;
+                        _priorCancerType = null;
+                        _priorCancerYear.clear();
+                      }),
+              ),
+              if (hasHistory == true) ...[
                 const SizedBox(height: 12),
-                RadioListTile<bool>(
-                  value: true,
-                  groupValue: _priorCancerHistory,
-                  title: Text(
-                    AppLocalizations.getString(context, 'common.yes'),
-                  ),
-                  onChanged: submitting
-                      ? null
-                      : (value) => setState(() => _priorCancerHistory = value),
-                ),
-                RadioListTile<bool>(
-                  value: false,
-                  groupValue: _priorCancerHistory,
-                  title: Text(AppLocalizations.getString(context, 'common.no')),
-                  onChanged: submitting
-                      ? null
-                      : (value) => setState(() {
-                          _priorCancerHistory = value;
-                          _priorCancerType = null;
-                          _priorCancerYear.clear();
-                        }),
-                ),
-                if (hasHistory == true) ...[
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<String>(
-                    initialValue: _priorCancerType,
-                    decoration: InputDecoration(
-                      labelText: AppLocalizations.getString(
-                        context,
-                        'assessment.cancerType',
-                      ),
-                      border: OutlineInputBorder(),
+                DropdownButtonFormField<String>(
+                  initialValue: _priorCancerType,
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.getString(
+                      context,
+                      'assessment.cancerType',
                     ),
-                    items:
-                        const [
-                              'breast',
-                              'cervical',
-                              'prostate',
-                              'esophageal',
-                              'colorectal',
-                              'other',
-                            ]
-                            .map(
-                              (type) => DropdownMenuItem(
-                                value: type,
-                                child: Text(
-                                  AppLocalizations.getString(
-                                    context,
-                                    switch (type) {
-                                      'breast' => 'assessment.cancerBreast',
-                                      'cervical' => 'assessment.cancerCervical',
-                                      'prostate' => 'assessment.cancerProstate',
-                                      'esophageal' =>
-                                        'assessment.cancerOesophageal',
-                                      'colorectal' =>
-                                        'assessment.cancerColorectal',
-                                      _ => 'assessment.cancerOther',
-                                    },
-                                  ),
+                    border: OutlineInputBorder(),
+                  ),
+                  items:
+                      const [
+                            'breast',
+                            'cervical',
+                            'prostate',
+                            'esophageal',
+                            'colorectal',
+                            'other',
+                          ]
+                          .map(
+                            (type) => DropdownMenuItem(
+                              value: type,
+                              child: Text(
+                                AppLocalizations.getString(
+                                  context,
+                                  switch (type) {
+                                    'breast' => 'assessment.cancerBreast',
+                                    'cervical' => 'assessment.cancerCervical',
+                                    'prostate' => 'assessment.cancerProstate',
+                                    'esophageal' =>
+                                      'assessment.cancerOesophageal',
+                                    'colorectal' =>
+                                      'assessment.cancerColorectal',
+                                    _ => 'assessment.cancerOther',
+                                  },
                                 ),
                               ),
-                            )
-                            .toList(),
-                    onChanged: submitting
-                        ? null
-                        : (value) => setState(() => _priorCancerType = value),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: _priorCancerYear,
-                    enabled: !submitting,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: AppLocalizations.getString(
-                        context,
-                        'assessment.yearDiagnosedOptional',
-                      ),
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 24),
-                AppPrimaryButton(
-                  onPressed: !valid || submitting
+                            ),
+                          )
+                          .toList(),
+                  onChanged: submitting
                       ? null
-                      : () => context.read<AssessmentsBloc>().add(
-                          SubmitCancerPreScreeningEvent(
-                            priorCancerHistory: hasHistory ? 'yes' : 'no',
-                            priorCancerType: hasHistory
-                                ? _priorCancerType!
-                                : '',
-                            priorCancerYear: hasHistory ? year : null,
-                          ),
-                        ),
-                  label: submitting
-                      ? AppLocalizations.getString(
-                          context,
-                          'assessment.submitting',
-                        )
-                      : AppLocalizations.getString(context, 'common.continue'),
-                  height: 52,
+                      : (value) => setState(() => _priorCancerType = value),
                 ),
                 const SizedBox(height: 12),
-                TextButton(
-                  onPressed: submitting
-                      ? null
-                      : () => context.router.maybePop(),
-                  child: Text(
-                    AppLocalizations.getString(context, 'common.back'),
+                TextField(
+                  controller: _priorCancerYear,
+                  enabled: !submitting,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.getString(
+                      context,
+                      'assessment.yearDiagnosedOptional',
+                    ),
+                    border: OutlineInputBorder(),
                   ),
                 ),
               ],
-            ),
+              const SizedBox(height: 24),
+              AppPrimaryButton(
+                onPressed: !valid || submitting
+                    ? null
+                    : () => context.read<AssessmentsBloc>().add(
+                        SubmitCancerPreScreeningEvent(
+                          priorCancerHistory: hasHistory ? 'yes' : 'no',
+                          priorCancerType: hasHistory ? _priorCancerType! : '',
+                          priorCancerYear: hasHistory ? year : null,
+                        ),
+                      ),
+                label: submitting
+                    ? AppLocalizations.getString(
+                        context,
+                        'assessment.submitting',
+                      )
+                    : AppLocalizations.getString(context, 'common.continue'),
+                height: 52,
+              ),
+              const SizedBox(height: 12),
+              TextButton(
+                onPressed: submitting ? null : () => context.router.maybePop(),
+                child: Text(AppLocalizations.getString(context, 'common.back')),
+              ),
+            ],
           ),
         );
       }
@@ -268,9 +256,9 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
         ),
         _ => AppLocalizations.getString(context, 'assessment.notReady'),
       };
-      return Scaffold(
-        appBar: AppBar(title: Text(def.shortTitle)),
-        body: Center(
+      return _AssessmentPageScaffold(
+        title: def.shortTitle,
+        child: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
@@ -392,4 +380,21 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
       ),
     );
   }
+}
+
+class _AssessmentPageScaffold extends StatelessWidget {
+  const _AssessmentPageScaffold({required this.title, required this.child});
+
+  final String title;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    body: NestedScrollView(
+      headerSliverBuilder: (_, _) => [
+        CustomAppBar(title: title, isHome: false),
+      ],
+      body: SafeArea(top: false, child: child),
+    ),
+  );
 }

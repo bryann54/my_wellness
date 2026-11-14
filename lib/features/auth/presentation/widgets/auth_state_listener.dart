@@ -11,6 +11,8 @@ import 'package:my_wellness/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_state.dart';
 import 'package:my_wellness/features/auth/presentation/bloc/auth_event.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/mfa_verification_dialog.dart';
+import 'package:my_wellness/core/di/injector.dart';
+import 'package:my_wellness/features/health_profile/presentation/bloc/health_history_bloc.dart';
 
 class AuthStateListener extends StatelessWidget {
   const AuthStateListener({
@@ -49,14 +51,19 @@ class AuthStateListener extends StatelessWidget {
 
     switch (state.status) {
       case AuthStatus.authenticated:
+        getIt<HealthHistoryBloc>().add(const ClearHealthHistoryEvent());
         _showSuccess(context);
+        if (isRegistration && state.shrLinkagePending) {
+          await context.router.push(const ShrConsentRoute());
+          if (!context.mounted) return;
+        }
         context.read<AppLockBloc>().add(const AppLockSignedIn());
 
       case AuthStatus.awaitingSignupConfirmation:
         if (state.pendingSignup == null) return;
         final message = state.pendingSignup?.message;
         if (message != null && message.isNotEmpty) {
-          AppSnackbar.error(context, message);
+          AppSnackbar.success(context, message);
         }
         await context.router.push(
           VerificationRoute(pending: state.pendingSignup),

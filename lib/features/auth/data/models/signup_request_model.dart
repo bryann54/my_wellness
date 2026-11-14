@@ -14,16 +14,18 @@ class SignupRequestModel {
 
   final String password;
 
-  @JsonKey(name: 'first_name', includeIfNull: false)
+  // These values are resolved from identity_verification_id. They remain as
+  // constructor fields for source compatibility, but must never be sent.
+  @JsonKey(includeFromJson: false, includeToJson: false)
   final String? firstName;
 
-  @JsonKey(includeIfNull: false)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   final String? surname;
 
-  @JsonKey(includeIfNull: false)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   final String? gender;
 
-  @JsonKey(name: 'date_of_birth', includeIfNull: false)
+  @JsonKey(includeFromJson: false, includeToJson: false)
   final String? dateOfBirth;
 
   @JsonKey(name: 'national_id_number', includeIfNull: false)
@@ -50,6 +52,9 @@ class SignupRequestModel {
   @JsonKey(name: 'accepted_terms')
   final bool acceptedTerms;
 
+  @JsonKey(name: 'country_of_residence', includeIfNull: false)
+  final String? countryOfResidence;
+
   @JsonKey(includeFromJson: false, includeToJson: false)
   final IdType? idType;
 
@@ -69,6 +74,7 @@ class SignupRequestModel {
     this.identityVerificationId,
     this.inviteToken,
     required this.acceptedTerms,
+    this.countryOfResidence,
     this.idType,
   }) : assert(
          email != null || phone != null,

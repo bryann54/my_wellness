@@ -12,6 +12,8 @@ SignupPendingModel _$SignupPendingModelFromJson(Map<String, dynamic> json) =>
       channel: json['channel'] as String?,
       destination: json['destination'] as String?,
       message: json['message'] as String?,
+      email: json['email'] as String?,
+      phone: json['phone'] as String?,
       access: json['access'] as String?,
       refresh: json['refresh'] as String?,
       user: json['user'] == null
@@ -27,6 +29,8 @@ Map<String, dynamic> _$SignupPendingModelToJson(SignupPendingModel instance) =>
       'channel': instance.channel,
       'destination': instance.destination,
       'message': instance.message,
+      'email': instance.email,
+      'phone': instance.phone,
       'access': instance.access,
       'refresh': instance.refresh,
       'user': instance.user,

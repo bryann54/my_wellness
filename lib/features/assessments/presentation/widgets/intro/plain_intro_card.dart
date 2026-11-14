@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_primary_button.dart';
+import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_definition.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_session.dart';
 import 'package:my_wellness/features/assessments/domain/repositories/assessments_repository.dart';
@@ -31,8 +32,11 @@ class PlainIntroCard extends StatelessWidget {
     final chapterLocked = canStart?.isChapterLocked ?? false;
 
     return Scaffold(
-      body: SafeArea(
-        child: ListView(
+      body: NestedScrollView(
+        headerSliverBuilder: (_, _) => [
+          CustomAppBar(title: definition.shortTitle, isHome: false),
+        ],
+        body: ListView(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
           children: [
             _BackLink(label: definition.category),

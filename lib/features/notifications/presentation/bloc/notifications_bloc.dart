@@ -27,6 +27,7 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
     on<ClearIdentityEvent>(_onClear);
     on<RefreshPermissionEvent>(_onRefresh);
     on<SetPushEnabledEvent>(_onSetPushEnabled);
+    on<OpenNotificationSettingsEvent>(_onOpenSettings);
     on<PermissionChangedEvent>(
       (e, emit) => emit(state.copyWith(permission: e.permission)),
     );
@@ -237,8 +238,10 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
           ),
         );
       } else {
-        await _service.setPushEnabled(false);
-        emit(state.copyWith(isUpdating: false, pushOptedIn: false));
+        // Only the OS can revoke permission. Opening the app settings keeps
+        // OneSignal and the visible switch in sync with the actual device.
+        await _service.openSystemSettings();
+        emit(state.copyWith(isUpdating: false));
       }
     } catch (_) {
       emit(
@@ -249,6 +252,13 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
         ),
       );
     }
+  }
+
+  Future<void> _onOpenSettings(
+    OpenNotificationSettingsEvent event,
+    Emitter<NotificationsState> emit,
+  ) async {
+    await _service.openSystemSettings();
   }
 
   void _onIncoming(

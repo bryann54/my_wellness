@@ -255,13 +255,21 @@ class VitalsRemoteDataSourceImpl implements VitalsRemoteDataSource {
   @override
   Future<({List<Map<String, dynamic>> items, String? nextCursor})>
   searchFormulary({String? cursor, required String query}) async {
-    final response = await _apiClient.get<Map<String, dynamic>>(
+    final response = await _apiClient.get<dynamic>(
       url: ApiEndpoints.formularySearch,
-      query: {'q': query, 'cursor': ?cursor},
+      query: {'q': query},
       options: ApiClient.protected,
     );
-    final results = (response['results'] as List<dynamic>? ?? const []);
-    final nextUrl = response['next'] as String?;
+    // The registry is deliberately a small, non-paginated result set. Keep
+    // support for the older envelope so mixed backend deployments fail safe.
+    final results = response is List
+        ? response
+        : response is Map<String, dynamic>
+        ? (response['results'] as List<dynamic>? ?? const [])
+        : const <dynamic>[];
+    final nextUrl = response is Map<String, dynamic>
+        ? response['next'] as String?
+        : null;
     final nextCursor = nextUrl == null
         ? null
         : Uri.parse(nextUrl).queryParameters['cursor'];

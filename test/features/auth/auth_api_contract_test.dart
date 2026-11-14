@@ -68,6 +68,7 @@ void main() {
           wardId: 3,
           identityVerificationId: 'verification-id',
           acceptedTerms: true,
+          countryOfResidence: 'KE',
         ),
       );
       final request = await fixture.request;
@@ -77,6 +78,7 @@ void main() {
       expect(request.json['accepted_terms'], isTrue);
       expect(request.json['identity_verification_id'], 'verification-id');
       expect(request.json['ward'], 3);
+      expect(request.json['country_of_residence'], 'KE');
       expect(request.json, isNot(contains('subdomain')));
     });
 

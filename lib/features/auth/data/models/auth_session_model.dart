@@ -14,12 +14,16 @@ class AuthSessionModel {
   final Map<String, dynamic>? clinician;
   final Map<String, dynamic>? profile;
 
+  @JsonKey(name: 'shr_linkage_pending')
+  final bool shrLinkagePending;
+
   const AuthSessionModel({
     required this.access,
     required this.refresh,
     this.user,
     this.clinician,
     this.profile,
+    this.shrLinkagePending = false,
   });
 
   factory AuthSessionModel.fromJson(Map<String, dynamic> json) =>
@@ -40,5 +44,6 @@ class AuthSessionModel {
           phone: '',
           gender: '',
         ),
+    shrLinkagePending: shrLinkagePending,
   );
 }

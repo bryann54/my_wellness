@@ -80,8 +80,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       url: ApiEndpoints.mfaVerify,
       payload: {
         'mfa_token': mfaToken,
-        if (code != null) 'code': code,
-        if (backupCode != null) 'backup_code': backupCode,
+        'code': ?code,
+        'backup_code': ?backupCode,
       },
       options: ApiClient.open,
     );
@@ -95,7 +95,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       payload: req.toJson(),
       options: ApiClient.open,
     );
-    return SignupPendingModel.fromJson(response);
+    return SignupPendingModel.fromJson({
+      ...response,
+      if (!response.containsKey('message')) 'message': response['detail'],
+    });
   }
 
   @override

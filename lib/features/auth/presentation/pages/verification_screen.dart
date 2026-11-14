@@ -18,6 +18,8 @@ import 'package:my_wellness/features/auth/presentation/bloc/auth_state.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/shared/auth_button.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/shared/auth_header.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/shared/otp_input.dart';
+import 'package:my_wellness/core/di/injector.dart';
+import 'package:my_wellness/features/health_profile/presentation/bloc/health_history_bloc.dart';
 
 @RoutePage()
 class VerificationScreen extends StatefulWidget {
@@ -106,13 +108,18 @@ class _VerificationScreenState extends State<VerificationScreen> {
         listenWhen: (prev, curr) =>
             prev.status != curr.status ||
             prev.errorMessage != curr.errorMessage,
-        listener: (context, state) {
+        listener: (context, state) async {
           if (state.status == AuthStatus.unauthenticated &&
               state.pendingSignup == null) {
             AppSnackbar.success(context, 'Verification complete.');
           }
           if (state.status == AuthStatus.authenticated) {
+            getIt<HealthHistoryBloc>().add(const ClearHealthHistoryEvent());
             AppSnackbar.success(context, 'Account verified.');
+            if (state.shrLinkagePending) {
+              await context.router.push(const ShrConsentRoute());
+              if (!context.mounted) return;
+            }
             context.read<AppLockBloc>().add(const AppLockSignedIn());
             context.router.replaceAll([const MainRoute()]);
           }

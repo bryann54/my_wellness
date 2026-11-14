@@ -11,10 +11,6 @@ SignupRequestModel _$SignupRequestModelFromJson(Map<String, dynamic> json) =>
       email: json['email'] as String?,
       phone: json['phone'] as String?,
       password: json['password'] as String,
-      firstName: json['first_name'] as String?,
-      surname: json['surname'] as String?,
-      gender: json['gender'] as String?,
-      dateOfBirth: json['date_of_birth'] as String?,
       nationalIdNumber: json['national_id_number'] as String?,
       county: json['county'] as String?,
       subCountyId: (json['sub_county'] as num?)?.toInt(),
@@ -23,6 +19,7 @@ SignupRequestModel _$SignupRequestModelFromJson(Map<String, dynamic> json) =>
       identityVerificationId: json['identity_verification_id'] as String?,
       inviteToken: json['invite_token'] as String?,
       acceptedTerms: json['accepted_terms'] as bool,
+      countryOfResidence: json['country_of_residence'] as String?,
     );
 
 Map<String, dynamic> _$SignupRequestModelToJson(SignupRequestModel instance) =>
@@ -30,10 +27,6 @@ Map<String, dynamic> _$SignupRequestModelToJson(SignupRequestModel instance) =>
       'email': ?instance.email,
       'phone': ?instance.phone,
       'password': instance.password,
-      'first_name': ?instance.firstName,
-      'surname': ?instance.surname,
-      'gender': ?instance.gender,
-      'date_of_birth': ?instance.dateOfBirth,
       'national_id_number': ?instance.nationalIdNumber,
       'county': ?instance.county,
       'sub_county': ?instance.subCountyId,
@@ -42,4 +35,5 @@ Map<String, dynamic> _$SignupRequestModelToJson(SignupRequestModel instance) =>
       'identity_verification_id': ?instance.identityVerificationId,
       'invite_token': ?instance.inviteToken,
       'accepted_terms': instance.acceptedTerms,
+      'country_of_residence': ?instance.countryOfResidence,
     };

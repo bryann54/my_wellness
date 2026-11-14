@@ -79,7 +79,7 @@
     "welcome": "Hello, {name}",
     "welcomeFallback": "Welcome",
     "recordReading": "Record a reading",
-    "healthOverview": "Health overview",
+    "healthOverview": "Vitals overview",
     "quickActions": "Quick actions",
     "viewHistory": "View history",
     "noReadingRecorded": "No reading recorded yet",

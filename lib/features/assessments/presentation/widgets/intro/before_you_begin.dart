@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_primary_button.dart';
+import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_definition.dart';
 
 class BeforeYouBeginPages extends StatefulWidget {
@@ -33,8 +34,11 @@ class _BeforeYouBeginPagesState extends State<BeforeYouBeginPages> {
     final last = _index == widget.pages.length - 1;
 
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
+      body: NestedScrollView(
+        headerSliverBuilder: (_, _) => [
+          CustomAppBar(title: widget.shortTitle, isHome: false),
+        ],
+        body: Padding(
           padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

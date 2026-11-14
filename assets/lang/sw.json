@@ -79,7 +79,7 @@
   "welcome": "Habari, {name}",
   "welcomeFallback": "Karibu",
   "recordReading": "Weka kipimo",
-  "healthOverview": "Muhtasari wa afya",
+  "healthOverview": "Vitali za afya",
   "quickActions": "Vitendo vya haraka",
   "viewHistory": "Angalia historia",
   "noReadingRecorded": "Bado hakuna kipimo kilichorekodiwa",

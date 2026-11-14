@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_primary_button.dart';
+import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
 
 class EncouragingFactScreen extends StatelessWidget {
   final String slug;
@@ -21,8 +22,11 @@ class EncouragingFactScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
+      body: NestedScrollView(
+        headerSliverBuilder: (_, _) => [
+          CustomAppBar(title: shortTitle, isHome: false),
+        ],
+        body: Padding(
           padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

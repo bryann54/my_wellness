@@ -10,6 +10,7 @@ class AssessmentsState extends Equatable {
   final List<AssessmentSummary> assessments;
   final List<AssessmentSummary> filteredAssessments;
   final String searchQuery;
+  final bool refreshing;
 
   final AssessmentDefinition? definition;
   final AssessmentSession? session;
@@ -40,6 +41,7 @@ class AssessmentsState extends Equatable {
     this.assessments = const [],
     this.filteredAssessments = const [],
     this.searchQuery = '',
+    this.refreshing = false,
     this.definition,
     this.session,
     this.canStart,
@@ -73,6 +75,7 @@ class AssessmentsState extends Equatable {
     List<AssessmentSummary>? assessments,
     List<AssessmentSummary>? filteredAssessments,
     String? searchQuery,
+    bool? refreshing,
     AssessmentDefinition? definition,
     AssessmentSession? session,
     CanStartResult? canStart,
@@ -106,6 +109,7 @@ class AssessmentsState extends Equatable {
       assessments: assessments ?? this.assessments,
       filteredAssessments: filteredAssessments ?? this.filteredAssessments,
       searchQuery: searchQuery ?? this.searchQuery,
+      refreshing: refreshing ?? this.refreshing,
       definition: definition ?? this.definition,
       session: clearSession ? null : (session ?? this.session),
       canStart: canStart ?? this.canStart,
@@ -137,6 +141,7 @@ class AssessmentsState extends Equatable {
     assessments,
     filteredAssessments,
     searchQuery,
+    refreshing,
     definition,
     session,
     canStart,

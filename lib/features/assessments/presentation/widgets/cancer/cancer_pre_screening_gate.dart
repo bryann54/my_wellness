@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_primary_button.dart';
+import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
 import 'package:my_wellness/features/assessments/presentation/bloc/assessments_bloc.dart';
 
 const _cancerTypes = <String>[
@@ -62,8 +63,11 @@ class _CancerPreScreeningGateState extends State<CancerPreScreeningGate> {
         AssessmentStatus.submitting;
 
     return Scaffold(
-      body: SafeArea(
-        child: ListView(
+      body: NestedScrollView(
+        headerSliverBuilder: (_, _) => [
+          CustomAppBar(title: widget.shortTitle, isHome: false),
+        ],
+        body: ListView(
           padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
           children: [
             Text(

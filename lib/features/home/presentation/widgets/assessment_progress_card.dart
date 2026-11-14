@@ -359,7 +359,10 @@ class _FeaturedSession extends StatelessWidget {
         children: [
           Row(
             children: [
-              _ProgressRing(percent: session.completionPercent, color: fg),
+              if (notStarted)
+                _NotStartedIcon(color: fg)
+              else
+                _ProgressRing(percent: session.completionPercent, color: fg),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
@@ -420,6 +423,27 @@ class _FeaturedSession extends StatelessWidget {
       ),
     );
   }
+}
+
+class _NotStartedIcon extends StatelessWidget {
+  const _NotStartedIcon({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    label: AppLocalizations.getString(context, 'homeDashboard.notStarted'),
+    child: Container(
+      width: 56,
+      height: 56,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color.withValues(alpha: 0.14),
+      ),
+      alignment: Alignment.center,
+      child: Icon(Icons.assignment_outlined, color: color, size: 27),
+    ),
+  );
 }
 
 class _ProgressRing extends StatelessWidget {

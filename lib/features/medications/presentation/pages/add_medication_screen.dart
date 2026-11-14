@@ -50,7 +50,6 @@ class _AddMedicationBody extends StatefulWidget {
 class _AddMedicationBodyState extends State<_AddMedicationBody> {
   final _formKey = GlobalKey<FormState>();
   final _searchCtrl = TextEditingController();
-  final _nameCtrl = TextEditingController();
   final _doseCtrl = TextEditingController();
   final _notesCtrl = TextEditingController();
   final _durationCtrl = TextEditingController();
@@ -73,6 +72,7 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
   bool _searching = false;
   bool _searchDone = false;
   List<Map<String, dynamic>> _searchResults = const [];
+  int _searchRequest = 0;
 
   final List<TimeOfDay> _reminderTimes = [];
 
@@ -87,7 +87,6 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
   void dispose() {
     _debouncer.cancel();
     _searchCtrl.dispose();
-    _nameCtrl.dispose();
     _doseCtrl.dispose();
     _notesCtrl.dispose();
     _durationCtrl.dispose();
@@ -98,8 +97,10 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
 
   void _onSearchChanged() {
     final query = _searchCtrl.text.trim();
-    if (query.isEmpty) {
+    if (query.length < 3) {
+      _searchRequest++;
       setState(() {
+        _searching = false;
         _searchResults = const [];
         _searchDone = false;
       });
@@ -110,6 +111,7 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
 
   Future<void> _searchRegistry(String query) async {
     if (!mounted) return;
+    final request = ++_searchRequest;
     setState(() {
       _searching = true;
       _searchDone = true;
@@ -117,6 +119,7 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
     final useCase = getIt<SearchFormularyUseCase>();
     final result = await useCase((cursor: null, query: query));
     if (!mounted) return;
+    if (request != _searchRequest || _searchCtrl.text.trim() != query) return;
     result.fold(
       (_) => setState(() {
         _searching = false;
@@ -135,7 +138,6 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
     if (id == null || id.isEmpty) return;
     setState(() {
       _pickedCandidate = MedicationCandidateOption(id: id, name: name);
-      _nameCtrl.text = name;
       _searchCtrl.clear();
       _searchResults = const [];
       _searchDone = false;
@@ -179,11 +181,31 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
         AppSnackbar.error(context, f);
       },
       (scan) {
+        if (scan.confirmed.isNotEmpty) {
+          setState(() => _scanning = false);
+          context.read<MedicationsBloc>().add(const LoadMedicationsEvent());
+          AppSnackbar.success(
+            context,
+            scan.message?.trim().isNotEmpty == true
+                ? scan.message!
+                : 'Medication added from photo.',
+          );
+          context.router.maybePop();
+          return;
+        }
         setState(() {
           _scanning = false;
           _scanResult = scan;
           _applyScanResult(scan);
         });
+        if (scan.needsConfirmation.isEmpty) {
+          AppSnackbar.warning(
+            context,
+            scan.message?.trim().isNotEmpty == true
+                ? scan.message!
+                : 'No medication could be read from that image.',
+          );
+        }
       },
     );
   }
@@ -191,7 +213,6 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
   void _applyScanResult(MedicationScanResult scan) {
     if (scan.confirmed.isNotEmpty) {
       final m = scan.confirmed.first;
-      _nameCtrl.text = m.name ?? m.rawName ?? '';
       _doseCtrl.text = m.dosage ?? '';
       _notesCtrl.text = m.notes ?? '';
       if (m.frequency?.isNotEmpty ?? false) {
@@ -202,7 +223,6 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
 
     if (scan.needsConfirmation.isNotEmpty) {
       final nc = scan.needsConfirmation.first;
-      _nameCtrl.text = nc.rawName ?? '';
       _doseCtrl.text = nc.dosage ?? '';
       _notesCtrl.text = nc.notes ?? '';
       if (nc.frequency?.isNotEmpty ?? false) {
@@ -217,7 +237,6 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
   }
 
   void _applyCandidate(MedicationCandidateOption candidate) {
-    _nameCtrl.text = candidate.name;
     if (candidate.dosage?.isNotEmpty ?? false) {
       _doseCtrl.text = candidate.dosage!;
     }
@@ -286,7 +305,6 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
     };
 
     context.read<MedicationsBloc>().add(AddMedicationEvent(payload));
-    context.router.maybePop();
   }
 
   @override
@@ -296,55 +314,65 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
       (b) => b.state.isSubmitting,
     );
 
-    return Scaffold(
-      body: NestedScrollView(
-        headerSliverBuilder: (_, _) => [
-          CustomAppBar(
-            title: AppLocalizations.getString(context, 'medications.addTitle'),
-            isHome: false,
-          ),
-        ],
-        body: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              Expanded(
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.lg,
-                    AppSpacing.md,
-                    AppSpacing.lg,
-                    AppSpacing.xl,
-                  ),
-                  children: [
-                    ScanMedicationCard(
-                      scanning: _scanning,
-                      onCamera: () => _scan(ImageSource.camera),
-                      onUpload: () => _scan(ImageSource.gallery),
-                    ),
-                    if (_scanResult != null &&
-                        _scanResult!.needsConfirmation.isNotEmpty) ...[
-                      const SizedBox(height: AppSpacing.lg),
-                      MedicationCandidatePicker(
-                        entry: _scanResult!.needsConfirmation.first,
-                        selected: _pickedCandidate,
-                        onSelected: (opt) {
-                          setState(() {
-                            _pickedCandidate = opt;
-                            _applyCandidate(opt);
-                          });
-                        },
-                      ),
-                    ],
-                    const SizedBox(height: AppSpacing.lg),
-                    _buildRegistrySearch(cs),
-                    const SizedBox(height: AppSpacing.lg),
-                    _buildFormFields(cs),
-                  ],
-                ),
+    return BlocListener<MedicationsBloc, MedicationsState>(
+      listenWhen: (previous, current) =>
+          previous.isSubmitting &&
+          !current.isSubmitting &&
+          current.medications.length > previous.medications.length,
+      listener: (context, _) => context.router.maybePop(),
+      child: Scaffold(
+        body: NestedScrollView(
+          headerSliverBuilder: (_, _) => [
+            CustomAppBar(
+              title: AppLocalizations.getString(
+                context,
+                'medications.addTitle',
               ),
-              _buildBottomBar(cs, isSubmitting),
-            ],
+              isHome: false,
+            ),
+          ],
+          body: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.lg,
+                      AppSpacing.md,
+                      AppSpacing.lg,
+                      AppSpacing.xl,
+                    ),
+                    children: [
+                      ScanMedicationCard(
+                        scanning: _scanning,
+                        onCamera: () => _scan(ImageSource.camera),
+                        onUpload: () => _scan(ImageSource.gallery),
+                      ),
+                      if (_scanResult != null &&
+                          _scanResult!.needsConfirmation.isNotEmpty) ...[
+                        const SizedBox(height: AppSpacing.lg),
+                        MedicationCandidatePicker(
+                          entry: _scanResult!.needsConfirmation.first,
+                          selected: _pickedCandidate,
+                          onSelected: (opt) {
+                            setState(() {
+                              _pickedCandidate = opt;
+                              _applyCandidate(opt);
+                            });
+                          },
+                        ),
+                      ],
+                      const SizedBox(height: AppSpacing.lg),
+                      _buildRegistrySearch(cs),
+                      const SizedBox(height: AppSpacing.lg),
+                      _buildFormFields(cs),
+                    ],
+                  ),
+                ),
+                _buildBottomBar(cs, isSubmitting),
+              ],
+            ),
           ),
         ),
       ),
@@ -357,14 +385,22 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
       children: [
         SoftInput(
           controller: _searchCtrl,
-          label: 'Search medication registry',
-          hint: 'e.g. metformin',
+          label: 'Which medication are you taking?',
+          hint: 'Type 3 letters, e.g. met or aml',
           prefixIcon: const Icon(Icons.search_rounded, size: 20),
         ),
         if (_searching)
           const Padding(
             padding: EdgeInsets.only(top: 8),
-            child: Center(child: ShimmerBox(width: 24, height: 8, radius: 4)),
+            child: Column(
+              children: [
+                ShimmerBox(width: double.infinity, height: 52, radius: 12),
+                SizedBox(height: 6),
+                ShimmerBox(width: double.infinity, height: 52, radius: 12),
+                SizedBox(height: 6),
+                ShimmerBox(width: double.infinity, height: 52, radius: 12),
+              ],
+            ),
           )
         else if (_searchDone && _searchResults.isNotEmpty)
           Container(
@@ -475,13 +511,6 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        SoftInput(
-          controller: _nameCtrl,
-          label: AppLocalizations.getString(context, 'medications.name'),
-          textCapitalization: TextCapitalization.words,
-          validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
-        ),
-        const SizedBox(height: AppSpacing.md),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

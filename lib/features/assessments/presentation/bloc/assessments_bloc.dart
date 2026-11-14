@@ -87,6 +87,8 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
   ) async {
     if (!event.silent || state.assessments.isEmpty) {
       emit(state.copyWith(status: AssessmentStatus.loading, clearError: true));
+    } else {
+      emit(state.copyWith(refreshing: true, clearError: true));
     }
 
     final accessRes = await _getAccess(NoParams());
@@ -104,6 +106,8 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
             errorMessage: mapFailure(failure),
           ),
         );
+      } else {
+        emit(state.copyWith(refreshing: false));
       }
       return;
     }
@@ -120,13 +124,27 @@ class AssessmentsBloc extends Bloc<AssessmentsEvent, AssessmentsState> {
         )
         .toList(growable: false);
 
+    final query = event.silent ? state.searchQuery : '';
+    final normalized = query.trim().toLowerCase();
+    final filtered = normalized.isEmpty
+        ? visible
+        : visible
+              .where(
+                (a) =>
+                    a.title.toLowerCase().contains(normalized) ||
+                    a.shortTitle.toLowerCase().contains(normalized) ||
+                    a.tagline.toLowerCase().contains(normalized) ||
+                    a.category.toLowerCase().contains(normalized),
+              )
+              .toList(growable: false);
     emit(
       state.copyWith(
         status: AssessmentStatus.ready,
         access: access,
         assessments: visible,
-        filteredAssessments: visible,
-        searchQuery: '',
+        filteredAssessments: filtered,
+        searchQuery: query,
+        refreshing: false,
       ),
     );
   }

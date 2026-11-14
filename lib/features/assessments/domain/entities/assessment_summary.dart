@@ -22,7 +22,6 @@ class AssessmentSummary extends Equatable {
   bool isVisibleFor(String? userGender) {
     final excluded = excludedGender?.trim().toLowerCase();
     if (excluded == null || excluded.isEmpty) return true;
-    if (dependantVariantSlug != null) return true;
     final mine = userGender?.trim().toLowerCase();
     if (mine == null || mine.isEmpty) return false;
     return excluded != mine;

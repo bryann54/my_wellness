@@ -108,7 +108,11 @@ class NotificationPermissionSheet extends StatelessWidget {
                         value: state.pushEnabled,
                         onChanged: (!configured || state.isUpdating)
                             ? null
-                            : (v) => bloc.add(SetPushEnabledEvent(v)),
+                            : (v) => v
+                                  ? bloc.add(const SetPushEnabledEvent(true))
+                                  : bloc.add(
+                                      const OpenNotificationSettingsEvent(),
+                                    ),
                         secondary: Icon(
                           state.pushEnabled
                               ? Icons.notifications_active_rounded
@@ -141,10 +145,8 @@ class NotificationPermissionSheet extends StatelessWidget {
                     if (blocked) ...[
                       const SizedBox(height: AppSpacing.md),
                       _BlockedCallout(
-                        onOpenSettings: () => bloc.add(
-                          // Already denied → this opens system settings.
-                          const SetPushEnabledEvent(true),
-                        ),
+                        onOpenSettings: () =>
+                            bloc.add(const OpenNotificationSettingsEvent()),
                       ),
                     ],
                     const SizedBox(height: AppSpacing.lg),

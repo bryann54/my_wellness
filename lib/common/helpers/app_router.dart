@@ -48,6 +48,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: AddAppointmentRoute.page),
 
     AutoRoute(page: VerificationRoute.page),
+    AutoRoute(page: ShrConsentRoute.page),
     AutoRoute(page: SettingsRoute.page),
     AutoRoute(page: ProfileDetailsRoute.page),
 

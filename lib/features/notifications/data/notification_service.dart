@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class NotificationService {
   final String _appId;
@@ -106,6 +107,10 @@ class NotificationService {
       await OneSignal.User.pushSubscription.optOut();
     }
   }
+
+  /// OS notification permission cannot be revoked by an app. Send the user to
+  /// this app's system page so the switch always represents the real setting.
+  Future<bool> openSystemSettings() => openAppSettings();
 
   Future<void> dispose() async {
     await _notifications.close();
