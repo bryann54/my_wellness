@@ -58,7 +58,19 @@ class CustomAppBar extends StatelessWidget {
       builder: (context, state) {
         final resolvedExpanded = isHome
             ? (expandedHeight ?? homeContentHeight)
-            : (expandedHeight ?? kToolbarHeight + curveExtra);
+            : (expandedHeight ?? 112 + curveExtra);
+
+        final pageTitle = isHome || title == null
+            ? null
+            : _AppBarTitle(
+                title: title!,
+                heroTag: titleHeroTag,
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 20,
+                  color: AppColors.textOnPrimary,
+                ),
+              );
 
         return SliverAppBar(
           expandedHeight: resolvedExpanded,
@@ -84,17 +96,7 @@ class CustomAppBar extends StatelessWidget {
                   padding: EdgeInsets.only(left: 12, top: 8, bottom: 8),
                   child: _PageBackButton(),
                 ),
-          title: isHome || title == null
-              ? null
-              : _AppBarTitle(
-                  title: title!,
-                  heroTag: titleHeroTag,
-                  style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 18,
-                    color: AppColors.textOnPrimary,
-                  ),
-                ),
+          title: null,
           actions: actions,
           bottom: bottom,
           flexibleSpace: AppBarFlexibleHeader(
@@ -102,6 +104,7 @@ class CustomAppBar extends StatelessWidget {
             username: state.profile?.displayName ?? '',
             expandedHeight: resolvedExpanded,
             bottomHeight: bottom?.preferredSize.height ?? 0,
+            pageTitle: pageTitle,
           ),
         );
       },
@@ -146,7 +149,7 @@ class _AppBarTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = Text(
-      title.toUpperCase(),
+      title,
       maxLines: 1,
       softWrap: false,
       overflow: TextOverflow.ellipsis,

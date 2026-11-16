@@ -8,6 +8,7 @@ class AppBarFlexibleHeader extends StatelessWidget {
   final String username;
   final double expandedHeight;
   final double bottomHeight;
+  final Widget? pageTitle;
 
   const AppBarFlexibleHeader({
     super.key,
@@ -15,6 +16,7 @@ class AppBarFlexibleHeader extends StatelessWidget {
     required this.username,
     required this.expandedHeight,
     required this.bottomHeight,
+    this.pageTitle,
   });
 
   @override
@@ -42,10 +44,50 @@ class AppBarFlexibleHeader extends StatelessWidget {
                     progress: progress,
                     statusBarHeight: statusBarHeight,
                   )
-                : const SizedBox.expand(),
+                : _PageHeaderContent(
+                    title: pageTitle,
+                    collapseProgress: progress,
+                    bottomHeight: bottomHeight,
+                  ),
           ),
         );
       },
+    );
+  }
+}
+
+class _PageHeaderContent extends StatelessWidget {
+  const _PageHeaderContent({
+    required this.title,
+    required this.collapseProgress,
+    required this.bottomHeight,
+  });
+
+  final Widget? title;
+  final double collapseProgress;
+  final double bottomHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    final child = title;
+    if (child == null) return const SizedBox.expand();
+
+    return IgnorePointer(
+      child: Align(
+        alignment: Alignment.bottomLeft,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            20,
+            0,
+            20,
+            AppBarClipper.radius + bottomHeight + 12,
+          ),
+          child: Opacity(
+            opacity: (1 - collapseProgress).clamp(0.0, 1.0),
+            child: child,
+          ),
+        ),
+      ),
     );
   }
 }
