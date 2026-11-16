@@ -1,9 +1,34 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:my_wellness/core/api_client/endpoints/api_endpoints.dart';
 import 'package:my_wellness/features/assessments/data/models/assessment_definition_model.dart';
+import 'package:my_wellness/features/assessments/domain/entities/assessment_summary.dart';
 
 void main() {
   group('assessment definition contract', () {
+    test('catalogue honours dependent variants and gender exclusions', () {
+      const parent = AssessmentSummary(
+        slug: 'endometriosis',
+        category: 'Reproductive health',
+        title: 'Endometriosis',
+        shortTitle: 'Endometriosis',
+        tagline: '',
+        excludedGender: 'male',
+        dependantVariantSlug: 'mens-reproductive-health',
+      );
+      const excluded = AssessmentSummary(
+        slug: 'female-only',
+        category: 'Reproductive health',
+        title: 'Female only',
+        shortTitle: 'Female only',
+        tagline: '',
+        excludedGender: 'male',
+      );
+
+      expect(parent.isVisibleFor('male'), isTrue);
+      expect(excluded.isVisibleFor('male'), isFalse);
+      expect(excluded.isVisibleFor(null), isTrue);
+    });
+
     test('uses the normalized detail endpoint', () {
       expect(
         ApiEndpoints.assessmentDetail('endometriosis'),

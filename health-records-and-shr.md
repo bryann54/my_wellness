@@ -1,5 +1,18 @@
 # Health Records & DHA Shared Health Record (SHR)
 
+<!-- guide-header:start -->
+> **Guide set `2026-11-16.b9b79a`.** Every file in this guide carries this same line.
+>
+> **Related files you need open with this one:** `README.md` (shared conventions), `account-and-profile.md`, `auth-and-signup.md`, `bookings-and-consultations.md`, `next-of-kin.md`, `push-notifications.md`, `vitals-medications-appointments.md`
+>
+> **AI agents, before building anything from this file:** check that you have each related
+> file and that its guide-set line reads exactly `2026-11-16.b9b79a`. If a file is missing or its line
+> differs, stop and ask the developer for the current copy, naming the files you need (or
+> fetch them: `GET /api/mobile-guide/<filename>/`, README "Fetching this guide itself, over
+> HTTP"). Never fill a gap from memory or an older copy. Anything the app already shows that
+> this guide doesn't describe is out of date: the app must match the website and WhatsApp.
+<!-- guide-header:end -->
+
 > **Before building anything from this file, check it against the web
 > platform** — the user web app, live on staging at https://staging.mywellnesshealth.co.ke/ (the source of truth).
 > The mobile app implements exactly the regular-user features that exist
@@ -66,10 +79,28 @@ GET /api/health-exchange/shr/visits/mine/                      -- signup step, a
 GET /api/health-exchange/shr/visits/by-booking/<booking_id>/   -- booking step
 ```
 
-Both 404 while nothing exists yet. Web treats a 404 as "nothing yet",
-because there's no way to tell "not applicable" from "not ready yet"
-(`SHRVisitByBookingView` / `SHRVisitForCurrentUserView`). `by-booking` also 404s for a
-booking that isn't yours. **Web polls every 3000ms**, and stops once status is
+Both 404 while nothing exists yet ("not ready yet"). `by-booking` also 404s for a
+booking that isn't yours.
+
+`by-booking` answers **200 with a skipped body** when no consent request will
+ever be made for the booking (`SHRVisitByBookingView`):
+
+```json
+{ "skipped": true, "reason": "sharing_off", "message": "Health information sharing with SHA is switched off in your account, so Brain Spine can't access your shared health record for this visit. You can switch it on under Account, Privacy & your data." }
+```
+
+| `reason` | When |
+|---|---|
+| `not_applicable` | The facility doesn't receive records through DHA. |
+| `sharing_off` | The person has "Share my health data with SHA" switched off. |
+| `not_cleared` | The visit's records need a cleared practitioner and none is registered. |
+| `no_dha_contact` | DHA has no phone number to send the code to. |
+| `unavailable` | DHA refused the request (e.g. no record for the person yet). |
+
+On a skipped body, stop polling and show **"Your booking is confirmed"**
+with `message` as given and a **Continue** button. Never build your own
+wording from `reason`; the server's message already avoids naming the
+condition. `/visits/mine/` has no skipped body. **Web polls every 3000ms**, and stops once status is
 one of `open`, `expired`, `closed`, `rejected`. Note `open` counts as "stop polling": it's the success exit,
 not a failure. Mobile must use the same 3-second interval and the same
 stop condition.
@@ -190,11 +221,27 @@ GET /api/health-exchange/shr-resync/status/
   "next_eligible_at": null,
   "records_fetching": false,
   "dha_phone_missing": false,
-  "consent_request_status": null
+  "consent_request_status": null,
+  "consent_request_reason": null,
+  "consent_request_message": null
 }
 ```
 (`get_shr_resync_status`, `services.py`. It also returns
 `last_attempted_at`, which web doesn't show.)
+
+`consent_request_reason` says why the last attempt to link this person's DHA records (at
+signup, or from **Request DHA consent**) stopped before DHA sent its code, and
+`consent_request_message` is the text to show for it. Both are `null` when the last attempt
+sent the code or nothing has been tried in the last 24 hours. Show the message as given; never
+write your own text per reason. The reasons are:
+
+| `consent_request_reason` | Meaning |
+|---|---|
+| `no_kenyan_id` | No Kenyan national ID on the account to look the person up with (e.g. a passport signup). |
+| `no_dha_record` | DHA answered but has no record matching the ID yet. |
+| `no_dha_phone` | DHA has no phone to send its code to (same case as `dha_phone_missing`). |
+| `service_unavailable` | DHA couldn't be reached or refused the request, or our side isn't set up for it. Not the person's doing; trying later can work. |
+| `not_available` | Linking isn't possible for this account. |
 `next_eligible_at` is only non-null while actually on cooldown. Display
 it as-is; don't compute your own 1-hour offset client-side (it already
 accounts for the test-account cooldown bypass). Web renders nothing for
@@ -263,10 +310,13 @@ status: Awaiting verification"* (no open visit). While on cooldown
     way. Web refetches that query immediately on this result, so the
     first poll doesn't wait 3s. When the step closes (Done or Skip for
     now), the card goes back to its normal view.
-  - `"not_possible"` means DHA has nothing resolvable for this account
-    yet. It's an expected outcome, not an error. Web shows an info toast:
-    *"DHA doesn't have a resolvable health record for your account yet.
-    If you've recently registered, try again later."*
+  - `"not_possible"` means no code was sent. It's an expected outcome, not an
+    error. Web shows `consent_request_message` from the same status response as
+    an info toast, e.g. *"We couldn't reach DHA's health record service just
+    now. This isn't anything you did, please try again later."* for
+    `service_unavailable`, or *"DHA doesn't have a health record we can match
+    to your ID yet. If you've recently registered with SHA, please try again
+    later."* for `no_dha_record`. Mobile should do the same.
 
 Both POSTs share the cooldown, and **an attempt is stamped before the
 work starts**, so a failed attempt still uses up the hour
@@ -642,6 +692,11 @@ and the patient has no open visit, no consent request is made and `dha_phone_mis
 `GET /api/health-exchange/shr-resync/status/` becomes true. It's set by a background job at
 signup, so keep polling while there's no visit. The status endpoint is polled alongside the
 visit (every 15s, §2).
+
+While there's still no visit and `consent_request_reason` is set (any reason) on
+`GET /api/health-exchange/shr-resync/status/`, the signup consent step shows **"Your account
+is ready"**, `consent_request_message`, and a **Continue** button that closes the step, instead
+of the spinner. The no-phone wording below is that message for `no_dha_phone`.
 
 While there's still no visit and `dha_phone_missing` is true, the consent step (§1) shows,
 instead of the spinner:

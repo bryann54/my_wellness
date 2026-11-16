@@ -298,7 +298,7 @@ class _HistoryBody extends StatelessWidget {
         ConnectionCard(onHistoryRefresh: onRefreshRequested),
         const SizedBox(height: 20),
 
-        if (state.errorMessage != null && history.isNotEmpty) ...[
+        if (state.errorMessage != null && !history.isEmpty) ...[
           _InlineNotice(message: state.errorMessage!),
           const SizedBox(height: 16),
         ],

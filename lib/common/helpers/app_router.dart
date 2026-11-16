@@ -50,6 +50,7 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: VerificationRoute.page),
     AutoRoute(page: ShrConsentRoute.page),
     AutoRoute(page: SettingsRoute.page),
+    // AutoRoute(page: AccountSettingsRoute.page),
     AutoRoute(page: ProfileDetailsRoute.page),
 
     AutoRoute(page: WebViewRoute.page),

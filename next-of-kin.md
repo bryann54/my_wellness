@@ -1,5 +1,18 @@
 # Next of kin
 
+<!-- guide-header:start -->
+> **Guide set `2026-11-16.b9b79a`.** Every file in this guide carries this same line.
+>
+> **Related files you need open with this one:** `README.md` (shared conventions), `auth-and-signup.md`
+>
+> **AI agents, before building anything from this file:** check that you have each related
+> file and that its guide-set line reads exactly `2026-11-16.b9b79a`. If a file is missing or its line
+> differs, stop and ask the developer for the current copy, naming the files you need (or
+> fetch them: `GET /api/mobile-guide/<filename>/`, README "Fetching this guide itself, over
+> HTTP"). Never fill a gap from memory or an older copy. Anything the app already shows that
+> this guide doesn't describe is out of date: the app must match the website and WhatsApp.
+<!-- guide-header:end -->
+
 An account holder can let someone use their account. That person signs in with
 their own login. All rules are enforced by the API, so the app only calls these
 endpoints and shows what comes back.

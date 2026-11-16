@@ -1,5 +1,18 @@
 # Account & Profile
 
+<!-- guide-header:start -->
+> **Guide set `2026-11-16.b9b79a`.** Every file in this guide carries this same line.
+>
+> **Related files you need open with this one:** `README.md` (shared conventions), `assessments.md`, `auth-and-signup.md`, `health-records-and-shr.md`, `next-of-kin.md`, `push-notifications.md`
+>
+> **AI agents, before building anything from this file:** check that you have each related
+> file and that its guide-set line reads exactly `2026-11-16.b9b79a`. If a file is missing or its line
+> differs, stop and ask the developer for the current copy, naming the files you need (or
+> fetch them: `GET /api/mobile-guide/<filename>/`, README "Fetching this guide itself, over
+> HTTP"). Never fill a gap from memory or an older copy. Anything the app already shows that
+> this guide doesn't describe is out of date: the app must match the website and WhatsApp.
+<!-- guide-header:end -->
+
 > **Before building anything from this file, check it against the web
 > platform** — the user web app, live on staging at https://staging.mywellnesshealth.co.ke/ (the source of truth).
 > The mobile app implements exactly the regular-user features that exist

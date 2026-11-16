@@ -9,6 +9,7 @@ import 'package:my_wellness/common/helpers/app_router.gr.dart';
 import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/shimmer.dart';
+import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_summary.dart';
 import 'package:my_wellness/features/assessments/presentation/bloc/assessments_bloc.dart';
 import 'package:my_wellness/features/home/domain/entities/dashboard_session.dart';
@@ -27,7 +28,19 @@ class AssessmentProgressCard extends StatelessWidget {
           return const _AssessmentProgressShimmer();
         }
 
-        if (homeState.sessions.isEmpty) {
+        final hasOccupation = context.select<AccountBloc, bool>(
+          (bloc) => bloc.state.profile?.occupation.trim().isNotEmpty == true,
+        );
+        final visibleSessions = homeState.sessions
+            .where(
+              (session) =>
+                  (session.status == DashboardSessionStatus.notStarted ||
+                      session.status == DashboardSessionStatus.inProgress) &&
+                  (hasOccupation || !session.isWorkplaceWellbeing),
+            )
+            .toList(growable: false);
+
+        if (visibleSessions.isEmpty) {
           return const SizedBox.shrink();
         }
 
@@ -79,7 +92,7 @@ class AssessmentProgressCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.xs),
             BlocBuilder<AssessmentsBloc, AssessmentsState>(
               builder: (context, assessmentState) => _SessionList(
-                sessions: homeState.sessions,
+                sessions: visibleSessions,
                 assessments: assessmentState.assessments,
               ),
             ),
@@ -224,8 +237,8 @@ class _SessionList extends StatelessWidget {
         sessions
             .where(
               (session) =>
-                  session.status == DashboardSessionStatus.inProgress &&
-                  !_isWellbeingSession(session, assessments),
+                  (session.status == DashboardSessionStatus.notStarted ||
+                  session.status == DashboardSessionStatus.inProgress),
             )
             .toList()
           ..sort((a, b) {
@@ -244,16 +257,6 @@ class _SessionList extends StatelessWidget {
     if (items.isEmpty) return const SizedBox.shrink();
     return _SessionCarousel(sessions: items, assessments: assessments);
   }
-}
-
-bool _isWellbeingSession(
-  DashboardSession session,
-  List<AssessmentSummary> assessments,
-) {
-  final summary = assessments.where((a) => a.slug == session.assessmentSlug);
-  final title = summary.isEmpty ? '' : summary.first.shortTitle;
-  final searchable = '${session.assessmentSlug} $title'.toLowerCase();
-  return searchable.contains('wellbeing') || searchable.contains('well-being');
 }
 
 class _SessionCarousel extends StatefulWidget {
@@ -343,9 +346,8 @@ class _FeaturedSession extends StatelessWidget {
 
     final subtitle = notStarted
         ? AppLocalizations.getString(context, 'homeDashboard.notStarted')
-        : AppLocalizations.t(context, 'homeDashboard.questionsAnswered', {
-            'current': '${session.currentIndex}',
-            'total': '${session.totalQuestions}',
+        : AppLocalizations.t(context, 'homeDashboard.progressPercent', {
+            'percent': '${session.completionPercent}',
           });
 
     return Container(
@@ -359,10 +361,7 @@ class _FeaturedSession extends StatelessWidget {
         children: [
           Row(
             children: [
-              if (notStarted)
-                _NotStartedIcon(color: fg)
-              else
-                _ProgressRing(percent: session.completionPercent, color: fg),
+              _ProgressRing(percent: session.completionPercent, color: fg),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
@@ -423,27 +422,6 @@ class _FeaturedSession extends StatelessWidget {
       ),
     );
   }
-}
-
-class _NotStartedIcon extends StatelessWidget {
-  const _NotStartedIcon({required this.color});
-
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) => Semantics(
-    label: AppLocalizations.getString(context, 'homeDashboard.notStarted'),
-    child: Container(
-      width: 56,
-      height: 56,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color.withValues(alpha: 0.14),
-      ),
-      alignment: Alignment.center,
-      child: Icon(Icons.assignment_outlined, color: color, size: 27),
-    ),
-  );
 }
 
 class _ProgressRing extends StatelessWidget {
@@ -541,7 +519,7 @@ void _openSession(BuildContext context, DashboardSession session) {
     context.router.push(
       AssessmentIntroRoute(
         slug: session.assessmentSlug,
-        sessionId: session.id,
+        sessionId: session.sessionId,
         // currentIndex: session.currentIndex,
         // totalQuestions: session.totalQuestions,
         // completionPercent: session.completionPercent,
@@ -553,7 +531,7 @@ void _openSession(BuildContext context, DashboardSession session) {
   context.read<AssessmentsBloc>().add(
     ResumeAssessmentsEvent(
       slug: session.assessmentSlug,
-      sessionId: session.id,
+      sessionId: session.sessionId!,
       // currentIndex: session.currentIndex,
       // totalQuestions: session.totalQuestions,
       // completionPercent: session.completionPercent,
@@ -566,6 +544,7 @@ String _titleFor(
   DashboardSession session,
   List<AssessmentSummary> availableAssessments,
 ) {
+  if (session.title.trim().isNotEmpty) return session.title;
   for (final assessment in availableAssessments) {
     if (assessment.slug == session.assessmentSlug) {
       return assessment.shortTitle;

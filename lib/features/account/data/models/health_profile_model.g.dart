@@ -11,6 +11,23 @@ HealthProfileModel _$HealthProfileModelFromJson(Map<String, dynamic> json) =>
       email: _stringFromJson(json['email']),
       fullName: _stringFromJson(json['full_name']),
       phone: _stringFromJson(json['phone']),
+      accountPhone: json['account_phone'] == null
+          ? ''
+          : _stringFromJson(json['account_phone']),
+      countryOfResidence: json['country_of_residence'] == null
+          ? 'KE'
+          : _stringFromJson(json['country_of_residence']),
+      emailVerified: json['email_verified'] == null
+          ? false
+          : _boolFromJson(json['email_verified']),
+      phoneVerified: json['phone_verified'] == null
+          ? false
+          : _boolFromJson(json['phone_verified']),
+      pendingContactVerifications:
+          (json['pending_contact_verifications'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
       age: _intFromJson(json['age']),
       ageStale: json['age_stale'] == null
           ? false
@@ -58,6 +75,12 @@ HealthProfileModel _$HealthProfileModelFromJson(Map<String, dynamic> json) =>
       shaBeneficiaryIdType: json['sha_beneficiary_id_type'] == null
           ? ''
           : _stringFromJson(json['sha_beneficiary_id_type']),
+      shaNumber: json['sha_number'] == null
+          ? ''
+          : _stringFromJson(json['sha_number']),
+      shaEligibilityCheckable: json['sha_eligibility_checkable'] == null
+          ? false
+          : _boolFromJson(json['sha_eligibility_checkable']),
       nationalIdNumber: _stringOrNullFromJson(json['national_id_number']),
       analyticsOptOut: json['analytics_opt_out'] == null
           ? false
@@ -72,6 +95,11 @@ Map<String, dynamic> _$HealthProfileModelToJson(HealthProfileModel instance) =>
       'email': instance.email,
       'full_name': instance.fullName,
       'phone': instance.phone,
+      'account_phone': instance.accountPhone,
+      'country_of_residence': instance.countryOfResidence,
+      'email_verified': instance.emailVerified,
+      'phone_verified': instance.phoneVerified,
+      'pending_contact_verifications': instance.pendingContactVerifications,
       'age': instance.age,
       'age_stale': instance.ageStale,
       'date_of_birth': instance.dateOfBirth,
@@ -97,6 +125,8 @@ Map<String, dynamic> _$HealthProfileModelToJson(HealthProfileModel instance) =>
       'dm_onboarding_seen': instance.dmOnboardingSeen,
       'sha_beneficiary_id': instance.shaBeneficiaryId,
       'sha_beneficiary_id_type': instance.shaBeneficiaryIdType,
+      'sha_number': instance.shaNumber,
+      'sha_eligibility_checkable': instance.shaEligibilityCheckable,
       'national_id_number': instance.nationalIdNumber,
       'analytics_opt_out': instance.analyticsOptOut,
       'sha_data_sharing_consent': instance.shaDataSharingConsent,

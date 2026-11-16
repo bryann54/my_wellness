@@ -22,8 +22,12 @@ class AssessmentSummary extends Equatable {
   bool isVisibleFor(String? userGender) {
     final excluded = excludedGender?.trim().toLowerCase();
     if (excluded == null || excluded.isEmpty) return true;
+    // Contract: a parent with a dependant variant remains in the catalogue;
+    // the server selects the appropriate variant when it is opened.
+    if (dependantVariantSlug?.trim().isNotEmpty == true) return true;
     final mine = userGender?.trim().toLowerCase();
-    if (mine == null || mine.isEmpty) return false;
+    // With no known gender there is no matching exclusion to apply.
+    if (mine == null || mine.isEmpty) return true;
     return excluded != mine;
   }
 

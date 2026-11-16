@@ -4,6 +4,11 @@ class HealthProfile extends Equatable {
   final String email;
   final String fullName;
   final String phone;
+  final String accountPhone;
+  final String countryOfResidence;
+  final bool emailVerified;
+  final bool phoneVerified;
+  final List<String> pendingContactVerifications;
 
   final int? age;
   final bool ageStale;
@@ -38,6 +43,8 @@ class HealthProfile extends Equatable {
 
   final String shaBeneficiaryId;
   final String shaBeneficiaryIdType;
+  final String shaNumber;
+  final bool shaEligibilityCheckable;
 
   final String? nationalIdNumber;
 
@@ -48,6 +55,11 @@ class HealthProfile extends Equatable {
     required this.email,
     required this.fullName,
     required this.phone,
+    this.accountPhone = '',
+    this.countryOfResidence = 'KE',
+    this.emailVerified = false,
+    this.phoneVerified = false,
+    this.pendingContactVerifications = const [],
     this.age,
     this.ageStale = false,
     this.dateOfBirth,
@@ -73,6 +85,8 @@ class HealthProfile extends Equatable {
     this.dmOnboardingSeen = false,
     this.shaBeneficiaryId = '',
     this.shaBeneficiaryIdType = '',
+    this.shaNumber = '',
+    this.shaEligibilityCheckable = false,
     this.nationalIdNumber,
     this.analyticsOptOut = false,
     this.shaDataSharingConsent = false,
@@ -91,6 +105,11 @@ class HealthProfile extends Equatable {
     email,
     fullName,
     phone,
+    accountPhone,
+    countryOfResidence,
+    emailVerified,
+    phoneVerified,
+    pendingContactVerifications,
     age,
     ageStale,
     dateOfBirth,
@@ -116,6 +135,8 @@ class HealthProfile extends Equatable {
     dmOnboardingSeen,
     shaBeneficiaryId,
     shaBeneficiaryIdType,
+    shaNumber,
+    shaEligibilityCheckable,
     nationalIdNumber,
     analyticsOptOut,
     shaDataSharingConsent,
