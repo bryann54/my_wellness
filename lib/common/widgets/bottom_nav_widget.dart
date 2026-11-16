@@ -104,7 +104,7 @@ class CustomFlashyBottomNav extends StatelessWidget {
       ),
       title: Text(
         title,
-        style: GoogleFonts.inter(
+        style: GoogleFonts.poppins(
           fontSize: 12,
           fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
         ),

@@ -75,7 +75,7 @@ class AppBottomSheet extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.poppins(
                           fontSize: 17,
                           fontWeight: FontWeight.w700,
                           color: cs.onSurface,
@@ -86,7 +86,7 @@ class AppBottomSheet extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text(
                           subtitle!,
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 13,
                             color: cs.onSurface.withValues(alpha: 0.6),
                             height: 1.4,
@@ -179,7 +179,7 @@ class _ActionBar extends StatelessWidget {
                 ),
                 child: Text(
                   secondaryLabel!,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 14.5,
                     fontWeight: FontWeight.w600,
                   ),
@@ -204,7 +204,7 @@ class _ActionBar extends StatelessWidget {
                   ? const ShimmerBox(width: 42, height: 10, radius: 5)
                   : Text(
                       primaryLabel,
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                         fontSize: 14.5,
                         fontWeight: FontWeight.w600,
                       ),

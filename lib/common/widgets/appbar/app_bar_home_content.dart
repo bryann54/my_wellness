@@ -44,7 +44,7 @@ class AppBarHomeContent extends StatelessWidget {
                     children: [
                       Text(
                         AppLocalizations.getString(context, 'common.hello'),
-                        style: GoogleFonts.inter(
+                        style: GoogleFonts.poppins(
                           fontSize: 16,
                           height: 1.1,
                           color: AppColors.textOnPrimary.withValues(
@@ -57,7 +57,7 @@ class AppBarHomeContent extends StatelessWidget {
                       Expanded(
                         child: Text(
                           username.isNotEmpty ? username : '...',
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 18,
                             height: 1.1,
                             fontWeight: FontWeight.w600,
@@ -98,7 +98,7 @@ class AppBarHomeContent extends StatelessWidget {
               child: Center(
                 child: Text(
                   username.isNotEmpty ? username : '...',
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontWeight: FontWeight.w700,
                     fontSize: 15,
                     color: AppColors.textOnPrimary,

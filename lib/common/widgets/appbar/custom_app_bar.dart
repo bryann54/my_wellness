@@ -76,13 +76,20 @@ class CustomAppBar extends StatelessWidget {
           ),
           surfaceTintColor: Colors.transparent,
           centerTitle: true,
-          automaticallyImplyLeading: !isTabRoot,
+          automaticallyImplyLeading: false,
+          leadingWidth: isHome || isTabRoot ? null : 104,
+          leading: isHome || isTabRoot
+              ? null
+              : const Padding(
+                  padding: EdgeInsets.only(left: 12, top: 8, bottom: 8),
+                  child: _PageBackButton(),
+                ),
           title: isHome || title == null
               ? null
               : _AppBarTitle(
                   title: title!,
                   heroTag: titleHeroTag,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontWeight: FontWeight.w700,
                     fontSize: 18,
                     color: AppColors.textOnPrimary,
@@ -98,6 +105,33 @@ class CustomAppBar extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _PageBackButton extends StatelessWidget {
+  const _PageBackButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: 'Back',
+      child: OutlinedButton.icon(
+        onPressed: () => Navigator.maybePop(context),
+        icon: const Icon(Icons.arrow_back_rounded, size: 17),
+        label: const Text('Back'),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: AppColors.textOnPrimary,
+          side: const BorderSide(color: AppColors.textOnPrimary, width: 1),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          textStyle: GoogleFonts.poppins(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+          shape: const StadiumBorder(),
+        ),
+      ),
     );
   }
 }

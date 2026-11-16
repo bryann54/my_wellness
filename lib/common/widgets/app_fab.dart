@@ -89,7 +89,7 @@ class AppFab extends StatelessWidget {
       icon: icon,
       label: Text(
         label ?? '',
-        style: GoogleFonts.inter(
+        style: GoogleFonts.poppins(
           fontSize: 14.5,
           fontWeight: FontWeight.w600,
           letterSpacing: 0.5,

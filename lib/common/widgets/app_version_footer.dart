@@ -34,7 +34,7 @@ class _AppVersionFooterState extends State<AppVersionFooter> {
 
     return Text(
       _version,
-      style: GoogleFonts.acme(
+      style: GoogleFonts.poppins(
         fontSize: 11,
         letterSpacing: 2,
         color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.35),

@@ -80,7 +80,7 @@ class EmptyStateView extends StatelessWidget {
           Text(
             title,
             textAlign: TextAlign.center,
-            style: GoogleFonts.acme(
+            style: GoogleFonts.poppins(
               fontSize: 22,
               fontWeight: FontWeight.bold,
               color: Theme.of(context).colorScheme.onSurface,
@@ -90,7 +90,7 @@ class EmptyStateView extends StatelessWidget {
           Text(
             subtitle,
             textAlign: TextAlign.center,
-            style: GoogleFonts.actor(
+            style: GoogleFonts.poppins(
               fontSize: 15,
               color: Theme.of(
                 context,

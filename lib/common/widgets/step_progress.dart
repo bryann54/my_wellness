@@ -36,7 +36,7 @@ class StepProgress extends StatelessWidget {
             alignment: Alignment.centerRight,
             child: Text(
               label!,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                 fontSize: 12,
                 color: cs.onSurface.withValues(alpha: 0.55),
                 fontWeight: FontWeight.w500,

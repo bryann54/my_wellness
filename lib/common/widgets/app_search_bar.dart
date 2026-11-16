@@ -105,21 +105,9 @@ class _AppSearchBarState extends State<AppSearchBar> {
               curve: Curves.easeOut,
               height: 48,
               decoration: BoxDecoration(
-                color: cs.surfaceContainerLow.withValues(alpha: 0.8),
+                color: cs.surface,
                 borderRadius: radius,
-                border: Border.all(
-                  color: borderColor,
-                  width: _focused ? 1.4 : 1,
-                ),
-                boxShadow: _focused
-                    ? [
-                        BoxShadow(
-                          color: cs.primary.withValues(alpha: 0.08),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ]
-                    : null,
+                border: Border.all(color: borderColor, width: 1),
               ),
               child: Row(
                 children: [
@@ -141,7 +129,7 @@ class _AppSearchBarState extends State<AppSearchBar> {
                       textCapitalization: TextCapitalization.none,
                       autocorrect: false,
                       enableSuggestions: false,
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
                         color: cs.onSurface,
@@ -150,7 +138,7 @@ class _AppSearchBarState extends State<AppSearchBar> {
                       cursorWidth: 1.6,
                       decoration: InputDecoration(
                         hintText: widget.hintText,
-                        hintStyle: GoogleFonts.inter(
+                        hintStyle: GoogleFonts.poppins(
                           fontSize: 15,
                           fontWeight: FontWeight.w400,
                           color: cs.onSurface.withValues(alpha: 0.4),

@@ -38,7 +38,7 @@ class SectionHeader extends StatelessWidget {
         ],
         Text(
               label,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                 fontSize: fontSize,
                 fontWeight: FontWeight.w600,
                 color: cs.onSurface,
