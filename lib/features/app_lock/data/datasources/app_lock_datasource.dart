@@ -3,7 +3,7 @@ import 'package:injectable/injectable.dart';
 import 'package:local_auth/local_auth.dart';
 
 abstract class AppLockDataSource {
-  /// True when the device has biometrics or a PIN/pattern/password.
+  /// True only when biometric hardware is available and enrolled.
   Future<bool> isDeviceSecured();
 
   /// Throws [LocalAuthException] on cancel, lockout or missing credentials.
@@ -27,12 +27,15 @@ class AppLockDataSourceImpl implements AppLockDataSource {
   AppLockDataSourceImpl(this._secure, this._auth);
 
   @override
-  Future<bool> isDeviceSecured() => _auth.isDeviceSupported();
+  Future<bool> isDeviceSecured() async {
+    if (!await _auth.canCheckBiometrics) return false;
+    return (await _auth.getAvailableBiometrics()).isNotEmpty;
+  }
 
   @override
   Future<bool> authenticate(String reason) => _auth.authenticate(
     localizedReason: reason,
-    biometricOnly: false,
+    biometricOnly: true,
     persistAcrossBackgrounding: true,
   );
 

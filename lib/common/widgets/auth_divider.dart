@@ -27,7 +27,7 @@ class AuthDivider extends StatelessWidget {
           ),
           Text(
             text,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.poppins(
               fontSize: 14,
               color: isDarkMode ? Colors.grey[400] : Colors.grey[600],
             ),

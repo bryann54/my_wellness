@@ -15,6 +15,7 @@ AuthSessionModel _$AuthSessionModelFromJson(Map<String, dynamic> json) =>
           : UserModel.fromJson(json['user'] as Map<String, dynamic>),
       clinician: json['clinician'] as Map<String, dynamic>?,
       profile: json['profile'] as Map<String, dynamic>?,
+      shrLinkagePending: json['shr_linkage_pending'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$AuthSessionModelToJson(AuthSessionModel instance) =>
@@ -24,4 +25,5 @@ Map<String, dynamic> _$AuthSessionModelToJson(AuthSessionModel instance) =>
       'user': instance.user?.toJson(),
       'clinician': instance.clinician,
       'profile': instance.profile,
+      'shr_linkage_pending': instance.shrLinkagePending,
     };

@@ -47,17 +47,18 @@ class _AssessmentCompleteBodyState extends State<_AssessmentCompleteBody> {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AssessmentsBloc>().state;
-
     if (state.score == null) {
       return const CompleteLoading();
     }
-
     return CompleteBody(
       slug: widget.slug,
       score: state.score!,
       session: state.session,
       referral: state.referral,
       categoryRaw: state.definition?.category,
+      definition: state.definition,
+      downloading: state.reportDownloading,
+      emailing: state.reportEmailing,
     );
   }
 }

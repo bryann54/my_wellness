@@ -7,34 +7,33 @@ enum ToastType { success, error, warning, info }
 class AssessmentsState extends Equatable {
   final AssessmentStatus status;
   final VitalsAccess? access;
-
-  /// Assessments visible to the signed-in member after applying
-  /// `excluded_gender` against their profile gender.
   final List<AssessmentSummary> assessments;
-
-  /// `assessments` filtered by [searchQuery]. When [searchQuery] is empty,
-  /// this mirrors [assessments] exactly.
   final List<AssessmentSummary> filteredAssessments;
-
-  /// Trimmed raw query typed by the user. Empty string == no active search.
   final String searchQuery;
+  final bool refreshing;
 
   final AssessmentDefinition? definition;
   final AssessmentSession? session;
+  final CanStartResult? canStart;
   final List<AssessmentAnswer> answers;
   final AssessmentScore? score;
+  final Referral? referral;
   final BmiPreview? bmiPreview;
   final bool bmiPreviewLoading;
   final String? bmiPreviewInputKey;
+
   final bool terminated;
   final String? terminationReference;
   final String? errorMessage;
+
   final ToastType? toastType;
   final String? toastMessage;
   final int toastNonce;
+
   final bool alreadyCompleted;
   final bool completionHandled;
-  final Referral? referral;
+  final bool reportDownloading;
+  final bool reportEmailing;
 
   const AssessmentsState({
     this.status = AssessmentStatus.initial,
@@ -42,10 +41,13 @@ class AssessmentsState extends Equatable {
     this.assessments = const [],
     this.filteredAssessments = const [],
     this.searchQuery = '',
+    this.refreshing = false,
     this.definition,
     this.session,
+    this.canStart,
     this.answers = const [],
     this.score,
+    this.referral,
     this.bmiPreview,
     this.bmiPreviewLoading = false,
     this.bmiPreviewInputKey,
@@ -57,8 +59,15 @@ class AssessmentsState extends Equatable {
     this.toastNonce = 0,
     this.alreadyCompleted = false,
     this.completionHandled = false,
-    this.referral,
+    this.reportDownloading = false,
+    this.reportEmailing = false,
   });
+
+  AssessmentQuestion? get currentQuestion =>
+      definition?.questionByIndex(session?.currentIndex ?? -1);
+
+  bool get shouldSkipIntro =>
+      session?.status == AssessmentSessionStatus.completed;
 
   AssessmentsState copyWith({
     AssessmentStatus? status,
@@ -66,10 +75,13 @@ class AssessmentsState extends Equatable {
     List<AssessmentSummary>? assessments,
     List<AssessmentSummary>? filteredAssessments,
     String? searchQuery,
+    bool? refreshing,
     AssessmentDefinition? definition,
     AssessmentSession? session,
+    CanStartResult? canStart,
     List<AssessmentAnswer>? answers,
     AssessmentScore? score,
+    Referral? referral,
     BmiPreview? bmiPreview,
     bool? bmiPreviewLoading,
     String? bmiPreviewInputKey,
@@ -86,7 +98,9 @@ class AssessmentsState extends Equatable {
     bool clearSession = false,
     bool? alreadyCompleted,
     bool? completionHandled,
-    Referral? referral,
+    bool? reportDownloading,
+    bool? reportEmailing,
+    Referral? referralClear,
     bool clearReferral = false,
   }) {
     return AssessmentsState(
@@ -95,10 +109,13 @@ class AssessmentsState extends Equatable {
       assessments: assessments ?? this.assessments,
       filteredAssessments: filteredAssessments ?? this.filteredAssessments,
       searchQuery: searchQuery ?? this.searchQuery,
+      refreshing: refreshing ?? this.refreshing,
       definition: definition ?? this.definition,
       session: clearSession ? null : (session ?? this.session),
+      canStart: canStart ?? this.canStart,
       answers: answers ?? this.answers,
       score: score ?? this.score,
+      referral: clearReferral ? null : (referral ?? this.referral),
       bmiPreview: clearBmiPreview ? null : (bmiPreview ?? this.bmiPreview),
       bmiPreviewLoading: bmiPreviewLoading ?? this.bmiPreviewLoading,
       bmiPreviewInputKey: clearBmiPreviewInputKey
@@ -112,7 +129,8 @@ class AssessmentsState extends Equatable {
       toastNonce: clearToast ? 0 : (toastNonce ?? this.toastNonce),
       alreadyCompleted: alreadyCompleted ?? this.alreadyCompleted,
       completionHandled: completionHandled ?? this.completionHandled,
-      referral: clearReferral ? null : (referral ?? this.referral),
+      reportDownloading: reportDownloading ?? this.reportDownloading,
+      reportEmailing: reportEmailing ?? this.reportEmailing,
     );
   }
 
@@ -123,10 +141,13 @@ class AssessmentsState extends Equatable {
     assessments,
     filteredAssessments,
     searchQuery,
+    refreshing,
     definition,
     session,
+    canStart,
     answers,
     score,
+    referral,
     bmiPreview,
     bmiPreviewLoading,
     bmiPreviewInputKey,
@@ -138,6 +159,7 @@ class AssessmentsState extends Equatable {
     toastNonce,
     alreadyCompleted,
     completionHandled,
-    referral,
+    reportDownloading,
+    reportEmailing,
   ];
 }

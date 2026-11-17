@@ -181,6 +181,44 @@ class AssessmentRepositoryImpl implements AssessmentsRepository {
     }
   }
 
+  @override
+  Future<Either<Failure, DownloadedReport>> downloadReport(
+    String slug,
+    String sessionId,
+  ) async {
+    try {
+      return Right(await _remote.downloadReport(slug, sessionId));
+    } on Exception catch (e) {
+      return Left(_map(e));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String?>> getReportEmailPrefill(
+    String slug,
+    String sessionId,
+  ) async {
+    try {
+      return Right(await _remote.getReportEmailPrefill(slug, sessionId));
+    } on Exception {
+      return const Right(null);
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> emailReport(
+    String slug,
+    String sessionId,
+    String email,
+  ) async {
+    try {
+      await _remote.emailReport(slug, sessionId, email);
+      return const Right(null);
+    } on Exception catch (e) {
+      return Left(_map(e));
+    }
+  }
+
   Failure _map(Exception e) {
     if (e is UnauthorizedException) return const UnauthorizedFailure();
     if (e is ValidationException) return ValidationFailure(error: e.message);

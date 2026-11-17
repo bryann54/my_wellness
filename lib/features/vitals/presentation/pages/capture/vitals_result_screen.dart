@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:my_wellness/common/widgets/shimmer_box.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
@@ -44,9 +45,7 @@ class _Body extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
 
     if (result == null) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator.adaptive()),
-      );
+      return const _ResultSkeleton();
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -163,19 +162,19 @@ class _Body extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.sm),
               if (state.candidatesLoading)
-                const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(AppSpacing.md),
-                    child: CircularProgressIndicator.adaptive(),
-                  ),
-                )
+                const _FacilitySkeleton()
               else if (state.facilityCandidates.isEmpty)
                 OutlinedButton.icon(
                   onPressed: () => context.read<VitalsCaptureBloc>().add(
                     const LoadFacilityCandidatesEvent(),
                   ),
                   icon: const Icon(Icons.search_rounded, size: 18),
-                  label: const Text('Find nearby facilities'),
+                  label: Text(
+                    AppLocalizations.getString(
+                      context,
+                      'vitals.findNearbyFacilities',
+                    ),
+                  ),
                 )
               else
                 ...state.facilityCandidates.map((c) {
@@ -219,8 +218,18 @@ class _Body extends StatelessWidget {
                                     const SizedBox(height: 2),
                                     Text(
                                       [
-                                        if (distance != null) '$distance km',
-                                        if (minutes != null) '$minutes min',
+                                        if (distance != null)
+                                          AppLocalizations.t(
+                                            context,
+                                            'vitals.distanceKm',
+                                            {'value': '$distance'},
+                                          ),
+                                        if (minutes != null)
+                                          AppLocalizations.t(
+                                            context,
+                                            'vitals.durationMinutes',
+                                            {'value': '$minutes'},
+                                          ),
                                       ].join(' · '),
                                       style: GoogleFonts.inter(
                                         fontSize: 12,
@@ -303,17 +312,23 @@ class _Body extends StatelessWidget {
 
             OutlinedButton.icon(
               onPressed: () {
-                context.read<VitalsCaptureBloc>().add(
-                  const CancelVitalsCaptureEvent(),
-                );
                 context.router.popUntilRouteWithName(VitalsRoute.name);
                 context.read<VitalsCaptureBloc>().add(
-                  StartVitalsCaptureEvent(kind),
+                  StartVitalsCaptureEvent(
+                    kind,
+                    setupSeen: true,
+                    bmiPromptDue: false,
+                  ),
                 );
-                context.router.push(VitalsCaptureIntroRoute(kind: kind));
+                context.router.push(VitalsPathwayRoute(kind: kind));
               },
               icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: const Text('Log another reading'),
+              label: Text(
+                AppLocalizations.getString(
+                  context,
+                  'vitals.logAnotherReading',
+                ),
+              ),
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(48),
                 foregroundColor: cs.onSurface,
@@ -328,11 +343,65 @@ class _Body extends StatelessWidget {
             const SizedBox(height: AppSpacing.xl),
             AppPrimaryButton(
               onPressed: () => _returnToVitals(context),
-              label: 'Back to vitals',
+              label: AppLocalizations.getString(
+                context,
+                'vitals.backToVitals',
+              ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ResultSkeleton extends StatelessWidget {
+  const _ResultSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: NestedScrollView(
+        headerSliverBuilder: (_, _) => [
+          CustomAppBar(
+            title: AppLocalizations.getString(context, 'vitals.title'),
+            isHome: false,
+          ),
+        ],
+        body: ListView(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.md,
+            AppSpacing.lg,
+            AppSpacing.xl,
+          ),
+          children: const [
+            Row(
+              children: [
+                ShimmerCircle(size: 28),
+                SizedBox(width: 10),
+                ShimmerLine(width: 110, height: 15),
+              ],
+            ),
+            SizedBox(height: AppSpacing.lg),
+            ShimmerCard(height: 132, radius: 14),
+            SizedBox(height: AppSpacing.lg),
+            ShimmerCard(height: 50, radius: 12),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FacilitySkeleton extends StatelessWidget {
+  const _FacilitySkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.only(bottom: AppSpacing.sm),
+      child: ShimmerCard(height: 72, radius: 12),
     );
   }
 }

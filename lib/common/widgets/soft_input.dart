@@ -14,6 +14,7 @@ class SoftInput extends StatelessWidget {
   final int maxLines;
   final int minLines;
   final Widget? prefixIcon;
+  final Widget? suffixIcon;
   final ValueChanged<String>? onChanged;
   final bool readOnly;
   final VoidCallback? onTap;
@@ -33,6 +34,7 @@ class SoftInput extends StatelessWidget {
     this.maxLines = 1,
     this.minLines = 1,
     this.prefixIcon,
+    this.suffixIcon,
     this.onChanged,
     this.readOnly = false,
     this.onTap,
@@ -57,7 +59,7 @@ class SoftInput extends StatelessWidget {
       onChanged: onChanged,
       textInputAction: textInputAction,
       textCapitalization: textCapitalization,
-      style: GoogleFonts.inter(
+      style: GoogleFonts.poppins(
         fontSize: 15,
         fontWeight: FontWeight.w500,
         color: cs.onSurface,
@@ -67,25 +69,26 @@ class SoftInput extends StatelessWidget {
         hintText: hint,
         suffixText: suffixText,
         prefixIcon: prefixIcon,
+        suffixIcon: suffixIcon,
         floatingLabelBehavior: FloatingLabelBehavior.always,
         filled: true,
         fillColor: cs.surfaceContainerHighest,
-        labelStyle: GoogleFonts.inter(
+        labelStyle: GoogleFonts.poppins(
           fontSize: 13.5,
           fontWeight: FontWeight.w600,
           color: cs.onSurface.withValues(alpha: 0.7),
         ),
-        floatingLabelStyle: GoogleFonts.inter(
+        floatingLabelStyle: GoogleFonts.poppins(
           fontSize: 13,
           fontWeight: FontWeight.w600,
           color: cs.primary,
         ),
-        hintStyle: GoogleFonts.inter(
+        hintStyle: GoogleFonts.poppins(
           fontSize: 14.5,
           fontWeight: FontWeight.w400,
           color: cs.onSurface.withValues(alpha: 0.35),
         ),
-        suffixStyle: GoogleFonts.inter(
+        suffixStyle: GoogleFonts.poppins(
           fontSize: 13.5,
           fontWeight: FontWeight.w500,
           color: cs.onSurface.withValues(alpha: 0.55),

@@ -121,24 +121,32 @@ class ShimmerLatestCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.all(20),
-      child: Row(
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: cs.outlineVariant.withValues(alpha: 0.5)),
+      ),
+      child: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ShimmerBox(width: 56, height: 56, radius: 16),
-          SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ShimmerLine(width: 90, height: 12),
-                SizedBox(height: 10),
-                ShimmerLine(width: 140, height: 24),
-                SizedBox(height: 8),
-                ShimmerLine(width: 100, height: 12),
-              ],
-            ),
+          Row(
+            children: [
+              ShimmerBox(width: 32, height: 32, radius: 10),
+              SizedBox(width: 8),
+              ShimmerLine(width: 100, height: 13),
+              Spacer(),
+              ShimmerBox(width: 64, height: 24, radius: 12),
+            ],
           ),
+          SizedBox(height: 16),
+          ShimmerLine(width: 180, height: 40),
+          SizedBox(height: 10),
+          ShimmerLine(width: 110, height: 13),
+          SizedBox(height: 6),
+          ShimmerLine(width: 130, height: 12),
         ],
       ),
     );

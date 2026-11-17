@@ -9,7 +9,7 @@ abstract class AccountRepository {
     Map<String, dynamic> data,
   );
   Future<Either<Failure, NoParams>> changeLanguage(String code);
-  Future<Either<Failure, void>> deleteAccount();
+  Future<Either<Failure, void>> deleteAccount(String password);
   Future<Either<Failure, void>> cancelAccountDeletion();
   Future<Either<Failure, void>> exportData();
 }

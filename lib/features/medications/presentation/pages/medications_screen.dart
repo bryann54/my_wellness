@@ -53,9 +53,14 @@ class _MedicationsScreenState extends State<MedicationsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog.adaptive(
-        title: const Text('Mark as refilled'),
+        title: Text(
+          AppLocalizations.getString(context, 'medications.refillTitle'),
+        ),
         content: Text(
-          'Confirm that ${m.name} has been refilled with $qty units.',
+          AppLocalizations.t(context, 'medications.refillConfirm', {
+            'name': m.name,
+            'quantity': '$qty',
+          }),
         ),
         actions: [
           TextButton(

@@ -21,6 +21,7 @@ class AppointmentsBloc extends Bloc<AppointmentsEvent, AppointmentsState> {
     on<AddAppointmentEvent>(_add);
     on<UpdateAppointmentEvent>(_update);
     on<DeleteAppointmentEvent>(_delete);
+    on<SearchAppointmentsEvent>(_search);
     on<ClearAppointmentsToastEvent>(
       (_, emit) => emit(state.copyWith(clearToast: true)),
     );
@@ -107,7 +108,7 @@ class AppointmentsBloc extends Bloc<AppointmentsEvent, AppointmentsState> {
             appointments: [appointment, ...state.appointments],
           ),
           ToastType.success,
-          'Appointment booked.',
+          'appointments.bookedSuccess',
         ),
       ),
     );
@@ -142,7 +143,7 @@ class AppointmentsBloc extends Bloc<AppointmentsEvent, AppointmentsState> {
                 .toList(growable: false),
           ),
           ToastType.success,
-          'Appointment updated.',
+          'appointments.updatedSuccess',
         ),
       ),
     );
@@ -163,10 +164,14 @@ class AppointmentsBloc extends Bloc<AppointmentsEvent, AppointmentsState> {
                 .toList(growable: false),
           ),
           ToastType.success,
-          'Appointment deleted.',
+          'appointments.deletedSuccess',
         ),
       ),
     );
+  }
+
+  void _search(SearchAppointmentsEvent event, Emitter<AppointmentsState> emit) {
+    emit(state.copyWith(searchQuery: event.query.trim()));
   }
 
   AppointmentsState _toast(

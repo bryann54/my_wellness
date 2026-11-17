@@ -11,9 +11,10 @@ class CompleteHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final isReproductive = categoryRaw?.toLowerCase() == 'reproductive health';
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 28, 20, 24),
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
       decoration: BoxDecoration(
         color: cs.primary.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(20),
@@ -24,26 +25,26 @@ class CompleteHero extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 32,
-                height: 32,
+                width: 28,
+                height: 28,
                 decoration: BoxDecoration(
                   color: cs.primary,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
                   Icons.check_rounded,
-                  size: 18,
+                  size: 16,
                   color: Colors.white,
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Text(
                 AppLocalizations.getString(
                   context,
                   'assessment.completedLabel',
                 ),
                 style: GoogleFonts.inter(
-                  fontSize: 13,
+                  fontSize: 12.5,
                   fontWeight: FontWeight.w600,
                   letterSpacing: 0.3,
                   color: cs.primary,
@@ -51,37 +52,44 @@ class CompleteHero extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 20),
-
-          // Title
-          Text(
-            AppLocalizations.getString(context, 'assessment.thankYouTitle'),
-            style: GoogleFonts.inter(
-              fontSize: 22,
-              fontWeight: FontWeight.w700,
-              height: 1.25,
-              color: cs.onSurface,
+          const SizedBox(height: 16),
+          if (!isReproductive) ...[
+            Text(
+              AppLocalizations.getString(context, 'assessment.thankYouTitle'),
+              style: GoogleFonts.inter(
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+                height: 1.25,
+                color: cs.onSurface,
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            AppLocalizations.getString(context, 'assessment.thankYouBody'),
-            style: GoogleFonts.inter(
-              fontSize: 13.5,
-              height: 1.5,
-              color: cs.onSurface.withValues(alpha: 0.65),
+            const SizedBox(height: 6),
+            Text(
+              AppLocalizations.getString(context, 'assessment.thankYouBody'),
+              style: GoogleFonts.inter(
+                fontSize: 13.5,
+                height: 1.5,
+                color: cs.onSurface.withValues(alpha: 0.65),
+              ),
             ),
-          ),
-
+          ] else
+            Text(
+              'Your questionnaire is complete.',
+              style: GoogleFonts.inter(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                color: cs.onSurface.withValues(alpha: 0.75),
+              ),
+            ),
           if (reference != null && reference!.isNotEmpty) ...[
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 color: cs.surface,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: cs.outlineVariant.withValues(alpha: 0.5),
+                  color: cs.outlineVariant.withValues(alpha: 0.4),
                 ),
               ),
               child: Row(
@@ -93,19 +101,19 @@ class CompleteHero extends StatelessWidget {
                       'assessment.referenceLabel',
                     ),
                     style: GoogleFonts.inter(
-                      fontSize: 10.5,
+                      fontSize: 10,
                       fontWeight: FontWeight.w700,
-                      letterSpacing: 1.0,
+                      letterSpacing: 0.8,
                       color: cs.onSurface.withValues(alpha: 0.5),
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 8),
                   Text(
                     reference!,
                     style: GoogleFonts.inter(
-                      fontSize: 14,
+                      fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      letterSpacing: 0.8,
+                      letterSpacing: 0.6,
                       color: cs.onSurface,
                     ),
                   ),

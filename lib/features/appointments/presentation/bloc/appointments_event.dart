@@ -42,6 +42,13 @@ class DeleteAppointmentEvent extends AppointmentsEvent {
   List<Object?> get props => [id];
 }
 
+class SearchAppointmentsEvent extends AppointmentsEvent {
+  final String query;
+  const SearchAppointmentsEvent(this.query);
+  @override
+  List<Object?> get props => [query];
+}
+
 class ClearAppointmentsToastEvent extends AppointmentsEvent {
   const ClearAppointmentsToastEvent();
 }

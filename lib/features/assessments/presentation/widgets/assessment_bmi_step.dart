@@ -231,7 +231,10 @@ class _AssessmentBmiStepState extends State<AssessmentBmiStep> {
                     context,
                     'assessment.bmi.weightKg',
                   ),
-                  hint: 'e.g. 76',
+                  hint: AppLocalizations.getString(
+                    context,
+                    'vitals.weightHint',
+                  ),
                   suffixText: 'kg',
                   readOnly: isSubmitting,
                   keyboardType: const TextInputType.numberWithOptions(
@@ -253,7 +256,10 @@ class _AssessmentBmiStepState extends State<AssessmentBmiStep> {
                     context,
                     'assessment.bmi.heightCm',
                   ),
-                  hint: 'e.g. 177',
+                  hint: AppLocalizations.getString(
+                    context,
+                    'vitals.heightHint',
+                  ),
                   suffixText: 'cm',
                   readOnly: isSubmitting,
                   keyboardType: const TextInputType.numberWithOptions(

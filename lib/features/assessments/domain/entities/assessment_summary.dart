@@ -7,6 +7,7 @@ class AssessmentSummary extends Equatable {
   final String shortTitle;
   final String tagline;
   final String? excludedGender;
+  final String? dependantVariantSlug;
 
   const AssessmentSummary({
     required this.slug,
@@ -15,15 +16,18 @@ class AssessmentSummary extends Equatable {
     required this.shortTitle,
     required this.tagline,
     this.excludedGender,
+    this.dependantVariantSlug,
   });
 
   bool isVisibleFor(String? userGender) {
     final excluded = excludedGender?.trim().toLowerCase();
     if (excluded == null || excluded.isEmpty) return true;
+    // Contract: a parent with a dependant variant remains in the catalogue;
+    // the server selects the appropriate variant when it is opened.
+    if (dependantVariantSlug?.trim().isNotEmpty == true) return true;
     final mine = userGender?.trim().toLowerCase();
-    // If the member's gender is not available yet, don't expose assessments
-    // with a gender exclusion until we can determine whether they apply.
-    if (mine == null || mine.isEmpty) return false;
+    // With no known gender there is no matching exclusion to apply.
+    if (mine == null || mine.isEmpty) return true;
     return excluded != mine;
   }
 
@@ -35,5 +39,6 @@ class AssessmentSummary extends Equatable {
     shortTitle,
     tagline,
     excludedGender,
+    dependantVariantSlug,
   ];
 }

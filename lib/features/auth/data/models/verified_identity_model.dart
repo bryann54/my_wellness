@@ -24,6 +24,12 @@ class VerifiedIdentityModel {
 
   final String? phone;
 
+  @JsonKey(name: 'phone_normalized')
+  final String? phoneNormalized;
+
+  @JsonKey(name: 'phone_locked')
+  final bool phoneLocked;
+
   @JsonKey(name: 'from_afyaconnect')
   final bool fromAfyaConnect;
 
@@ -47,6 +53,8 @@ class VerifiedIdentityModel {
     this.gender,
     this.dateOfBirth,
     this.phone,
+    this.phoneNormalized,
+    this.phoneLocked = false,
     this.fromAfyaConnect = false,
     this.countyId,
     this.subCountyId,
@@ -66,7 +74,8 @@ class VerifiedIdentityModel {
     otherName: otherName,
     gender: gender,
     dateOfBirth: dateOfBirth,
-    phone: phone,
+    phone: phoneNormalized ?? phone,
+    phoneLocked: phoneLocked,
     fromAfyaConnect: fromAfyaConnect,
     countyId: countyId,
     subCountyId: subCountyId,

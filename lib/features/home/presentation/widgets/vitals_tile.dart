@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:my_wellness/common/widgets/shimmer_box.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:my_wellness/common/constants/hero.dart';
@@ -283,10 +284,7 @@ class _EmptyState extends StatelessWidget {
     if (isLoading) {
       return Row(
         children: [
-          SizedBox.square(
-            dimension: 16,
-            child: CircularProgressIndicator(strokeWidth: 2, color: accent),
-          ),
+          const ShimmerBox(width: 20, height: 8, radius: 4),
           const SizedBox(width: AppSpacing.sm),
           Text(
             AppLocalizations.getString(context, 'common.loading'),

@@ -7,6 +7,7 @@ import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_fab.dart';
 import 'package:my_wellness/common/widgets/shimmer_box.dart';
+import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
 import 'package:my_wellness/features/vitals/data/datasources/vitals_capture_remote_datasource.dart';
 import 'package:my_wellness/features/vitals/domain/entities/bs_reading.dart';
 import 'package:my_wellness/features/vitals/presentation/bloc/vitals_bloc.dart';
@@ -21,14 +22,19 @@ class BsTab extends StatelessWidget {
 
   static void _startCapture(BuildContext context) {
     final access = context.read<VitalsCaptureBloc>().state.access;
-   if (access != null && !access.hasAccess) {
+    if (access != null && !access.hasAccess) {
       context.router.push(PricingRoute(initialServiceId: 'monitor'));
       return;
     }
+    final profile = context.read<AccountBloc>().state.profile;
     context.read<VitalsCaptureBloc>().add(
-      const StartVitalsCaptureEvent(VitalsCaptureKind.bs),
+      StartVitalsCaptureEvent(
+        VitalsCaptureKind.bs,
+        setupSeen: profile?.dmOnboardingSeen ?? false,
+        bmiPromptDue: profile?.bmiPromptDue ?? false,
+      ),
     );
-    context.router.push(VitalsCaptureIntroRoute(kind: VitalsCaptureKind.bs));
+    context.router.push(VitalsPathwayRoute(kind: VitalsCaptureKind.bs));
   }
 
   @override
@@ -41,7 +47,7 @@ class BsTab extends StatelessWidget {
         final locked = access != null && !access.hasAccess;
 
         if (captureState.accessLoading && access == null) {
-          return const Center(child: CircularProgressIndicator.adaptive());
+          return const _BsSkeleton();
         }
 
         if (locked && !access.demoRestricted) {
@@ -132,6 +138,7 @@ class BsTab extends StatelessWidget {
                             LatestReadingCard(
                               kind: ReadingKind.bs,
                               classification: latest.classification,
+                              classificationLabel: latest.classificationLabel,
                               primary: latest.value,
                               unit: latest.unit,
                               timestampIso: latest.takenAt,
@@ -159,6 +166,8 @@ class BsTab extends StatelessWidget {
                                       primary: r.value,
                                       unit: r.unit,
                                       classification: r.classification,
+                                      classificationLabel:
+                                          r.classificationLabel,
                                       timestampIso: r.takenAt,
                                       secondary: _readingContext(context, r),
                                       onDelete: () => context
@@ -196,9 +205,18 @@ class BsTab extends StatelessWidget {
         context,
         'vitals.readingTypePostMeal',
       ),
-      'pre_meal' => 'Pre-meal',
-      'hba1c' => 'HbA1c',
-      _ => type,
+      'pre_meal' => AppLocalizations.getString(
+        context,
+        'vitals.readingTypePreMeal',
+      ),
+      'hba1c' => AppLocalizations.getString(
+        context,
+        'vitals.readingTypeHba1c',
+      ),
+      _ => AppLocalizations.getString(
+        context,
+        'vitals.readingTypeUnknown',
+      ),
     };
   }
 

@@ -92,7 +92,7 @@ class _NotificationHostState extends State<NotificationHost>
         router.push(const AppointmentsRoute());
 
       case NotificationRouteBookings():
-        router.push(const BookingsRoute());
+        router.push(const AppointmentsRoute());
 
       case NotificationRouteAppointment():
         router.push(const AppointmentsRoute());
@@ -107,7 +107,7 @@ class _NotificationHostState extends State<NotificationHost>
         router.push(AssessmentIntroRoute(slug: slug));
 
       case NotificationRouteAssessmentResult(:final slug):
-        router.push(AssessmentResultRoute(slug: slug));
+        router.push(AssessmentIntroRoute(slug: slug));
 
       case NotificationRouteVitals():
         router.push(VitalsRoute());

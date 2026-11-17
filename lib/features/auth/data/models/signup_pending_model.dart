@@ -7,9 +7,13 @@ part 'signup_pending_model.g.dart';
 
 @JsonSerializable()
 class SignupPendingModel {
+  @JsonKey(name: 'next_step')
+  final String? nextStep;
   final String? channel;
   final String? destination;
   final String? message;
+  final String? email;
+  final String? phone;
   final String? access;
   final String? refresh;
   final UserModel? user;
@@ -19,9 +23,12 @@ class SignupPendingModel {
   final Object? pendingSubdomainClaim;
 
   const SignupPendingModel({
+    this.nextStep,
     this.channel,
     this.destination,
     this.message,
+    this.email,
+    this.phone,
     this.access,
     this.refresh,
     this.user,
@@ -31,8 +38,16 @@ class SignupPendingModel {
 
   bool get hasSession => access != null && refresh != null;
 
-  AuthSessionModel toSessionModel() =>
-      AuthSessionModel(access: access!, refresh: refresh!, user: user);
+  bool get expectsSession => nextStep?.toLowerCase() == 'signed_in';
+
+  bool get expectsOtp => nextStep?.toLowerCase() == 'otp';
+
+  AuthSessionModel toSessionModel() => AuthSessionModel(
+    access: access!,
+    refresh: refresh!,
+    user: user,
+    shrLinkagePending: shrLinkagePending ?? false,
+  );
 
   factory SignupPendingModel.fromJson(Map<String, dynamic> json) =>
       _$SignupPendingModelFromJson(json);
@@ -44,7 +59,7 @@ class SignupPendingModel {
     final isPhone = normalizedChannel == 'phone' || normalizedChannel == 'sms';
     return SignupPendingEntity(
       channel: isPhone ? SignupChannel.phone : SignupChannel.email,
-      destination: destination ?? fallbackDestination,
+      destination: destination ?? email ?? phone ?? fallbackDestination,
       message: message,
     );
   }

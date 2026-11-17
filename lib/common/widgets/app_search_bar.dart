@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:my_wellness/common/res/l10n.dart';
 
 class AppSearchBar extends StatefulWidget {
   final String hintText;
@@ -104,21 +105,9 @@ class _AppSearchBarState extends State<AppSearchBar> {
               curve: Curves.easeOut,
               height: 48,
               decoration: BoxDecoration(
-                color: cs.surfaceContainerLow.withValues(alpha: 0.8),
+                color: cs.surface,
                 borderRadius: radius,
-                border: Border.all(
-                  color: borderColor,
-                  width: _focused ? 1.4 : 1,
-                ),
-                boxShadow: _focused
-                    ? [
-                        BoxShadow(
-                          color: cs.primary.withValues(alpha: 0.08),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ]
-                    : null,
+                border: Border.all(color: borderColor, width: 1),
               ),
               child: Row(
                 children: [
@@ -140,7 +129,7 @@ class _AppSearchBarState extends State<AppSearchBar> {
                       textCapitalization: TextCapitalization.none,
                       autocorrect: false,
                       enableSuggestions: false,
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
                         color: cs.onSurface,
@@ -149,7 +138,7 @@ class _AppSearchBarState extends State<AppSearchBar> {
                       cursorWidth: 1.6,
                       decoration: InputDecoration(
                         hintText: widget.hintText,
-                        hintStyle: GoogleFonts.inter(
+                        hintStyle: GoogleFonts.poppins(
                           fontSize: 15,
                           fontWeight: FontWeight.w400,
                           color: cs.onSurface.withValues(alpha: 0.4),
@@ -193,7 +182,7 @@ class _ClearButton extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Semantics(
       button: true,
-      label: 'Clear search',
+      label: AppLocalizations.getString(context, 'common.clearSearch'),
       child: InkWell(
         onTap: onTap,
         customBorder: const CircleBorder(),
@@ -227,7 +216,7 @@ class _FilterButton extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     return Semantics(
       button: true,
-      label: 'Filter',
+      label: AppLocalizations.getString(context, 'common.filter'),
       child: Material(
         color: cs.surfaceContainerLow,
         shape: RoundedRectangleBorder(

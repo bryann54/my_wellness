@@ -7,6 +7,7 @@ import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_fab.dart';
 import 'package:my_wellness/common/widgets/shimmer_box.dart';
+import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
 import 'package:my_wellness/features/vitals/data/datasources/vitals_capture_remote_datasource.dart';
 import 'package:my_wellness/features/vitals/presentation/bloc/vitals_bloc.dart';
 import 'package:my_wellness/features/vitals/presentation/bloc/vitals_capture_bloc.dart';
@@ -20,14 +21,19 @@ class BpTab extends StatelessWidget {
 
   static void _startCapture(BuildContext context) {
     final access = context.read<VitalsCaptureBloc>().state.access;
-   if (access != null && !access.hasAccess) {
+    if (access != null && !access.hasAccess) {
       context.router.push(PricingRoute(initialServiceId: 'monitor'));
       return;
     }
+    final profile = context.read<AccountBloc>().state.profile;
     context.read<VitalsCaptureBloc>().add(
-      const StartVitalsCaptureEvent(VitalsCaptureKind.bp),
+      StartVitalsCaptureEvent(
+        VitalsCaptureKind.bp,
+        setupSeen: profile?.htnOnboardingSeen ?? false,
+        bmiPromptDue: profile?.bmiPromptDue ?? false,
+      ),
     );
-    context.router.push(VitalsCaptureIntroRoute(kind: VitalsCaptureKind.bp));
+    context.router.push(VitalsPathwayRoute(kind: VitalsCaptureKind.bp));
   }
 
   @override
@@ -40,7 +46,7 @@ class BpTab extends StatelessWidget {
         final locked = access != null && !access.hasAccess;
 
         if (captureState.accessLoading && access == null) {
-          return const Center(child: CircularProgressIndicator.adaptive());
+          return const _BpSkeleton();
         }
 
         if (locked && !access.demoRestricted) {
@@ -167,6 +173,8 @@ class BpTab extends StatelessWidget {
                                       primary: '${r.systolic}/${r.diastolic}',
                                       unit: 'mmHg',
                                       classification: r.classification,
+                                      classificationLabel:
+                                          r.classificationLabel,
                                       timestampIso: r.takenAt,
                                       secondary: r.pulse == null
                                           ? null

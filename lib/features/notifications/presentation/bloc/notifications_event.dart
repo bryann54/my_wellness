@@ -32,6 +32,10 @@ class SetPushEnabledEvent extends NotificationsEvent {
   List<Object?> get props => [enabled];
 }
 
+class OpenNotificationSettingsEvent extends NotificationsEvent {
+  const OpenNotificationSettingsEvent();
+}
+
 class PermissionChangedEvent extends NotificationsEvent {
   final NotificationPermission permission;
   const PermissionChangedEvent(this.permission);

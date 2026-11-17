@@ -13,7 +13,6 @@ import 'package:my_wellness/features/assessments/presentation/widgets/assessment
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_intro_skeleton.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_progress_bar.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_question_view.dart';
-import 'package:my_wellness/features/assessments/presentation/widgets/assessment_card.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_session_bottom_bar.dart';
 import 'package:my_wellness/features/assessments/presentation/widgets/assessment_toast_listener.dart';
 import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
@@ -78,11 +77,9 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
     }
 
     if (state.status == AssessmentStatus.error) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(AppLocalizations.getString(context, 'assessment.title')),
-        ),
-        body: Center(
+      return _AssessmentPageScaffold(
+        title: AppLocalizations.getString(context, 'assessment.title'),
+        child: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
@@ -128,118 +125,140 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
             hasHistory != null &&
             (hasHistory == false || _priorCancerType != null) &&
             (_priorCancerYear.text.trim().isEmpty || year != null);
-        return Scaffold(
-          appBar: AppBar(title: Text(def.shortTitle)),
-          body: SafeArea(
-            child: ListView(
-              padding: const EdgeInsets.all(24),
-              children: [
-                Text(
-                  'Have you previously been diagnosed with this cancer?',
-                  style: Theme.of(context).textTheme.titleLarge,
+        return _AssessmentPageScaffold(
+          title: def.shortTitle,
+          child: ListView(
+            padding: const EdgeInsets.all(24),
+            children: [
+              Text(
+                AppLocalizations.getString(
+                  context,
+                  'assessment.priorCancerQuestion',
                 ),
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 12),
+              RadioListTile<bool>(
+                value: true,
+                groupValue: _priorCancerHistory,
+                title: Text(AppLocalizations.getString(context, 'common.yes')),
+                onChanged: submitting
+                    ? null
+                    : (value) => setState(() => _priorCancerHistory = value),
+              ),
+              RadioListTile<bool>(
+                value: false,
+                groupValue: _priorCancerHistory,
+                title: Text(AppLocalizations.getString(context, 'common.no')),
+                onChanged: submitting
+                    ? null
+                    : (value) => setState(() {
+                        _priorCancerHistory = value;
+                        _priorCancerType = null;
+                        _priorCancerYear.clear();
+                      }),
+              ),
+              if (hasHistory == true) ...[
                 const SizedBox(height: 12),
-                RadioListTile<bool>(
-                  value: true,
-                  groupValue: _priorCancerHistory,
-                  title: const Text('Yes'),
-                  onChanged: submitting
-                      ? null
-                      : (value) => setState(() => _priorCancerHistory = value),
-                ),
-                RadioListTile<bool>(
-                  value: false,
-                  groupValue: _priorCancerHistory,
-                  title: const Text('No'),
-                  onChanged: submitting
-                      ? null
-                      : (value) => setState(() {
-                          _priorCancerHistory = value;
-                          _priorCancerType = null;
-                          _priorCancerYear.clear();
-                        }),
-                ),
-                if (hasHistory == true) ...[
-                  const SizedBox(height: 12),
-                  DropdownButtonFormField<String>(
-                    initialValue: _priorCancerType,
-                    decoration: const InputDecoration(
-                      labelText: 'Cancer type',
-                      border: OutlineInputBorder(),
+                DropdownButtonFormField<String>(
+                  initialValue: _priorCancerType,
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.getString(
+                      context,
+                      'assessment.cancerType',
                     ),
-                    items:
-                        const [
-                              'breast',
-                              'cervical',
-                              'prostate',
-                              'esophageal',
-                              'colorectal',
-                              'other',
-                            ]
-                            .map(
-                              (type) => DropdownMenuItem(
-                                value: type,
-                                child: Text(
-                                  type[0].toUpperCase() + type.substring(1),
+                    border: OutlineInputBorder(),
+                  ),
+                  items:
+                      const [
+                            'breast',
+                            'cervical',
+                            'prostate',
+                            'esophageal',
+                            'colorectal',
+                            'other',
+                          ]
+                          .map(
+                            (type) => DropdownMenuItem(
+                              value: type,
+                              child: Text(
+                                AppLocalizations.getString(
+                                  context,
+                                  switch (type) {
+                                    'breast' => 'assessment.cancerBreast',
+                                    'cervical' => 'assessment.cancerCervical',
+                                    'prostate' => 'assessment.cancerProstate',
+                                    'esophageal' =>
+                                      'assessment.cancerOesophageal',
+                                    'colorectal' =>
+                                      'assessment.cancerColorectal',
+                                    _ => 'assessment.cancerOther',
+                                  },
                                 ),
                               ),
-                            )
-                            .toList(),
-                    onChanged: submitting
-                        ? null
-                        : (value) => setState(() => _priorCancerType = value),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: _priorCancerYear,
-                    enabled: !submitting,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Year diagnosed (optional)',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 24),
-                AppPrimaryButton(
-                  onPressed: !valid || submitting
+                            ),
+                          )
+                          .toList(),
+                  onChanged: submitting
                       ? null
-                      : () => context.read<AssessmentsBloc>().add(
-                          SubmitCancerPreScreeningEvent(
-                            priorCancerHistory: hasHistory ? 'yes' : 'no',
-                            priorCancerType: hasHistory
-                                ? _priorCancerType!
-                                : '',
-                            priorCancerYear: hasHistory ? year : null,
-                          ),
-                        ),
-                  label: submitting ? 'Submitting…' : 'Continue',
-                  height: 52,
+                      : (value) => setState(() => _priorCancerType = value),
                 ),
                 const SizedBox(height: 12),
-                TextButton(
-                  onPressed: submitting
-                      ? null
-                      : () => context.router.maybePop(),
-                  child: Text(
-                    AppLocalizations.getString(context, 'common.back'),
+                TextField(
+                  controller: _priorCancerYear,
+                  enabled: !submitting,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.getString(
+                      context,
+                      'assessment.yearDiagnosedOptional',
+                    ),
+                    border: OutlineInputBorder(),
                   ),
                 ),
               ],
-            ),
+              const SizedBox(height: 24),
+              AppPrimaryButton(
+                onPressed: !valid || submitting
+                    ? null
+                    : () => context.read<AssessmentsBloc>().add(
+                        SubmitCancerPreScreeningEvent(
+                          priorCancerHistory: hasHistory ? 'yes' : 'no',
+                          priorCancerType: hasHistory ? _priorCancerType! : '',
+                          priorCancerYear: hasHistory ? year : null,
+                        ),
+                      ),
+                label: submitting
+                    ? AppLocalizations.getString(
+                        context,
+                        'assessment.submitting',
+                      )
+                    : AppLocalizations.getString(context, 'common.continue'),
+                height: 52,
+              ),
+              const SizedBox(height: 12),
+              TextButton(
+                onPressed: submitting ? null : () => context.router.maybePop(),
+                child: Text(AppLocalizations.getString(context, 'common.back')),
+              ),
+            ],
           ),
         );
       }
       final message = switch (session.status) {
-        AssessmentSessionStatus.awaitingPayment =>
-          'This assessment is waiting for access to be unlocked.',
-        AssessmentSessionStatus.awaitingCall =>
-          'A care team member will contact you to complete this assessment.',
-        _ => 'This assessment is not ready to continue yet.',
+        AssessmentSessionStatus.awaitingPayment => AppLocalizations.getString(
+          context,
+          'assessment.awaitingPayment',
+        ),
+        AssessmentSessionStatus.awaitingCall => AppLocalizations.getString(
+          context,
+          'assessment.awaitingCall',
+        ),
+        _ => AppLocalizations.getString(context, 'assessment.notReady'),
       };
-      return Scaffold(
-        appBar: AppBar(title: Text(def.shortTitle)),
-        body: Center(
+      return _AssessmentPageScaffold(
+        title: def.shortTitle,
+        child: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Column(
@@ -297,25 +316,24 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
       child: Scaffold(
         body: NestedScrollView(
           headerSliverBuilder: (_, _) => [
-            CustomAppBar(
-              title: def.shortTitle,
-              titleHeroTag: assessmentTitleTag(widget.slug),
-              isHome: false,
-            ),
+            CustomAppBar(title: def.shortTitle, isHome: false),
           ],
-          body: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 12, 24, 8),
-                child: AssessmentProgressBar(
-                  current: session.currentIndex,
-                  total: session.totalQuestions,
-                  section: q.section,
+          body: CustomScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 12, 24, 8),
+                  child: AssessmentProgressBar(
+                    current: session.currentIndex,
+                    total: session.totalQuestions,
+                    section: q.section,
+                  ),
                 ),
               ),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+                sliver: SliverToBoxAdapter(
                   child: isBmi
                       ? AssessmentBmiStep(
                           initialWeightKg: profile?.weightKg?.toString(),
@@ -362,4 +380,21 @@ class _AssessmentSessionBodyState extends State<_AssessmentSessionBody> {
       ),
     );
   }
+}
+
+class _AssessmentPageScaffold extends StatelessWidget {
+  const _AssessmentPageScaffold({required this.title, required this.child});
+
+  final String title;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    body: NestedScrollView(
+      headerSliverBuilder: (_, _) => [
+        CustomAppBar(title: title, isHome: false),
+      ],
+      body: SafeArea(top: false, child: child),
+    ),
+  );
 }

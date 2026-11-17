@@ -227,10 +227,7 @@ class VitalsCaptureRemoteDataSourceImpl
       url: kind == VitalsCaptureKind.bp
           ? ApiEndpoints.referralFacilityCandidatesFromBpReading(readingId)
           : ApiEndpoints.referralFacilityCandidatesFromBsReading(readingId),
-      query: {
-        'user_lat': ?userLat,
-        'user_lng': ?userLng,
-      },
+      query: {'user_lat': ?userLat, 'user_lng': ?userLng},
       options: ApiClient.protected,
     );
     return (

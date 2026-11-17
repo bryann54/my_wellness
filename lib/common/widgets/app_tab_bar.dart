@@ -25,8 +25,11 @@ class AppTabBar extends StatelessWidget implements PreferredSizeWidget {
       indicatorWeight: 2,
       indicatorSize: TabBarIndicatorSize.label,
       labelPadding: const EdgeInsets.symmetric(horizontal: 16),
-      labelStyle: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w600),
-      unselectedLabelStyle: GoogleFonts.inter(
+      labelStyle: GoogleFonts.poppins(
+        fontSize: 15,
+        fontWeight: FontWeight.w600,
+      ),
+      unselectedLabelStyle: GoogleFonts.poppins(
         fontSize: 14,
         fontWeight: FontWeight.w500,
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_wellness/common/widgets/shimmer_box.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:my_wellness/common/res/app_spacing.dart';
@@ -107,7 +108,11 @@ class NotificationPermissionSheet extends StatelessWidget {
                         value: state.pushEnabled,
                         onChanged: (!configured || state.isUpdating)
                             ? null
-                            : (v) => bloc.add(SetPushEnabledEvent(v)),
+                            : (v) => v
+                                  ? bloc.add(const SetPushEnabledEvent(true))
+                                  : bloc.add(
+                                      const OpenNotificationSettingsEvent(),
+                                    ),
                         secondary: Icon(
                           state.pushEnabled
                               ? Icons.notifications_active_rounded
@@ -140,15 +145,16 @@ class NotificationPermissionSheet extends StatelessWidget {
                     if (blocked) ...[
                       const SizedBox(height: AppSpacing.md),
                       _BlockedCallout(
-                        onOpenSettings: () => bloc.add(
-                          // Already denied → this opens system settings.
-                          const SetPushEnabledEvent(true),
-                        ),
+                        onOpenSettings: () =>
+                            bloc.add(const OpenNotificationSettingsEvent()),
                       ),
                     ],
                     const SizedBox(height: AppSpacing.lg),
                     Text(
-                      'Choose how you want to hear about each type of reminder.',
+                      AppLocalizations.getString(
+                        context,
+                        'notifications.preferenceIntro',
+                      ),
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: cs.onSurfaceVariant,
                       ),
@@ -158,7 +164,7 @@ class NotificationPermissionSheet extends StatelessWidget {
                       const Padding(
                         padding: EdgeInsets.all(AppSpacing.lg),
                         child: Center(
-                          child: CircularProgressIndicator.adaptive(),
+                          child: ShimmerBox(width: 120, height: 12, radius: 6),
                         ),
                       )
                     else if (state.preferencesError != null &&
@@ -174,7 +180,12 @@ class NotificationPermissionSheet extends StatelessWidget {
                             onPressed: () => bloc.add(
                               const LoadNotificationPreferencesEvent(),
                             ),
-                            child: const Text('Retry'),
+                            child: Text(
+                              AppLocalizations.getString(
+                                context,
+                                'common.retry',
+                              ),
+                            ),
                           ),
                         ],
                       )
@@ -203,7 +214,10 @@ class NotificationPermissionSheet extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(top: AppSpacing.sm),
                         child: Text(
-                          'Notification choices saved.',
+                          AppLocalizations.getString(
+                            context,
+                            'notifications.preferencesSaved',
+                          ),
                           style: TextStyle(color: cs.primary),
                         ),
                       ),
@@ -218,7 +232,10 @@ class NotificationPermissionSheet extends StatelessWidget {
                                 );
                               }
                             : null,
-                        label: 'Save choices',
+                        label: AppLocalizations.getString(
+                          context,
+                          'notifications.saveChoices',
+                        ),
                         isLoading: state.savingPreferences,
                       ),
                     ],

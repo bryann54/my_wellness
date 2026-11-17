@@ -8,6 +8,7 @@ class VerifiedIdentity extends Equatable {
   final String? gender;
   final String? dateOfBirth;
   final String? phone;
+  final bool phoneLocked;
   final bool fromAfyaConnect;
   final int? countyId;
   final int? subCountyId;
@@ -22,6 +23,7 @@ class VerifiedIdentity extends Equatable {
     this.gender,
     this.dateOfBirth,
     this.phone,
+    this.phoneLocked = false,
     this.fromAfyaConnect = false,
     this.countyId,
     this.subCountyId,
@@ -43,6 +45,7 @@ class VerifiedIdentity extends Equatable {
     gender,
     dateOfBirth,
     phone,
+    phoneLocked,
     fromAfyaConnect,
     countyId,
     subCountyId,

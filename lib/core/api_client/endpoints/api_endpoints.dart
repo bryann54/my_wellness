@@ -18,6 +18,20 @@ class ApiEndpoints {
       '/api/auth/password-reset/confirm/';
   static const String authKyc = '/api/auth/verify-id/';
 
+  // DHA Shared Health Record consent
+  static const String shrVisitMine = '/api/health-exchange/shr/visits/mine/';
+  static String shrVisitVerify(String id) =>
+      '/api/health-exchange/shr/visits/$id/verify/';
+  static String shrVisitReject(String id) =>
+      '/api/health-exchange/shr/visits/$id/reject/';
+  static String shrVisitResend(String id) =>
+      '/api/health-exchange/shr/visits/$id/resend-otp/';
+  static const String shrResyncStatus =
+      '/api/health-exchange/shr-resync/status/';
+  static const String shrResync = '/api/health-exchange/shr-resync/';
+  static const String shrRequestConsent =
+      '/api/health-exchange/shr-resync/request-consent/';
+
   //  Accounts (self-service)
   static const String analyticsOptOut = '/api/auth/analytics-opt-out/';
   static const String changePassword = '/api/auth/change-password/';
@@ -26,6 +40,11 @@ class ApiEndpoints {
   static const String deleteAccountStatus = '/api/auth/delete-account/status/';
   static const String exportData = '/api/auth/export-data/';
   static const String shaConsent = '/api/auth/sha-consent/';
+  static const String verifyContactRequest =
+      '/api/auth/verify-contact/request/';
+  static const String verifyContactConfirm =
+      '/api/auth/verify-contact/confirm/';
+  static const String updateIdentity = '/api/auth/update-identity/';
 
   // MFA
   static const String mfaConfirm = '/api/auth/mfa/confirm/';
@@ -97,7 +116,7 @@ class ApiEndpoints {
       '/api/care-navigation/referrals/from-bs-reading/$readingId/';
 
   static String referralFromSession(String sessionId) =>
-      '/api/care-navigation/referrals/from-session/$sessionId';
+      '/api/care-navigation/referrals/from-session/$sessionId/';
 
   static String referralFacilityCandidatesFromBpReading(String readingId) =>
       '/api/care-navigation/referrals/from-bp-reading/$readingId/facility-candidates/';
@@ -116,6 +135,8 @@ class ApiEndpoints {
 
   // ─── Assessments ──────────────────────────────────────────────────────
   static const String assessments = '/api/assessments/';
+  static const String assessmentHealthChecks =
+      '/api/assessments/health-checks/';
   static const String dashboard = '/api/dashboard/';
   static String assessmentDetail(String slug) => '/api/assessments/$slug/';
   static String assessmentOffline(String slug) =>
@@ -193,6 +214,8 @@ class ApiEndpoints {
 
   // ─── Health Profile ───────────────────────────────────────────────────
   static const String healthProfile = '/api/health-profile/';
+  static const String clinicalMedicalHistory =
+      '/api/clinical/my-medical-history/';
 
   // ─── Health Exchange ──────────────────────────────────────────────────
   static const String healthExchangeClinicVisitNotifications =
@@ -201,6 +224,10 @@ class ApiEndpoints {
       '/api/health-exchange/my-summary/';
   static const String healthExchangeShaEligibility =
       '/api/health-exchange/sha-eligibility/';
+  static const String afyaConnectResyncStatus =
+      '/api/health-exchange/afyaconnect-resync/status/';
+  static const String afyaConnectResync =
+      '/api/health-exchange/afyaconnect-resync/';
 
   // ─── Chatbot ──────────────────────────────────────────────────────────
   static const String chatbotMessage = '/api/chatbot/message/';
@@ -246,5 +273,4 @@ class ApiEndpoints {
       '/api/care-navigation/referrals/$id/';
   static String referralFacilityCandidatesFromSession(String sessionId) =>
       '/api/care-navigation/referrals/from-session/$sessionId/facility-candidates/';
-  static const String healthJourney = '/api/care-navigation/health-journey/';
 }

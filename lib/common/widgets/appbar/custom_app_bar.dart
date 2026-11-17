@@ -82,7 +82,7 @@ class CustomAppBar extends StatelessWidget {
               : _AppBarTitle(
                   title: title!,
                   heroTag: titleHeroTag,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontWeight: FontWeight.w700,
                     fontSize: 18,
                     color: AppColors.textOnPrimary,

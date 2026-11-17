@@ -46,11 +46,21 @@ class AuthInterceptor extends Interceptor {
         return handler.next(err);
       }
 
-      final newToken = await _handleTokenRefresh();
+      // Retrying a mutation can duplicate a clinical submission. Only replay
+      // idempotent reads; callers surface an expired session for every write.
+      final method = err.requestOptions.method.toUpperCase();
+      if (method != 'GET' && method != 'HEAD') {
+        await _localDataSource.clearAuthData();
+        return handler.next(err);
+      }
 
-      if (newToken != null) {
-        return handler.resolve(await _retry(err.requestOptions, newToken));
-      } else {
+      final refresh = await _handleTokenRefresh();
+
+      if (refresh.token != null) {
+        return handler.resolve(
+          await _retry(err.requestOptions, refresh.token!),
+        );
+      } else if (refresh.invalid) {
         await _localDataSource.clearAuthData();
       }
     }
@@ -58,10 +68,10 @@ class AuthInterceptor extends Interceptor {
     return handler.next(err);
   }
 
-  Future<String?> _handleTokenRefresh() async {
+  Future<({String? token, bool invalid})> _handleTokenRefresh() async {
     if (_refreshTokenCompleter != null &&
         !_refreshTokenCompleter!.isCompleted) {
-      return _refreshTokenCompleter!.future;
+      return (token: await _refreshTokenCompleter!.future, invalid: false);
     }
 
     _refreshTokenCompleter = Completer<String?>();
@@ -91,10 +101,18 @@ class AuthInterceptor extends Interceptor {
 
       _refreshTokenCompleter!.complete(access);
 
-      return access;
+      return (token: access, invalid: false);
+    } on DioException catch (error) {
+      _refreshTokenCompleter!.complete(null);
+      // The contract uses 400 for expired, blacklisted and reused refresh
+      // tokens. Network, throttling and server errors are transient and must
+      // not erase the stored session.
+      return (token: null, invalid: error.response?.statusCode == 400);
     } catch (_) {
       _refreshTokenCompleter!.complete(null);
-      return null;
+      return (token: null, invalid: false);
+    } finally {
+      _refreshTokenCompleter = null;
     }
   }
 

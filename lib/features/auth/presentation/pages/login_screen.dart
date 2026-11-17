@@ -132,11 +132,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         () => _isPasswordVisible = !_isPasswordVisible,
                       ),
                       onSubmitted: (_) => _handleLogin(),
-                      validator: (v) => AuthValidators.validatePassword(
-                        context,
-                        v,
-                        isStrict: true,
-                      ),
+                      validator: (v) =>
+                          AuthValidators.validateSignInPassword(context, v),
                     ),
                     Align(
                       alignment: Alignment.centerRight,

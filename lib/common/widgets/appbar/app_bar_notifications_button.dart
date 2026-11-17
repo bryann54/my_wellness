@@ -116,7 +116,7 @@ class AppBarNotificationsButton extends StatelessWidget {
                 child: Center(
                   child: Text(
                     _badgeLabel,
-                    style: GoogleFonts.inter(
+                    style: GoogleFonts.poppins(
                       fontSize: 10,
                       height: 1.0,
                       fontWeight: FontWeight.w700,

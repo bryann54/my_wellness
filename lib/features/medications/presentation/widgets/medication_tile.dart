@@ -128,9 +128,13 @@ class _RefillBanner extends StatelessWidget {
 
     final cs = Theme.of(context).colorScheme;
     final accent = overdue ? cs.error : const Color(0xFFF59E0B);
-    final text = overdue
-        ? 'Refill overdue · ${_fmtDate(medication.refillDueDate!)}'
-        : 'Refill due soon · ${_fmtDate(medication.refillDueDate!)}';
+    final text = AppLocalizations.t(
+      context,
+      overdue
+          ? 'medications.refillOverdue'
+          : 'medications.refillDueSoon',
+      {'date': _fmtDate(medication.refillDueDate!)},
+    );
 
     return Padding(
       padding: const EdgeInsets.only(top: AppSpacing.sm),
@@ -148,7 +152,7 @@ class _RefillBanner extends StatelessWidget {
             Expanded(
               child: Text(
                 text,
-                style: GoogleFonts.inter(
+                style: GoogleFonts.poppins(
                   fontSize: 12.5,
                   fontWeight: FontWeight.w600,
                   color: accent,
@@ -164,7 +168,12 @@ class _RefillBanner extends StatelessWidget {
                   minimumSize: const Size(0, 28),
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
-                child: const Text('Mark refilled'),
+                child: Text(
+                  AppLocalizations.getString(
+                    context,
+                    'medications.markRefilled',
+                  ),
+                ),
               ),
           ],
         ),
@@ -195,8 +204,8 @@ class _SideEffectsCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Side effects',
-            style: GoogleFonts.inter(
+            AppLocalizations.getString(context, 'medications.sideEffects'),
+            style: GoogleFonts.poppins(
               fontSize: 12,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.3,
@@ -206,7 +215,7 @@ class _SideEffectsCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             data.sideEffects,
-            style: GoogleFonts.inter(
+            style: GoogleFonts.poppins(
               fontSize: 13,
               height: 1.5,
               color: cs.onSurface.withValues(alpha: 0.8),
@@ -216,7 +225,7 @@ class _SideEffectsCard extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               data.safetyCaution!,
-              style: GoogleFonts.inter(
+              style: GoogleFonts.poppins(
                 fontSize: 12.5,
                 height: 1.45,
                 fontWeight: FontWeight.w600,
@@ -266,7 +275,7 @@ class _Header extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final subtitle = _subtitle(medication);
+    final subtitle = _subtitle(context, medication);
     final condition = medication.condition?.trim();
     final showCondition =
         condition != null &&
@@ -334,15 +343,36 @@ class _Header extends StatelessWidget {
     );
   }
 
-  static String _humanize(String raw) {
-    final s = raw.trim().replaceAll('_', ' ');
-    if (s.isEmpty) return s;
-    return '${s[0].toUpperCase()}${s.substring(1)}';
-  }
-
-  static String? _subtitle(Medication m) {
+  static String? _subtitle(BuildContext context, Medication m) {
     final dosage = m.dosage.trim();
-    final frequency = _humanize(m.frequency);
+    final frequency = switch (m.frequency.trim().toLowerCase()) {
+      'once_daily' => AppLocalizations.getString(
+        context,
+        'medications.frequencyOnceDaily',
+      ),
+      'twice_daily' => AppLocalizations.getString(
+        context,
+        'medications.frequencyTwiceDaily',
+      ),
+      'thrice_daily' => AppLocalizations.getString(
+        context,
+        'medications.frequencyThreeTimesDaily',
+      ),
+      'four_times_daily' =>
+        AppLocalizations.getString(
+          context,
+          'medications.frequencyFourTimesDaily',
+        ),
+      'weekly' => AppLocalizations.getString(
+        context,
+        'medications.frequencyWeekly',
+      ),
+      'as_needed' => AppLocalizations.getString(
+        context,
+        'medications.frequencyAsNeeded',
+      ),
+      _ => m.frequency.trim(),
+    };
 
     if (dosage.isEmpty && frequency.isEmpty) return null;
     if (frequency.isEmpty) return dosage;
@@ -406,7 +436,10 @@ class _Details extends StatelessWidget {
             value: _t(context, 'common.available'),
           ),
         if (hasReminders)
-          _LabeledRow(label: 'Reminders', value: m.reminderTimes.join(', ')),
+          _LabeledRow(
+            label: _t(context, 'medications.reminders'),
+            value: m.reminderTimes.join(', '),
+          ),
         if (hasNotes) ...[
           const SizedBox(height: AppSpacing.xs),
           _LabeledRow(

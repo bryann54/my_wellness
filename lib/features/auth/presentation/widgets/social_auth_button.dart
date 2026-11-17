@@ -1,6 +1,7 @@
 // lib/features/auth/presentation/widgets/social_auth_button.dart
 
 import 'package:flutter/material.dart';
+import 'package:my_wellness/common/widgets/shimmer_box.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
@@ -52,16 +53,7 @@ class SocialAuthButton extends StatelessWidget {
                   ),
                   child: Center(
                     child: isLoading
-                        ? SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator.adaptive(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                textColor,
-                              ),
-                            ),
-                          )
+                        ? const ShimmerBox(width: 20, height: 8, radius: 4)
                         : _ProviderIcon(provider: provider),
                   ),
                 ),

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:my_wellness/common/res/l10n.dart';
 
 /// Handles camera and photo library access.
 ///
@@ -52,27 +53,40 @@ class MediaService {
 
   static Future<void> showPermissionDialog(
     BuildContext context, {
-    required String permissionName,
+    required String permissionNameKey,
   }) {
+    final permissionName = AppLocalizations.getString(
+      context,
+      permissionNameKey,
+    );
     return showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('$permissionName Access Required'),
+        title: Text(
+          AppLocalizations.t(context, 'permissions.accessRequired', {
+            'permission': permissionName,
+          }),
+        ),
         content: Text(
-          'To attach documents, we need $permissionName access. '
-          'Please enable it in your device settings.',
+          AppLocalizations.t(context, 'permissions.mediaExplanation', {
+            'permission': permissionName,
+          }),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(
+              AppLocalizations.getString(context, 'common.cancel'),
+            ),
           ),
           FilledButton(
             onPressed: () async {
               Navigator.pop(ctx);
               await openAppSettings();
             },
-            child: const Text('Open Settings'),
+            child: Text(
+              AppLocalizations.getString(context, 'permissions.openSettings'),
+            ),
           ),
         ],
       ),

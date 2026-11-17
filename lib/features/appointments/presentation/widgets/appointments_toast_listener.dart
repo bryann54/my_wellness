@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_snackbar.dart';
 import 'package:my_wellness/features/appointments/presentation/bloc/appointments_bloc.dart';
 
@@ -15,10 +16,13 @@ class AppointmentsToastListener extends StatelessWidget {
         listener: (context, state) {
           final message = state.toastMessage;
           if (message == null) return;
+          final displayMessage = message.startsWith('appointments.')
+              ? AppLocalizations.getString(context, message)
+              : message;
           if (state.toastType == ToastType.success) {
-            AppSnackbar.success(context, message);
+            AppSnackbar.success(context, displayMessage);
           } else {
-            AppSnackbar.error(context, message);
+            AppSnackbar.error(context, displayMessage);
           }
           context.read<AppointmentsBloc>().add(
             const ClearAppointmentsToastEvent(),

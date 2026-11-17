@@ -17,14 +17,13 @@ class CompleteFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         FilledButton(
           onPressed: onDashboard,
           style: FilledButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 15),
+            padding: const EdgeInsets.symmetric(vertical: 14),
             backgroundColor: cs.primary,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -32,10 +31,7 @@ class CompleteFooter extends StatelessWidget {
           ),
           child: Text(
             AppLocalizations.getString(context, 'assessment.goToDashboard'),
-            style: GoogleFonts.inter(
-              fontSize: 14.5,
-              fontWeight: FontWeight.w600,
-            ),
+            style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ),
         const SizedBox(height: 6),
@@ -44,7 +40,7 @@ class CompleteFooter extends StatelessWidget {
           child: Text(
             AppLocalizations.getString(context, 'assessment.moreAssessments'),
             style: GoogleFonts.inter(
-              fontSize: 13.5,
+              fontSize: 13,
               fontWeight: FontWeight.w500,
               color: cs.onSurface.withValues(alpha: 0.7),
             ),

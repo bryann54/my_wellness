@@ -36,7 +36,7 @@ class Appointment extends Equatable {
   final String clinicName;
   final Facility? facility;
   final String appointmentDate;
-  final String appointmentTime;
+  final String? appointmentTime;
   final String? notes;
   final String source;
   final String? booking;
@@ -48,7 +48,7 @@ class Appointment extends Equatable {
     required this.clinicName,
     this.facility,
     required this.appointmentDate,
-    required this.appointmentTime,
+    this.appointmentTime,
     this.notes,
     this.source = 'manual',
     this.booking,

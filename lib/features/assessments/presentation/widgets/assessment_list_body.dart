@@ -9,11 +9,13 @@ import 'package:my_wellness/features/assessments/presentation/widgets/assessment
 class AssessmentListBody extends StatelessWidget {
   final List<AssessmentSummary> assessments;
   final String searchQuery;
+  final Widget? header;
 
   const AssessmentListBody({
     super.key,
     required this.assessments,
     required this.searchQuery,
+    this.header,
   });
 
   void _open(BuildContext context, AssessmentSummary summary) {
@@ -36,6 +38,7 @@ class AssessmentListBody extends StatelessWidget {
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 40),
       children: [
+        if (header != null) ...[header!, const SizedBox(height: 12)],
         if (hasRecommended) ...[
           AssessmentSectionLabel(
             AppLocalizations.getString(

@@ -15,7 +15,7 @@ AppointmentModel _$AppointmentModelFromJson(Map<String, dynamic> json) =>
           ? null
           : FacilityModel.fromJson(json['facility'] as Map<String, dynamic>),
       appointmentDate: json['appointment_date'] as String,
-      appointmentTime: json['appointment_time'] as String,
+      appointmentTime: json['appointment_time'] as String?,
       notes: json['notes'] as String?,
       source: json['source'] as String? ?? 'manual',
       booking: json['booking'] as String?,

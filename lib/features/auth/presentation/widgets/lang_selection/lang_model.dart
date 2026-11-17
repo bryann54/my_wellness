@@ -2,12 +2,12 @@
 
 class Language {
   final String code;
-  final String label;
+  final String labelKey;
   final String flagAsset;
 
   const Language({
     required this.code,
-    required this.label,
+    required this.labelKey,
     required this.flagAsset,
   });
 }
@@ -15,12 +15,12 @@ class Language {
 const Languages = [
   Language(
     code: 'sw',
-    label: 'swahili',
+    labelKey: 'language.swahili',
     flagAsset: 'assets/images/flag_es.png',
   ),
   Language(
     code: 'en',
-    label: 'English US',
+    labelKey: 'language.english',
     flagAsset: 'assets/images/flag_en.png',
   ),
 ];

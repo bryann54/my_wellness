@@ -18,20 +18,22 @@ SignupRequestModel _$SignupRequestModelFromJson(Map<String, dynamic> json) =>
       wardId: (json['ward'] as num?)?.toInt(),
       identityVerificationId: json['identity_verification_id'] as String?,
       inviteToken: json['invite_token'] as String?,
-      subdomain: json['subdomain'] as String?,
+      acceptedTerms: json['accepted_terms'] as bool,
+      countryOfResidence: json['country_of_residence'] as String?,
     );
 
 Map<String, dynamic> _$SignupRequestModelToJson(SignupRequestModel instance) =>
     <String, dynamic>{
-      'email': instance.email,
-      'phone': instance.phone,
+      'email': ?instance.email,
+      'phone': ?instance.phone,
       'password': instance.password,
-      'national_id_number': instance.nationalIdNumber,
-      'county': instance.county,
-      'sub_county': instance.subCountyId,
-      'constituency': instance.constituencyId,
-      'ward': instance.wardId,
-      'identity_verification_id': instance.identityVerificationId,
-      'invite_token': instance.inviteToken,
-      'subdomain': instance.subdomain,
+      'national_id_number': ?instance.nationalIdNumber,
+      'county': ?instance.county,
+      'sub_county': ?instance.subCountyId,
+      'constituency': ?instance.constituencyId,
+      'ward': ?instance.wardId,
+      'identity_verification_id': ?instance.identityVerificationId,
+      'invite_token': ?instance.inviteToken,
+      'accepted_terms': instance.acceptedTerms,
+      'country_of_residence': ?instance.countryOfResidence,
     };

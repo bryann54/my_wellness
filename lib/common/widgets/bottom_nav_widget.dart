@@ -66,22 +66,14 @@ class CustomFlashyBottomNav extends StatelessWidget {
               index: 2,
               activeIcon: PhosphorIconsFill.calendarCheck,
               inactiveIcon: PhosphorIconsRegular.calendarBlank,
-              title: AppLocalizations.getString(context, 'bookings.title'),
+              title: AppLocalizations.getString(context, 'common.appointments'),
               activeColor: activeColor,
               inactiveColor: inactiveColor,
             ),
+
             _buildItem(
               context: context,
               index: 3,
-              activeIcon: PhosphorIconsFill.leaf,
-              inactiveIcon: PhosphorIconsRegular.leaf,
-              title: AppLocalizations.getString(context, 'wellness.title'),
-              activeColor: activeColor,
-              inactiveColor: inactiveColor,
-            ),
-            _buildItem(
-              context: context,
-              index: 4,
               activeIcon: PhosphorIconsFill.userCircle,
               inactiveIcon: PhosphorIconsRegular.user,
               title: AppLocalizations.getString(context, 'profile.title'),
@@ -112,7 +104,7 @@ class CustomFlashyBottomNav extends StatelessWidget {
       ),
       title: Text(
         title,
-        style: GoogleFonts.inter(
+        style: GoogleFonts.poppins(
           fontSize: 12,
           fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
         ),

@@ -18,7 +18,7 @@ typedef LocationCallback =
       required County county,
       required SubCounty subCounty,
       required Constituency constituency,
-      Ward? ward,
+      required Ward ward,
     });
 
 class RegisterStepLocation extends StatefulWidget {
@@ -60,7 +60,10 @@ class _RegisterStepLocationState extends State<RegisterStepLocation> {
   bool _seedApplied = false;
 
   bool get _canContinue =>
-      _county != null && _subCounty != null && _constituency != null;
+      _county != null &&
+      _subCounty != null &&
+      _constituency != null &&
+      _ward != null;
 
   @override
   void initState() {
@@ -152,7 +155,7 @@ class _RegisterStepLocationState extends State<RegisterStepLocation> {
       county: _county!,
       subCounty: _subCounty!,
       constituency: _constituency!,
-      ward: _ward,
+      ward: _ward!,
     );
   }
 
@@ -245,7 +248,7 @@ class _RegisterStepLocationState extends State<RegisterStepLocation> {
             WardDropdown(
               constituencyId: _constituency?.id,
               selectedWardId: _ward?.id,
-              isOptional: true,
+              isOptional: false,
               onChanged: (id) {
                 setState(() {
                   if (id == null) {

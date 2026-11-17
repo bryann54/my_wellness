@@ -288,7 +288,7 @@ class SoftDropdown<T> extends StatelessWidget {
       items: items,
       onChanged: onChanged,
       isExpanded: true,
-      style: GoogleFonts.inter(
+      style: GoogleFonts.poppins(
         fontSize: 15,
         fontWeight: FontWeight.w500,
         color: cs.onSurface,
@@ -298,12 +298,12 @@ class SoftDropdown<T> extends StatelessWidget {
         floatingLabelBehavior: FloatingLabelBehavior.always,
         filled: true,
         fillColor: cs.surfaceContainerHighest,
-        labelStyle: GoogleFonts.inter(
+        labelStyle: GoogleFonts.poppins(
           fontSize: 13.5,
           fontWeight: FontWeight.w600,
           color: cs.onSurface.withValues(alpha: 0.7),
         ),
-        floatingLabelStyle: GoogleFonts.inter(
+        floatingLabelStyle: GoogleFonts.poppins(
           fontSize: 13,
           fontWeight: FontWeight.w600,
           color: cs.primary,

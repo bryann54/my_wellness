@@ -1,4 +1,3 @@
-
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -32,7 +31,7 @@ class ApiClient {
         ),
       ) {
     _dio.interceptors.addAll([
-      DioLogInterceptor(printBody: kDebugMode),
+      if (kDebugMode) DioLogInterceptor(),
       authInterceptor,
     ]);
   }
@@ -132,7 +131,11 @@ class ApiClient {
     }
 
     return switch (e.response?.statusCode) {
-      400 => ValidationException(message ?? 'Invalid request'),
+      400 => ValidationException(
+        message ?? 'Invalid request',
+        code: _extractCode(data),
+        details: _extractDetails(data),
+      ),
       401 => UnauthorizedException(message ?? 'Session expired'),
       402 => PaymentRequiredException(
         code: _extractCode(data) ?? 'vitals_access_required',
@@ -148,7 +151,18 @@ class ApiClient {
     if (data is! Map) return null;
     final body = data['error'] is Map ? data['error'] as Map : data;
     final code = body['code'];
-    return code is String && code.isNotEmpty ? code : null;
+    if (code is String && code.isNotEmpty) return code;
+    final detail = body['detail'];
+    if (detail is Map) return _extractCode(detail);
+    return null;
+  }
+
+  Map<String, dynamic>? _extractDetails(dynamic data) {
+    if (data is! Map) return null;
+    final body = data['error'] is Map ? data['error'] as Map : data;
+    final detail = body['detail'];
+    final source = detail is Map ? detail : body;
+    return source.map((key, value) => MapEntry(key.toString(), value));
   }
 
   /// Walks the response body and returns the first human-readable string.
@@ -161,6 +175,14 @@ class ApiClient {
 
     // Unwrap the "error" envelope if present.
     final body = data['error'] is Map ? data['error'] as Map : data;
+
+    // Structured auth errors carry routing fields (email/phone) alongside a
+    // dedicated human-readable message. Never concatenate those destinations
+    // into the text shown to the user.
+    final explicitMessage = body['message'];
+    if (explicitMessage is String && explicitMessage.isNotEmpty) {
+      return explicitMessage;
+    }
 
     // Case 1: top-level detail string.
     final detail = body['detail'];

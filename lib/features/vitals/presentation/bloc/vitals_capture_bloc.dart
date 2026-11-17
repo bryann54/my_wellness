@@ -13,6 +13,17 @@ import 'package:my_wellness/features/vitals/domain/usecases/vitals_capture_useca
 part 'vitals_capture_event.dart';
 part 'vitals_capture_state.dart';
 
+List<int> toggleDialysisDaySelection(List<int> current, int day) {
+  if (day < 0 || day > 6) return List<int>.from(current);
+  final next = [...current];
+  if (next.contains(day)) {
+    next.remove(day);
+  } else if (next.length < 7) {
+    next.add(day);
+  }
+  return next;
+}
+
 @injectable
 class VitalsCaptureBloc extends Bloc<VitalsCaptureEvent, VitalsCaptureState> {
   final GetVitalsCaptureContentUseCase _getContent;
@@ -54,6 +65,9 @@ class VitalsCaptureBloc extends Bloc<VitalsCaptureEvent, VitalsCaptureState> {
     on<ToggleDialysisDayEvent>(_onToggleDialysisDay);
     on<CaptureContinueFromPathwayEvent>(_onContinuePathway);
     on<ConfirmBmiEvent>(_onConfirmBmi);
+    on<SkipBmiEvent>(
+      (_, emit) => emit(state.copyWith(step: VitalsCaptureStep.reading)),
+    );
     on<SubmitVitalsReadingEvent>(_onSubmitReading);
     on<SubmitVitalsSecondReadingEvent>(_onSubmitSecondReading);
     on<AnswerWellbeingEvent>(_onAnswerWellbeing);
@@ -73,18 +87,37 @@ class VitalsCaptureBloc extends Bloc<VitalsCaptureEvent, VitalsCaptureState> {
     StartVitalsCaptureEvent event,
     Emitter<VitalsCaptureState> emit,
   ) async {
+    emit(
+      VitalsCaptureState(
+        kind: event.kind,
+        step: VitalsCaptureStep.loadingContent,
+        access: state.access,
+      ),
+    );
     // Refresh access first — cheap and authoritative.
     final accessRes = await _getAccess(NoParams());
     accessRes.fold((_) {}, (a) => emit(state.copyWith(access: a)));
+
+    final profileRes = await _getMonitoringProfile(event.kind);
+    final profile = profileRes.getOrElse(() => const <String, dynamic>{});
+    final existingPathway = (profile['pathway'] as String?)?.trim();
+    final resumeStep = event.setupSeen && existingPathway?.isNotEmpty == true
+        ? (event.bmiPromptDue
+              ? VitalsCaptureStep.bmi
+              : VitalsCaptureStep.reading)
+        : VitalsCaptureStep.pathway;
 
     final cached = _contentCache[event.kind];
     if (cached != null) {
       emit(
         VitalsCaptureState(
           kind: event.kind,
-          step: VitalsCaptureStep.intro,
+          step: resumeStep,
           content: cached,
           access: state.access,
+          pathwayValue: existingPathway?.isEmpty == false
+              ? existingPathway
+              : null,
         ),
       );
       return;
@@ -96,6 +129,9 @@ class VitalsCaptureBloc extends Bloc<VitalsCaptureEvent, VitalsCaptureState> {
         kind: event.kind,
         step: VitalsCaptureStep.loadingContent,
         access: state.access,
+        pathwayValue: existingPathway?.isEmpty == false
+            ? existingPathway
+            : null,
       ),
     );
 
@@ -115,9 +151,7 @@ class VitalsCaptureBloc extends Bloc<VitalsCaptureEvent, VitalsCaptureState> {
         (content) {
           _contentCache[event.kind] = content;
           if (state.kind == event.kind) {
-            emit(
-              state.copyWith(step: VitalsCaptureStep.intro, content: content),
-            );
+            emit(state.copyWith(step: resumeStep, content: content));
           }
         },
       );
@@ -176,13 +210,11 @@ class VitalsCaptureBloc extends Bloc<VitalsCaptureEvent, VitalsCaptureState> {
     ToggleDialysisDayEvent event,
     Emitter<VitalsCaptureState> emit,
   ) {
-    final next = [...state.dialysisDays];
-    if (next.contains(event.day)) {
-      next.remove(event.day);
-    } else if (next.length < 3) {
-      next.add(event.day);
-    }
-    emit(state.copyWith(dialysisDays: next));
+    emit(
+      state.copyWith(
+        dialysisDays: toggleDialysisDaySelection(state.dialysisDays, event.day),
+      ),
+    );
   }
 
   void _onContinuePathway(_, Emitter<VitalsCaptureState> emit) {

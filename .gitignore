@@ -54,4 +54,5 @@ android/app/google-services.json
 
 # Local project handoff/context notes
 PROJECT_*.md
+web.md
 android/secrets.properties

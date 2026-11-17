@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_wellness/common/res/l10n.dart';
 
 import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/features/account/domain/entities/health_profile.dart';
@@ -38,7 +39,7 @@ class AccountHeader extends StatelessWidget {
             onPressed: onLogout,
             icon: const Icon(Icons.logout_rounded),
             color: cs.error,
-            tooltip: 'Log out',
+            tooltip: AppLocalizations.getString(context, 'profile.logOut'),
           ),
         ),
       ],

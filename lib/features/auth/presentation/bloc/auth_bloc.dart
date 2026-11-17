@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:my_wellness/common/utils/functions.dart';
+import 'package:my_wellness/core/errors/failures.dart';
 import 'package:my_wellness/features/auth/domain/usecases/auth_usecases.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
@@ -19,6 +20,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final RequestPasswordResetUseCase _requestPasswordResetUseCase;
   final ConfirmPasswordResetUseCase _confirmPasswordResetUseCase;
   final VerifyIdentityUseCase _verifyIdentityUseCase;
+  final VerifyMfaUseCase _verifyMfaUseCase;
 
   AuthBloc({
     required SignInUseCase signInUseCase,
@@ -31,6 +33,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required RequestPasswordResetUseCase requestPasswordResetUseCase,
     required ConfirmPasswordResetUseCase confirmPasswordResetUseCase,
     required VerifyIdentityUseCase verifyIdentityUseCase,
+    required VerifyMfaUseCase verifyMfaUseCase,
   }) : _signInUseCase = signInUseCase,
        _signUpUseCase = signUpUseCase,
        _confirmSignupEmailUseCase = confirmSignupEmailUseCase,
@@ -41,8 +44,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
        _requestPasswordResetUseCase = requestPasswordResetUseCase,
        _confirmPasswordResetUseCase = confirmPasswordResetUseCase,
        _verifyIdentityUseCase = verifyIdentityUseCase,
+       _verifyMfaUseCase = verifyMfaUseCase,
        super(const AuthState()) {
     on<SignInEvent>(_onSignIn);
+    on<VerifyMfaEvent>(_onVerifyMfa);
+    on<CancelMfaEvent>(
+      (_, emit) => emit(
+        state.copyWith(
+          status: AuthStatus.initial,
+          clearMfa: true,
+          clearError: true,
+        ),
+      ),
+    );
     on<SignUpEvent>(_onSignUp);
     on<ConfirmSignupEmailEvent>(_onConfirmSignupEmail);
     on<ConfirmSignupPhoneEvent>(_onConfirmSignupPhone);
@@ -68,11 +82,69 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           errorMessage: mapFailureToMessage(failure),
         ),
       ),
+      (result) {
+        if (result.requiresSignupConfirmation) {
+          emit(
+            state.copyWith(
+              status: AuthStatus.awaitingSignupConfirmation,
+              pendingSignup: result.pendingSignup,
+              clearError: true,
+              clearMfa: true,
+            ),
+          );
+          return;
+        }
+        if (result.requiresMfa) {
+          emit(
+            state.copyWith(
+              status: AuthStatus.mfaRequired,
+              mfaToken: result.mfaToken,
+              clearError: true,
+            ),
+          );
+          return;
+        }
+        emit(
+          state.copyWith(
+            status: AuthStatus.authenticated,
+            user: result.session!.user,
+            clearPending: true,
+            clearMfa: true,
+            clearError: true,
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _onVerifyMfa(
+    VerifyMfaEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    final token = state.mfaToken;
+    if (token == null) return;
+    emit(state.copyWith(status: AuthStatus.loading, clearError: true));
+    final result = await _verifyMfaUseCase(
+      mfaToken: token,
+      code: event.useBackupCode ? null : event.value.trim(),
+      backupCode: event.useBackupCode ? event.value.trim() : null,
+    );
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          status: failure is ValidationFailure && failure.code == 'mfa_expired'
+              ? AuthStatus.mfaExpired
+              : AuthStatus.mfaRequired,
+          errorMessage: mapFailureToMessage(failure),
+          clearMfa:
+              failure is ValidationFailure && failure.code == 'mfa_expired',
+        ),
+      ),
       (session) => emit(
         state.copyWith(
           status: AuthStatus.authenticated,
           user: session.user,
-          clearPending: true,
+          clearMfa: true,
           clearError: true,
         ),
       ),
@@ -96,6 +168,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             state.copyWith(
               status: AuthStatus.authenticated,
               user: session.user,
+              shrLinkagePending: session.shrLinkagePending,
               clearPending: true,
               clearError: true,
             ),
@@ -133,6 +206,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         state.copyWith(
           status: AuthStatus.authenticated,
           user: session.user,
+          shrLinkagePending: session.shrLinkagePending,
           clearPending: true,
           clearError: true,
         ),
@@ -160,6 +234,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         state.copyWith(
           status: AuthStatus.authenticated,
           user: session.user,
+          shrLinkagePending: session.shrLinkagePending,
           clearPending: true,
           clearError: true,
         ),
@@ -219,6 +294,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(state.copyWith(status: AuthStatus.loading, clearError: true));
     final result = await _requestPasswordResetUseCase(
       identifier: event.identifier,
+      channel: event.channel,
     );
     result.fold(
       (failure) => emit(

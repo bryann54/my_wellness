@@ -103,6 +103,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       inviteToken: (_inviteToken ?? '').trim().isEmpty
           ? null
           : _inviteToken!.trim(),
+      acceptedTerms: identity.acceptedTerms,
+      countryOfResidence: 'KE',
       subCountyId: _subCounty?.id,
       constituencyId: _constituency?.id,
       wardId: _ward?.id,
@@ -212,8 +214,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       RegisterStepCredentials(
                         initialEmail: _email,
                         initialPhone: _identity?.verifiedPhone ?? _phone,
-                        phoneIsVerified:
-                            _identity?.verifiedPhone?.isNotEmpty ?? false,
+                        phoneIsVerified: _identity?.phoneLocked ?? false,
                         onContinue:
                             ({
                               required email,
@@ -244,7 +245,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               required county,
                               required subCounty,
                               required constituency,
-                              ward,
+                              required ward,
                             }) {
                               setState(() {
                                 _county = county;

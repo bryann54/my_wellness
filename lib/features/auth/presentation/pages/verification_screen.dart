@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:my_wellness/common/widgets/shimmer_box.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -17,6 +18,8 @@ import 'package:my_wellness/features/auth/presentation/bloc/auth_state.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/shared/auth_button.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/shared/auth_header.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/shared/otp_input.dart';
+import 'package:my_wellness/core/di/injector.dart';
+import 'package:my_wellness/features/health_profile/presentation/bloc/health_history_bloc.dart';
 
 @RoutePage()
 class VerificationScreen extends StatefulWidget {
@@ -105,13 +108,18 @@ class _VerificationScreenState extends State<VerificationScreen> {
         listenWhen: (prev, curr) =>
             prev.status != curr.status ||
             prev.errorMessage != curr.errorMessage,
-        listener: (context, state) {
+        listener: (context, state) async {
           if (state.status == AuthStatus.unauthenticated &&
               state.pendingSignup == null) {
             AppSnackbar.success(context, 'Verification complete.');
           }
           if (state.status == AuthStatus.authenticated) {
+            getIt<HealthHistoryBloc>().add(const ClearHealthHistoryEvent());
             AppSnackbar.success(context, 'Account verified.');
+            if (state.shrLinkagePending) {
+              await context.router.push(const ShrConsentRoute());
+              if (!context.mounted) return;
+            }
             context.read<AppLockBloc>().add(const AppLockSignedIn());
             context.router.replaceAll([const MainRoute()]);
           }
@@ -125,7 +133,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
         builder: (context, state) {
           final pending = widget.pending ?? state.pendingSignup;
           if (pending == null) {
-            return const Center(child: CircularProgressIndicator.adaptive());
+            return const _VerificationSkeleton();
           }
 
           final isPhone = pending.channel == SignupChannel.phone;
@@ -226,6 +234,46 @@ class _VerificationScreenState extends State<VerificationScreen> {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _VerificationSkeleton extends StatelessWidget {
+  const _VerificationSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const ShimmerLine(width: 220, height: 28),
+            const SizedBox(height: 12),
+            const ShimmerParagraph(lines: 2),
+            const SizedBox(height: AppSpacing.xl),
+            Row(
+              children: List.generate(
+                6,
+                (index) => const Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 3),
+                    child: ShimmerBox(height: 52, radius: 10),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            const ShimmerCard(height: 50, radius: 12),
+            const SizedBox(height: AppSpacing.sm),
+            const Center(child: ShimmerLine(width: 120, height: 14)),
+          ],
+        ),
       ),
     );
   }

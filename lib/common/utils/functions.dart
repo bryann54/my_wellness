@@ -25,9 +25,10 @@ extension EitherX<L, R> on Either<L, R> {
   L getLeftOrThrow() => fold((l) => l, (r) => throw Exception('Right: $r'));
 }
 
-DateTime? parseDateTime(String dateIso, String timeIso) {
+DateTime? parseDateTime(String dateIso, String? timeIso) {
   try {
     final d = DateTime.parse(dateIso);
+    if (timeIso == null || timeIso.trim().isEmpty) return d;
     final t = timeIso.contains('T')
         ? DateTime.parse(timeIso)
         : _parseTime(timeIso);

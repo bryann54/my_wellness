@@ -168,7 +168,10 @@ class _UpdateIdentitySheetState extends State<UpdateIdentitySheet> {
             SoftInput(
               controller: _idCtrl,
               label: AppLocalizations.getString(context, 'profile.idNumber'),
-              hint: 'e.g. 12345678',
+              hint: AppLocalizations.getString(
+                context,
+                'profile.identityNumberExample',
+              ),
               keyboardType: TextInputType.number,
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             ),

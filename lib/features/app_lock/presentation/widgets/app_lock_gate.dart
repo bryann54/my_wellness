@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_wellness/common/widgets/shimmer_box.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
@@ -139,13 +140,7 @@ class _LockScreenState extends State<_LockScreen> {
                           ),
                         ),
                   icon: busy
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator.adaptive(
-                            strokeWidth: 2,
-                          ),
-                        )
+                      ? const ShimmerBox(width: 42, height: 10, radius: 5)
                       : const Icon(Icons.lock_open_rounded),
                   label: Text(l('appLock.unlock')),
                 ),

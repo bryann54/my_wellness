@@ -12,6 +12,8 @@ enum AuthStatus {
   awaitingSignupConfirmation,
   passwordResetRequested,
   passwordResetCompleted,
+  mfaRequired,
+  mfaExpired,
 }
 
 enum KycStatus { idle, verifying, verified, error }
@@ -21,6 +23,8 @@ class AuthState extends Equatable {
   final UserEntity? user;
   final String? errorMessage;
   final SignupPendingEntity? pendingSignup;
+  final String? mfaToken;
+  final bool shrLinkagePending;
 
   final KycStatus kycStatus;
   final VerifiedIdentity? verifiedIdentity;
@@ -31,6 +35,8 @@ class AuthState extends Equatable {
     this.user,
     this.errorMessage,
     this.pendingSignup,
+    this.mfaToken,
+    this.shrLinkagePending = false,
     this.kycStatus = KycStatus.idle,
     this.verifiedIdentity,
     this.kycError,
@@ -47,19 +53,24 @@ class AuthState extends Equatable {
     bool clearUser = false,
     bool clearError = false,
     bool clearPending = false,
+    String? mfaToken,
+    bool clearMfa = false,
     bool clearVerifiedIdentity = false,
     bool clearKycError = false,
+    bool? shrLinkagePending,
   }) {
     return AuthState(
       status: status ?? this.status,
       user: clearUser ? null : user ?? this.user,
       errorMessage: clearError ? null : errorMessage ?? this.errorMessage,
       pendingSignup: clearPending ? null : pendingSignup ?? this.pendingSignup,
+      mfaToken: clearMfa ? null : mfaToken ?? this.mfaToken,
       kycStatus: kycStatus ?? this.kycStatus,
       verifiedIdentity: clearVerifiedIdentity
           ? null
           : verifiedIdentity ?? this.verifiedIdentity,
       kycError: clearKycError ? null : kycError ?? this.kycError,
+      shrLinkagePending: shrLinkagePending ?? this.shrLinkagePending,
     );
   }
 
@@ -69,8 +80,10 @@ class AuthState extends Equatable {
     user,
     errorMessage,
     pendingSignup,
+    mfaToken,
     kycStatus,
     verifiedIdentity,
     kycError,
+    shrLinkagePending,
   ];
 }

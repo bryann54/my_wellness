@@ -1,19 +1,12 @@
 // ignore_for_file: constant_identifier_names
 
 /// Centralized Hero tag registry. Every tag used in the app lives here.
-/// Rule: a tag may only be "in flight" between two adjacent screens.
+/// Rule: a tag may only be "in flight" between two adjacent screens, and
+/// each tag must appear exactly once per route subtree.
 abstract final class HeroTags {
-  /// Logo carried across the auth funnel:
-  /// Splash → Auth (onboarding) → Login → Register.
   static const String authLogo = 'hero_auth_logo';
-
-  /// Bottom-bar "Sign in / Sign up" toggle between Login ↔ Register.
   static const String authToggle = 'hero_auth_toggle';
-
-  /// Primary CTA carried Login → Main.
   static const String authPrimaryCta = 'hero_auth_primary_cta';
-
-  /// "Continue" CTA carried Verification → Login (after code confirm).
   static const String verificationCta = 'hero_verification_cta';
 
   static const String homeNotifications = 'hero_home_notifications';
@@ -35,7 +28,4 @@ abstract final class HeroTags {
   /// Bookings list card → Booking detail (title + status chip).
   static String bookingTitle(String id) => 'hero_booking_title_$id';
   static String bookingStatus(String id) => 'hero_booking_status_$id';
-
-  /// Referral rail card → Referral detail (title).
-  static String referralTitle(String id) => 'hero_referral_title_$id';
 }

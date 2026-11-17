@@ -62,36 +62,22 @@ class AssessmentCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                 ],
-                Hero(
-                  tag: assessmentTitleTag(summary.slug),
-                  flightShuttleBuilder: textShuttleBuilder,
-                  child: Material(
-                    color: Colors.transparent,
-                    child: Text(
-                      summary.shortTitle,
-                      style: GoogleFonts.inter(
-                        fontSize: isRecommended ? 20 : 16,
-                        fontWeight: FontWeight.w700,
-                        height: 1.3,
-                        color: cs.onSurface,
-                      ),
-                    ),
+                Text(
+                  summary.shortTitle,
+                  style: GoogleFonts.inter(
+                    fontSize: isRecommended ? 20 : 16,
+                    fontWeight: FontWeight.w700,
+                    height: 1.3,
+                    color: cs.onSurface,
                   ),
                 ),
                 const SizedBox(height: 6),
-                Hero(
-                  tag: assessmentTaglineTag(summary.slug),
-                  flightShuttleBuilder: textShuttleBuilder,
-                  child: Material(
-                    color: Colors.transparent,
-                    child: Text(
-                      summary.tagline,
-                      style: GoogleFonts.inter(
-                        fontSize: isRecommended ? 14 : 13.5,
-                        height: 1.5,
-                        color: cs.onSurfaceVariant,
-                      ),
-                    ),
+                Text(
+                  summary.tagline,
+                  style: GoogleFonts.inter(
+                    fontSize: isRecommended ? 14 : 13.5,
+                    height: 1.5,
+                    color: cs.onSurfaceVariant,
                   ),
                 ),
                 if (isRecommended) ...[

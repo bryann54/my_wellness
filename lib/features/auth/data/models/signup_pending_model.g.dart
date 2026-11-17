@@ -8,9 +8,12 @@ part of 'signup_pending_model.dart';
 
 SignupPendingModel _$SignupPendingModelFromJson(Map<String, dynamic> json) =>
     SignupPendingModel(
+      nextStep: json['next_step'] as String?,
       channel: json['channel'] as String?,
       destination: json['destination'] as String?,
       message: json['message'] as String?,
+      email: json['email'] as String?,
+      phone: json['phone'] as String?,
       access: json['access'] as String?,
       refresh: json['refresh'] as String?,
       user: json['user'] == null
@@ -22,9 +25,12 @@ SignupPendingModel _$SignupPendingModelFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$SignupPendingModelToJson(SignupPendingModel instance) =>
     <String, dynamic>{
+      'next_step': instance.nextStep,
       'channel': instance.channel,
       'destination': instance.destination,
       'message': instance.message,
+      'email': instance.email,
+      'phone': instance.phone,
       'access': instance.access,
       'refresh': instance.refresh,
       'user': instance.user,

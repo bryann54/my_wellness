@@ -1,6 +1,7 @@
 // lib/features/auth/presentation/widgets/conversation/conversation_input_bar.dart
 
 import 'package:flutter/material.dart';
+import 'package:my_wellness/common/widgets/shimmer_box.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/res/colors.dart';
 import 'package:my_wellness/common/res/l10n.dart';
@@ -121,9 +122,7 @@ class ConversationInputBar extends StatelessWidget {
                     child: isLoading
                         ? const Padding(
                             padding: EdgeInsets.all(12),
-                            child: CircularProgressIndicator.adaptive(
-                              strokeWidth: 2,
-                            ),
+                            child: ShimmerBox(width: 20, height: 8, radius: 4),
                           )
                         : Icon(
                             Icons.send_rounded,

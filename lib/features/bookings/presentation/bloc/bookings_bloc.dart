@@ -1,9 +1,9 @@
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:equatable/equatable.dart';
-import 'package:injectable/injectable.dart';
 
 import 'package:my_wellness/common/utils/functions.dart';
+import 'package:my_wellness/core/di/injector.dart';
 import 'package:my_wellness/features/bookings/domain/entities/booking_timeline.dart';
 import 'package:my_wellness/features/bookings/domain/entities/facility.dart';
 import 'package:my_wellness/features/bookings/domain/entities/referral.dart';
@@ -14,22 +14,7 @@ import 'package:my_wellness/features/bookings/domain/usecases/bookings_usecases.
 part 'bookings_event.dart';
 part 'bookings_state.dart';
 
-@lazySingleton
 class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
-  final GetMyBookingsUseCase _getMyBookings;
-  final GetBookingTimelineUseCase _getTimeline;
-  final CompleteBookingUseCase _completeBooking;
-  final CreateBookingUseCase _createBooking;
-  final PushStkForBookingUseCase _pushStk;
-  final MatchFacilitiesUseCase _matchFacilities;
-  final SearchFacilitiesUseCase _searchFacilities;
-  final CreateFacilityUseCase _createFacility;
-  final GetMyReferralsUseCase _getMyReferrals;
-  final GetReferralUseCase _getReferral;
-  final GenerateReferralFromSessionUseCase _genFromSession;
-  final GenerateReferralFromBpReadingUseCase _genFromBp;
-  final GenerateReferralFromBsReadingUseCase _genFromBs;
-
   BookingsBloc({
     required GetMyBookingsUseCase getMyBookings,
     required GetBookingTimelineUseCase getTimeline,
@@ -88,6 +73,38 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
     );
   }
 
+  /// Builds a fresh instance with its dependencies from `getIt`. Use this
+  /// everywhere instead of `getIt<BookingsBloc>()`.
+  factory BookingsBloc.factory() => BookingsBloc(
+    getMyBookings: getIt<GetMyBookingsUseCase>(),
+    getTimeline: getIt<GetBookingTimelineUseCase>(),
+    completeBooking: getIt<CompleteBookingUseCase>(),
+    createBooking: getIt<CreateBookingUseCase>(),
+    pushStk: getIt<PushStkForBookingUseCase>(),
+    matchFacilities: getIt<MatchFacilitiesUseCase>(),
+    searchFacilities: getIt<SearchFacilitiesUseCase>(),
+    createFacility: getIt<CreateFacilityUseCase>(),
+    getMyReferrals: getIt<GetMyReferralsUseCase>(),
+    getReferral: getIt<GetReferralUseCase>(),
+    genFromSession: getIt<GenerateReferralFromSessionUseCase>(),
+    genFromBp: getIt<GenerateReferralFromBpReadingUseCase>(),
+    genFromBs: getIt<GenerateReferralFromBsReadingUseCase>(),
+  );
+
+  final GetMyBookingsUseCase _getMyBookings;
+  final GetBookingTimelineUseCase _getTimeline;
+  final CompleteBookingUseCase _completeBooking;
+  final CreateBookingUseCase _createBooking;
+  final PushStkForBookingUseCase _pushStk;
+  final MatchFacilitiesUseCase _matchFacilities;
+  final SearchFacilitiesUseCase _searchFacilities;
+  final CreateFacilityUseCase _createFacility;
+  final GetMyReferralsUseCase _getMyReferrals;
+  final GetReferralUseCase _getReferral;
+  final GenerateReferralFromSessionUseCase _genFromSession;
+  final GenerateReferralFromBpReadingUseCase _genFromBp;
+  final GenerateReferralFromBsReadingUseCase _genFromBs;
+
   BookingsState _toasted(
     BookingsState base,
     BookingToastType type,
@@ -99,6 +116,7 @@ class BookingsBloc extends Bloc<BookingsEvent, BookingsState> {
     toastIsKey: isKey,
     toastNonce: base.toastNonce + 1,
   );
+
   Future<void> _onLoadMyBookings(
     LoadMyBookingsEvent event,
     Emitter<BookingsState> emit,

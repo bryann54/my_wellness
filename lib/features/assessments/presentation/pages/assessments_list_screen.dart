@@ -1,7 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:my_wellness/common/constants/hero.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/utils/debouncer.dart';
 import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
@@ -42,14 +41,16 @@ class _AssessmentsListCoordinatorState
   @override
   void initState() {
     super.initState();
-    context.read<AssessmentsBloc>().add(const ResetAssessmentsEvent());
     _loadForCurrentMember();
   }
 
   void _loadForCurrentMember() {
     final gender = context.read<AccountBloc>().state.profile?.gender;
     context.read<AssessmentsBloc>().add(
-      LoadAssessmentsEvent(userGender: gender),
+      LoadAssessmentsEvent(
+        userGender: gender,
+        silent: context.read<AssessmentsBloc>().state.assessments.isNotEmpty,
+      ),
     );
   }
 
@@ -100,10 +101,10 @@ class _AssessmentsListBodyState extends State<_AssessmentsListBody> {
   }
 
   Future<void> _refresh() async {
+    final bloc = context.read<AssessmentsBloc>();
     final gender = context.read<AccountBloc>().state.profile?.gender;
-    context.read<AssessmentsBloc>().add(
-      LoadAssessmentsEvent(userGender: gender),
-    );
+    bloc.add(LoadAssessmentsEvent(userGender: gender, silent: true));
+    await bloc.stream.firstWhere((state) => !state.refreshing);
   }
 
   @override
@@ -114,7 +115,6 @@ class _AssessmentsListBodyState extends State<_AssessmentsListBody> {
           headerSliverBuilder: (_, _) => [
             CustomAppBar(
               title: AppLocalizations.getString(context, 'assessment.title'),
-              titleHeroTag: HeroTags.homeScreeningActivity,
               isHome: false,
               isTabRoot: true,
               bottom: AssessmentSearchBarBottom(
@@ -162,20 +162,15 @@ class _AssessmentsListBodyState extends State<_AssessmentsListBody> {
 
               return RefreshIndicator.adaptive(
                 onRefresh: _refresh,
-                child: Column(
-                  children: [
-                    if (isSearching)
-                      AssessmentSearchResultCount(
-                        count: items.length,
-                        query: state.searchQuery,
-                      ),
-                    Expanded(
-                      child: AssessmentListBody(
-                        assessments: items,
-                        searchQuery: state.searchQuery,
-                      ),
-                    ),
-                  ],
+                child: AssessmentListBody(
+                  assessments: items,
+                  searchQuery: state.searchQuery,
+                  header: isSearching
+                      ? AssessmentSearchResultCount(
+                          count: items.length,
+                          query: state.searchQuery,
+                        )
+                      : null,
                 ),
               );
             },

@@ -2,6 +2,15 @@ import 'package:equatable/equatable.dart';
 import 'assessment_cta.dart';
 import 'assessment_question.dart';
 
+class BeforeYouBeginPage extends Equatable {
+  final String heading;
+  final String body;
+  const BeforeYouBeginPage({required this.heading, required this.body});
+
+  @override
+  List<Object?> get props => [heading, body];
+}
+
 class AssessmentDefinition extends Equatable {
   final String slug;
   final String category;
@@ -11,9 +20,10 @@ class AssessmentDefinition extends Equatable {
   final String? disclaimer;
   final String? referencePrefix;
   final String? understandingCopy;
-  final String? beforeYouBegin;
+  final List<BeforeYouBeginPage> beforeYouBegin;
   final String? cancerHistoryTypeCode;
   final String? encouragingFact;
+  final String? dependantVariantSlug;
   final List<AssessmentQuestion> questions;
   final List<AssessmentCta> ctas;
 
@@ -28,9 +38,10 @@ class AssessmentDefinition extends Equatable {
     this.disclaimer,
     this.referencePrefix,
     this.understandingCopy,
-    this.beforeYouBegin,
+    this.beforeYouBegin = const [],
     this.cancerHistoryTypeCode,
     this.encouragingFact,
+    this.dependantVariantSlug,
   });
 
   AssessmentQuestion? questionByIndex(int index) {
@@ -47,6 +58,15 @@ class AssessmentDefinition extends Equatable {
     return null;
   }
 
+  AssessmentCta? ctaByKey(String key) {
+    for (final c in ctas) {
+      if (c.key == key) return c;
+    }
+    return null;
+  }
+
+  bool get isCancer => category.trim().toLowerCase() == 'cancer';
+
   @override
   List<Object?> get props => [
     slug,
@@ -60,6 +80,7 @@ class AssessmentDefinition extends Equatable {
     beforeYouBegin,
     cancerHistoryTypeCode,
     encouragingFact,
+    dependantVariantSlug,
     questions,
     ctas,
   ];

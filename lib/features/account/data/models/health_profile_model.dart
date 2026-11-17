@@ -56,12 +56,29 @@ String? _stringOrNullFromJson(Object? value) {
 
 @JsonSerializable()
 class HealthProfileModel {
+  @JsonKey(fromJson: _stringFromJson)
   final String email;
 
-  @JsonKey(name: 'full_name')
+  @JsonKey(name: 'full_name', fromJson: _stringFromJson)
   final String fullName;
 
+  @JsonKey(fromJson: _stringFromJson)
   final String phone;
+
+  @JsonKey(name: 'account_phone', fromJson: _stringFromJson)
+  final String accountPhone;
+
+  @JsonKey(name: 'country_of_residence', fromJson: _stringFromJson)
+  final String countryOfResidence;
+
+  @JsonKey(name: 'email_verified', fromJson: _boolFromJson)
+  final bool emailVerified;
+
+  @JsonKey(name: 'phone_verified', fromJson: _boolFromJson)
+  final bool phoneVerified;
+
+  @JsonKey(name: 'pending_contact_verifications')
+  final List<String> pendingContactVerifications;
 
   @JsonKey(fromJson: _intFromJson)
   final int? age;
@@ -81,6 +98,10 @@ class HealthProfileModel {
   @JsonKey(name: 'bmi_stale', fromJson: _boolFromJson)
   final bool bmiStale;
 
+  @JsonKey(name: 'bmi_prompt_due', fromJson: _boolFromJson)
+  final bool bmiPromptDue;
+
+  @JsonKey(fromJson: _stringFromJson)
   final String gender;
 
   final String? county;
@@ -97,7 +118,7 @@ class HealthProfileModel {
   @JsonKey(fromJson: _stringFromJson)
   final String occupation;
 
-  @JsonKey(name: 'member_code')
+  @JsonKey(name: 'member_code', fromJson: _stringFromJson)
   final String memberCode;
 
   @JsonKey(name: 'health_profile_completed', fromJson: _boolFromJson)
@@ -133,6 +154,12 @@ class HealthProfileModel {
   @JsonKey(name: 'sha_beneficiary_id_type', fromJson: _stringFromJson)
   final String shaBeneficiaryIdType;
 
+  @JsonKey(name: 'sha_number', fromJson: _stringFromJson)
+  final String shaNumber;
+
+  @JsonKey(name: 'sha_eligibility_checkable', fromJson: _boolFromJson)
+  final bool shaEligibilityCheckable;
+
   @JsonKey(name: 'national_id_number', fromJson: _stringOrNullFromJson)
   final String? nationalIdNumber;
 
@@ -146,12 +173,18 @@ class HealthProfileModel {
     required this.email,
     required this.fullName,
     required this.phone,
+    this.accountPhone = '',
+    this.countryOfResidence = 'KE',
+    this.emailVerified = false,
+    this.phoneVerified = false,
+    this.pendingContactVerifications = const [],
     this.age,
     this.ageStale = false,
     this.dateOfBirth,
     this.weightKg,
     this.heightCm,
     this.bmiStale = false,
+    this.bmiPromptDue = false,
     required this.gender,
     this.county,
     this.subCounty,
@@ -170,6 +203,8 @@ class HealthProfileModel {
     this.dmOnboardingSeen = false,
     this.shaBeneficiaryId = '',
     this.shaBeneficiaryIdType = '',
+    this.shaNumber = '',
+    this.shaEligibilityCheckable = false,
     this.nationalIdNumber,
     this.analyticsOptOut = false,
     this.shaDataSharingConsent = false,
@@ -184,12 +219,18 @@ class HealthProfileModel {
     email: email,
     fullName: fullName,
     phone: phone,
+    accountPhone: accountPhone,
+    countryOfResidence: countryOfResidence,
+    emailVerified: emailVerified,
+    phoneVerified: phoneVerified,
+    pendingContactVerifications: pendingContactVerifications,
     age: age,
     ageStale: ageStale,
     dateOfBirth: dateOfBirth,
     weightKg: weightKg,
     heightCm: heightCm,
     bmiStale: bmiStale,
+    bmiPromptDue: bmiPromptDue,
     gender: gender,
     county: county,
     subCounty: subCounty,
@@ -208,6 +249,8 @@ class HealthProfileModel {
     dmOnboardingSeen: dmOnboardingSeen,
     shaBeneficiaryId: shaBeneficiaryId,
     shaBeneficiaryIdType: shaBeneficiaryIdType,
+    shaNumber: shaNumber,
+    shaEligibilityCheckable: shaEligibilityCheckable,
     nationalIdNumber: nationalIdNumber,
     analyticsOptOut: analyticsOptOut,
     shaDataSharingConsent: shaDataSharingConsent,

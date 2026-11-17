@@ -1,17 +1,17 @@
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
-import 'package:my_wellness/common/constants/hero.dart';
 import 'package:my_wellness/common/res/app_spacing.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/shimmer.dart';
+import 'package:my_wellness/features/account/presentation/bloc/account_bloc.dart';
 import 'package:my_wellness/features/assessments/domain/entities/assessment_summary.dart';
 import 'package:my_wellness/features/assessments/presentation/bloc/assessments_bloc.dart';
-import 'package:my_wellness/features/assessments/presentation/widgets/assessment_card.dart';
 import 'package:my_wellness/features/home/domain/entities/dashboard_session.dart';
 import 'package:my_wellness/features/home/presentation/bloc/home_bloc.dart';
 
@@ -28,7 +28,19 @@ class AssessmentProgressCard extends StatelessWidget {
           return const _AssessmentProgressShimmer();
         }
 
-        if (homeState.sessions.isEmpty) {
+        final hasOccupation = context.select<AccountBloc, bool>(
+          (bloc) => bloc.state.profile?.occupation.trim().isNotEmpty == true,
+        );
+        final visibleSessions = homeState.sessions
+            .where(
+              (session) =>
+                  (session.status == DashboardSessionStatus.notStarted ||
+                      session.status == DashboardSessionStatus.inProgress) &&
+                  (hasOccupation || !session.isWorkplaceWellbeing),
+            )
+            .toList(growable: false);
+
+        if (visibleSessions.isEmpty) {
           return const SizedBox.shrink();
         }
 
@@ -41,21 +53,15 @@ class AssessmentProgressCard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: Hero(
-                    tag: HeroTags.homeScreeningActivity,
-                    child: Material(
-                      color: Colors.transparent,
-                      child: Text(
-                        AppLocalizations.getString(
-                          context,
-                          'homeDashboard.screeningActivity',
-                        ),
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: colors.onSurfaceVariant,
-                        ),
-                      ),
+                  child: Text(
+                    AppLocalizations.getString(
+                      context,
+                      'homeDashboard.screeningActivity',
+                    ),
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: colors.onSurfaceVariant,
                     ),
                   ),
                 ),
@@ -86,7 +92,7 @@ class AssessmentProgressCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.xs),
             BlocBuilder<AssessmentsBloc, AssessmentsState>(
               builder: (context, assessmentState) => _SessionList(
-                sessions: homeState.sessions,
+                sessions: visibleSessions,
                 assessments: assessmentState.assessments,
               ),
             ),
@@ -113,20 +119,14 @@ class _AssessmentProgressShimmer extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: Hero(
-                  tag: HeroTags.homeScreeningActivity,
-                  child: Material(
-                    color: Colors.transparent,
-                    child: Text(
-                      AppLocalizations.getString(
-                        context,
-                        'homeDashboard.screeningActivity',
-                      ),
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: colors.onSurfaceVariant,
-                      ),
-                    ),
+                child: Text(
+                  AppLocalizations.getString(
+                    context,
+                    'homeDashboard.screeningActivity',
+                  ),
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: colors.onSurfaceVariant,
                   ),
                 ),
               ),
@@ -237,8 +237,8 @@ class _SessionList extends StatelessWidget {
         sessions
             .where(
               (session) =>
-                  session.status == DashboardSessionStatus.inProgress &&
-                  !_isWellbeingSession(session, assessments),
+                  (session.status == DashboardSessionStatus.notStarted ||
+                  session.status == DashboardSessionStatus.inProgress),
             )
             .toList()
           ..sort((a, b) {
@@ -257,16 +257,6 @@ class _SessionList extends StatelessWidget {
     if (items.isEmpty) return const SizedBox.shrink();
     return _SessionCarousel(sessions: items, assessments: assessments);
   }
-}
-
-bool _isWellbeingSession(
-  DashboardSession session,
-  List<AssessmentSummary> assessments,
-) {
-  final summary = assessments.where((a) => a.slug == session.assessmentSlug);
-  final title = summary.isEmpty ? '' : summary.first.shortTitle;
-  final searchable = '${session.assessmentSlug} $title'.toLowerCase();
-  return searchable.contains('wellbeing') || searchable.contains('well-being');
 }
 
 class _SessionCarousel extends StatefulWidget {
@@ -356,9 +346,8 @@ class _FeaturedSession extends StatelessWidget {
 
     final subtitle = notStarted
         ? AppLocalizations.getString(context, 'homeDashboard.notStarted')
-        : AppLocalizations.t(context, 'homeDashboard.questionsAnswered', {
-            'current': '${session.currentIndex}',
-            'total': '${session.totalQuestions}',
+        : AppLocalizations.t(context, 'homeDashboard.progressPercent', {
+            'percent': '${session.completionPercent}',
           });
 
     return Container(
@@ -378,22 +367,15 @@ class _FeaturedSession extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Hero(
-                      tag: assessmentTitleTag(session.assessmentSlug),
-                      flightShuttleBuilder: textShuttleBuilder,
-                      child: Material(
-                        color: Colors.transparent,
-                        child: Text(
-                          title,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w700,
-                            height: 1.25,
-                            color: fg,
-                          ),
-                        ),
+                    Text(
+                      title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        height: 1.25,
+                        color: fg,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -465,12 +447,12 @@ class _ProgressRing extends StatelessWidget {
               alignment: Alignment.center,
               children: [
                 SizedBox.expand(
-                  child: CircularProgressIndicator(
-                    value: value,
-                    strokeWidth: 5,
-                    strokeCap: StrokeCap.round,
-                    backgroundColor: color.withValues(alpha: 0.2),
-                    valueColor: AlwaysStoppedAnimation(color),
+                  child: CustomPaint(
+                    painter: _ProgressRingPainter(
+                      value: value,
+                      color: color,
+                      backgroundColor: color.withValues(alpha: 0.2),
+                    ),
                   ),
                 ),
                 Text(
@@ -489,15 +471,58 @@ class _ProgressRing extends StatelessWidget {
   }
 }
 
+class _ProgressRingPainter extends CustomPainter {
+  const _ProgressRingPainter({
+    required this.value,
+    required this.color,
+    required this.backgroundColor,
+  });
+
+  final double value;
+  final Color color;
+  final Color backgroundColor;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const strokeWidth = 5.0;
+    final center = size.center(Offset.zero);
+    final radius = (math.min(size.width, size.height) - strokeWidth) / 2;
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    final background = Paint()
+      ..color = backgroundColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth;
+    final foreground = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+    canvas.drawArc(rect, 0, math.pi * 2, false, background);
+    canvas.drawArc(
+      rect,
+      -math.pi / 2,
+      math.pi * 2 * value.clamp(0, 1),
+      false,
+      foreground,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _ProgressRingPainter oldDelegate) =>
+      oldDelegate.value != value ||
+      oldDelegate.color != color ||
+      oldDelegate.backgroundColor != backgroundColor;
+}
+
 void _openSession(BuildContext context, DashboardSession session) {
   if (session.completionPercent == 0) {
     context.router.push(
       AssessmentIntroRoute(
         slug: session.assessmentSlug,
-        sessionId: session.id,
-        currentIndex: session.currentIndex,
-        totalQuestions: session.totalQuestions,
-        completionPercent: session.completionPercent,
+        sessionId: session.sessionId,
+        // currentIndex: session.currentIndex,
+        // totalQuestions: session.totalQuestions,
+        // completionPercent: session.completionPercent,
       ),
     );
     return;
@@ -506,10 +531,10 @@ void _openSession(BuildContext context, DashboardSession session) {
   context.read<AssessmentsBloc>().add(
     ResumeAssessmentsEvent(
       slug: session.assessmentSlug,
-      sessionId: session.id,
-      currentIndex: session.currentIndex,
-      totalQuestions: session.totalQuestions,
-      completionPercent: session.completionPercent,
+      sessionId: session.sessionId!,
+      // currentIndex: session.currentIndex,
+      // totalQuestions: session.totalQuestions,
+      // completionPercent: session.completionPercent,
     ),
   );
   context.router.push(AssessmentSessionRoute(slug: session.assessmentSlug));
@@ -519,6 +544,7 @@ String _titleFor(
   DashboardSession session,
   List<AssessmentSummary> availableAssessments,
 ) {
+  if (session.title.trim().isNotEmpty) return session.title;
   for (final assessment in availableAssessments) {
     if (assessment.slug == session.assessmentSlug) {
       return assessment.shortTitle;

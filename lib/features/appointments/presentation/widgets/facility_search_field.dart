@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_wellness/common/widgets/shimmer_box.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/utils/debouncer.dart';
@@ -6,6 +7,8 @@ import 'package:my_wellness/common/widgets/soft_input.dart';
 import 'package:my_wellness/core/di/injector.dart';
 import 'package:my_wellness/features/vitals/domain/entities/appointment.dart';
 import 'package:my_wellness/features/vitals/domain/usecases/vitals_usecases.dart';
+
+const int _minQueryLength = 2;
 
 class FacilitySearchField extends StatefulWidget {
   final void Function(String? clinicName, String? facilityId) onChanged;
@@ -56,19 +59,20 @@ class _FacilitySearchFieldState extends State<FacilitySearchField> {
     if (_picked != null) {
       setState(() => _picked = null);
     }
-    if (query.isEmpty) {
+    widget.onChanged(query.isEmpty ? null : query, null);
+
+    if (query.length < _minQueryLength) {
+      _debouncer.cancel();
       setState(() {
         _results = const [];
         _hasSearched = false;
         _loading = false;
+        _lastQuery = null;
       });
-      widget.onChanged(null, null);
       return;
     }
 
-    widget.onChanged(query, null);
     if (query == _lastQuery) return;
-
     _debouncer.run(() => _search(query));
   }
 
@@ -79,10 +83,9 @@ class _FacilitySearchFieldState extends State<FacilitySearchField> {
       _hasSearched = true;
     });
 
-    final useCase = getIt<SearchFacilitiesUseCase>();
-    final result = await useCase(query);
+    final result = await getIt<SearchFacilitiesUseCase>()(query);
 
-    if (!mounted) return;
+    if (!mounted || _controller.text.trim() != query) return;
 
     result.fold(
       (_) => setState(() {
@@ -150,7 +153,7 @@ class _FacilitySearchFieldState extends State<FacilitySearchField> {
           _ResultsPanel(
             loading: _loading,
             results: _results,
-            hasQuery: _controller.text.trim().isNotEmpty,
+            hasQuery: _controller.text.trim().length >= _minQueryLength,
             onPick: _pick,
             cs: cs,
           ),
@@ -255,13 +258,7 @@ class _ResultsPanel extends StatelessWidget {
     if (loading) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 16),
-        child: Center(
-          child: SizedBox(
-            width: 18,
-            height: 18,
-            child: CircularProgressIndicator.adaptive(strokeWidth: 2),
-          ),
-        ),
+        child: Center(child: ShimmerBox(width: 24, height: 8, radius: 4)),
       );
     }
 

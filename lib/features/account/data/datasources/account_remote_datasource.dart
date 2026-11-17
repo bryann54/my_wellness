@@ -14,7 +14,7 @@ abstract class AccountRemoteDataSource {
   Future<HealthProfile> updateProfile(Map<String, dynamic> data);
 
   /// Schedule the account for deletion (grace-period flow).
-  Future<void> requestAccountDeletion();
+  Future<void> requestAccountDeletion(String password);
 
   /// Cancel a pending account deletion.
   Future<void> cancelAccountDeletion();
@@ -49,9 +49,10 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
   }
 
   @override
-  Future<void> requestAccountDeletion() async {
+  Future<void> requestAccountDeletion(String password) async {
     await _apiClient.post(
       url: ApiEndpoints.deleteAccount,
+      payload: {'password': password},
       options: ApiClient.protected,
     );
   }

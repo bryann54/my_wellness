@@ -2,13 +2,13 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
 class DioLogInterceptor extends Interceptor {
-  DioLogInterceptor({bool printBody = false});
+  DioLogInterceptor();
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     debugPrint(
       '--> REQUEST: ${options.method} '
-      '${options.baseUrl}${options.path}',
+      '${options.baseUrl}${options.path} (${options.connectTimeout})',
     );
 
     return super.onRequest(options, handler);
@@ -18,7 +18,7 @@ class DioLogInterceptor extends Interceptor {
   void onResponse(Response response, ResponseInterceptorHandler handler) {
     debugPrint(
       '<-- RESPONSE: ${response.statusCode} '
-      '${response.requestOptions.path}',
+      '${response.requestOptions.method} ${response.requestOptions.path}',
     );
 
     return super.onResponse(response, handler);
@@ -28,7 +28,8 @@ class DioLogInterceptor extends Interceptor {
   void onError(DioException err, ErrorInterceptorHandler handler) {
     debugPrint(
       'XXX ERROR: ${err.response?.statusCode} '
-      '${err.requestOptions.path}',
+      '${err.requestOptions.method} ${err.requestOptions.path} '
+      '[${err.type.name}] ${err.message ?? ''}',
     );
 
     return super.onError(err, handler);
