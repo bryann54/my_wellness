@@ -35,7 +35,7 @@ Status meanings:
 | --- | --- |
 | `95f47f7` | Saved guide set and the dashboard health-check parsing/profile-filter baseline. |
 | `08b0373` | Began shared Poppins and flat-focus alignment. |
-| Current branch work | Restores native platform back navigation, removes unused placeholder features, introduces this tracker, and replaces the Health Profile web-style rendering with structured localized tabs. |
+| `47bea8b` | Restores native platform back navigation, removes unused placeholder features, introduces this tracker, and replaces the Health Profile web-style rendering with structured localized tabs. |
 
 ## Pull-request checklist
 
