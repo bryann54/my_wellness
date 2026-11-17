@@ -4,6 +4,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:my_wellness/common/helpers/app_router.gr.dart';
+import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_primary_button.dart';
 import 'package:my_wellness/common/widgets/app_snackbar.dart';
 import 'package:my_wellness/core/api_client/client/api_client.dart';
@@ -74,16 +75,9 @@ class _ConnectionCardState extends State<ConnectionCard> {
         return;
       }
       if (consentStatus == 'no_dha_phone') {
-        _showOnce(
-          'Kenya’s Digital Health Agency has no phone number for you, so '
-          'we can’t link your records yet. Once your number is on your DHA '
-          'record, you can link them from Medical History.',
-        );
+        _showOnce(_t(context, 'healthHistory.dhaPhoneMissingNotice'));
       } else if (consentStatus == 'not_possible') {
-        _showOnce(
-          'DHA doesn’t have a resolvable health record for your account yet. '
-          'If you’ve recently registered, try again later.',
-        );
+        _showOnce(_t(context, 'healthHistory.dhaRecordUnavailable'));
       }
       _schedule(fetching || consentStatus == 'pending' ? 3 : 15);
     } on Exception {
@@ -113,8 +107,7 @@ class _ConnectionCardState extends State<ConnectionCard> {
         if (!mounted) return;
         AppSnackbar.success(
           context,
-          'Refresh requested — new records usually take a few seconds to '
-          'appear below.',
+          _t(context, 'healthHistory.refreshRequested'),
         );
         await widget.onHistoryRefresh();
         Timer(const Duration(seconds: 9), () {
@@ -127,14 +120,13 @@ class _ConnectionCardState extends State<ConnectionCard> {
         );
       }
       await _loadStatus();
-    } on ValidationException catch (error) {
-      if (mounted) AppSnackbar.error(context, error.message);
+    } on ValidationException {
+      if (mounted) {
+        AppSnackbar.error(context, _t(context, 'healthHistory.dhaError'));
+      }
     } on Exception {
       if (mounted) {
-        AppSnackbar.error(
-          context,
-          'We couldn’t contact DHA. Please try again.',
-        );
+        AppSnackbar.error(context, _t(context, 'healthHistory.dhaError'));
       }
     } finally {
       if (mounted) setState(() => _sending = false);
@@ -180,7 +172,7 @@ class _ConnectionCardState extends State<ConnectionCard> {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    'Health record connection',
+                    _t(context, 'healthHistory.connectionTitle'),
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                 ),
@@ -191,10 +183,7 @@ class _ConnectionCardState extends State<ConnectionCard> {
 
             // ── Fixed body paragraph (contract requirement) ────────────
             Text(
-              'Access to health records shared through Kenya’s Digital Health '
-              'Agency (DHA) requires appropriate consent and an active system '
-              'connection. Records from other facilities will appear here only '
-              'when they have been securely retrieved.',
+              _t(context, 'healthHistory.connectionBody'),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: cs.onSurfaceVariant,
                 height: 1.5,
@@ -210,9 +199,7 @@ class _ConnectionCardState extends State<ConnectionCard> {
               const SizedBox(height: 12),
               _InfoBanner(
                 icon: Icons.phone_disabled_outlined,
-                text:
-                    'Kenya’s Digital Health Agency has no phone number for you. '
-                    'Once your number is on your DHA record, link from Medical History.',
+                text: _t(context, 'healthHistory.dhaPhoneMissingInline'),
               ),
             ],
 
@@ -221,8 +208,21 @@ class _ConnectionCardState extends State<ConnectionCard> {
             // ── Connection status / cooldown line ──────────────────────
             Text(
               onCooldown
-                  ? 'You can try again on ${_formatDateTime(nextEligible)}.'
-                  : 'Connection status: ${connected ? 'Active' : 'Awaiting verification'}',
+                  ? AppLocalizations.t(context, 'healthHistory.cooldown', {
+                      'date': _formatDateTime(context, nextEligible),
+                    })
+                  : AppLocalizations.t(
+                      context,
+                      'healthHistory.connectionStatus',
+                      {
+                        'status': _t(
+                          context,
+                          connected
+                              ? 'healthHistory.active'
+                              : 'healthHistory.awaitingVerification',
+                        ),
+                      },
+                    ),
               style: Theme.of(
                 context,
               ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
@@ -232,10 +232,15 @@ class _ConnectionCardState extends State<ConnectionCard> {
             AppPrimaryButton(
               onPressed: enabled ? _act : null,
               label: _sending
-                  ? (_hasOpenVisit ? 'Refreshing…' : 'Requesting…')
+                  ? _t(
+                      context,
+                      _hasOpenVisit
+                          ? 'healthHistory.refreshing'
+                          : 'healthHistory.requesting',
+                    )
                   : (_hasOpenVisit
-                        ? 'Refresh from DHA'
-                        : 'Request DHA consent'),
+                        ? _t(context, 'healthHistory.refreshFromDha')
+                        : _t(context, 'healthHistory.requestDhaConsent')),
               isLoading: _sending,
             ),
           ],
@@ -259,7 +264,12 @@ class _StatusChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
-        connected ? 'Consent confirmed' : 'Consent not confirmed',
+        _t(
+          context,
+          connected
+              ? 'healthHistory.consentConfirmed'
+              : 'healthHistory.consentNotConfirmed',
+        ),
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
           color: connected ? cs.onSecondaryContainer : cs.onSurfaceVariant,
           fontWeight: FontWeight.w600,
@@ -290,7 +300,7 @@ class _FetchingBanner extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              'Fetching your latest health records from DHA — this can take a few seconds…',
+              _t(context, 'healthHistory.fetchingRecords'),
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ),
@@ -328,9 +338,14 @@ class _InfoBanner extends StatelessWidget {
   }
 }
 
-String _formatDateTime(String raw) {
+String _formatDateTime(BuildContext context, String raw) {
   final value = DateTime.tryParse(raw);
   return value == null
-      ? raw
-      : DateFormat('dd MMM yyyy, HH:mm').format(value.toLocal());
+      ? _t(context, 'healthHistory.dateUnavailable')
+      : DateFormat.yMMMd(
+          Localizations.localeOf(context).toLanguageTag(),
+        ).add_Hm().format(value.toLocal());
 }
+
+String _t(BuildContext context, String key) =>
+    AppLocalizations.getString(context, key);

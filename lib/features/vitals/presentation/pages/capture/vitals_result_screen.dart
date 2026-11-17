@@ -169,7 +169,12 @@ class _Body extends StatelessWidget {
                     const LoadFacilityCandidatesEvent(),
                   ),
                   icon: const Icon(Icons.search_rounded, size: 18),
-                  label: const Text('Find nearby facilities'),
+                  label: Text(
+                    AppLocalizations.getString(
+                      context,
+                      'vitals.findNearbyFacilities',
+                    ),
+                  ),
                 )
               else
                 ...state.facilityCandidates.map((c) {
@@ -213,8 +218,18 @@ class _Body extends StatelessWidget {
                                     const SizedBox(height: 2),
                                     Text(
                                       [
-                                        if (distance != null) '$distance km',
-                                        if (minutes != null) '$minutes min',
+                                        if (distance != null)
+                                          AppLocalizations.t(
+                                            context,
+                                            'vitals.distanceKm',
+                                            {'value': '$distance'},
+                                          ),
+                                        if (minutes != null)
+                                          AppLocalizations.t(
+                                            context,
+                                            'vitals.durationMinutes',
+                                            {'value': '$minutes'},
+                                          ),
                                       ].join(' · '),
                                       style: GoogleFonts.inter(
                                         fontSize: 12,
@@ -308,7 +323,12 @@ class _Body extends StatelessWidget {
                 context.router.push(VitalsPathwayRoute(kind: kind));
               },
               icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: const Text('Log another reading'),
+              label: Text(
+                AppLocalizations.getString(
+                  context,
+                  'vitals.logAnotherReading',
+                ),
+              ),
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size.fromHeight(48),
                 foregroundColor: cs.onSurface,
@@ -323,7 +343,10 @@ class _Body extends StatelessWidget {
             const SizedBox(height: AppSpacing.xl),
             AppPrimaryButton(
               onPressed: () => _returnToVitals(context),
-              label: 'Back to vitals',
+              label: AppLocalizations.getString(
+                context,
+                'vitals.backToVitals',
+              ),
             ),
           ],
         ),

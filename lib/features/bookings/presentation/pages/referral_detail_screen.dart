@@ -203,8 +203,21 @@ class _ReferralBody extends StatelessWidget {
                   spacing: 6,
                   runSpacing: 6,
                   children: [
-                    if (f.kephLevel != null) _Tag(label: 'KEPH ${f.kephLevel}'),
-                    if (f.coversSha) const _Tag(label: 'SHA'),
+                    if (f.kephLevel != null)
+                      _Tag(
+                        label: AppLocalizations.t(
+                          context,
+                          'bookings.kephLevel',
+                          {'level': '${f.kephLevel}'},
+                        ),
+                      ),
+                    if (f.coversSha)
+                      _Tag(
+                        label: AppLocalizations.getString(
+                          context,
+                          'bookings.sha',
+                        ),
+                      ),
                   ],
                 ),
                 const SizedBox(height: AppSpacing.sm),

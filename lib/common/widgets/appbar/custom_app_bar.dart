@@ -58,19 +58,7 @@ class CustomAppBar extends StatelessWidget {
       builder: (context, state) {
         final resolvedExpanded = isHome
             ? (expandedHeight ?? homeContentHeight)
-            : (expandedHeight ?? 112 + curveExtra);
-
-        final pageTitle = isHome || title == null
-            ? null
-            : _AppBarTitle(
-                title: title!,
-                heroTag: titleHeroTag,
-                style: GoogleFonts.poppins(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 20,
-                  color: AppColors.textOnPrimary,
-                ),
-              );
+            : (expandedHeight ?? kToolbarHeight + curveExtra);
 
         return SliverAppBar(
           expandedHeight: resolvedExpanded,
@@ -88,15 +76,18 @@ class CustomAppBar extends StatelessWidget {
           ),
           surfaceTintColor: Colors.transparent,
           centerTitle: true,
-          automaticallyImplyLeading: false,
-          leadingWidth: isHome || isTabRoot ? null : 104,
-          leading: isHome || isTabRoot
+          automaticallyImplyLeading: !isTabRoot,
+          title: isHome || title == null
               ? null
-              : const Padding(
-                  padding: EdgeInsets.only(left: 12, top: 8, bottom: 8),
-                  child: _PageBackButton(),
+              : _AppBarTitle(
+                  title: title!,
+                  heroTag: titleHeroTag,
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 18,
+                    color: AppColors.textOnPrimary,
+                  ),
                 ),
-          title: null,
           actions: actions,
           bottom: bottom,
           flexibleSpace: AppBarFlexibleHeader(
@@ -104,37 +95,9 @@ class CustomAppBar extends StatelessWidget {
             username: state.profile?.displayName ?? '',
             expandedHeight: resolvedExpanded,
             bottomHeight: bottom?.preferredSize.height ?? 0,
-            pageTitle: pageTitle,
           ),
         );
       },
-    );
-  }
-}
-
-class _PageBackButton extends StatelessWidget {
-  const _PageBackButton();
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: 'Back',
-      child: OutlinedButton.icon(
-        onPressed: () => Navigator.maybePop(context),
-        icon: const Icon(Icons.arrow_back_rounded, size: 17),
-        label: const Text('Back'),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.textOnPrimary,
-          side: const BorderSide(color: AppColors.textOnPrimary, width: 1),
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          textStyle: GoogleFonts.poppins(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-          ),
-          shape: const StadiumBorder(),
-        ),
-      ),
     );
   }
 }
@@ -149,7 +112,7 @@ class _AppBarTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = Text(
-      title,
+      title.toUpperCase(),
       maxLines: 1,
       softWrap: false,
       overflow: TextOverflow.ellipsis,

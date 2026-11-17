@@ -197,8 +197,14 @@ class _BodyState extends State<_Body> {
                           context,
                           'assessment.bmi.weightKg',
                         ),
-                        hint: 'e.g. 76',
-                        suffixText: 'kg',
+                        hint: AppLocalizations.getString(
+                          context,
+                          'vitals.weightHint',
+                        ),
+                        suffixText: AppLocalizations.getString(
+                          context,
+                          'vitals.unitKg',
+                        ),
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
@@ -217,8 +223,14 @@ class _BodyState extends State<_Body> {
                           context,
                           'assessment.bmi.heightCm',
                         ),
-                        hint: 'e.g. 177',
-                        suffixText: 'cm',
+                        hint: AppLocalizations.getString(
+                          context,
+                          'vitals.heightHint',
+                        ),
+                        suffixText: AppLocalizations.getString(
+                          context,
+                          'vitals.unitCm',
+                        ),
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
@@ -263,18 +275,44 @@ class _BmiPreviewCard extends StatelessWidget {
     final within = measurement.category == BmiCategory.withinReference;
     final color = within ? const Color(0xFF10B981) : const Color(0xFFDC2626);
     final label = switch (measurement.category) {
-      BmiCategory.belowReference => 'Below reference range',
-      BmiCategory.withinReference => 'Within reference range',
-      BmiCategory.aboveReference => 'Above reference range',
-      BmiCategory.wellAboveReference => 'Well above reference range',
+      BmiCategory.belowReference => AppLocalizations.getString(
+        context,
+        'vitals.bmiBelowReference',
+      ),
+      BmiCategory.withinReference => AppLocalizations.getString(
+        context,
+        'vitals.bmiWithinReference',
+      ),
+      BmiCategory.aboveReference => AppLocalizations.getString(
+        context,
+        'vitals.bmiAboveReference',
+      ),
+      BmiCategory.wellAboveReference => AppLocalizations.getString(
+        context,
+        'vitals.bmiWellAboveReference',
+      ),
     };
     final guidance = switch (measurement.category) {
       BmiCategory.belowReference =>
-        'Reference weight ${measurement.referenceWeightLowKg.toStringAsFixed(1)}–${measurement.referenceWeightHighKg.toStringAsFixed(1)} kg; current weight ${measurement.weightKg.toStringAsFixed(1)} kg. Weight loss is not recommended based on this BMI. Consider discussing nutrition and your weight with a healthcare professional.',
+        AppLocalizations.t(context, 'vitals.bmiBelowGuidance', {
+          'low': measurement.referenceWeightLowKg.toStringAsFixed(1),
+          'high': measurement.referenceWeightHighKg.toStringAsFixed(1),
+          'current': measurement.weightKg.toStringAsFixed(1),
+        }),
       BmiCategory.withinReference =>
-        'Reference weight ${measurement.referenceWeightLowKg.toStringAsFixed(1)}–${measurement.referenceWeightHighKg.toStringAsFixed(1)} kg; current weight ${measurement.weightKg.toStringAsFixed(1)} kg. Your BMI is within the general adult reference range. Maintain healthy habits; BMI alone does not determine overall health.',
+        AppLocalizations.t(context, 'vitals.bmiWithinGuidance', {
+          'low': measurement.referenceWeightLowKg.toStringAsFixed(1),
+          'high': measurement.referenceWeightHighKg.toStringAsFixed(1),
+          'current': measurement.weightKg.toStringAsFixed(1),
+        }),
       BmiCategory.aboveReference || BmiCategory.wellAboveReference =>
-        'A BMI near 24.9 corresponds to approximately ${measurement.referenceWeightHighKg.toStringAsFixed(1)} kg. Weight difference ${measurement.weightDifferenceKg.toStringAsFixed(1)} kg. An illustrative first milestone is ${measurement.firstMilestoneKg.toStringAsFixed(1)} kg (about ${(measurement.weightKg - measurement.firstMilestoneKg).toStringAsFixed(1)} kg body weight). Discuss goals with your clinician.',
+        AppLocalizations.t(context, 'vitals.bmiAboveGuidance', {
+          'high': measurement.referenceWeightHighKg.toStringAsFixed(1),
+          'difference': measurement.weightDifferenceKg.toStringAsFixed(1),
+          'milestone': measurement.firstMilestoneKg.toStringAsFixed(1),
+          'remaining': (measurement.weightKg - measurement.firstMilestoneKg)
+              .toStringAsFixed(1),
+        }),
     };
 
     return Container(

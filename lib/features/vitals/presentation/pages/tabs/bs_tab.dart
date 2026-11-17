@@ -205,9 +205,18 @@ class BsTab extends StatelessWidget {
         context,
         'vitals.readingTypePostMeal',
       ),
-      'pre_meal' => 'Pre-meal',
-      'hba1c' => 'HbA1c',
-      _ => type,
+      'pre_meal' => AppLocalizations.getString(
+        context,
+        'vitals.readingTypePreMeal',
+      ),
+      'hba1c' => AppLocalizations.getString(
+        context,
+        'vitals.readingTypeHba1c',
+      ),
+      _ => AppLocalizations.getString(
+        context,
+        'vitals.readingTypeUnknown',
+      ),
     };
   }
 

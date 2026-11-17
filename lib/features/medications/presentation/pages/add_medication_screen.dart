@@ -188,7 +188,10 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
             context,
             scan.message?.trim().isNotEmpty == true
                 ? scan.message!
-                : 'Medication added from photo.',
+                : AppLocalizations.getString(
+                    context,
+                    'medications.scanAdded',
+                  ),
           );
           context.router.maybePop();
           return;
@@ -203,7 +206,10 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
             context,
             scan.message?.trim().isNotEmpty == true
                 ? scan.message!
-                : 'No medication could be read from that image.',
+                : AppLocalizations.getString(
+                    context,
+                    'medications.scanNoResult',
+                  ),
           );
         }
       },
@@ -279,7 +285,7 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
     if (_pickedCandidate == null) {
       AppSnackbar.warning(
         context,
-        'Pick the medication from the registry search or scan.',
+        AppLocalizations.getString(context, 'medications.pickRequired'),
       );
       return;
     }
@@ -385,8 +391,14 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
       children: [
         SoftInput(
           controller: _searchCtrl,
-          label: 'Which medication are you taking?',
-          hint: 'Type 3 letters, e.g. met or aml',
+          label: AppLocalizations.getString(
+            context,
+            'medications.searchLabel',
+          ),
+          hint: AppLocalizations.getString(
+            context,
+            'medications.searchHint',
+          ),
           prefixIcon: const Icon(Icons.search_rounded, size: 20),
         ),
         if (_searching)
@@ -426,7 +438,13 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
               itemBuilder: (context, i) {
                 final item = _searchResults[i];
                 final name =
-                    (item['display'] ?? item['name'] ?? 'Unnamed') as String;
+                    (item['display'] ??
+                            item['name'] ??
+                            AppLocalizations.getString(
+                              context,
+                              'medications.unnamed',
+                            ))
+                        as String;
                 final code = item['code'] as String?;
                 return InkWell(
                   onTap: () => _pickRegistryItem(item),
@@ -440,7 +458,7 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
                       children: [
                         Text(
                           name,
-                          style: GoogleFonts.inter(
+                          style: GoogleFonts.poppins(
                             fontSize: 13.5,
                             fontWeight: FontWeight.w600,
                           ),
@@ -448,7 +466,7 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
                         if (code != null && code.isNotEmpty)
                           Text(
                             code,
-                            style: GoogleFonts.inter(
+                            style: GoogleFonts.poppins(
                               fontSize: 11.5,
                               color: cs.onSurface.withValues(alpha: 0.55),
                             ),
@@ -464,8 +482,11 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
           Padding(
             padding: const EdgeInsets.only(top: 8, left: 4),
             child: Text(
-              'No matches in the registry.',
-              style: GoogleFonts.inter(
+              AppLocalizations.getString(
+                context,
+                'medications.noRegistryMatches',
+              ),
+              style: GoogleFonts.poppins(
                 fontSize: 12.5,
                 color: cs.onSurface.withValues(alpha: 0.55),
               ),
@@ -488,7 +509,7 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
                   Expanded(
                     child: Text(
                       _pickedCandidate!.name,
-                      style: GoogleFonts.inter(
+                      style: GoogleFonts.poppins(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
@@ -521,9 +542,16 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
                   context,
                   'medications.dosage',
                 ),
-                hint: '10 mg',
-                validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Required' : null,
+                hint: AppLocalizations.getString(
+                  context,
+                  'medications.dosageHint',
+                ),
+                validator: (v) => (v == null || v.trim().isEmpty)
+                    ? AppLocalizations.getString(
+                        context,
+                        'validation.required',
+                      )
+                    : null,
               ),
             ),
             const SizedBox(width: AppSpacing.md),
@@ -534,27 +562,60 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
                   context,
                   'medications.frequency',
                 ),
-                items: const [
+                items: [
                   DropdownMenuItem(
                     value: 'once_daily',
-                    child: Text('Once daily'),
+                    child: Text(
+                      AppLocalizations.getString(
+                        context,
+                        'medications.frequencyOnceDaily',
+                      ),
+                    ),
                   ),
                   DropdownMenuItem(
                     value: 'twice_daily',
-                    child: Text('Twice daily'),
+                    child: Text(
+                      AppLocalizations.getString(
+                        context,
+                        'medications.frequencyTwiceDaily',
+                      ),
+                    ),
                   ),
                   DropdownMenuItem(
                     value: 'thrice_daily',
-                    child: Text('Three times daily'),
+                    child: Text(
+                      AppLocalizations.getString(
+                        context,
+                        'medications.frequencyThreeTimesDaily',
+                      ),
+                    ),
                   ),
                   DropdownMenuItem(
                     value: 'four_times_daily',
-                    child: Text('Four times daily'),
+                    child: Text(
+                      AppLocalizations.getString(
+                        context,
+                        'medications.frequencyFourTimesDaily',
+                      ),
+                    ),
                   ),
-                  DropdownMenuItem(value: 'weekly', child: Text('Weekly')),
+                  DropdownMenuItem(
+                    value: 'weekly',
+                    child: Text(
+                      AppLocalizations.getString(
+                        context,
+                        'medications.frequencyWeekly',
+                      ),
+                    ),
+                  ),
                   DropdownMenuItem(
                     value: 'as_needed',
-                    child: Text('As needed'),
+                    child: Text(
+                      AppLocalizations.getString(
+                        context,
+                        'medications.frequencyAsNeeded',
+                      ),
+                    ),
                   ),
                 ],
                 onChanged: (v) =>
@@ -566,16 +627,71 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
         const SizedBox(height: AppSpacing.md),
         SoftDropdown<String>(
           value: _dosageForm,
-          label: 'Dosage form',
-          items: const [
-            DropdownMenuItem(value: 'tablet', child: Text('Tablet')),
-            DropdownMenuItem(value: 'capsule', child: Text('Capsule')),
-            DropdownMenuItem(value: 'syrup', child: Text('Syrup')),
-            DropdownMenuItem(value: 'injection', child: Text('Injection')),
-            DropdownMenuItem(value: 'inhaler', child: Text('Inhaler')),
-            DropdownMenuItem(value: 'cream', child: Text('Cream')),
-            DropdownMenuItem(value: 'drops', child: Text('Drops')),
-            DropdownMenuItem(value: 'other', child: Text('Other')),
+          label: AppLocalizations.getString(
+            context,
+            'medications.dosageForm',
+          ),
+          items: [
+            DropdownMenuItem(
+              value: 'tablet',
+              child: Text(
+                AppLocalizations.getString(
+                  context,
+                  'medications.formTablet',
+                ),
+              ),
+            ),
+            DropdownMenuItem(
+              value: 'capsule',
+              child: Text(
+                AppLocalizations.getString(
+                  context,
+                  'medications.formCapsule',
+                ),
+              ),
+            ),
+            DropdownMenuItem(
+              value: 'syrup',
+              child: Text(
+                AppLocalizations.getString(context, 'medications.formSyrup'),
+              ),
+            ),
+            DropdownMenuItem(
+              value: 'injection',
+              child: Text(
+                AppLocalizations.getString(
+                  context,
+                  'medications.formInjection',
+                ),
+              ),
+            ),
+            DropdownMenuItem(
+              value: 'inhaler',
+              child: Text(
+                AppLocalizations.getString(
+                  context,
+                  'medications.formInhaler',
+                ),
+              ),
+            ),
+            DropdownMenuItem(
+              value: 'cream',
+              child: Text(
+                AppLocalizations.getString(context, 'medications.formCream'),
+              ),
+            ),
+            DropdownMenuItem(
+              value: 'drops',
+              child: Text(
+                AppLocalizations.getString(context, 'medications.formDrops'),
+              ),
+            ),
+            DropdownMenuItem(
+              value: 'other',
+              child: Text(
+                AppLocalizations.getString(context, 'condition.other'),
+              ),
+            ),
           ],
           onChanged: (v) => setState(() => _dosageForm = v ?? 'tablet'),
         ),
@@ -734,8 +850,14 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
             Expanded(
               child: SoftInput(
                 controller: _quantityPerDoseCtrl,
-                label: 'Quantity per dose',
-                hint: '1',
+                label: AppLocalizations.getString(
+                  context,
+                  'medications.quantityPerDose',
+                ),
+                hint: AppLocalizations.getString(
+                  context,
+                  'medications.quantityPerDoseHint',
+                ),
                 keyboardType: TextInputType.number,
               ),
             ),
@@ -743,8 +865,14 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
             Expanded(
               child: SoftInput(
                 controller: _quantityDispensedCtrl,
-                label: 'Quantity dispensed',
-                hint: '30',
+                label: AppLocalizations.getString(
+                  context,
+                  'medications.quantityDispensed',
+                ),
+                hint: AppLocalizations.getString(
+                  context,
+                  'medications.quantityDispensedHint',
+                ),
                 keyboardType: TextInputType.number,
               ),
             ),
@@ -779,8 +907,11 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Reminder times',
-                  style: GoogleFonts.inter(
+                  AppLocalizations.getString(
+                    context,
+                    'medications.reminderTimes',
+                  ),
+                  style: GoogleFonts.poppins(
                     fontSize: 13.5,
                     fontWeight: FontWeight.w600,
                     color: cs.onSurface,
@@ -790,7 +921,12 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
               TextButton.icon(
                 onPressed: _reminderTimes.length >= 12 ? null : _addReminder,
                 icon: const Icon(Icons.add, size: 16),
-                label: const Text('Add'),
+                label: Text(
+                  AppLocalizations.getString(
+                    context,
+                    'medications.addReminder',
+                  ),
+                ),
                 style: TextButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   minimumSize: const Size(0, 30),
@@ -803,8 +939,11 @@ class _AddMedicationBodyState extends State<_AddMedicationBody> {
             Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Text(
-                'No reminders. Tap Add to set one.',
-                style: GoogleFonts.inter(
+                AppLocalizations.getString(
+                  context,
+                  'medications.noReminders',
+                ),
+                style: GoogleFonts.poppins(
                   fontSize: 12.5,
                   color: cs.onSurface.withValues(alpha: 0.55),
                 ),

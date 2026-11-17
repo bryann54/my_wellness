@@ -40,7 +40,7 @@ class _Body extends StatelessWidget {
 
     final question = result?.wellbeingQuestionText.isNotEmpty == true
         ? result!.wellbeingQuestionText
-        : 'Are you feeling unwell or experiencing general body weakness?';
+        : AppLocalizations.getString(context, 'vitals.wellbeingQuestion');
 
     return Scaffold(
       body: NestedScrollView(
@@ -68,7 +68,10 @@ class _Body extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.xl),
             _AnswerTile(
-              label: 'Yes, I feel unwell',
+              label: AppLocalizations.getString(
+                context,
+                'vitals.feelingUnwell',
+              ),
               selected: false,
               enabled: !isSubmitting,
               onTap: () => context.read<VitalsCaptureBloc>().add(
@@ -77,7 +80,10 @@ class _Body extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.md),
             _AnswerTile(
-              label: 'No, I feel fine',
+              label: AppLocalizations.getString(
+                context,
+                'vitals.feelingFine',
+              ),
               selected: false,
               enabled: !isSubmitting,
               onTap: () => context.read<VitalsCaptureBloc>().add(

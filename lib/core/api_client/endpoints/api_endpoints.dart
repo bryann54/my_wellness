@@ -273,5 +273,4 @@ class ApiEndpoints {
       '/api/care-navigation/referrals/$id/';
   static String referralFacilityCandidatesFromSession(String sessionId) =>
       '/api/care-navigation/referrals/from-session/$sessionId/facility-candidates/';
-  static const String healthJourney = '/api/care-navigation/health-journey/';
 }

@@ -124,22 +124,34 @@ class _BodyState extends State<_Body> {
                   Expanded(
                     child: SoftInput(
                       controller: _sysCtrl,
-                      label: 'Systolic',
-                      suffixText: 'mmHg',
+                      label: AppLocalizations.getString(
+                        context,
+                        'vitals.systolic',
+                      ),
+                      suffixText: AppLocalizations.getString(
+                        context,
+                        'vitals.unitMmHg',
+                      ),
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      validator: _requiredInt(50, 300),
+                      validator: _requiredInt(context, 50, 300),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: SoftInput(
                       controller: _diaCtrl,
-                      label: 'Diastolic',
-                      suffixText: 'mmHg',
+                      label: AppLocalizations.getString(
+                        context,
+                        'vitals.diastolic',
+                      ),
+                      suffixText: AppLocalizations.getString(
+                        context,
+                        'vitals.unitMmHg',
+                      ),
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      validator: _requiredInt(30, 200),
+                      validator: _requiredInt(context, 30, 200),
                     ),
                   ),
                 ],
@@ -148,10 +160,13 @@ class _BodyState extends State<_Body> {
               SoftInput(
                 controller: _pulseCtrl,
                 label: AppLocalizations.getString(context, 'vitals.pulse'),
-                suffixText: 'bpm',
+                suffixText: AppLocalizations.getString(
+                  context,
+                  'vitals.unitBpm',
+                ),
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                validator: _optionalInt(20, 250),
+                validator: _optionalInt(context, 20, 250),
               ),
               const SizedBox(height: AppSpacing.xl),
               AppPrimaryButton(
@@ -168,19 +183,43 @@ class _BodyState extends State<_Body> {
     );
   }
 
-  String? Function(String?) _requiredInt(int min, int max) => (v) {
-    if (v == null || v.trim().isEmpty) return 'Required';
+  String? Function(String?) _requiredInt(
+    BuildContext context,
+    int min,
+    int max,
+  ) => (v) {
+    if (v == null || v.trim().isEmpty) {
+      return AppLocalizations.getString(context, 'validation.required');
+    }
     final n = int.tryParse(v.trim());
-    if (n == null) return 'Numbers only';
-    if (n < min || n > max) return 'Must be $min–$max';
+    if (n == null) {
+      return AppLocalizations.getString(context, 'validation.numbersOnly');
+    }
+    if (n < min || n > max) {
+      return AppLocalizations.t(context, 'validation.range', {
+        'min': '$min',
+        'max': '$max',
+      });
+    }
     return null;
   };
 
-  String? Function(String?) _optionalInt(int min, int max) => (v) {
+  String? Function(String?) _optionalInt(
+    BuildContext context,
+    int min,
+    int max,
+  ) => (v) {
     if (v == null || v.trim().isEmpty) return null;
     final n = int.tryParse(v.trim());
-    if (n == null) return 'Numbers only';
-    if (n < min || n > max) return 'Must be $min–$max';
+    if (n == null) {
+      return AppLocalizations.getString(context, 'validation.numbersOnly');
+    }
+    if (n < min || n > max) {
+      return AppLocalizations.t(context, 'validation.range', {
+        'min': '$min',
+        'max': '$max',
+      });
+    }
     return null;
   };
 }

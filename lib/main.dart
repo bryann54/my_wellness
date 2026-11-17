@@ -23,7 +23,6 @@ import 'package:my_wellness/features/notifications/presentation/bloc/notificatio
 import 'package:my_wellness/features/notifications/presentation/notification_host.dart';
 import 'package:my_wellness/features/vitals/presentation/bloc/vitals_bloc.dart';
 import 'package:my_wellness/features/vitals/presentation/bloc/vitals_capture_bloc.dart';
-import 'package:my_wellness/features/wellness/presentation/bloc/wellness_bloc.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -71,7 +70,6 @@ void main() async {
         BlocProvider(create: (_) => getIt<HomeBloc>()),
         BlocProvider(create: (_) => getIt<AssessmentsBloc>()),
         BlocProvider(create: (_) => getIt<BookingsBloc>()),
-        BlocProvider(create: (_) => getIt<WellnessBloc>()),
         BlocProvider(create: (_) => getIt<GeographyBloc>()),
         BlocProvider(create: (_) => getIt<LaunchBloc>()),
         BlocProvider(create: (_) => getIt<BookingsBloc>()),

@@ -151,7 +151,10 @@ class NotificationPermissionSheet extends StatelessWidget {
                     ],
                     const SizedBox(height: AppSpacing.lg),
                     Text(
-                      'Choose how you want to hear about each type of reminder.',
+                      AppLocalizations.getString(
+                        context,
+                        'notifications.preferenceIntro',
+                      ),
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: cs.onSurfaceVariant,
                       ),
@@ -177,7 +180,12 @@ class NotificationPermissionSheet extends StatelessWidget {
                             onPressed: () => bloc.add(
                               const LoadNotificationPreferencesEvent(),
                             ),
-                            child: const Text('Retry'),
+                            child: Text(
+                              AppLocalizations.getString(
+                                context,
+                                'common.retry',
+                              ),
+                            ),
                           ),
                         ],
                       )
@@ -206,7 +214,10 @@ class NotificationPermissionSheet extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(top: AppSpacing.sm),
                         child: Text(
-                          'Notification choices saved.',
+                          AppLocalizations.getString(
+                            context,
+                            'notifications.preferencesSaved',
+                          ),
                           style: TextStyle(color: cs.primary),
                         ),
                       ),
@@ -221,7 +232,10 @@ class NotificationPermissionSheet extends StatelessWidget {
                                 );
                               }
                             : null,
-                        label: 'Save choices',
+                        label: AppLocalizations.getString(
+                          context,
+                          'notifications.saveChoices',
+                        ),
                         isLoading: state.savingPreferences,
                       ),
                     ],

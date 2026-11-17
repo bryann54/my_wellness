@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/features/auth/presentation/widgets/lang_selection/lang_model.dart';
 
 class LanguageTile extends StatelessWidget {
@@ -64,8 +65,8 @@ class LanguageTile extends StatelessWidget {
                 const SizedBox(width: 14),
                 Expanded(
                   child: Text(
-                    language.label,
-                    style: GoogleFonts.inter(
+                    AppLocalizations.getString(context, language.labelKey),
+                    style: GoogleFonts.poppins(
                       fontSize: 15,
                       fontWeight: isSelected
                           ? FontWeight.w600

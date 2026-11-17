@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:my_wellness/common/res/app_spacing.dart';
+import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/features/health_profile/domain/entities/health_history.dart';
-
-// ─────────────────────────────────────────────────────────────────────────────
-// MEASUREMENTS
-// ─────────────────────────────────────────────────────────────────────────────
 
 class MeasurementsSection extends StatefulWidget {
   const MeasurementsSection({super.key, required this.history});
+
   final HealthHistory history;
 
   @override
@@ -16,274 +14,338 @@ class MeasurementsSection extends StatefulWidget {
 }
 
 class _MeasurementsSectionState extends State<MeasurementsSection> {
+  _BpFilter _bpFilter = _BpFilter.all;
   bool _showAllBp = false;
   bool _showAllBs = false;
-  _BpFilter _bpFilter = _BpFilter.all;
+  bool _showAllVitals = false;
 
   @override
   Widget build(BuildContext context) {
-    final h = widget.history;
-    final measurements = [
-      h.latestBloodPressure,
-      h.latestBloodSugar,
-      h.latestVitalSign,
-    ].whereType<HealthMeasurement>().toList();
-
-    if (measurements.isEmpty && h.allergies.isEmpty) {
-      return const _SectionEmptyCard(
-        icon: Icons.monitor_heart_outlined,
-        title: 'No measurements yet',
-        message:
-            'Measurements recorded through health monitoring or connected records '
-            'will appear here.',
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+    final history = widget.history;
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        AppSpacing.md,
+        AppSpacing.md,
+        AppSpacing.xl,
+      ),
       children: [
-        // Hero tiles
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final twoCol = constraints.maxWidth > 420;
-            return Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: [
-                for (final item in measurements)
-                  SizedBox(
-                    width: twoCol
-                        ? (constraints.maxWidth - 10) / 2
-                        : constraints.maxWidth,
-                    child: _MeasurementTile(item: item),
-                  ),
-                if (h.allergies.isNotEmpty)
-                  SizedBox(
-                    width: twoCol
-                        ? (constraints.maxWidth - 10) / 2
-                        : constraints.maxWidth,
-                    child: _AllergySummaryTile(allergies: h.allergies),
-                  ),
-              ],
-            );
-          },
+        _SectionIntro(
+          title: _t(context, 'healthHistory.measurementsTitle'),
+          subtitle: _t(context, 'healthHistory.measurementsSubtitle'),
         ),
-        const SizedBox(height: 14),
-        _BpHistoryCard(
+        const SizedBox(height: AppSpacing.md),
+        _MeasurementSummary(history: history),
+        const SizedBox(height: AppSpacing.md),
+        _BloodPressureCard(
+          readings: history.bloodPressureReadings,
+          attentionNotice: history.bpAttentionNotice,
           filter: _bpFilter,
           showAll: _showAllBp,
-          onFilterChanged: (f) => setState(() => _bpFilter = f),
-          onToggleShowAll: () => setState(() => _showAllBp = !_showAllBp),
+          onFilterChanged: (value) => setState(() {
+            _bpFilter = value;
+            _showAllBp = false;
+          }),
+          onToggleAll: () => setState(() => _showAllBp = !_showAllBp),
         ),
-        if (h.latestBloodSugar != null) ...[
-          const SizedBox(height: 14),
-          _BloodSugarCard(
-            latest: h.latestBloodSugar!,
-            showAll: _showAllBs,
-            onToggle: () => setState(() => _showAllBs = !_showAllBs),
-          ),
-        ],
+        const SizedBox(height: AppSpacing.md),
+        _BloodSugarCard(
+          readings: history.bloodSugarReadings,
+          showAll: _showAllBs,
+          onToggleAll: () => setState(() => _showAllBs = !_showAllBs),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        _VitalSignsCard(
+          records: history.vitalSigns,
+          showAll: _showAllVitals,
+          onToggleAll: () => setState(() => _showAllVitals = !_showAllVitals),
+        ),
       ],
     );
   }
 }
 
-class _MeasurementTile extends StatelessWidget {
-  const _MeasurementTile({required this.item});
-  final HealthMeasurement item;
+class ClinicalSection extends StatelessWidget {
+  const ClinicalSection({super.key, required this.history});
+
+  final HealthHistory history;
 
   @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final attention = item.needsAttention;
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: attention
-            ? cs.errorContainer.withValues(alpha: .22)
-            : cs.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: attention
-              ? cs.error.withValues(alpha: .35)
-              : cs.outlineVariant.withValues(alpha: .5),
+  Widget build(BuildContext context) => ListView(
+    physics: const AlwaysScrollableScrollPhysics(),
+    padding: const EdgeInsets.fromLTRB(
+      AppSpacing.md,
+      AppSpacing.md,
+      AppSpacing.md,
+      AppSpacing.xl,
+    ),
+    children: [
+      _SectionIntro(
+        title: _t(context, 'healthHistory.clinicalTitle'),
+        subtitle: _t(context, 'healthHistory.clinicalSubtitle'),
+      ),
+      const SizedBox(height: AppSpacing.md),
+      _RecordGroup<DiagnosisRecord>(
+        icon: Icons.health_and_safety_outlined,
+        title: _t(context, 'healthHistory.diagnoses'),
+        records: history.diagnoses,
+        emptyMessage: _t(context, 'healthHistory.noDiagnoses'),
+        itemBuilder: (context, record) => _RecordTile(
+          title: record.condition,
+          badge: record.severity,
+          body: record.details,
+          date: record.recordedAt,
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            item.label,
-            style: Theme.of(
-              context,
-            ).textTheme.labelMedium?.copyWith(color: cs.onSurfaceVariant),
-          ),
-          const SizedBox(height: 8),
-          Text.rich(
-            TextSpan(
-              text: item.value,
-              children: [
-                if (item.unit != null)
-                  TextSpan(
-                    text: ' ${item.unit}',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-              ],
-            ),
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w800,
-              color: attention ? cs.error : cs.onSurface,
-            ),
-          ),
-          if (item.detail != null || item.recordedAt != null) ...[
-            const SizedBox(height: 6),
-            Text(
-              [
-                item.detail,
-                if (item.recordedAt != null) _date(item.recordedAt!),
-              ].whereType<String>().join(' · '),
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-            ),
-          ],
-        ],
+      const SizedBox(height: AppSpacing.md),
+      _RecordGroup<AllergyRecord>(
+        icon: Icons.warning_amber_rounded,
+        title: _t(context, 'healthHistory.allergies'),
+        records: history.allergies,
+        emptyMessage: _t(context, 'healthHistory.noAllergies'),
+        emptyBadge: _t(context, 'healthHistory.notDocumented'),
+        itemBuilder: (context, record) => _RecordTile(
+          title: record.allergen,
+          badge: record.severity,
+          metadata: record.reaction == null
+              ? null
+              : _tp(context, 'healthHistory.reaction', {
+                  'value': record.reaction!,
+                }),
+          body: record.notes,
+          date: record.recordedAt,
+        ),
       ),
-    );
-  }
+    ],
+  );
 }
 
-class _AllergySummaryTile extends StatelessWidget {
-  const _AllergySummaryTile({required this.allergies});
-  final List<HealthRecordItem> allergies;
+class CareRecordsSection extends StatelessWidget {
+  const CareRecordsSection({super.key, required this.history});
+
+  final HealthHistory history;
+
+  @override
+  Widget build(BuildContext context) => ListView(
+    physics: const AlwaysScrollableScrollPhysics(),
+    padding: const EdgeInsets.fromLTRB(
+      AppSpacing.md,
+      AppSpacing.md,
+      AppSpacing.md,
+      AppSpacing.xl,
+    ),
+    children: [
+      _SectionIntro(
+        title: _t(context, 'healthHistory.careTitle'),
+        subtitle: _t(context, 'healthHistory.careSubtitle'),
+      ),
+      const SizedBox(height: AppSpacing.md),
+      _RecordGroup<LabResultRecord>(
+        icon: Icons.science_outlined,
+        title: _t(context, 'healthHistory.labResults'),
+        records: history.labResults,
+        emptyMessage: _t(context, 'healthHistory.noLabResults'),
+        itemBuilder: (context, record) => _LabResultTile(record: record),
+      ),
+      const SizedBox(height: AppSpacing.md),
+      _RecordGroup<ProcedureRecord>(
+        icon: Icons.medical_services_outlined,
+        title: _t(context, 'healthHistory.procedures'),
+        records: history.procedures,
+        emptyMessage: _t(context, 'healthHistory.noProcedures'),
+        itemBuilder: (context, record) => _RecordTile(
+          title: record.name,
+          body: record.notes,
+          date: record.recordedAt,
+        ),
+      ),
+      const SizedBox(height: AppSpacing.md),
+      _RecordGroup<PrescriptionRecord>(
+        icon: Icons.medication_outlined,
+        title: _t(context, 'healthHistory.prescriptions'),
+        records: history.prescriptions,
+        emptyMessage: _t(context, 'healthHistory.noPrescriptions'),
+        itemBuilder: (context, record) => _RecordTile(
+          title: record.medication,
+          badge: record.dosage,
+          metadata: _prescriptionPeriod(context, record),
+          body: record.instructions,
+          date: record.recordedAt,
+        ),
+      ),
+      const SizedBox(height: AppSpacing.md),
+      _RecordGroup<ImmunizationRecord>(
+        icon: Icons.vaccines_outlined,
+        title: _t(context, 'healthHistory.immunizations'),
+        records: history.immunizations,
+        emptyMessage: _t(context, 'healthHistory.noImmunizations'),
+        itemBuilder: (context, record) => _RecordTile(
+          title: record.vaccineName,
+          badge: record.doseNumber == null
+              ? null
+              : _tp(context, 'healthHistory.dose', {
+                  'value': record.doseNumber!,
+                }),
+          secondaryBadge: _immunizationStatus(context, record.status),
+          body: record.notes,
+          date: record.recordedAt,
+        ),
+      ),
+      const SizedBox(height: AppSpacing.lg),
+      _Footnote(text: _t(context, 'healthHistory.noRecordFootnote')),
+      const SizedBox(height: AppSpacing.sm),
+      _Footnote(text: _t(context, 'healthHistory.disclaimer')),
+    ],
+  );
+}
+
+class _MeasurementSummary extends StatelessWidget {
+  const _MeasurementSummary({required this.history});
+
+  final HealthHistory history;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final names = allergies.map((a) => a.title).where((s) => s.isNotEmpty);
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: cs.outlineVariant.withValues(alpha: .5)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Allergy information',
-            style: Theme.of(
-              context,
-            ).textTheme.labelMedium?.copyWith(color: cs.onSurfaceVariant),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '${allergies.length} recorded',
-            style: Theme.of(
-              context,
-            ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            names.isEmpty
-                ? 'Not equivalent to “no known allergies”'
-                : names.join(', '),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-          ),
-        ],
-      ),
+    final bloodPressure = history.latestBloodPressure;
+    final bloodSugar = history.latestBloodSugar;
+    final allergies = history.allergies;
+    return Column(
+      children: [
+        _SummaryTile(
+          icon: Icons.monitor_heart_outlined,
+          label: _t(context, 'healthHistory.latestBloodPressure'),
+          value: bloodPressure == null
+              ? _t(context, 'healthHistory.notRecorded')
+              : _tp(context, 'healthHistory.bpValue', {
+                  'systolic': '${bloodPressure.systolic ?? '—'}',
+                  'diastolic': '${bloodPressure.diastolic ?? '—'}',
+                }),
+          detail: bloodPressure == null
+              ? _t(context, 'healthHistory.noReadingAvailable')
+              : _join([
+                  _date(context, bloodPressure.takenAt),
+                  bloodPressure.monitorBandLabel,
+                ]),
+          tone: bloodPressure?.monitorBand == 'red'
+              ? _SummaryTone.alert
+              : _SummaryTone.normal,
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        _SummaryTile(
+          icon: Icons.water_drop_outlined,
+          label: _t(context, 'healthHistory.latestBloodGlucose'),
+          value: bloodSugar == null
+              ? _t(context, 'healthHistory.notRecorded')
+              : '${bloodSugar.value} ${bloodSugar.unit ?? '%'}'.trim(),
+          detail: bloodSugar == null
+              ? _t(context, 'healthHistory.noReadingAvailable')
+              : bloodSugar.readingTypeLabel,
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        _SummaryTile(
+          icon: Icons.warning_amber_rounded,
+          label: _t(context, 'healthHistory.allergyInformation'),
+          value: allergies.isEmpty
+              ? _t(context, 'healthHistory.notRecorded')
+              : _tp(context, 'healthHistory.recordedCount', {
+                  'count': '${allergies.length}',
+                }),
+          detail: allergies.isEmpty
+              ? _t(context, 'healthHistory.noKnownAllergiesCaution')
+              : allergies.map((record) => record.allergen).join(', '),
+        ),
+      ],
     );
   }
 }
 
-enum _BpFilter { all, attention, normal }
-
-class _BpHistoryCard extends StatelessWidget {
-  const _BpHistoryCard({
+class _BloodPressureCard extends StatelessWidget {
+  const _BloodPressureCard({
+    required this.readings,
+    required this.attentionNotice,
     required this.filter,
     required this.showAll,
     required this.onFilterChanged,
-    required this.onToggleShowAll,
+    required this.onToggleAll,
   });
 
+  final List<BloodPressureRecord> readings;
+  final String? attentionNotice;
   final _BpFilter filter;
   final bool showAll;
   final ValueChanged<_BpFilter> onFilterChanged;
-  final VoidCallback onToggleShowAll;
+  final VoidCallback onToggleAll;
 
-  // Note: the current entity only exposes the *latest* BP reading.
-  // The contract's bp_readings list is mapped to latestBloodPressure only
-  // in HealthHistory; the full list isn't on the entity yet. This card
-  // therefore renders the available reading(s) and the filter UI, and will
-  // light up automatically when the entity gains the full list.
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: cs.outlineVariant.withValues(alpha: .5)),
-      ),
+    final filtered = switch (filter) {
+      _BpFilter.all => readings,
+      _BpFilter.attention =>
+        readings
+            .where((record) => record.needsAttention)
+            .toList(growable: false),
+      _BpFilter.inRange =>
+        readings
+            .where((record) => !record.needsAttention)
+            .toList(growable: false),
+    };
+    final visible = showAll ? filtered : filtered.take(3).toList();
+    return _SurfaceCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          _CardHeader(
+            icon: Icons.favorite_border_rounded,
+            title: _t(context, 'healthHistory.bpHistory'),
+            subtitle: _t(context, 'healthHistory.bpHistorySubtitle'),
+            count: filtered.length,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
             children: [
-              Expanded(
-                child: Text(
-                  'Blood pressure history',
-                  style: Theme.of(context).textTheme.titleSmall,
+              for (final option in _BpFilter.values)
+                ChoiceChip(
+                  label: Text(_bpFilterLabel(context, option)),
+                  selected: option == filter,
+                  onSelected: (_) => onFilterChanged(option),
                 ),
-              ),
-              Text(
-                'Monitoring indicator',
-                style: Theme.of(
-                  context,
-                ).textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant),
-              ),
             ],
           ),
-          const SizedBox(height: 12),
-          _SegmentedFilter(
-            value: filter,
-            onChanged: onFilterChanged,
-            options: const {
-              _BpFilter.all: 'All',
-              _BpFilter.attention: 'Needs attention',
-              _BpFilter.normal: 'In range',
-            },
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: cs.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(12),
+          if (attentionNotice != null) ...[
+            const SizedBox(height: AppSpacing.md),
+            _AttentionNotice(message: attentionNotice!),
+          ],
+          const SizedBox(height: AppSpacing.sm),
+          if (visible.isEmpty)
+            _EmptyMessage(
+              text: readings.isEmpty
+                  ? _t(context, 'healthHistory.noBpReadings')
+                  : _t(context, 'healthHistory.noBpFilterResults'),
+            )
+          else
+            for (var index = 0; index < visible.length; index++) ...[
+              if (index != 0) const Divider(height: AppSpacing.lg),
+              _BloodPressureTile(record: visible[index]),
+            ],
+          if (filtered.length > 3) ...[
+            const SizedBox(height: AppSpacing.sm),
+            TextButton(
+              onPressed: onToggleAll,
+              child: Text(
+                _t(
+                  context,
+                  showAll
+                      ? 'healthHistory.showRecentReadings'
+                      : 'healthHistory.viewAllReadings',
+                ),
+              ),
             ),
-            child: Text(
-              'No blood pressure readings are available in this record.',
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'Blood pressure categories are monitoring indicators, not a medical '
-            'diagnosis. For treatment decisions, consult your healthcare professional.',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: cs.onSurfaceVariant,
-              height: 1.5,
-            ),
-          ),
+          ],
+          const SizedBox(height: AppSpacing.sm),
+          _Footnote(text: _t(context, 'healthHistory.bpFootnote')),
         ],
       ),
     );
@@ -292,65 +354,47 @@ class _BpHistoryCard extends StatelessWidget {
 
 class _BloodSugarCard extends StatelessWidget {
   const _BloodSugarCard({
-    required this.latest,
+    required this.readings,
     required this.showAll,
-    required this.onToggle,
+    required this.onToggleAll,
   });
 
-  final HealthMeasurement latest;
+  final List<BloodSugarRecord> readings;
   final bool showAll;
-  final VoidCallback onToggle;
+  final VoidCallback onToggleAll;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: cs.outlineVariant.withValues(alpha: .5)),
-      ),
+    final visible = showAll ? readings : readings.take(1).toList();
+    return _SurfaceCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Blood glucose', style: Theme.of(context).textTheme.titleSmall),
-          const SizedBox(height: 8),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                latest.value,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: latest.needsAttention ? cs.error : cs.onSurface,
+          _CardHeader(
+            icon: Icons.water_drop_outlined,
+            title: _t(context, 'healthHistory.bloodGlucose'),
+            count: readings.length,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          if (visible.isEmpty)
+            _EmptyMessage(text: _t(context, 'healthHistory.noBsReadings'))
+          else
+            for (var index = 0; index < visible.length; index++) ...[
+              if (index != 0) const Divider(height: AppSpacing.lg),
+              _BloodSugarTile(record: visible[index]),
+            ],
+          if (readings.length > 1) ...[
+            const SizedBox(height: AppSpacing.sm),
+            TextButton(
+              onPressed: onToggleAll,
+              child: Text(
+                _t(
+                  context,
+                  showAll
+                      ? 'healthHistory.showLatestReading'
+                      : 'healthHistory.viewAllReadings',
                 ),
               ),
-              if (latest.unit != null)
-                Padding(
-                  padding: const EdgeInsets.only(left: 4, bottom: 4),
-                  child: Text(
-                    latest.unit!,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ),
-              const Spacer(),
-              if (latest.recordedAt != null)
-                Text(
-                  _date(latest.recordedAt!),
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant),
-                ),
-            ],
-          ),
-          if (latest.detail != null) ...[
-            const SizedBox(height: 6),
-            _Pill(
-              label: latest.detail!,
-              tone: latest.needsAttention
-                  ? _PillTone.warning
-                  : _PillTone.neutral,
             ),
           ],
         ],
@@ -359,198 +403,252 @@ class _BloodSugarCard extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// CLINICAL
-// ─────────────────────────────────────────────────────────────────────────────
+class _VitalSignsCard extends StatelessWidget {
+  const _VitalSignsCard({
+    required this.records,
+    required this.showAll,
+    required this.onToggleAll,
+  });
 
-class ClinicalSection extends StatelessWidget {
-  const ClinicalSection({super.key, required this.history});
-  final HealthHistory history;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _RecordRow(
-          label: 'Diagnoses & medical conditions',
-          records: history.diagnoses,
-          emptyLine:
-              'No clinical diagnoses documented in the available record.',
-          emptyPillLabel: 'No record',
-          display: (r) => _RecordDisplay(
-            title: r.title,
-            meta: r.subtitle != null ? '(${r.subtitle})' : null,
-            date: r.recordedAt,
-            body: r.detail,
-          ),
-        ),
-        const SizedBox(height: 12),
-        _RecordRow(
-          label: 'Allergies & adverse reactions',
-          records: history.allergies,
-          emptyLine: 'No allergy or adverse-reaction information documented.',
-          emptyPillLabel: 'Not documented',
-          display: (r) => _RecordDisplay(
-            title: r.title,
-            meta: r.subtitle != null ? '(${r.subtitle})' : null,
-            date: r.recordedAt,
-            body: r.detail,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// TREATMENT
-// ─────────────────────────────────────────────────────────────────────────────
-
-class TreatmentSection extends StatelessWidget {
-  const TreatmentSection({super.key, required this.history});
-  final HealthHistory history;
+  final List<VitalSignRecord> records;
+  final bool showAll;
+  final VoidCallback onToggleAll;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _RecordRow(
-          label: 'Laboratory results',
-          records: history.labResults,
-          emptyLine: 'No laboratory investigation results available.',
-          display: (r) => _RecordDisplay(
-            title: r.title,
-            date: r.recordedAt,
-            body: r.detail,
+    final visible = showAll ? records : records.take(3).toList();
+    return _SurfaceCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _CardHeader(
+            icon: Icons.monitor_weight_outlined,
+            title: _t(context, 'healthHistory.otherVitals'),
+            count: records.length,
           ),
-        ),
-        const SizedBox(height: 12),
-        _RecordRow(
-          label: 'Procedures & interventions',
-          records: history.procedures,
-          emptyLine: 'No procedures or interventions documented.',
-          display: (r) => _RecordDisplay(
-            title: r.title,
-            date: r.recordedAt,
-            body: r.detail,
-          ),
-        ),
-        const SizedBox(height: 12),
-        _RecordRow(
-          label: 'Prescriptions & medications',
-          records: history.prescriptions,
-          emptyLine: 'No prescriptions available in the connected history.',
-          display: (r) => _RecordDisplay(
-            title: r.title,
-            meta: r.subtitle,
-            date: r.recordedAt,
-            body: r.detail,
-          ),
-        ),
-        const SizedBox(height: 12),
-        _RecordRow(
-          label: 'Immunization history',
-          records: history.immunizations,
-          emptyLine: 'No vaccination records available in this history.',
-          display: (r) => _RecordDisplay(
-            title: r.title,
-            meta: r.subtitle,
-            date: r.recordedAt,
-            body: r.detail,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// JOURNEY
-// ─────────────────────────────────────────────────────────────────────────────
-
-class JourneySection extends StatelessWidget {
-  const JourneySection({super.key, required this.history});
-  final HealthHistory history;
-
-  @override
-  Widget build(BuildContext context) {
-    if (history.journey.isEmpty) {
-      return const _SectionEmptyCard(
-        icon: Icons.timeline_outlined,
-        title: 'No completed checks yet',
-        message:
-            'Completed health checks and recommended care will appear here.',
-      );
-    }
-    return _JourneyTimeline(items: history.journey);
-  }
-}
-
-class _JourneyTimeline extends StatelessWidget {
-  const _JourneyTimeline({required this.items});
-  final List<HealthJourneyItem> items;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        for (var i = 0; i < items.length; i++)
-          IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: 24,
-                  child: Column(
-                    children: [
-                      Container(
-                        width: 12,
-                        height: 12,
-                        margin: const EdgeInsets.only(top: 6),
-                        decoration: BoxDecoration(
-                          color: items[i].hasActiveWarning
-                              ? cs.error
-                              : cs.primary,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: cs.surface, width: 2),
-                        ),
-                      ),
-                      if (i != items.length - 1)
-                        Expanded(
-                          child: Container(
-                            width: 2,
-                            color: cs.outlineVariant.withValues(alpha: .6),
-                          ),
-                        ),
-                    ],
-                  ),
+          const SizedBox(height: AppSpacing.sm),
+          if (visible.isEmpty)
+            _EmptyMessage(text: _t(context, 'healthHistory.noOtherVitals'))
+          else
+            for (var index = 0; index < visible.length; index++) ...[
+              if (index != 0) const Divider(height: AppSpacing.lg),
+              _RecordTile(
+                title: visible[index].typeLabel,
+                metadata: '${visible[index].value} ${visible[index].unit ?? ''}'
+                    .trim(),
+                body: visible[index].notes,
+                date: visible[index].takenAt,
+              ),
+            ],
+          if (records.length > 3) ...[
+            const SizedBox(height: AppSpacing.sm),
+            TextButton(
+              onPressed: onToggleAll,
+              child: Text(
+                _t(
+                  context,
+                  showAll
+                      ? 'healthHistory.showRecentRecords'
+                      : 'healthHistory.viewAllRecords',
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      bottom: i == items.length - 1 ? 0 : 18,
-                    ),
-                    child: _JourneyEntry(item: items[i]),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-      ],
+          ],
+        ],
+      ),
     );
   }
 }
 
-class _JourneyEntry extends StatelessWidget {
-  const _JourneyEntry({required this.item});
-  final HealthJourneyItem item;
+class _BloodPressureTile extends StatelessWidget {
+  const _BloodPressureTile({required this.record});
+
+  final BloodPressureRecord record;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final metadata = _join([
+      _date(context, record.takenAt),
+      record.pulse == null
+          ? null
+          : _tp(context, 'healthHistory.pulse', {'value': '${record.pulse}'}),
+      _dialysisPhase(context, record.dialysisPhase),
+    ]);
+    return _RecordTile(
+      title: _tp(context, 'healthHistory.bpValue', {
+        'systolic': '${record.systolic ?? '—'}',
+        'diastolic': '${record.diastolic ?? '—'}',
+      }),
+      badge: record.monitorBandLabel,
+      badgeTone: record.monitorBand == 'red'
+          ? _BadgeTone.danger
+          : record.needsAttention
+          ? _BadgeTone.warning
+          : _BadgeTone.positive,
+      metadata: metadata,
+      body: record.notes,
+    );
+  }
+}
+
+class _BloodSugarTile extends StatelessWidget {
+  const _BloodSugarTile({required this.record});
+
+  final BloodSugarRecord record;
+
+  @override
+  Widget build(BuildContext context) {
+    final notClassified = record.classification == 'not_classified';
+    return _RecordTile(
+      title: '${record.value} ${record.unit ?? '%'}'.trim(),
+      badge: notClassified
+          ? _t(context, 'healthHistory.notClassified')
+          : record.classificationLabel,
+      badgeTone: switch (record.classification) {
+        'red' => _BadgeTone.danger,
+        'green' ||
+        'within_target_2h' ||
+        'within_general_target' => _BadgeTone.positive,
+        'not_classified' || 'timing_not_met' => _BadgeTone.neutral,
+        _ => _BadgeTone.warning,
+      },
+      metadata: _join([
+        _date(context, record.takenAt),
+        record.readingTypeLabel,
+      ]),
+      body: _join([
+        if (notClassified)
+          _t(context, 'healthHistory.notClassifiedExplanation'),
+        record.notes,
+      ]),
+    );
+  }
+}
+
+class _LabResultTile extends StatelessWidget {
+  const _LabResultTile({required this.record});
+
+  final LabResultRecord record;
+
+  @override
+  Widget build(BuildContext context) {
+    final specimen = record.specimenTypeLabel == null
+        ? null
+        : _tp(context, 'healthHistory.specimen', {
+            'type': record.specimenTypeLabel!,
+            'date': _date(context, record.specimenCollectedAt) ?? '',
+          });
+    return _RecordTile(
+      title: record.testName,
+      metadata: '${record.value} ${record.unit ?? ''}'.trim(),
+      badge: record.interpretationLabel,
+      badgeTone: record.interpretation == 'N'
+          ? _BadgeTone.positive
+          : _BadgeTone.danger,
+      secondaryBadge: record.status == 'final' ? null : record.statusLabel,
+      body: _join([
+        if (record.referenceRange != null)
+          _tp(context, 'healthHistory.referenceRange', {
+            'value': record.referenceRange!,
+          }),
+        specimen,
+        record.notes,
+      ]),
+      date: record.recordedAt,
+    );
+  }
+}
+
+class _RecordGroup<T> extends StatefulWidget {
+  const _RecordGroup({
+    required this.icon,
+    required this.title,
+    required this.records,
+    required this.emptyMessage,
+    required this.itemBuilder,
+    this.emptyBadge,
+  });
+
+  final IconData icon;
+  final String title;
+  final List<T> records;
+  final String emptyMessage;
+  final String? emptyBadge;
+  final Widget Function(BuildContext context, T record) itemBuilder;
+
+  @override
+  State<_RecordGroup<T>> createState() => _RecordGroupState<T>();
+}
+
+class _RecordGroupState<T> extends State<_RecordGroup<T>> {
+  bool _showAll = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final visible = _showAll ? widget.records : widget.records.take(3).toList();
+    return _SurfaceCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _CardHeader(
+            icon: widget.icon,
+            title: widget.title,
+            count: widget.records.length,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          if (visible.isEmpty)
+            _EmptyMessage(
+              text: widget.emptyMessage,
+              badge: widget.emptyBadge ?? _t(context, 'healthHistory.noRecord'),
+            )
+          else
+            for (var index = 0; index < visible.length; index++) ...[
+              if (index != 0) const Divider(height: AppSpacing.lg),
+              widget.itemBuilder(context, visible[index]),
+            ],
+          if (widget.records.length > 3) ...[
+            const SizedBox(height: AppSpacing.sm),
+            TextButton(
+              onPressed: () => setState(() => _showAll = !_showAll),
+              child: Text(
+                _t(
+                  context,
+                  _showAll
+                      ? 'healthHistory.showRecentRecords'
+                      : 'healthHistory.viewAllRecords',
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _RecordTile extends StatelessWidget {
+  const _RecordTile({
+    required this.title,
+    this.badge,
+    this.secondaryBadge,
+    this.badgeTone = _BadgeTone.neutral,
+    this.metadata,
+    this.body,
+    this.date,
+  });
+
+  final String title;
+  final String? badge;
+  final String? secondaryBadge;
+  final _BadgeTone badgeTone;
+  final String? metadata;
+  final String? body;
+  final DateTime? date;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final formattedDate = _date(context, date);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -559,37 +657,54 @@ class _JourneyEntry extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                _titleCase(item.assessmentSlug),
-                style: Theme.of(context).textTheme.titleSmall,
+                title.isEmpty
+                    ? _t(context, 'healthHistory.notRecorded')
+                    : title,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
-            if (item.bandLabel != null)
-              _Pill(
-                label: item.bandLabel!,
-                tone: item.hasActiveWarning
-                    ? _PillTone.danger
-                    : _PillTone.neutral,
+            if (formattedDate != null) ...[
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                formattedDate,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
+            ],
           ],
         ),
-        const SizedBox(height: 3),
-        Text(
-          _date(item.completedAt),
-          style: Theme.of(
-            context,
-          ).textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant),
-        ),
-        if (item.summary != null) ...[
-          const SizedBox(height: 6),
-          Text(item.summary!, style: Theme.of(context).textTheme.bodySmall),
-        ],
-        if (item.referralFacility != null) ...[
-          const SizedBox(height: 6),
+        if (metadata != null && metadata!.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.xs),
           Text(
-            'Recommended care: ${item.referralFacility}',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: cs.primary,
-              fontWeight: FontWeight.w600,
+            metadata!,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+        if (badge != null || secondaryBadge != null) ...[
+          const SizedBox(height: AppSpacing.sm),
+          Wrap(
+            spacing: AppSpacing.xs,
+            runSpacing: AppSpacing.xs,
+            children: [
+              if (badge != null) _Badge(label: badge!, tone: badgeTone),
+              if (secondaryBadge != null)
+                _Badge(label: secondaryBadge!, tone: _BadgeTone.neutral),
+            ],
+          ),
+        ],
+        if (body != null && body!.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            body!,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              height: 1.45,
             ),
           ),
         ],
@@ -598,189 +713,197 @@ class _JourneyEntry extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// SHARED
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _RecordDisplay {
-  const _RecordDisplay({required this.title, this.meta, this.body, this.date});
-  final String title;
-  final String? meta;
-  final String? body;
-  final DateTime? date;
-}
-
-class _RecordRow extends StatefulWidget {
-  const _RecordRow({
+class _SummaryTile extends StatelessWidget {
+  const _SummaryTile({
+    required this.icon,
     required this.label,
-    required this.records,
-    required this.emptyLine,
-    required this.display,
-    this.emptyPillLabel = 'No record',
+    required this.value,
+    this.detail,
+    this.tone = _SummaryTone.normal,
   });
 
+  final IconData icon;
   final String label;
-  final List<HealthRecordItem> records;
-  final String emptyLine;
-  final String emptyPillLabel;
-  final _RecordDisplay Function(HealthRecordItem) display;
+  final String value;
+  final String? detail;
+  final _SummaryTone tone;
 
   @override
-  State<_RecordRow> createState() => _RecordRowState();
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final accent = tone == _SummaryTone.alert ? cs.error : cs.primary;
+    return _SurfaceCard(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: .08),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: accent),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: cs.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  value,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: tone == _SummaryTone.alert ? cs.error : null,
+                  ),
+                ),
+                if (detail != null && detail!.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    detail!,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: cs.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class _RecordRowState extends State<_RecordRow> {
-  bool _expanded = false;
-  static const _previewCount = 3;
+class _SectionIntro extends StatelessWidget {
+  const _SectionIntro({required this.title, required this.subtitle});
+
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(title, style: Theme.of(context).textTheme.titleLarge),
+      const SizedBox(height: AppSpacing.xs),
+      Text(
+        subtitle,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+          height: 1.45,
+        ),
+      ),
+    ],
+  );
+}
+
+class _CardHeader extends StatelessWidget {
+  const _CardHeader({
+    required this.icon,
+    required this.title,
+    this.subtitle,
+    this.count,
+  });
+
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final int? count;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, color: theme.colorScheme.primary, size: 22),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: theme.textTheme.titleMedium),
+              if (subtitle != null) ...[
+                const SizedBox(height: 2),
+                Text(
+                  subtitle!,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        if (count != null)
+          _Badge(
+            label: _tp(context, 'healthHistory.recordCount', {
+              'count': '$count',
+            }),
+          ),
+      ],
+    );
+  }
+}
+
+class _SurfaceCard extends StatelessWidget {
+  const _SurfaceCard({required this.child, this.padding});
+
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final records = widget.records;
-    final hasMany = records.length > _previewCount;
-    final visible = _expanded ? records : records.take(_previewCount).toList();
-
-    return Container(
-      padding: const EdgeInsets.all(16),
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: cs.outlineVariant.withValues(alpha: .5)),
+        border: Border.all(color: cs.outlineVariant),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  widget.label,
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-              ),
-              Text(
-                records.isEmpty ? '' : '${records.length}',
-                style: Theme.of(
-                  context,
-                ).textTheme.labelMedium?.copyWith(color: cs.onSurfaceVariant),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          if (records.isEmpty) ...[
-            Text(
-              widget.emptyLine,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-            ),
-            const SizedBox(height: 8),
-            _Pill(label: widget.emptyPillLabel, tone: _PillTone.muted),
-          ] else ...[
-            for (var i = 0; i < visible.length; i++) ...[
-              if (i != 0)
-                Divider(
-                  height: 20,
-                  color: cs.outlineVariant.withValues(alpha: .6),
-                ),
-              _RecordEntry(display: widget.display(visible[i])),
-            ],
-            if (hasMany) ...[
-              const SizedBox(height: 10),
-              InkWell(
-                onTap: () => setState(() => _expanded = !_expanded),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Text(
-                    _expanded ? 'Show recent records' : 'View all records',
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: cs.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ],
+      child: Padding(
+        padding: padding ?? const EdgeInsets.all(AppSpacing.md),
+        child: child,
       ),
     );
   }
 }
 
-class _RecordEntry extends StatelessWidget {
-  const _RecordEntry({required this.display});
-  final _RecordDisplay display;
+class _AttentionNotice extends StatelessWidget {
+  const _AttentionNotice({required this.message});
 
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          display.meta == null
-              ? display.title
-              : '${display.title} ${display.meta}',
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
-        ),
-        if (display.date != null) ...[
-          const SizedBox(height: 2),
-          Text(
-            _date(display.date!),
-            style: Theme.of(
-              context,
-            ).textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant),
-          ),
-        ],
-        if (display.body != null) ...[
-          const SizedBox(height: 4),
-          Text(
-            display.body!,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-class _SectionEmptyCard extends StatelessWidget {
-  const _SectionEmptyCard({
-    required this.icon,
-    required this.title,
-    required this.message,
-  });
-  final IconData icon;
-  final String title;
   final String message;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(AppSpacing.sm),
       decoration: BoxDecoration(
-        color: cs.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: cs.outlineVariant.withValues(alpha: .5)),
+        color: cs.errorContainer,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: cs.error.withValues(alpha: .3)),
       ),
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 28, color: cs.onSurfaceVariant),
-          const SizedBox(height: 12),
-          Text(title, style: Theme.of(context).textTheme.titleSmall),
-          const SizedBox(height: 6),
-          Text(
-            message,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: cs.onSurfaceVariant,
-              height: 1.5,
+          Icon(Icons.error_outline_rounded, color: cs.onErrorContainer),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              _tp(context, 'healthHistory.attention', {'message': message}),
+              style: TextStyle(color: cs.onErrorContainer),
             ),
           ),
         ],
@@ -789,96 +912,58 @@ class _SectionEmptyCard extends StatelessWidget {
   }
 }
 
-class _SegmentedFilter<T> extends StatelessWidget {
-  const _SegmentedFilter({
-    required this.value,
-    required this.onChanged,
-    required this.options,
-  });
+class _EmptyMessage extends StatelessWidget {
+  const _EmptyMessage({required this.text, this.badge});
 
-  final T value;
-  final ValueChanged<T> onChanged;
-  final Map<T, String> options;
+  final String text;
+  final String? badge;
 
   @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.all(3),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        children: [
-          for (final entry in options.entries)
-            Expanded(
-              child: GestureDetector(
-                onTap: () => onChanged(entry.key),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  padding: const EdgeInsets.symmetric(vertical: 7),
-                  decoration: BoxDecoration(
-                    color: value == entry.key ? cs.surface : Colors.transparent,
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: value == entry.key
-                        ? [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: .06),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
-                            ),
-                          ]
-                        : null,
-                  ),
-                  child: Text(
-                    entry.value,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: value == entry.key
-                          ? cs.onSurface
-                          : cs.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          text,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+        if (badge != null) ...[
+          const SizedBox(height: AppSpacing.sm),
+          _Badge(label: badge!),
         ],
-      ),
-    );
-  }
+      ],
+    ),
+  );
 }
 
-enum _PillTone { neutral, muted, warning, danger }
+class _Badge extends StatelessWidget {
+  const _Badge({required this.label, this.tone = _BadgeTone.neutral});
 
-class _Pill extends StatelessWidget {
-  const _Pill({required this.label, this.tone = _PillTone.neutral});
   final String label;
-  final _PillTone tone;
+  final _BadgeTone tone;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final (bg, fg) = switch (tone) {
-      _PillTone.neutral => (cs.surfaceContainerHighest, cs.onSurfaceVariant),
-      _PillTone.muted => (
-        cs.surfaceContainerHigh.withValues(alpha: .6),
-        cs.onSurfaceVariant,
-      ),
-      _PillTone.warning => (cs.tertiaryContainer, cs.onTertiaryContainer),
-      _PillTone.danger => (cs.errorContainer, cs.onErrorContainer),
+    final (background, foreground) = switch (tone) {
+      _BadgeTone.neutral => (cs.surfaceContainerHighest, cs.onSurfaceVariant),
+      _BadgeTone.positive => (cs.secondaryContainer, cs.onSecondaryContainer),
+      _BadgeTone.warning => (cs.tertiaryContainer, cs.onTertiaryContainer),
+      _BadgeTone.danger => (cs.errorContainer, cs.onErrorContainer),
     };
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: bg,
+        color: background,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
         label,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: fg,
+          color: foreground,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -886,11 +971,70 @@ class _Pill extends StatelessWidget {
   }
 }
 
-String _date(DateTime value) =>
-    DateFormat('dd MMM yyyy').format(value.toLocal());
+class _Footnote extends StatelessWidget {
+  const _Footnote({required this.text});
 
-String _titleCase(String slug) => slug
-    .split('-')
-    .where((p) => p.isNotEmpty)
-    .map((p) => '${p[0].toUpperCase()}${p.substring(1)}')
-    .join(' ');
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Text(
+    text,
+    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
+      height: 1.5,
+    ),
+  );
+}
+
+enum _BpFilter { all, attention, inRange }
+
+enum _BadgeTone { neutral, positive, warning, danger }
+
+enum _SummaryTone { normal, alert }
+
+String _t(BuildContext context, String key) =>
+    AppLocalizations.getString(context, key);
+
+String _tp(BuildContext context, String key, Map<String, String> params) =>
+    AppLocalizations.t(context, key, params);
+
+String? _date(BuildContext context, DateTime? value) {
+  if (value == null) return null;
+  final locale = Localizations.localeOf(context).toLanguageTag();
+  return DateFormat.yMMMd(locale).format(value.toLocal());
+}
+
+String? _join(Iterable<String?> values) {
+  final present = values.whereType<String>().where((value) => value.isNotEmpty);
+  return present.isEmpty ? null : present.join(' · ');
+}
+
+String _bpFilterLabel(BuildContext context, _BpFilter filter) =>
+    switch (filter) {
+      _BpFilter.all => _t(context, 'healthHistory.allReadings'),
+      _BpFilter.attention => _t(context, 'healthHistory.needsAttention'),
+      _BpFilter.inRange => _t(context, 'healthHistory.withinRange'),
+    };
+
+String? _dialysisPhase(BuildContext context, String? phase) => switch (phase) {
+  'pre' => _t(context, 'healthHistory.preDialysis'),
+  'post' => _t(context, 'healthHistory.postDialysis'),
+  _ => null,
+};
+
+String? _immunizationStatus(BuildContext context, String? status) =>
+    switch (status) {
+      null || '' || 'completed' => null,
+      'entered-in-error' => _t(context, 'healthHistory.enteredInError'),
+      'not-done' => _t(context, 'healthHistory.notDone'),
+      _ => _t(context, 'healthHistory.statusUnavailable'),
+    };
+
+String? _prescriptionPeriod(BuildContext context, PrescriptionRecord record) {
+  final start = _date(context, record.startDate);
+  if (start == null) return null;
+  final end = _date(context, record.endDate);
+  return end == null
+      ? _tp(context, 'healthHistory.fromOngoing', {'start': start})
+      : _tp(context, 'healthHistory.fromUntil', {'start': start, 'end': end});
+}

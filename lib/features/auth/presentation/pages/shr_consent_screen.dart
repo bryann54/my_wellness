@@ -4,6 +4,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:my_wellness/common/res/app_spacing.dart';
+import 'package:my_wellness/common/res/l10n.dart';
 import 'package:my_wellness/common/widgets/app_primary_button.dart';
 import 'package:my_wellness/common/widgets/app_snackbar.dart';
 import 'package:my_wellness/common/widgets/appbar/custom_app_bar.dart';
@@ -99,7 +100,10 @@ class _ShrConsentScreenState extends State<ShrConsentScreen> {
       );
       if (!mounted) return;
       setState(() => _visit = visit);
-      AppSnackbar.success(context, 'Code resent.');
+      AppSnackbar.success(
+        context,
+        AppLocalizations.getString(context, 'shr.codeResent'),
+      );
     });
   }
 
@@ -124,7 +128,10 @@ class _ShrConsentScreenState extends State<ShrConsentScreen> {
       if (mounted) AppSnackbar.error(context, error.message);
     } on Exception {
       if (mounted) {
-        AppSnackbar.error(context, 'We couldn’t reach DHA. Please try again.');
+        AppSnackbar.error(
+          context,
+          AppLocalizations.getString(context, 'shr.dhaError'),
+        );
       }
     } finally {
       if (mounted) setState(() => _sending = false);
@@ -134,8 +141,11 @@ class _ShrConsentScreenState extends State<ShrConsentScreen> {
   @override
   Widget build(BuildContext context) => Scaffold(
     body: NestedScrollView(
-      headerSliverBuilder: (_, _) => const [
-        CustomAppBar(title: 'Link your health records', isHome: false),
+      headerSliverBuilder: (_, _) => [
+        CustomAppBar(
+          title: AppLocalizations.getString(context, 'shr.title'),
+          isHome: false,
+        ),
       ],
       body: SafeArea(
         top: false,
@@ -160,10 +170,8 @@ class _ShrConsentScreenState extends State<ShrConsentScreen> {
       return _Result(
         key: const ValueKey('open'),
         icon: Icons.verified_rounded,
-        title: 'Health records linked',
-        body:
-            'Your care team can now securely access your shared health record '
-            'from Kenya’s Digital Health Agency.',
+        title: AppLocalizations.getString(context, 'shr.linkedTitle'),
+        body: AppLocalizations.getString(context, 'shr.linkedBody'),
         onDone: () => context.router.maybePop(),
       );
     }
@@ -171,11 +179,8 @@ class _ShrConsentScreenState extends State<ShrConsentScreen> {
       return _Result(
         key: const ValueKey('rejected'),
         icon: Icons.shield_outlined,
-        title: 'Record sharing declined',
-        body:
-            'You can still use the app as normal — your care team just won’t '
-            'have automatic access to your shared health record. You can '
-            'change this later from account settings.',
+        title: AppLocalizations.getString(context, 'shr.declinedTitle'),
+        body: AppLocalizations.getString(context, 'shr.declinedBody'),
         onDone: () => context.router.maybePop(),
       );
     }
@@ -218,19 +223,21 @@ class _Waiting extends StatelessWidget {
       const CircularProgressIndicator.adaptive(),
       const SizedBox(height: 24),
       Text(
-        'Linking your existing health records…',
+        AppLocalizations.getString(context, 'shr.linking'),
         textAlign: TextAlign.center,
         style: Theme.of(context).textTheme.titleLarge,
       ),
       const SizedBox(height: 12),
       Text(
-        'This secure connection can take a little while. You can skip it and '
-        'continue using the app.',
+        AppLocalizations.getString(context, 'shr.linkingBody'),
         textAlign: TextAlign.center,
         style: Theme.of(context).textTheme.bodyMedium,
       ),
       const SizedBox(height: 28),
-      TextButton(onPressed: onSkip, child: const Text('Skip for now')),
+      TextButton(
+        onPressed: onSkip,
+        child: Text(AppLocalizations.getString(context, 'shr.skipForNow')),
+      ),
     ],
   );
 }
@@ -262,14 +269,12 @@ class _OtpForm extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          'Link your health records',
+          AppLocalizations.getString(context, 'shr.title'),
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(height: 10),
-        const Text(
-          'We can link any existing health records Kenya’s Digital Health '
-          'Agency already has for you. We’ve texted a verification code to '
-          'your phone — enter it below to confirm.',
+        Text(
+          AppLocalizations.getString(context, 'shr.otpBody'),
         ),
         const SizedBox(height: 20),
         Container(
@@ -279,10 +284,8 @@ class _OtpForm extends StatelessWidget {
             borderRadius: BorderRadius.circular(14),
             border: Border.all(color: cs.primary.withValues(alpha: .28)),
           ),
-          child: const Text(
-            'Your consent: Entering this code confirms you consent to My '
-            'Wellness Health fetching your existing health records from '
-            'Kenya’s Digital Health Agency (DHA).',
+          child: Text(
+            AppLocalizations.getString(context, 'shr.consentBody'),
           ),
         ),
         const SizedBox(height: 20),
@@ -295,9 +298,12 @@ class _OtpForm extends StatelessWidget {
             LengthLimitingTextInputFormatter(8),
           ],
           onChanged: (_) => onChanged(),
-          decoration: const InputDecoration(
-            labelText: 'Verification code',
-            hintText: 'Enter the code from DHA',
+          decoration: InputDecoration(
+            labelText: AppLocalizations.getString(
+              context,
+              'shr.verificationCode',
+            ),
+            hintText: AppLocalizations.getString(context, 'shr.codeHint'),
           ),
         ),
         const SizedBox(height: 20),
@@ -305,7 +311,7 @@ class _OtpForm extends StatelessWidget {
           onPressed: controller.text.trim().length >= 4 && !sending
               ? onConfirm
               : null,
-          label: 'Confirm',
+          label: AppLocalizations.getString(context, 'common.confirm'),
           isLoading: sending,
         ),
         const SizedBox(height: 10),
@@ -315,15 +321,21 @@ class _OtpForm extends StatelessWidget {
           children: [
             TextButton(
               onPressed: sending ? null : onResend,
-              child: const Text('Resend code'),
+              child: Text(
+                AppLocalizations.getString(context, 'auth.resendCode'),
+              ),
             ),
             TextButton(
               onPressed: sending ? null : onDecline,
-              child: const Text('Decline'),
+              child: Text(
+                AppLocalizations.getString(context, 'shr.decline'),
+              ),
             ),
             TextButton(
               onPressed: sending ? null : onSkip,
-              child: const Text('Skip for now'),
+              child: Text(
+                AppLocalizations.getString(context, 'shr.skipForNow'),
+              ),
             ),
           ],
         ),
@@ -350,7 +362,7 @@ class _DeclineForm extends StatelessWidget {
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
       Text(
-        'Decline record sharing',
+        AppLocalizations.getString(context, 'shr.declineTitle'),
         style: Theme.of(context).textTheme.titleLarge,
       ),
       const SizedBox(height: 16),
@@ -358,18 +370,23 @@ class _DeclineForm extends StatelessWidget {
         controller: controller,
         minLines: 3,
         maxLines: 5,
-        decoration: const InputDecoration(
-          labelText:
-              'Let us know why you’d rather not share your records (optional).',
+        decoration: InputDecoration(
+          labelText: AppLocalizations.getString(
+            context,
+            'shr.declineReason',
+          ),
         ),
       ),
       const SizedBox(height: 20),
       AppPrimaryButton(
         onPressed: sending ? null : onConfirm,
-        label: 'Confirm decline',
+        label: AppLocalizations.getString(context, 'shr.confirmDecline'),
         isLoading: sending,
       ),
-      TextButton(onPressed: sending ? null : onBack, child: const Text('Back')),
+      TextButton(
+        onPressed: sending ? null : onBack,
+        child: Text(AppLocalizations.getString(context, 'common.back')),
+      ),
     ],
   );
 }
@@ -401,7 +418,10 @@ class _Result extends StatelessWidget {
       const SizedBox(height: 10),
       Text(body, textAlign: TextAlign.center),
       const SizedBox(height: 26),
-      AppPrimaryButton(onPressed: onDone, label: 'Done'),
+      AppPrimaryButton(
+        onPressed: onDone,
+        label: AppLocalizations.getString(context, 'shr.done'),
+      ),
     ],
   );
 }

@@ -153,10 +153,14 @@ class _PricingBodyState extends State<_PricingBody> {
                               }
                             : null),
                   label: _step == 0
-                      ? 'Continue'
+                      ? tr('common.continue')
                       : state.checkoutLoading
-                      ? 'Starting M-Pesa…'
-                      : 'Review & pay${state.quote == null ? '' : ' · ${formatPrice(state.quote!.totalKes)}'}',
+                      ? tr('pricing.startingMpesa')
+                      : AppLocalizations.t(context, 'pricing.reviewAndPay', {
+                          'total': state.quote == null
+                              ? ''
+                              : formatPrice(state.quote!.totalKes),
+                        }),
                   isLoading:
                       (_step == 1 && state.checkoutLoading) ||
                       isInitialQuoteLoading,
@@ -211,11 +215,7 @@ class _PricingBodyState extends State<_PricingBody> {
                       .where((id) => id != 'workplace')
                       .length ??
                   8;
-              final countWord = switch (allInOneCount) {
-                8 => 'eight',
-                9 => 'nine',
-                _ => '$allInOneCount',
-              };
+              final countWord = '$allInOneCount';
 
               return RefreshIndicator.adaptive(
                 onRefresh: () => _refresh(context),
@@ -229,19 +229,23 @@ class _PricingBodyState extends State<_PricingBody> {
                   ),
                   children: [
                     Text(
-                      _step == 0 ? 'Choose What Works for You' : 'My Package',
+                      tr(
+                        _step == 0
+                            ? 'pricing.chooseTitle'
+                            : 'pricing.myPackage',
+                      ),
                       style: _heading(context),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       _step == 0
-                          ? 'Select a service or package to continue.'
-                          : 'Review your selection and choose any required options.',
+                          ? tr('pricing.chooseSubtitle')
+                          : tr('pricing.reviewSubtitle'),
                       style: _body(context),
                     ),
                     const SizedBox(height: AppSpacing.md),
                     if (_step == 0) ...[
-                      _sectionTitle(context, 'Standalone Packages'),
+                      _sectionTitle(context, tr('pricing.standalonePackages')),
                       for (final service in services)
                         _ServiceTile(
                           service: service,
@@ -249,7 +253,7 @@ class _PricingBodyState extends State<_PricingBody> {
                           onChanged: (value) =>
                               _toggleService(service.serviceId, value),
                         ),
-                      _sectionTitle(context, 'Combined Packages'),
+                      _sectionTitle(context, tr('pricing.combinedPackages')),
                       for (final bundle in visibleBundles)
                         _BundleTile(
                           bundle: bundle,
@@ -257,17 +261,20 @@ class _PricingBodyState extends State<_PricingBody> {
                           onTap: () => _chooseBundle(bundle.bundleId),
                         ),
                       if (catalog.allInOne case final all?) ...[
-                        _sectionTitle(context, 'Everything in One Package'),
+                        _sectionTitle(context, tr('pricing.everythingPackage')),
                         _BundleTile(
                           bundle: all,
                           selected: _bundle == 'all_in_one',
-                          subtitle:
-                              'One annual payment for all $countWord service areas',
+                          subtitle: AppLocalizations.t(
+                            context,
+                            'pricing.allInOneDescription',
+                            {'count': countWord},
+                          ),
                           onTap: () => _chooseBundle('all_in_one'),
                         ),
                       ],
                     ] else ...[
-                      _sectionTitle(context, 'Selected package'),
+                      _sectionTitle(context, tr('pricing.selectedPackage')),
                       if (_bundle != null)
                         _BundleTile(
                           bundle:
@@ -296,11 +303,11 @@ class _PricingBodyState extends State<_PricingBody> {
                             onChanged: (value) =>
                                 _toggleService(service.serviceId, value),
                           ),
-                      _sectionTitle(context, 'Create My Package'),
+                      _sectionTitle(context, tr('pricing.createPackage')),
                     ],
                     if (_step == 1 && _selected.contains('sexual')) ...[
                       _TierPicker(
-                        label: 'Sexual health age category',
+                        label: tr('pricing.sexualAgeCategory'),
                         value: lockedTier ?? _sexualTier,
                         options: const {'youth': '18–24', 'adult': '25+'},
                         locked: lockedTier != null,
@@ -310,11 +317,11 @@ class _PricingBodyState extends State<_PricingBody> {
                         },
                       ),
                       if (lockedTier != null)
-                        const Text("Set from your account's age."),
+                        Text(tr('pricing.ageFromAccount')),
                     ],
                     if (_step == 1 && _bundle == 'cs') ...[
                       _TierPicker(
-                        label: 'Sexual health age category',
+                        label: tr('pricing.sexualAgeCategory'),
                         value: lockedTier ?? _sexualTier,
                         options: const {'youth': '18–24', 'adult': '25+'},
                         locked: lockedTier != null,
@@ -324,15 +331,15 @@ class _PricingBodyState extends State<_PricingBody> {
                         },
                       ),
                       if (lockedTier != null)
-                        const Text("Set from your account's age."),
+                        Text(tr('pricing.ageFromAccount')),
                     ],
                     if (_step == 1 && _selected.contains('monitor'))
                       _TierPicker(
-                        label: 'Monitoring billing term',
+                        label: tr('pricing.monitoringTerm'),
                         value: _monitorTerm,
-                        options: const {
-                          'monthly': 'Monthly',
-                          'annual': 'Annual',
+                        options: {
+                          'monthly': tr('pricing.monthly'),
+                          'annual': tr('pricing.annual'),
                         },
                         onChanged: (value) {
                           setState(() => _monitorTerm = value);
@@ -341,9 +348,12 @@ class _PricingBodyState extends State<_PricingBody> {
                       ),
                     if (_step == 1 && _selected.contains('opinion'))
                       _TierPicker(
-                        label: 'Second opinion appointment',
+                        label: tr('pricing.secondOpinion'),
                         value: _opinionTier,
-                        options: const {'gp': 'GP', 'consultant': 'Consultant'},
+                        options: {
+                          'gp': tr('pricing.gp'),
+                          'consultant': tr('pricing.consultant'),
+                        },
                         onChanged: (value) {
                           setState(() => _opinionTier = value);
                           _requestQuote();
@@ -390,7 +400,11 @@ class _PricingBodyState extends State<_PricingBody> {
                         Padding(
                           padding: const EdgeInsets.only(top: 8),
                           child: Text(
-                            'M-Pesa prompt sent to ${state.payment!.phoneNumber}. Enter your PIN on your phone to continue.',
+                            AppLocalizations.t(
+                              context,
+                              'pricing.mpesaPromptSent',
+                              {'phone': state.payment!.phoneNumber},
+                            ),
                           ),
                         ),
                     ],
@@ -431,12 +445,15 @@ class _PricingBodyState extends State<_PricingBody> {
   String get _tierPrompt {
     if ((_selected.contains('sexual') || _bundle == 'cs') &&
         _effectiveSexualTier == null) {
-      return 'Select an age category above to see the price.';
+      return AppLocalizations.getString(context, 'pricing.selectAgePrompt');
     }
     if (_selected.contains('monitor') && _monitorTerm == null) {
-      return 'Select a billing term above to see the price.';
+      return AppLocalizations.getString(context, 'pricing.selectTermPrompt');
     }
-    return 'Select an appointment type above to see the price.';
+    return AppLocalizations.getString(
+      context,
+      'pricing.selectAppointmentPrompt',
+    );
   }
 
   String? get _effectiveSexualTier {
@@ -475,7 +492,10 @@ class _PricingBodyState extends State<_PricingBody> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Review Your Package', style: _heading(context)),
+              Text(
+                AppLocalizations.getString(context, 'pricing.reviewPackage'),
+                style: _heading(context),
+              ),
               const SizedBox(height: 12),
               for (final line in quote.lines.where(
                 (line) => line.serviceId != 'workplace',
@@ -484,12 +504,19 @@ class _PricingBodyState extends State<_PricingBody> {
                   contentPadding: EdgeInsets.zero,
                   title: Text(labels[line.serviceId] ?? line.serviceId),
                   trailing: Text(
-                    line.isFree ? 'Included' : formatPrice(line.priceKes),
+                    line.isFree
+                        ? AppLocalizations.getString(
+                            context,
+                            'pricing.included',
+                          )
+                        : formatPrice(line.priceKes),
                   ),
                 ),
               const Divider(),
               Text(
-                'Total · ${formatPrice(quote.totalKes)}',
+                AppLocalizations.t(context, 'pricing.totalDot', {
+                  'total': formatPrice(quote.totalKes),
+                }),
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               const SizedBox(height: 20),
@@ -497,7 +524,10 @@ class _PricingBodyState extends State<_PricingBody> {
                 width: double.infinity,
                 child: AppPrimaryButton(
                   onPressed: () => Navigator.of(sheetContext).pop(true),
-                  label: 'Pay with M-Pesa',
+                  label: AppLocalizations.getString(
+                    context,
+                    'pricing.payMpesa',
+                  ),
                 ),
               ),
             ],
@@ -511,9 +541,14 @@ class _PricingBodyState extends State<_PricingBody> {
     final phone = await CustomAlertDialog.show<String>(
       context: context,
       dialog: CustomAlertDialog(
-        title: 'M-Pesa phone number',
-        message:
-            'Confirm the number for your M-Pesa prompt. You can edit it if needed.',
+        title: AppLocalizations.getString(
+          context,
+          'pricing.mpesaPhoneTitle',
+        ),
+        message: AppLocalizations.getString(
+          context,
+          'pricing.mpesaPhoneBody',
+        ),
         type: DialogType.info,
         content: _PhonePromptContent(
           initialPhone: enteredPhone,
@@ -522,11 +557,15 @@ class _PricingBodyState extends State<_PricingBody> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(
+              AppLocalizations.getString(context, 'common.cancel'),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(enteredPhone.trim()),
-            child: const Text('Send prompt'),
+            child: Text(
+              AppLocalizations.getString(context, 'pricing.sendPrompt'),
+            ),
           ),
         ],
       ),
@@ -692,8 +731,14 @@ class _PhonePromptContentState extends State<_PhonePromptContent> {
         autofocus: true,
         onChanged: widget.onChanged,
         decoration: InputDecoration(
-          labelText: 'Phone number',
-          hintText: '2547XXXXXXXX',
+          labelText: AppLocalizations.getString(
+            context,
+            'auth.phoneNumber',
+          ),
+          hintText: AppLocalizations.getString(
+            context,
+            'pricing.phoneHint',
+          ),
           prefixIcon: const Icon(Icons.phone_rounded),
           filled: false,
           border: OutlineInputBorder(
@@ -868,7 +913,7 @@ class _QuoteCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Live package quote',
+              AppLocalizations.getString(context, 'pricing.liveQuote'),
               style: Theme.of(context).textTheme.titleMedium,
             ),
             for (final line in visibleLines)
@@ -877,28 +922,50 @@ class _QuoteCard extends StatelessWidget {
                 contentPadding: EdgeInsets.zero,
                 title: Text(names[line.serviceId] ?? line.serviceId),
                 subtitle: line.isFree
-                    ? const Text('Included at no additional cost')
+                    ? Text(
+                        AppLocalizations.getString(
+                          context,
+                          'pricing.includedNoCost',
+                        ),
+                      )
                     : line.isDiscounted
-                    ? const Text('Discount applied')
+                    ? Text(
+                        AppLocalizations.getString(
+                          context,
+                          'pricing.discountApplied',
+                        ),
+                      )
                     : null,
                 trailing: Text(formatPrice(line.priceKes)),
               ),
             if (quote.discountKes > 0)
-              Text('You save ${formatPrice(quote.discountKes)}'),
+              Text(
+                AppLocalizations.t(context, 'pricing.youSave', {
+                  'amount': formatPrice(quote.discountKes),
+                }),
+              ),
             const Divider(),
             Text(
-              'Total: ${formatPrice(quote.totalKes)}',
+              AppLocalizations.t(context, 'pricing.total', {
+                'total': formatPrice(quote.totalKes),
+              }),
               style: Theme.of(context).textTheme.titleLarge,
             ),
             if (quote.cheaperComboId != null && onCombo != null) ...[
               const SizedBox(height: 12),
               Text(
-                'A fixed bundle costs less: ${formatPrice(quote.cheaperComboPriceKes ?? 0)}.',
+                AppLocalizations.t(context, 'pricing.cheaperBundle', {
+                  'amount': formatPrice(quote.cheaperComboPriceKes ?? 0),
+                }),
               ),
               TextButton(
                 onPressed: onCombo,
-                child: const Text('View the lower-priced bundle'),
-              ),
+                child: Text(
+                  AppLocalizations.getString(
+                    context,
+                    'pricing.viewCheaperBundle',
+                  ),
+              ),)
             ],
           ],
         ),
@@ -929,7 +996,10 @@ class _PricingMessage extends StatelessWidget {
             const SizedBox(height: 16),
             FilledButton(
               onPressed: onAction,
-              child: Text(actionLabel ?? 'Retry'),
+              child: Text(
+                actionLabel ??
+                    AppLocalizations.getString(context, 'common.retry'),
+              ),
             ),
           ],
         ],

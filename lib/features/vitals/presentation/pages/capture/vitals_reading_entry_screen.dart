@@ -144,22 +144,34 @@ class _BpFormState extends State<_BpForm> {
                   Expanded(
                     child: SoftInput(
                       controller: _sysCtrl,
-                      label: 'Systolic',
-                      suffixText: 'mmHg',
+                      label: AppLocalizations.getString(
+                        context,
+                        'vitals.systolic',
+                      ),
+                      suffixText: AppLocalizations.getString(
+                        context,
+                        'vitals.unitMmHg',
+                      ),
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      validator: _requiredInt(50, 300),
+                      validator: _requiredInt(context, 50, 300),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: SoftInput(
                       controller: _diaCtrl,
-                      label: 'Diastolic',
-                      suffixText: 'mmHg',
+                      label: AppLocalizations.getString(
+                        context,
+                        'vitals.diastolic',
+                      ),
+                      suffixText: AppLocalizations.getString(
+                        context,
+                        'vitals.unitMmHg',
+                      ),
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      validator: _requiredInt(30, 200),
+                      validator: _requiredInt(context, 30, 200),
                     ),
                   ),
                 ],
@@ -168,10 +180,13 @@ class _BpFormState extends State<_BpForm> {
               SoftInput(
                 controller: _pulseCtrl,
                 label: AppLocalizations.getString(context, 'vitals.pulse'),
-                suffixText: 'bpm',
+                suffixText: AppLocalizations.getString(
+                  context,
+                  'vitals.unitBpm',
+                ),
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                validator: _optionalInt(20, 250),
+                validator: _optionalInt(context, 20, 250),
               ),
               if (preview != null && preview != 'neutral') ...[
                 const SizedBox(height: AppSpacing.md),
@@ -192,19 +207,43 @@ class _BpFormState extends State<_BpForm> {
     );
   }
 
-  String? Function(String?) _requiredInt(int min, int max) => (v) {
-    if (v == null || v.trim().isEmpty) return 'Required';
+  String? Function(String?) _requiredInt(
+    BuildContext context,
+    int min,
+    int max,
+  ) => (v) {
+    if (v == null || v.trim().isEmpty) {
+      return AppLocalizations.getString(context, 'validation.required');
+    }
     final n = int.tryParse(v.trim());
-    if (n == null) return 'Numbers only';
-    if (n < min || n > max) return 'Must be $min–$max';
+    if (n == null) {
+      return AppLocalizations.getString(context, 'validation.numbersOnly');
+    }
+    if (n < min || n > max) {
+      return AppLocalizations.t(context, 'validation.range', {
+        'min': '$min',
+        'max': '$max',
+      });
+    }
     return null;
   };
 
-  String? Function(String?) _optionalInt(int min, int max) => (v) {
+  String? Function(String?) _optionalInt(
+    BuildContext context,
+    int min,
+    int max,
+  ) => (v) {
     if (v == null || v.trim().isEmpty) return null;
     final n = int.tryParse(v.trim());
-    if (n == null) return 'Numbers only';
-    if (n < min || n > max) return 'Must be $min–$max';
+    if (n == null) {
+      return AppLocalizations.getString(context, 'validation.numbersOnly');
+    }
+    if (n < min || n > max) {
+      return AppLocalizations.t(context, 'validation.range', {
+        'min': '$min',
+        'max': '$max',
+      });
+    }
     return null;
   };
 }
@@ -218,18 +257,34 @@ class _PreviewChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = classificationColor(classification);
     final label = switch (classification) {
-      'red' => 'Severely High Blood Pressure',
-      'orange_2' => 'Very High Blood Pressure',
-      'orange_1' => 'High Blood Pressure',
-      'yellow' => 'Slightly Elevated Blood Pressure',
-      'blue' => 'Low Blood Pressure',
-      'green' => 'Within Monitoring Range',
-      _ =>
-        classification
-            .split('_')
-            .where((s) => s.isNotEmpty)
-            .map((s) => s[0].toUpperCase() + s.substring(1))
-            .join(' '),
+      'red' => AppLocalizations.getString(
+        context,
+        'vitals.classificationSeverelyHigh',
+      ),
+      'orange_2' => AppLocalizations.getString(
+        context,
+        'vitals.classificationVeryHigh',
+      ),
+      'orange_1' => AppLocalizations.getString(
+        context,
+        'vitals.classificationHigh',
+      ),
+      'yellow' => AppLocalizations.getString(
+        context,
+        'vitals.classificationElevated',
+      ),
+      'blue' => AppLocalizations.getString(
+        context,
+        'vitals.classificationLow',
+      ),
+      'green' => AppLocalizations.getString(
+        context,
+        'vitals.classificationInRange',
+      ),
+      _ => AppLocalizations.getString(
+        context,
+        'vitals.classificationUnknown',
+      ),
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -364,16 +419,56 @@ class _BsFormState extends State<_BsForm> {
               const SizedBox(height: AppSpacing.lg),
               SoftDropdown<String>(
                 value: _readingType,
-                label: 'Reading type',
-                items: const [
-                  DropdownMenuItem(value: 'random', child: Text('Random')),
-                  DropdownMenuItem(value: 'fasting', child: Text('Fasting')),
-                  DropdownMenuItem(value: 'pre_meal', child: Text('Pre-meal')),
+                label: AppLocalizations.getString(
+                  context,
+                  'vitals.readingType',
+                ),
+                items: [
+                  DropdownMenuItem(
+                    value: 'random',
+                    child: Text(
+                      AppLocalizations.getString(
+                        context,
+                        'vitals.readingTypeRandom',
+                      ),
+                    ),
+                  ),
+                  DropdownMenuItem(
+                    value: 'fasting',
+                    child: Text(
+                      AppLocalizations.getString(
+                        context,
+                        'vitals.readingTypeFasting',
+                      ),
+                    ),
+                  ),
+                  DropdownMenuItem(
+                    value: 'pre_meal',
+                    child: Text(
+                      AppLocalizations.getString(
+                        context,
+                        'vitals.readingTypePreMeal',
+                      ),
+                    ),
+                  ),
                   DropdownMenuItem(
                     value: 'post_meal',
-                    child: Text('Post-meal'),
+                    child: Text(
+                      AppLocalizations.getString(
+                        context,
+                        'vitals.readingTypePostMeal',
+                      ),
+                    ),
                   ),
-                  DropdownMenuItem(value: 'hba1c', child: Text('HbA1c')),
+                  DropdownMenuItem(
+                    value: 'hba1c',
+                    child: Text(
+                      AppLocalizations.getString(
+                        context,
+                        'vitals.readingTypeHba1c',
+                      ),
+                    ),
+                  ),
                 ],
                 onChanged: (v) => setState(() {
                   _readingType = v ?? 'random';
@@ -384,15 +479,28 @@ class _BsFormState extends State<_BsForm> {
                 const SizedBox(height: AppSpacing.md),
                 SoftDropdown<String>(
                   value: _mealTiming,
-                  label: 'Meal timing',
-                  items: const [
+                  label: AppLocalizations.getString(
+                    context,
+                    'vitals.mealTiming',
+                  ),
+                  items: [
                     DropdownMenuItem(
                       value: 'less_than_2h',
-                      child: Text('Less than 2h'),
+                      child: Text(
+                        AppLocalizations.getString(
+                          context,
+                          'vitals.mealTimingLt2h',
+                        ),
+                      ),
                     ),
                     DropdownMenuItem(
                       value: 'at_least_2h',
-                      child: Text('At least 2h'),
+                      child: Text(
+                        AppLocalizations.getString(
+                          context,
+                          'vitals.mealTimingGt2h',
+                        ),
+                      ),
                     ),
                   ],
                   onChanged: (v) => setState(() => _mealTiming = v),
@@ -406,7 +514,10 @@ class _BsFormState extends State<_BsForm> {
                     flex: 2,
                     child: SoftInput(
                       controller: _valueCtrl,
-                      label: isHba1c ? 'Value (%)' : 'Value',
+                      label: AppLocalizations.getString(
+                        context,
+                        isHba1c ? 'vitals.valuePercent' : 'vitals.value',
+                      ),
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
@@ -414,9 +525,19 @@ class _BsFormState extends State<_BsForm> {
                         FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                       ],
                       validator: (v) {
-                        if (v == null || v.trim().isEmpty) return 'Required';
+                        if (v == null || v.trim().isEmpty) {
+                          return AppLocalizations.getString(
+                            context,
+                            'validation.required',
+                          );
+                        }
                         final n = double.tryParse(v.trim());
-                        if (n == null) return 'Numbers only';
+                        if (n == null) {
+                          return AppLocalizations.getString(
+                            context,
+                            'validation.numbersOnly',
+                          );
+                        }
                         return null;
                       },
                     ),
@@ -426,15 +547,28 @@ class _BsFormState extends State<_BsForm> {
                     Expanded(
                       child: SoftDropdown<String>(
                         value: _unit,
-                        label: 'Unit',
-                        items: const [
+                        label: AppLocalizations.getString(
+                          context,
+                          'vitals.unit',
+                        ),
+                        items: [
                           DropdownMenuItem(
                             value: 'mmol/L',
-                            child: Text('mmol/L'),
+                            child: Text(
+                              AppLocalizations.getString(
+                                context,
+                                'vitals.unitMmolL',
+                              ),
+                            ),
                           ),
                           DropdownMenuItem(
                             value: 'mg/dL',
-                            child: Text('mg/dL'),
+                            child: Text(
+                              AppLocalizations.getString(
+                                context,
+                                'vitals.unitMgDl',
+                              ),
+                            ),
                           ),
                         ],
                         onChanged: (v) => setState(() => _unit = v ?? 'mmol/L'),

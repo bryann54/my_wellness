@@ -28,7 +28,10 @@ class ProfileContactFields extends StatelessWidget {
         SoftInput(
           controller: phoneController,
           label: AppLocalizations.getString(context, 'profile.phone'),
-          hint: '+254 700 000 000',
+          hint: AppLocalizations.getString(
+            context,
+            'profile.phoneExample',
+          ),
           keyboardType: TextInputType.phone,
           inputFormatters: [
             FilteringTextInputFormatter.allow(RegExp(r'[0-9+\s-]')),

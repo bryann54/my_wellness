@@ -84,7 +84,12 @@ class VitalsLockedCard extends StatelessWidget {
                     );
                   },
                   icon: const Icon(Icons.shopping_bag_outlined, size: 18),
-                  label: const Text('Unlock logging'),
+                  label: Text(
+                    AppLocalizations.getString(
+                      context,
+                      'vitals.unlockLogging',
+                    ),
+                  ),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.primaryColor,
                     minimumSize: const Size.fromHeight(48),
@@ -152,10 +157,16 @@ class VitalsNavigatorCallCard extends StatelessWidget {
                 const SizedBox(height: AppSpacing.lg),
                 Text(
                   alerted
-                      ? 'A health navigator will call you'
-                      : 'Request a health navigator call',
+                      ? AppLocalizations.getString(
+                          context,
+                          'vitals.navigatorWillCall',
+                        )
+                      : AppLocalizations.getString(
+                          context,
+                          'vitals.navigatorRequestTitle',
+                        ),
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
                     color: cs.onSurface,
@@ -164,13 +175,16 @@ class VitalsNavigatorCallCard extends StatelessWidget {
                 const SizedBox(height: AppSpacing.sm),
                 Text(
                   alerted
-                      ? 'We have your request. A navigator will reach out '
-                            'shortly to help you get set up.'
-                      : 'Logging is restricted on this demo account. '
-                            'Request a call and a health navigator will help '
-                            'you get access.',
+                      ? AppLocalizations.getString(
+                          context,
+                          'vitals.navigatorRequestReceived',
+                        )
+                      : AppLocalizations.getString(
+                          context,
+                          'vitals.navigatorRestrictedBody',
+                        ),
                   textAlign: TextAlign.center,
-                  style: GoogleFonts.inter(
+                  style: GoogleFonts.poppins(
                     fontSize: 13.5,
                     height: 1.5,
                     color: cs.onSurface.withValues(alpha: 0.65),
@@ -185,7 +199,14 @@ class VitalsNavigatorCallCard extends StatelessWidget {
                         : Icons.phone_in_talk_outlined,
                     size: 18,
                   ),
-                  label: Text(alerted ? 'Request sent' : 'Request a call'),
+                  label: Text(
+                    AppLocalizations.getString(
+                      context,
+                      alerted
+                          ? 'vitals.navigatorRequestSent'
+                          : 'vitals.navigatorRequestCall',
+                    ),
+                  ),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.primaryColor,
                     minimumSize: const Size.fromHeight(48),

@@ -313,7 +313,10 @@ class CompleteFindings extends StatelessWidget {
         if (display.nutritionRecommendation != null) ...[
           const SizedBox(height: 16),
           _SectionCard(
-            title: 'Nutrition Recommendation',
+            title: AppLocalizations.getString(
+              context,
+              'bookings.nutritionRecommendation',
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
